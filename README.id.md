@@ -1,4 +1,4 @@
-# KokoCallMCP Bahasa Indonesia
+# JP Bids MCP Bahasa Indonesia
 
 ## 日本語
 
@@ -10,4 +10,4 @@ This file is a supplemental README for Indonesian-speaking users. It follows the
 
 ## Bahasa Indonesia
 
-File ini adalah README tambahan untuk pengguna berbahasa Indonesia. KokoCallMCP menyediakan pencarian tender pemerintah Jepang melalui MCP, selalu mencantumkan sumber data, dan tidak menyimpan dokumen lampiran.
+File ini adalah README tambahan untuk pengguna berbahasa Indonesia. JP Bids MCP menyediakan pencarian tender pemerintah Jepang melalui MCP, selalu mencantumkan sumber data, dan tidak menyimpan dokumen lampiran.

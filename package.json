@@ -1,10 +1,10 @@
 {
-  "name": "koko-call-mcp",
-  "version": "0.2.0",
-  "description": "KokoCallMCP provides Japan government procurement bid search through the Model Context Protocol.",
+  "name": "jp-bids-mcp",
+  "version": "0.3.0",
+  "description": "JP Bids MCP provides Japan government procurement bid search through the Model Context Protocol.",
   "type": "module",
   "license": "Apache-2.0",
-  "mcpName": "io.github.sugukurukabe/koko-call",
+  "mcpName": "io.github.sugukurukabe/jp-bids",
   "main": "./dist/server.js",
   "types": "./dist/server.d.ts",
   "exports": {
@@ -42,7 +42,7 @@
     "url": "https://github.com/sugukurukabe/koko-call-mcp/issues"
   },
   "bin": {
-    "koko-call-mcp": "dist/server.js"
+    "jp-bids-mcp": "dist/server.js"
   },
   "files": [
     "dist",

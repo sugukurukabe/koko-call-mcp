@@ -1,21 +1,21 @@
 ---
-description: KokoCallMCP project overview
+description: JP Bids MCP project overview
 alwaysApply: true
 ---
 
-# KokoCallMCP
+# JP Bids MCP
 
 ## 日本語
 
-KokoCallMCP は中小企業庁 官公需情報ポータルサイト検索APIをMCPで提供する読み取り専用サーバーです。
+JP Bids MCP は中小企業庁 官公需情報ポータルサイト検索APIをMCPで提供する読み取り専用サーバーです。
 
 ## English
 
-KokoCallMCP is a read-only MCP server for the Small and Medium Enterprise Agency KKJ procurement search API.
+JP Bids MCP is a read-only MCP server for the Small and Medium Enterprise Agency KKJ procurement search API.
 
 ## Bahasa Indonesia
 
-KokoCallMCP adalah server MCP read-only untuk API pencarian pengadaan KKJ dari Small and Medium Enterprise Agency.
+JP Bids MCP adalah server MCP read-only untuk API pencarian pengadaan KKJ dari Small and Medium Enterprise Agency.
 
 ## 守ること / Rules / Aturan
 

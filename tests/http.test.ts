@@ -5,7 +5,7 @@ import { createHttpApp } from "../src/transports/http.js";
 describe("HTTP transport app", () => {
   it("serves health checks", async () => {
     const response = await request(createHttpApp()).get("/healthz").expect(200);
-    expect(response.body).toEqual({ ok: true, service: "KokoCallMCP" });
+    expect(response.body).toEqual({ ok: true, service: "JP Bids MCP" });
   });
 
   it("rejects unsupported standalone SSE GET on /mcp", async () => {

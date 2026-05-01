@@ -3,7 +3,7 @@ import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import cors from "cors";
 import express from "express";
 import { parseAllowedOrigins, validateOrigin } from "../lib/http.js";
-import { createKokoCallServer } from "../mcp.js";
+import { createJpBidsServer } from "../mcp.js";
 
 const supportedProtocolVersions = new Set(["2025-11-25"]);
 
@@ -17,7 +17,7 @@ export function createHttpApp(): express.Express {
   app.use("/.well-known", express.static("public/.well-known"));
 
   app.get("/healthz", (_req, res) => {
-    res.status(200).json({ ok: true, service: "KokoCallMCP" });
+    res.status(200).json({ ok: true, service: "JP Bids MCP" });
   });
 
   app.get("/mcp", (_req, res) => {
@@ -34,9 +34,13 @@ export function createHttpApp(): express.Express {
       return;
     }
 
-    const server = createKokoCallServer({
+    const server = createJpBidsServer({
       kkjClientOptions: {
-        rateLimitPerSecond: Number(process.env.KOKO_CALL_RATE_LIMIT_PER_SECOND ?? 1),
+        rateLimitPerSecond: Number(
+          process.env.JP_BIDS_RATE_LIMIT_PER_SECOND ??
+            process.env.KOKO_CALL_RATE_LIMIT_PER_SECOND ??
+            1,
+        ),
       },
     });
     const transport = new StreamableHTTPServerTransport({
@@ -67,6 +71,6 @@ export async function startHttpServer(): Promise<void> {
   const host = process.env.HTTP_HOST ?? (process.env.K_SERVICE ? "0.0.0.0" : "127.0.0.1");
 
   app.listen(port, host, () => {
-    console.error(`KokoCallMCP listening on http://${host}:${port}/mcp`);
+    console.error(`JP Bids MCP listening on http://${host}:${port}/mcp`);
   });
 }

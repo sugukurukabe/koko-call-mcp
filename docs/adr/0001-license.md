@@ -6,7 +6,7 @@ Accepted
 
 ## Decision
 
-KokoCallMCP is released under Apache-2.0.
+JP Bids MCP is released under Apache-2.0.
 
 ## Rationale
 

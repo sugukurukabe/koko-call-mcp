@@ -16,7 +16,7 @@ export function createAttribution(accessedAt = new Date()): Attribution {
     apiEndpoint: "http://www.kkj.go.jp/api/",
     licenseUrl: "https://www.kkj.go.jp/s/help/notes/",
     serviceDisclaimer:
-      "KokoCallMCP returns public procurement search results as reference information. Verify official documents before bidding.",
+      "JP Bids MCP returns public procurement search results as reference information. Verify official documents before bidding.",
     accessedAt: accessedAt.toISOString(),
   };
 }

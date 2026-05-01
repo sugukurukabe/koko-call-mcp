@@ -5,7 +5,7 @@
 Cloud Run は Streamable HTTP 版の公開先です。KKJ APIはHTTPのみですが、ユーザーにはCloud RunのHTTPS endpointを提供します。
 
 ```bash
-gcloud run deploy koko-call-mcp \
+gcloud run deploy jp-bids-mcp \
   --source . \
   --region asia-northeast1 \
   --min-instances 0 \
@@ -15,7 +15,7 @@ gcloud run deploy koko-call-mcp \
   --concurrency 80 \
   --timeout 30s \
   --allow-unauthenticated \
-  --set-env-vars PORT=8080,KOKO_CALL_RATE_LIMIT_PER_SECOND=1
+  --set-env-vars PORT=8080,JP_BIDS_RATE_LIMIT_PER_SECOND=1
 ```
 
 推奨環境変数:
@@ -23,7 +23,7 @@ gcloud run deploy koko-call-mcp \
 - `PORT=8080`
 - `HTTP_HOST=0.0.0.0`（Cloud Runでは `K_SERVICE` により自動判定されます）
 - `ALLOWED_ORIGINS=https://claude.ai,https://cursor.com`
-- `KOKO_CALL_RATE_LIMIT_PER_SECOND=1`
+- `JP_BIDS_RATE_LIMIT_PER_SECOND=1`
 
 デプロイ後確認:
 
@@ -41,7 +41,7 @@ Recommended environment variables:
 - `PORT=8080`
 - `HTTP_HOST=0.0.0.0` (automatically inferred on Cloud Run through `K_SERVICE`)
 - `ALLOWED_ORIGINS=https://claude.ai,https://cursor.com`
-- `KOKO_CALL_RATE_LIMIT_PER_SECOND=1`
+- `JP_BIDS_RATE_LIMIT_PER_SECOND=1`
 
 Post-deploy checks:
 
@@ -59,7 +59,7 @@ Environment variable yang direkomendasikan:
 - `PORT=8080`
 - `HTTP_HOST=0.0.0.0` (di Cloud Run otomatis melalui `K_SERVICE`)
 - `ALLOWED_ORIGINS=https://claude.ai,https://cursor.com`
-- `KOKO_CALL_RATE_LIMIT_PER_SECOND=1`
+- `JP_BIDS_RATE_LIMIT_PER_SECOND=1`
 
 Pemeriksaan setelah deploy:
 

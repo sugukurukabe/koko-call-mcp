@@ -2,6 +2,12 @@
 
 ## 日本語
 
+### 0.3.0
+
+- 公開パッケージ名を `jp-bids-mcp` に変更。
+- MCPサーバー名、CLI、Registry metadataを JP Bids MCP に統一。
+- 旧環境変数 `KOKO_CALL_RATE_LIMIT_PER_SECOND` は互換aliasとして維持。
+
 ### 0.2.0
 
 - 検索条件に開札日・納入期限日を追加。
@@ -14,6 +20,12 @@
 
 ## English
 
+### 0.3.0
+
+- Renamed the public package to `jp-bids-mcp`.
+- Unified the MCP server name, CLI, and Registry metadata under JP Bids MCP.
+- Kept `KOKO_CALL_RATE_LIMIT_PER_SECOND` as a backward-compatible alias.
+
 ### 0.2.0
 
 - Added opening date and delivery/end date search filters.
@@ -25,6 +37,12 @@
 - Initial implementation with Tools, Prompts, Resources, Resource Templates, Completion, Logging, stdio, and Streamable HTTP.
 
 ## Bahasa Indonesia
+
+### 0.3.0
+
+- Mengubah nama package publik menjadi `jp-bids-mcp`.
+- Menyatukan nama server MCP, CLI, dan metadata Registry sebagai JP Bids MCP.
+- Mempertahankan `KOKO_CALL_RATE_LIMIT_PER_SECOND` sebagai alias kompatibilitas.
 
 ### 0.2.0
 

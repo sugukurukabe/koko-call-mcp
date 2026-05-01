@@ -1,10 +1,10 @@
 cff-version: 1.2.0
-title: KokoCallMCP
+title: JP Bids MCP
 message: If you use this software, please cite it as below.
 type: software
 authors:
   - name: Sugukuru Inc.
-version: 0.2.0
+version: 0.3.0
 license: Apache-2.0
 repository-code: "https://github.com/sugukurukabe/koko-call-mcp"
 abstract: "A Model Context Protocol server for searching Japanese government procurement bid information."

@@ -2,7 +2,7 @@
 
 ## 日本語
 
-KokoCallMCP は、MCPのプリミティブを薄く保ち、KKJ API固有の処理を `api` と `domain` に閉じ込めます。
+JP Bids MCP は、MCPのプリミティブを薄く保ち、KKJ API固有の処理を `api` と `domain` に閉じ込めます。
 
 ```mermaid
 flowchart TD
@@ -23,12 +23,12 @@ flowchart TD
 
 ## English
 
-KokoCallMCP keeps MCP primitives thin and isolates KKJ-specific logic in `api` and `domain`.
+JP Bids MCP keeps MCP primitives thin and isolates KKJ-specific logic in `api` and `domain`.
 
 The dependency direction is `server -> mcp -> primitives -> api/domain -> lib`. Reverse dependencies are not allowed.
 
 ## Bahasa Indonesia
 
-KokoCallMCP menjaga primitive MCP tetap tipis dan mengisolasi logika khusus KKJ di `api` dan `domain`.
+JP Bids MCP menjaga primitive MCP tetap tipis dan mengisolasi logika khusus KKJ di `api` dan `domain`.
 
 Arah dependensi adalah `server -> mcp -> primitives -> api/domain -> lib`. Dependensi terbalik tidak diperbolehkan.

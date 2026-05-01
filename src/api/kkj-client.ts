@@ -52,7 +52,7 @@ export class KkjClient {
   constructor(options: KkjClientOptions = {}) {
     this.fetchImpl = options.fetchImpl ?? fetch;
     this.endpoint = options.endpoint ?? defaultEndpoint;
-    this.userAgent = options.userAgent ?? "KokoCallMCP/0.2.0";
+    this.userAgent = options.userAgent ?? "JP Bids MCP/0.3.0";
     this.timeoutMs = options.timeoutMs ?? 10_000;
     this.cache = new LRUCache<string, BidSearchResult>({
       max: 500,

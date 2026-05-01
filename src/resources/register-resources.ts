@@ -29,7 +29,7 @@ export function registerResources(server: McpServer, client: KkjClient): void {
     "docs://api-reference",
     {
       title: "KKJ API Reference",
-      description: "KokoCallMCPで使うKKJ APIパラメータの要約。",
+      description: "JP Bids MCPで使うKKJ APIパラメータの要約。",
       mimeType: "text/markdown",
     },
     (uri) => ({

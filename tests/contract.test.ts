@@ -2,12 +2,12 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { describe, expect, it } from "vitest";
 import { KkjClient } from "../src/api/kkj-client.js";
-import { createKokoCallServer } from "../src/mcp.js";
+import { createJpBidsServer } from "../src/mcp.js";
 
 describe("MCP contract", () => {
   it("exposes tools, prompts, resources, templates, and completion", async () => {
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
-    const server = createKokoCallServer();
+    const server = createJpBidsServer();
     const client = new Client({ name: "contract-test", version: "0.1.0" });
 
     await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
@@ -62,7 +62,7 @@ describe("MCP contract", () => {
     });
     await kkjClient.search({ Query: "cached", Count: 1 });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
-    const server = createKokoCallServer({ kkjClient });
+    const server = createJpBidsServer({ kkjClient });
     const client = new Client({ name: "resource-cache-test", version: "0.1.0" });
 
     await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);

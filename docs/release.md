@@ -38,7 +38,7 @@ Keep `package.json` `mcpName` and `server.json` `name` identical.
 
 Remote Streamable HTTP entries must not be added to `server.json` until the Cloud Run URL is live and publicly reachable.
 
-The first npm release should be published as `koko-call-mcp` with stdio metadata only. Add `remotes` in a follow-up release after Cloud Run health checks pass.
+The first npm release should be published as `jp-bids-mcp` with stdio metadata only. Add `remotes` in a follow-up release after Cloud Run health checks pass.
 
 ## Bahasa Indonesia
 

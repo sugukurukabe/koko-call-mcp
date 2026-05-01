@@ -33,5 +33,5 @@ jobs:
           TARBALL=$(npm pack --json | node -e "let s='';process.stdin.on('data',d=>s+=d);process.stdin.on('end',()=>console.log(JSON.parse(s)[0].filename))")
           TMPDIR=$(mktemp -d)
           npm install --prefix "$TMPDIR" "./$TARBALL" >/dev/null
-          test -x "$TMPDIR/node_modules/.bin/koko-call-mcp"
-          "$TMPDIR/node_modules/.bin/koko-call-mcp" --version
+          test -x "$TMPDIR/node_modules/.bin/jp-bids-mcp"
+          "$TMPDIR/node_modules/.bin/jp-bids-mcp" --version

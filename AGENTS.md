@@ -2,7 +2,7 @@
 
 ## 日本語
 
-このリポジトリは KokoCallMCP です。開発時は MCP公式仕様、`docs/spec-notes/`、`docs/adr/`、`.cursor/rules/` を先に確認してください。
+このリポジトリは JP Bids MCP です。開発時は MCP公式仕様、`docs/spec-notes/`、`docs/adr/`、`.cursor/rules/` を先に確認してください。
 
 禁止事項:
 
@@ -13,7 +13,7 @@
 
 ## English
 
-This repository is KokoCallMCP. Before development, read the official MCP specification, `docs/spec-notes/`, `docs/adr/`, and `.cursor/rules/`.
+This repository is JP Bids MCP. Before development, read the official MCP specification, `docs/spec-notes/`, `docs/adr/`, and `.cursor/rules/`.
 
 Do not:
 
@@ -24,7 +24,7 @@ Do not:
 
 ## Bahasa Indonesia
 
-Repositori ini adalah KokoCallMCP. Sebelum pengembangan, baca spesifikasi resmi MCP, `docs/spec-notes/`, `docs/adr/`, dan `.cursor/rules/`.
+Repositori ini adalah JP Bids MCP. Sebelum pengembangan, baca spesifikasi resmi MCP, `docs/spec-notes/`, `docs/adr/`, dan `.cursor/rules/`.
 
 Jangan:
 

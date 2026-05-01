@@ -1,8 +1,8 @@
-# KokoCallMCP
+# JP Bids MCP
 
 ## 日本語
 
-KokoCallMCP は、日本全国の官公需入札情報を Claude、Cursor、VS Code などのMCPクライアントから検索するための読み取り専用MCPサーバーです。
+JP Bids MCP は、日本全国の官公需入札情報を Claude、Cursor、VS Code などのMCPクライアントから検索するための読み取り専用MCPサーバーです。
 
 出典: 中小企業庁 官公需情報ポータルサイト 検索API。
 
@@ -32,13 +32,13 @@ npm start
 Published package name:
 
 ```bash
-npx koko-call-mcp
+npx jp-bids-mcp
 ```
 
 Check the CLI without starting an MCP session:
 
 ```bash
-npx koko-call-mcp --help
+npx jp-bids-mcp --help
 ```
 
 HTTP:
@@ -68,12 +68,12 @@ npm run publish:dry-run
 - `docs/release.md`
 - `docs/reproducible-builds.md`
 - `docs/api-health-check.md`
-- `docs/releases/v0.2.0.md`
+- `docs/releases/v0.3.0.md`
 - `docs/demo-script.md`
 
 ## English
 
-KokoCallMCP is a read-only MCP server for searching Japan government procurement bid information from MCP clients such as Claude, Cursor, and VS Code.
+JP Bids MCP is a read-only MCP server for searching Japan government procurement bid information from MCP clients such as Claude, Cursor, and VS Code.
 
 Source: Small and Medium Enterprise Agency KKJ procurement search API.
 
@@ -96,7 +96,7 @@ Source: Small and Medium Enterprise Agency KKJ procurement search API.
 
 ## Bahasa Indonesia
 
-KokoCallMCP adalah server MCP read-only untuk mencari informasi tender pengadaan pemerintah Jepang dari klien MCP seperti Claude, Cursor, dan VS Code.
+JP Bids MCP adalah server MCP read-only untuk mencari informasi tender pengadaan pemerintah Jepang dari klien MCP seperti Claude, Cursor, dan VS Code.
 
 Sumber: API pencarian pengadaan KKJ dari Small and Medium Enterprise Agency.
 
