@@ -5,6 +5,8 @@ import express from "express";
 import { parseAllowedOrigins, validateOrigin } from "../lib/http.js";
 import { createKokoCallServer } from "../mcp.js";
 
+const supportedProtocolVersions = new Set(["2025-11-25"]);
+
 export function createHttpApp(): express.Express {
   const app = express();
   const allowedOrigins = parseAllowedOrigins(process.env.ALLOWED_ORIGINS);
@@ -23,6 +25,15 @@ export function createHttpApp(): express.Express {
   });
 
   app.post("/mcp", async (req, res) => {
+    const protocolVersion = req.header("MCP-Protocol-Version");
+    if (protocolVersion && !supportedProtocolVersions.has(protocolVersion)) {
+      res.status(400).json({
+        error: "Unsupported MCP protocol version",
+        supported: [...supportedProtocolVersions],
+      });
+      return;
+    }
+
     const server = createKokoCallServer({
       kkjClientOptions: {
         rateLimitPerSecond: Number(process.env.KOKO_CALL_RATE_LIMIT_PER_SECOND ?? 1),
@@ -53,8 +64,9 @@ export function createHttpApp(): express.Express {
 export async function startHttpServer(): Promise<void> {
   const app = createHttpApp();
   const port = Number(process.env.PORT ?? 8080);
+  const host = process.env.HTTP_HOST ?? (process.env.K_SERVICE ? "0.0.0.0" : "127.0.0.1");
 
-  app.listen(port, "0.0.0.0", () => {
-    console.error(`KokoCallMCP listening on http://0.0.0.0:${port}/mcp`);
+  app.listen(port, host, () => {
+    console.error(`KokoCallMCP listening on http://${host}:${port}/mcp`);
   });
 }

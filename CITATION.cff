@@ -6,5 +6,5 @@ authors:
   - name: Sugukuru Inc.
 version: 0.2.0
 license: Apache-2.0
-repository-code: "https://github.com/sugukuru-labs/koko-call-mcp"
+repository-code: "https://github.com/sugukurukabe/koko-call-mcp"
 abstract: "A Model Context Protocol server for searching Japanese government procurement bid information."

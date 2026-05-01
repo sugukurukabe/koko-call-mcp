@@ -5,9 +5,17 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -22,3 +30,9 @@ jobs:
       - run: npm run registry:validate
       - run: npm run build:repro
       - run: npm run sbom
+      - run: |
+          TARBALL=$(npm pack --json | node -e "let s='';process.stdin.on('data',d=>s+=d);process.stdin.on('end',()=>console.log(JSON.parse(s)[0].filename))")
+          TMPDIR=$(mktemp -d)
+          npm install --prefix "$TMPDIR" "./$TARBALL" >/dev/null
+          test -x "$TMPDIR/node_modules/.bin/koko-call-mcp"
+          "$TMPDIR/node_modules/.bin/koko-call-mcp" --version

@@ -1,27 +1,21 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.sugukuru/koko-call",
+  "name": "io.github.sugukurukabe/koko-call",
   "title": "KokoCallMCP",
   "description": "Read-only MCP server for searching Japan government procurement bid information from the KKJ portal.",
   "repository": {
-    "url": "https://github.com/sugukuru-labs/koko-call-mcp",
+    "url": "https://github.com/sugukurukabe/koko-call-mcp",
     "source": "github"
   },
   "version": "0.2.0",
   "packages": [
     {
       "registryType": "npm",
-      "identifier": "@sugukuru/koko-call-mcp",
+      "identifier": "koko-call-mcp",
       "version": "0.2.0",
       "transport": {
         "type": "stdio"
       }
-    }
-  ],
-  "remotes": [
-    {
-      "type": "streamable-http",
-      "url": "https://mcp.sugukuru.dev/koko-call/mcp"
     }
   ]
 }

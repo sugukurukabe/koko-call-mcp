@@ -21,6 +21,7 @@ gcloud run deploy koko-call-mcp \
 推奨環境変数:
 
 - `PORT=8080`
+- `HTTP_HOST=0.0.0.0`（Cloud Runでは `K_SERVICE` により自動判定されます）
 - `ALLOWED_ORIGINS=https://claude.ai,https://cursor.com`
 - `KOKO_CALL_RATE_LIMIT_PER_SECOND=1`
 
@@ -38,6 +39,7 @@ Cloud Run hosts the Streamable HTTP server. The upstream KKJ API is HTTP-only, b
 Recommended environment variables:
 
 - `PORT=8080`
+- `HTTP_HOST=0.0.0.0` (automatically inferred on Cloud Run through `K_SERVICE`)
 - `ALLOWED_ORIGINS=https://claude.ai,https://cursor.com`
 - `KOKO_CALL_RATE_LIMIT_PER_SECOND=1`
 
@@ -55,6 +57,7 @@ Cloud Run menjadi host server Streamable HTTP. API KKJ upstream hanya HTTP, teta
 Environment variable yang direkomendasikan:
 
 - `PORT=8080`
+- `HTTP_HOST=0.0.0.0` (di Cloud Run otomatis melalui `K_SERVICE`)
 - `ALLOWED_ORIGINS=https://claude.ai,https://cursor.com`
 - `KOKO_CALL_RATE_LIMIT_PER_SECOND=1`
 

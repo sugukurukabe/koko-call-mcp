@@ -760,7 +760,7 @@ if (mode === "stdio") {
   "repository": "https://github.com/sugukurukabe/koko-call-mcp",
   "license": "Apache-2.0",
   "endpoints": {
-    "mcp": "https://mcp.sugukuru.dev/koko-call/mcp"
+    "mcp": "Cloud Run デプロイ後に確定する公開URL"
   },
   "capabilities": {
     "tools": { "listChanged": false }
@@ -803,10 +803,10 @@ if (mode === "stdio") {
 
 - Dockerfile multi-stage build
 - Cloud Run scale-to-zero デプロイ（asia-northeast1）
-- Cloudflare DNS で `mcp.sugukuru.dev/koko-call/mcp`
+- Cloud Run デプロイ後に公開URLを `server.json` と README に反映
 - `.well-known/mcp-server.json` 配信
 - Custom Connector として Claude/ChatGPT/Cursor から接続可
-- `v0.2.0` リリース、npm publish (`@sugukuru/koko-call-mcp`)
+- `v0.2.0` リリース、npm publish (`koko-call-mcp`)
 
 **月額コスト**：Cloud Run scale-to-zero で **〜200円**（月10万リクエスト未満なら無料枠内）
 

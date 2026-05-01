@@ -1,17 +1,45 @@
 {
-  "name": "@sugukuru/koko-call-mcp",
+  "name": "koko-call-mcp",
   "version": "0.2.0",
   "description": "KokoCallMCP provides Japan government procurement bid search through the Model Context Protocol.",
   "type": "module",
   "license": "Apache-2.0",
-  "mcpName": "io.github.sugukuru/koko-call",
+  "mcpName": "io.github.sugukurukabe/koko-call",
+  "main": "./dist/server.js",
+  "types": "./dist/server.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/mcp.d.ts",
+      "import": "./dist/mcp.js"
+    },
+    "./api": {
+      "types": "./dist/api/kkj-client.d.ts",
+      "import": "./dist/api/kkj-client.js"
+    },
+    "./types": {
+      "types": "./dist/domain/bid.d.ts",
+      "import": "./dist/domain/bid.js"
+    }
+  },
+  "sideEffects": false,
+  "packageManager": "npm@11.6.2",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "procurement",
+    "japan",
+    "government",
+    "bids",
+    "kkj",
+    "cloud-run"
+  ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sugukuru-labs/koko-call-mcp.git"
+    "url": "git+https://github.com/sugukurukabe/koko-call-mcp.git"
   },
-  "homepage": "https://github.com/sugukuru-labs/koko-call-mcp",
+  "homepage": "https://github.com/sugukurukabe/koko-call-mcp",
   "bugs": {
-    "url": "https://github.com/sugukuru-labs/koko-call-mcp/issues"
+    "url": "https://github.com/sugukurukabe/koko-call-mcp/issues"
   },
   "bin": {
     "koko-call-mcp": "dist/server.js"
@@ -23,13 +51,16 @@
     "README.ja.md",
     "README.id.md",
     "LICENSE",
+    "CHANGELOG.md",
+    "SECURITY.md",
+    "CITATION.cff",
     "server.json"
   ],
   "engines": {
     "node": ">=20 <25"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && chmod +x dist/server.js",
     "dev": "tsx src/server.ts",
     "dev:http": "tsx src/server.ts --http",
     "start": "node dist/server.js",
@@ -46,9 +77,10 @@
     "registry:validate": "tsx scripts/registry-validate.ts",
     "build:repro": "tsx scripts/reproducible-build.ts",
     "release:gate": "tsx scripts/release-gate.ts",
+    "prepublishOnly": "npm run release:gate",
     "check": "npm run lint && npm run build && npm run test",
     "sbom": "cyclonedx-npm --output-file bom.json",
-    "publish:dry-run": "npm publish --dry-run --access public"
+    "publish:dry-run": "npm publish --dry-run --access public --ignore-scripts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "latest",

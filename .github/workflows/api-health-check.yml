@@ -5,9 +5,13 @@ on:
     - cron: "30 20 * * *"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   fixture-health:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -19,6 +23,7 @@ jobs:
 
   live-health:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v5

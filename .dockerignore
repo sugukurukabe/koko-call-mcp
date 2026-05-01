@@ -1,0 +1,15 @@
+.git/
+.github/
+.cursor/
+node_modules/
+dist/
+coverage/
+docs/api/
+.stryker-tmp/
+.mutation-tmp/
+bom.json
+*.log
+.env
+.env.*
+!.env.example
+.cookbook-candidates/

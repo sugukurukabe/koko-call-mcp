@@ -7,7 +7,7 @@ const commands: ReadonlyArray<readonly [string, readonly string[]]> = [
   ["npm", ["run", "api:health"]],
   ["npm", ["run", "registry:validate"]],
   ["npm", ["run", "sbom"]],
-  ["npm", ["run", "publish:dry-run"]],
+  ["npm", ["publish", "--dry-run", "--access", "public", "--ignore-scripts"]],
 ];
 
 for (const [command, args] of commands) {
