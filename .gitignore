@@ -8,6 +8,9 @@ gcs-key.json
 data/
 bom.json
 *.log
+reports/
+.stryker-tmp/
+.mutation-tmp/
 
 # cookbook-scout local candidates
 .cookbook-candidates/

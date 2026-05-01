@@ -4,8 +4,10 @@ const commands: ReadonlyArray<readonly [string, readonly string[]]> = [
   ["npm", ["run", "check"]],
   ["npm", ["run", "bench"]],
   ["npm", ["run", "docs:api"]],
+  ["git", ["diff", "--exit-code", "docs/api"]],
   ["npm", ["run", "api:health"]],
   ["npm", ["run", "registry:validate"]],
+  ["npm", ["run", "build:repro"]],
   ["npm", ["run", "sbom"]],
   ["npm", ["publish", "--dry-run", "--access", "public", "--ignore-scripts"]],
 ];

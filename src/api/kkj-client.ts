@@ -35,7 +35,7 @@ const defaultEndpoint = "http://www.kkj.go.jp/api/";
 
 const xmlParser = new XMLParser({
   ignoreAttributes: false,
-  parseTagValue: true,
+  parseTagValue: false,
   trimValues: true,
 });
 

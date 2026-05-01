@@ -25,10 +25,9 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: npm run bench
-      - run: npm run docs:api
+      - run: npm run docs:check
       - run: npm run api:health
       - run: npm run registry:validate
-      - run: npm run build:repro
       - run: npm run sbom
       - run: |
           TARBALL=$(npm pack --json | node -e "let s='';process.stdin.on('data',d=>s+=d);process.stdin.on('end',()=>console.log(JSON.parse(s)[0].filename))")

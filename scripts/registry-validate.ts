@@ -26,8 +26,17 @@ interface ServerJson {
   }>;
 }
 
+interface WellKnownJson {
+  version: string;
+  repository?: string;
+  transports?: string[];
+}
+
 const packageJson = JSON.parse(await readFile("package.json", "utf8")) as PackageJson;
 const serverJson = JSON.parse(await readFile("server.json", "utf8")) as ServerJson;
+const wellKnownJson = JSON.parse(
+  await readFile("public/.well-known/mcp-server.json", "utf8"),
+) as WellKnownJson;
 
 const errors: string[] = [];
 
@@ -39,12 +48,23 @@ if (packageJson.version !== serverJson.version) {
   errors.push(`version mismatch: ${packageJson.version} !== ${serverJson.version}`);
 }
 
+if (packageJson.version !== wellKnownJson.version) {
+  errors.push(`well-known version mismatch: ${packageJson.version} !== ${wellKnownJson.version}`);
+}
+
 const packageRepositoryUrl = packageJson.repository?.url
   ?.replace(/^git\+/, "")
   .replace(/\.git$/, "");
 const serverRepositoryUrl = serverJson.repository?.url?.replace(/\.git$/, "");
 if (!packageRepositoryUrl || !serverRepositoryUrl || packageRepositoryUrl !== serverRepositoryUrl) {
   errors.push(`repository URL mismatch: ${packageRepositoryUrl} !== ${serverRepositoryUrl}`);
+}
+
+const wellKnownRepositoryUrl = wellKnownJson.repository?.replace(/\.git$/, "");
+if (!wellKnownRepositoryUrl || packageRepositoryUrl !== wellKnownRepositoryUrl) {
+  errors.push(
+    `well-known repository URL mismatch: ${packageRepositoryUrl} !== ${wellKnownRepositoryUrl}`,
+  );
 }
 
 const npmPackage = serverJson.packages?.find((entry) => entry.identifier === packageJson.name);
