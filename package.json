@@ -61,6 +61,8 @@
   "devDependencies": {
     "@biomejs/biome": "latest",
     "@cyclonedx/cyclonedx-npm": "latest",
+    "@emnapi/core": "^1.10.0",
+    "@emnapi/runtime": "^1.10.0",
     "@stryker-mutator/core": "^9.6.1",
     "@stryker-mutator/typescript-checker": "^9.6.1",
     "@stryker-mutator/vitest-runner": "^9.6.1",
