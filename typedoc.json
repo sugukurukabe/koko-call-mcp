@@ -1,0 +1,7 @@
+{
+  "entryPoints": ["src/mcp.ts", "src/api/kkj-client.ts", "src/domain/bid.ts"],
+  "out": "docs/api",
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "readme": "README.md"
+}

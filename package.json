@@ -1,0 +1,79 @@
+{
+  "name": "@sugukuru/koko-call-mcp",
+  "version": "0.2.0",
+  "description": "KokoCallMCP provides Japan government procurement bid search through the Model Context Protocol.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "mcpName": "io.github.sugukuru/koko-call",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sugukuru-labs/koko-call-mcp.git"
+  },
+  "homepage": "https://github.com/sugukuru-labs/koko-call-mcp",
+  "bugs": {
+    "url": "https://github.com/sugukuru-labs/koko-call-mcp/issues"
+  },
+  "bin": {
+    "koko-call-mcp": "dist/server.js"
+  },
+  "files": [
+    "dist",
+    "public",
+    "README.md",
+    "README.ja.md",
+    "README.id.md",
+    "LICENSE",
+    "server.json"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/server.ts",
+    "dev:http": "tsx src/server.ts --http",
+    "start": "node dist/server.js",
+    "start:http": "node dist/server.js --http",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:contract": "vitest run tests/contract.test.ts",
+    "bench": "tsx benchmarks/kkj.bench.ts",
+    "mutation": "stryker run",
+    "docs:api": "typedoc",
+    "api:health": "tsx scripts/api-health-check.ts",
+    "registry:validate": "tsx scripts/registry-validate.ts",
+    "build:repro": "tsx scripts/reproducible-build.ts",
+    "release:gate": "tsx scripts/release-gate.ts",
+    "check": "npm run lint && npm run build && npm run test",
+    "sbom": "cyclonedx-npm --output-file bom.json",
+    "publish:dry-run": "npm publish --dry-run --access public"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "latest",
+    "cors": "latest",
+    "express": "latest",
+    "fast-xml-parser": "latest",
+    "lru-cache": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "latest",
+    "@cyclonedx/cyclonedx-npm": "latest",
+    "@stryker-mutator/core": "^9.6.1",
+    "@stryker-mutator/typescript-checker": "^9.6.1",
+    "@stryker-mutator/vitest-runner": "^9.6.1",
+    "@types/cors": "latest",
+    "@types/express": "latest",
+    "@types/node": "latest",
+    "@types/supertest": "^7.2.0",
+    "fast-check": "latest",
+    "supertest": "^7.2.2",
+    "tinybench": "^6.0.1",
+    "tsx": "latest",
+    "typedoc": "^0.28.19",
+    "typescript": "latest",
+    "vitest": "latest"
+  }
+}

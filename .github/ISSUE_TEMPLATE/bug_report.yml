@@ -1,0 +1,19 @@
+name: Bug Report
+description: Report a reproducible KokoCallMCP problem.
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: 日本語 / English / Bahasa Indonesia で問題を説明してください。
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Commands, tool arguments, or MCP client steps.
+    validations:
+      required: true

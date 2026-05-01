@@ -1,0 +1,81 @@
+<!DOCTYPE html><html class="default" lang="en" data-base="./"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>@sugukuru/koko-call-mcp</title><meta name="description" content="Documentation for @sugukuru/koko-call-mcp"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="assets/style.css"/><link rel="stylesheet" href="assets/highlight.css"/><script defer src="assets/main.js"></script><script async src="assets/icons.js" id="tsd-icons-script"></script><script async src="assets/search.js" id="tsd-search-script"></script><script async src="assets/navigation.js" id="tsd-nav-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar"><div class="tsd-toolbar-contents container"><a href="index.html" class="title">@sugukuru/koko-call-mcp</a><div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/><ul role="listbox" id="tsd-search-results"></ul><div id="tsd-search-status" aria-live="polite" aria-atomic="true"><div>Preparing search index...</div></div></dialog><a href="#" class="tsd-widget menu" id="tsd-toolbar-menu-trigger" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="assets/icons.svg#icon-menu"></use></svg></a></div></header><div class="container container-main"><div class="col-content"><div class="tsd-page-title"><h1>@sugukuru/koko-call-mcp</h1></div><div class="tsd-panel tsd-typography"><h1 id="kokocallmcp" class="tsd-anchor-link">KokoCallMCP<a href="#kokocallmcp" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h1>
+<h2 id="日本語" class="tsd-anchor-link">日本語<a href="#日本語" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>KokoCallMCP は、日本全国の官公需入札情報を Claude、Cursor、VS Code などのMCPクライアントから検索するための読み取り専用MCPサーバーです。</p>
+<p>出典: 中小企業庁 官公需情報ポータルサイト 検索API。</p>
+<h3 id="特徴" class="tsd-anchor-link">特徴<a href="#特徴" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul>
+<li>MCP 2025-11-25 の Tools、Prompts、Resources、Resource Templates、Completion、Logging に対応。</li>
+<li><code>search_bids</code>、<code>list_recent_bids</code>、<code>get_bid_detail</code>、<code>summarize_bids_by_org</code> の4ツール。</li>
+<li>すべての構造化出力に <code>attribution</code> を含め、出典明記を強制。</li>
+<li>stdio と Streamable HTTP の両方に対応。</li>
+</ul>
+<h3 id="検索の使い分け" class="tsd-anchor-link">検索の使い分け<a href="#検索の使い分け" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul>
+<li><code>query</code>: 全文検索。複数キーワードや幅広い探索に使います。</li>
+<li><code>project_name</code>: 件名だけを絞り込む場合に使います。</li>
+<li><code>organization_name</code>: 発注機関名で探す場合に使います。</li>
+<li><code>prefecture</code>: 都道府県で絞り込む場合に使います。</li>
+<li>日付条件: <code>issued_*</code> は公告日、<code>due_*</code> は入札開始日、<code>opening_*</code> は開札日、<code>period_end_*</code> は納入期限日です。</li>
+</ul>
+<h3 id="起動" class="tsd-anchor-link">起動<a href="#起動" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<pre><code class="bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">install</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">build</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">start</span>
+</code><button type="button">Copy</button></pre>
+
+<p>HTTP:</p>
+<pre><code class="bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">start:http</span>
+</code><button type="button">Copy</button></pre>
+
+<h3 id="テスト" class="tsd-anchor-link">テスト<a href="#テスト" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<pre><code class="bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">check</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">bench</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">api:health</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">build:repro</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">release:gate</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">publish:dry-run</span>
+</code><button type="button">Copy</button></pre>
+
+<h3 id="関連ドキュメント" class="tsd-anchor-link">関連ドキュメント<a href="#関連ドキュメント" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul>
+<li><code>docs/architecture.md</code></li>
+<li><code>docs/inspector.md</code></li>
+<li><code>docs/deployment-cloud-run.md</code></li>
+<li><code>docs/release.md</code></li>
+<li><code>docs/reproducible-builds.md</code></li>
+<li><code>docs/api-health-check.md</code></li>
+<li><code>docs/releases/v0.2.0.md</code></li>
+<li><code>docs/demo-script.md</code></li>
+</ul>
+<h2 id="english" class="tsd-anchor-link">English<a href="#english" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>KokoCallMCP is a read-only MCP server for searching Japan government procurement bid information from MCP clients such as Claude, Cursor, and VS Code.</p>
+<p>Source: Small and Medium Enterprise Agency KKJ procurement search API.</p>
+<h3 id="features" class="tsd-anchor-link">Features<a href="#features" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul>
+<li>Supports MCP 2025-11-25 Tools, Prompts, Resources, Resource Templates, Completion, and Logging.</li>
+<li>Four focused tools: <code>search_bids</code>, <code>list_recent_bids</code>, <code>get_bid_detail</code>, and <code>summarize_bids_by_org</code>.</li>
+<li>Every structured result includes required <code>attribution</code>.</li>
+<li>Supports both stdio and Streamable HTTP.</li>
+<li>Includes contract tests, property-based tests, benchmarks, mutation testing configuration, SBOM generation, CodeQL, and Dependency Review.</li>
+</ul>
+<h3 id="search-guidance" class="tsd-anchor-link">Search Guidance<a href="#search-guidance" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul>
+<li><code>query</code>: full-text search for broad discovery.</li>
+<li><code>project_name</code>: project-title filtering.</li>
+<li><code>organization_name</code>: buyer or issuing organization filtering.</li>
+<li><code>prefecture</code>: prefecture filtering.</li>
+<li>Date filters: <code>issued_*</code> is notice date, <code>due_*</code> is tender submission date, <code>opening_*</code> is opening date, and <code>period_end_*</code> is delivery/end date.</li>
+</ul>
+<h2 id="bahasa-indonesia" class="tsd-anchor-link">Bahasa Indonesia<a href="#bahasa-indonesia" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>KokoCallMCP adalah server MCP read-only untuk mencari informasi tender pengadaan pemerintah Jepang dari klien MCP seperti Claude, Cursor, dan VS Code.</p>
+<p>Sumber: API pencarian pengadaan KKJ dari Small and Medium Enterprise Agency.</p>
+<h3 id="fitur" class="tsd-anchor-link">Fitur<a href="#fitur" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul>
+<li>Mendukung Tools, Prompts, Resources, Resource Templates, Completion, dan Logging dari MCP 2025-11-25.</li>
+<li>Empat tool terfokus: <code>search_bids</code>, <code>list_recent_bids</code>, <code>get_bid_detail</code>, dan <code>summarize_bids_by_org</code>.</li>
+<li>Setiap hasil terstruktur wajib menyertakan <code>attribution</code>.</li>
+<li>Mendukung stdio dan Streamable HTTP.</li>
+<li>Menyertakan contract test, property-based test, benchmark, konfigurasi mutation testing, SBOM, CodeQL, dan Dependency Review.</li>
+</ul>
+<h3 id="panduan-pencarian" class="tsd-anchor-link">Panduan Pencarian<a href="#panduan-pencarian" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul>
+<li><code>query</code>: pencarian full-text untuk eksplorasi luas.</li>
+<li><code>project_name</code>: filter berdasarkan judul proyek.</li>
+<li><code>organization_name</code>: filter berdasarkan instansi pembeli atau penerbit.</li>
+<li><code>prefecture</code>: filter berdasarkan prefektur.</li>
+<li>Filter tanggal: <code>issued_*</code> untuk tanggal pengumuman, <code>due_*</code> untuk tanggal mulai tender, <code>opening_*</code> untuk tanggal pembukaan, dan <code>period_end_*</code> untuk tanggal akhir pengiriman.</li>
+</ul>
+</div></div><div class="col-sidebar"><div class="page-menu"><div class="tsd-navigation settings"><details class="tsd-accordion"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="assets/icons.svg#icon-chevronDown"></use></svg><h3>Settings</h3></summary><div class="tsd-accordion-details"><div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span><ul id="tsd-filter-options"><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-protected" name="protected"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Protected</span></label></li><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li></ul></div><div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div><details open class="tsd-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="assets/icons.svg#icon-chevronDown"></use></svg><h3>On This Page</h3></summary><div class="tsd-accordion-details"><a href="#kokocallmcp"><span>Koko<wbr/>Call<wbr/>MCP</span></a><ul><li><a href="#日本語"><span>日本語</span></a></li><li><ul><li><a href="#特徴"><span>特徴</span></a></li><li><a href="#検索の使い分け"><span>検索の使い分け</span></a></li><li><a href="#起動"><span>起動</span></a></li><li><a href="#テスト"><span>テスト</span></a></li><li><a href="#関連ドキュメント"><span>関連ドキュメント</span></a></li></ul></li><li><a href="#english"><span>English</span></a></li><li><ul><li><a href="#features"><span>Features</span></a></li><li><a href="#search-guidance"><span>Search <wbr/>Guidance</span></a></li></ul></li><li><a href="#bahasa-indonesia"><span>Bahasa <wbr/>Indonesia</span></a></li><li><ul><li><a href="#fitur"><span>Fitur</span></a></li><li><a href="#panduan-pencarian"><span>Panduan <wbr/>Pencarian</span></a></li></ul></li></ul></div></details></div><div class="site-menu"><nav class="tsd-navigation"><a href="modules.html">@sugukuru/koko-call-mcp</a><ul class="tsd-small-nested-navigation" id="tsd-nav-container"><li>Loading...</li></ul></nav></div></div></div><footer><p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer><div class="overlay"></div></body></html>

@@ -1,0 +1,24 @@
+---
+description: MCP implementation rules
+globs: src/**/*.ts
+---
+
+# MCP Rules
+
+## 日本語
+
+- Tool登録は `register{ToolName}(server, client)` パターンにする。
+- Toolは `inputSchema`, `outputSchema`, `annotations` を持つ。
+- ユーザーが直せる入力エラーは `isError: true` で返す。
+
+## English
+
+- Register tools with the `register{ToolName}(server, client)` pattern.
+- Tools include `inputSchema`, `outputSchema`, and `annotations`.
+- User-correctable input errors are returned with `isError: true`.
+
+## Bahasa Indonesia
+
+- Daftarkan tool dengan pola `register{ToolName}(server, client)`.
+- Tool harus memiliki `inputSchema`, `outputSchema`, dan `annotations`.
+- Error input yang bisa diperbaiki pengguna dikembalikan dengan `isError: true`.

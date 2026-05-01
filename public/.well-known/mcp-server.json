@@ -1,0 +1,33 @@
+{
+  "name": "KokoCallMCP",
+  "version": "0.2.0",
+  "description": "Japan Government Procurement Search MCP Server.",
+  "homepage": "https://github.com/sugukuru-labs/koko-call-mcp",
+  "repository": "https://github.com/sugukuru-labs/koko-call-mcp",
+  "license": "Apache-2.0",
+  "endpoints": {
+    "mcp": "https://mcp.sugukuru.dev/koko-call/mcp"
+  },
+  "capabilities": {
+    "tools": {
+      "listChanged": false
+    },
+    "resources": {
+      "listChanged": false,
+      "subscribe": false
+    },
+    "prompts": {
+      "listChanged": false
+    },
+    "completions": {},
+    "logging": {}
+  },
+  "transports": ["stdio", "streamable-http"],
+  "data_sources": [
+    {
+      "name": "中小企業庁 官公需情報ポータルサイト 検索API",
+      "url": "https://www.kkj.go.jp/",
+      "license_url": "https://www.kkj.go.jp/s/help/notes/"
+    }
+  ]
+}
