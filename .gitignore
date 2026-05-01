@@ -8,3 +8,6 @@ gcs-key.json
 data/
 bom.json
 *.log
+
+# cookbook-scout local candidates
+.cookbook-candidates/
