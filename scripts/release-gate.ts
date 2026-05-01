@@ -9,7 +9,7 @@ const commands: ReadonlyArray<readonly [string, readonly string[]]> = [
   ["npm", ["run", "registry:validate"]],
   ["npm", ["run", "build:repro"]],
   ["npm", ["run", "sbom"]],
-  ["npm", ["publish", "--dry-run", "--access", "public", "--ignore-scripts"]],
+  ["npm", ["pack", "--dry-run", "--json"]],
 ];
 
 for (const [command, args] of commands) {
