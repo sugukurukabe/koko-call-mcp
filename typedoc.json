@@ -3,5 +3,6 @@
   "out": "docs/api",
   "excludePrivate": true,
   "excludeInternal": true,
+  "disableSources": true,
   "readme": "README.md"
 }
