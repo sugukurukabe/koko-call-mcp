@@ -87,6 +87,9 @@ More examples: `examples/remote-smoke-prompts.md`.
 - `docs/inspector.md`
 - `docs/deployment-cloud-run.md`
 - `docs/remote-release-checklist.md`
+- `docs/submissions/mcp-directories.md`
+- `docs/articles/zenn-jp-bids-mcp.md`
+- `docs/articles/note-public-data-mcp.md`
 - `docs/adr/`
 - `public/.well-known/agents.json`
 
