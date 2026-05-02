@@ -1,5 +1,15 @@
 # JP Bids MCP
 
+```bash
+npx --yes jp-bids-mcp --version
+```
+
+Remote MCP endpoint:
+
+```text
+https://mcp.bid-jp.com/mcp
+```
+
 ## 日本語
 
 JP Bids MCP は、日本全国の官公需入札情報を Claude、Cursor、VS Code などのMCPクライアントから検索するための読み取り専用MCPサーバーです。
@@ -23,7 +33,36 @@ JP Bids MCP は、日本全国の官公需入札情報を Claude、Cursor、VS C
 - `prefecture`: 都道府県で絞り込む場合に使います。
 - 日付条件: `issued_*` は公告日、`due_*` は入札開始日、`opening_*` は開札日、`period_end_*` は納入期限日です。
 
-### 起動
+### 30秒で試す
+
+remote MCPが使えるクライアントでは、以下に接続してください。
+
+```text
+https://mcp.bid-jp.com/mcp
+```
+
+MCP Inspector:
+
+```bash
+npx --yes @modelcontextprotocol/inspector
+```
+
+Inspectorでは `Transport Type` を `Streamable HTTP` にし、URLへ `https://mcp.bid-jp.com/mcp` を入れます。`mcp-server-everything` のようなSTDIOサンプルは使いません。
+
+接続後のサンプル:
+
+```json
+{
+  "query": "システム",
+  "prefecture": "鹿児島県",
+  "category": "役務",
+  "limit": 3
+}
+```
+
+追加サンプルは `examples/remote-smoke-prompts.md` にあります。
+
+### ローカル起動
 
 ```bash
 npm install
@@ -47,12 +86,6 @@ HTTP:
 
 ```bash
 npm run start:http
-```
-
-Remote MCP endpoint:
-
-```text
-https://mcp.bid-jp.com/mcp
 ```
 
 ### テスト
@@ -103,6 +136,33 @@ Source: Small and Medium Enterprise Agency KKJ procurement search API.
 - `prefecture`: prefecture filtering.
 - Date filters: `issued_*` is notice date, `due_*` is tender submission date, `opening_*` is opening date, and `period_end_*` is delivery/end date.
 
+### Quick Remote Test
+
+Connect an MCP client to:
+
+```text
+https://mcp.bid-jp.com/mcp
+```
+
+For MCP Inspector:
+
+```bash
+npx --yes @modelcontextprotocol/inspector
+```
+
+Set `Transport Type` to `Streamable HTTP` and use `https://mcp.bid-jp.com/mcp` as the URL. Do not use the default STDIO sample command such as `mcp-server-everything`.
+
+Example `search_bids` arguments:
+
+```json
+{
+  "query": "system",
+  "prefecture": "鹿児島県",
+  "category": "役務",
+  "limit": 3
+}
+```
+
 ## Bahasa Indonesia
 
 JP Bids MCP adalah server MCP read-only untuk mencari informasi tender pengadaan pemerintah Jepang dari klien MCP seperti Claude, Cursor, dan VS Code.
@@ -127,3 +187,19 @@ Sumber: API pencarian pengadaan KKJ dari Small and Medium Enterprise Agency.
 - `organization_name`: filter berdasarkan instansi pembeli atau penerbit.
 - `prefecture`: filter berdasarkan prefektur.
 - Filter tanggal: `issued_*` untuk tanggal pengumuman, `due_*` untuk tanggal mulai tender, `opening_*` untuk tanggal pembukaan, dan `period_end_*` untuk tanggal akhir pengiriman.
+
+### Uji Remote Cepat
+
+Hubungkan klien MCP ke:
+
+```text
+https://mcp.bid-jp.com/mcp
+```
+
+Untuk MCP Inspector:
+
+```bash
+npx --yes @modelcontextprotocol/inspector
+```
+
+Pilih `Transport Type` sebagai `Streamable HTTP` dan gunakan URL `https://mcp.bid-jp.com/mcp`. Jangan gunakan command STDIO contoh seperti `mcp-server-everything`.

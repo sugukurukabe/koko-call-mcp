@@ -34,6 +34,19 @@ npx --yes @modelcontextprotocol/inspector
 https://mcp.bid-jp.com/mcp
 ```
 
+注意: Inspectorの初期値に `mcp-server-everything` が入っている場合、それはSTDIOサンプルです。JP Bids MCPのremote確認では `Transport Type` を `Streamable HTTP` に切り替えてください。
+
+サンプル入力:
+
+```json
+{
+  "query": "システム",
+  "prefecture": "鹿児島県",
+  "category": "役務",
+  "limit": 3
+}
+```
+
 Inspectorでは Tools、Prompts、Resources、Resource Templates、Completion、Notifications を確認してください。
 
 ## English
@@ -70,6 +83,19 @@ Connection URL:
 https://mcp.bid-jp.com/mcp
 ```
 
+Note: If Inspector defaults to `mcp-server-everything`, that is a STDIO sample. For JP Bids MCP remote testing, switch `Transport Type` to `Streamable HTTP`.
+
+Sample input:
+
+```json
+{
+  "query": "system",
+  "prefecture": "鹿児島県",
+  "category": "役務",
+  "limit": 3
+}
+```
+
 Verify Tools, Prompts, Resources, Resource Templates, Completion, and Notifications.
 
 ## Bahasa Indonesia
@@ -104,6 +130,19 @@ URL koneksi:
 
 ```text
 https://mcp.bid-jp.com/mcp
+```
+
+Catatan: Jika Inspector memakai default `mcp-server-everything`, itu adalah contoh STDIO. Untuk pengujian remote JP Bids MCP, ubah `Transport Type` menjadi `Streamable HTTP`.
+
+Contoh input:
+
+```json
+{
+  "query": "system",
+  "prefecture": "鹿児島県",
+  "category": "役務",
+  "limit": 3
+}
 ```
 
 Verifikasi Tools, Prompts, Resources, Resource Templates, Completion, dan Notifications.
