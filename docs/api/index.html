@@ -8,6 +8,8 @@
 <li><code>search_bids</code>、<code>list_recent_bids</code>、<code>get_bid_detail</code>、<code>summarize_bids_by_org</code> の4ツール。</li>
 <li>すべての構造化出力に <code>attribution</code> を含め、出典明記を強制。</li>
 <li>stdio と Streamable HTTP の両方に対応。</li>
+<li><code>org://{organization_name}</code> などの動的Resource Templateで、読み取り専用コンテキストを必要な範囲だけ取得できます。</li>
+<li>Sampling、Tasks、OAuthは未実装です。必要条件が出た時点でADRに基づき追加します。</li>
 </ul>
 <h3 id="検索の使い分け" class="tsd-anchor-link">検索の使い分け<a href="#検索の使い分け" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul>
@@ -60,6 +62,8 @@
 <li>Supports both stdio and Streamable HTTP.</li>
 <li>Includes contract tests, property-based tests, benchmarks, mutation testing configuration, SBOM generation, CodeQL, and Dependency Review.</li>
 <li>The initial public Registry metadata advertises stdio only; remote Streamable HTTP metadata should be added after a live Cloud Run URL exists.</li>
+<li>Dynamic Resource Templates such as <code>org://{organization_name}</code> provide read-only context without overloading the model context window.</li>
+<li>Sampling, Tasks, and OAuth are intentionally not implemented yet; they will be added only after concrete requirements and ADR review.</li>
 </ul>
 <h3 id="search-guidance" class="tsd-anchor-link">Search Guidance<a href="#search-guidance" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul>
@@ -80,6 +84,8 @@
 <li>Mendukung stdio dan Streamable HTTP.</li>
 <li>Menyertakan contract test, property-based test, benchmark, konfigurasi mutation testing, SBOM, CodeQL, dan Dependency Review.</li>
 <li>Metadata Registry publik awal hanya mengiklankan stdio; metadata Streamable HTTP remote ditambahkan setelah URL Cloud Run live tersedia.</li>
+<li>Resource Template dinamis seperti <code>org://{organization_name}</code> menyediakan konteks read-only tanpa membebani context window model.</li>
+<li>Sampling, Tasks, dan OAuth sengaja belum diimplementasikan; fitur tersebut hanya ditambahkan setelah ada kebutuhan konkret dan review ADR.</li>
 </ul>
 <h3 id="panduan-pencarian" class="tsd-anchor-link">Panduan Pencarian<a href="#panduan-pencarian" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul>

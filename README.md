@@ -12,6 +12,8 @@ JP Bids MCP は、日本全国の官公需入札情報を Claude、Cursor、VS C
 - `search_bids`、`list_recent_bids`、`get_bid_detail`、`summarize_bids_by_org` の4ツール。
 - すべての構造化出力に `attribution` を含め、出典明記を強制。
 - stdio と Streamable HTTP の両方に対応。
+- `org://{organization_name}` などの動的Resource Templateで、読み取り専用コンテキストを必要な範囲だけ取得できます。
+- Sampling、Tasks、OAuthは未実装です。必要条件が出た時点でADRに基づき追加します。
 
 ### 検索の使い分け
 
@@ -85,6 +87,8 @@ Source: Small and Medium Enterprise Agency KKJ procurement search API.
 - Supports both stdio and Streamable HTTP.
 - Includes contract tests, property-based tests, benchmarks, mutation testing configuration, SBOM generation, CodeQL, and Dependency Review.
 - The initial public Registry metadata advertises stdio only; remote Streamable HTTP metadata should be added after a live Cloud Run URL exists.
+- Dynamic Resource Templates such as `org://{organization_name}` provide read-only context without overloading the model context window.
+- Sampling, Tasks, and OAuth are intentionally not implemented yet; they will be added only after concrete requirements and ADR review.
 
 ### Search Guidance
 
@@ -108,6 +112,8 @@ Sumber: API pencarian pengadaan KKJ dari Small and Medium Enterprise Agency.
 - Mendukung stdio dan Streamable HTTP.
 - Menyertakan contract test, property-based test, benchmark, konfigurasi mutation testing, SBOM, CodeQL, dan Dependency Review.
 - Metadata Registry publik awal hanya mengiklankan stdio; metadata Streamable HTTP remote ditambahkan setelah URL Cloud Run live tersedia.
+- Resource Template dinamis seperti `org://{organization_name}` menyediakan konteks read-only tanpa membebani context window model.
+- Sampling, Tasks, dan OAuth sengaja belum diimplementasikan; fitur tersebut hanya ditambahkan setelah ada kebutuhan konkret dan review ADR.
 
 ### Panduan Pencarian
 

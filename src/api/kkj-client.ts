@@ -47,6 +47,7 @@ export class KkjClient {
   private readonly cache: LRUCache<string, BidSearchResult>;
   private readonly limiter: TokenBucketRateLimiter;
   private recentBidKeys: string[] = [];
+  private recentOrganizationNames: string[] = [];
   private readonly recentBids = new Map<string, Bid>();
 
   constructor(options: KkjClientOptions = {}) {
@@ -101,12 +102,24 @@ export class KkjClient {
     return this.recentBids.get(key);
   }
 
+  completeOrganizationNames(value: string): string[] {
+    return this.recentOrganizationNames
+      .filter((organizationName) => organizationName.includes(value))
+      .slice(0, 100);
+  }
+
   private rememberBidKeys(bids: Bid[]): void {
     for (const bid of bids) {
       this.recentBids.set(bid.key, bid);
     }
     const merged = [bids.map((bid) => bid.key), this.recentBidKeys].flat();
     this.recentBidKeys = [...new Set(merged)].slice(0, 200);
+    const organizationNames = bids
+      .map((bid) => bid.organizationName)
+      .filter((organizationName): organizationName is string => Boolean(organizationName));
+    this.recentOrganizationNames = [
+      ...new Set([...organizationNames, ...this.recentOrganizationNames]),
+    ].slice(0, 200);
     for (const key of this.recentBids.keys()) {
       if (!this.recentBidKeys.includes(key)) {
         this.recentBids.delete(key);

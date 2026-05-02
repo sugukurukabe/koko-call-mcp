@@ -34,7 +34,11 @@ describe("MCP contract", () => {
 
     const templates = await client.listResourceTemplates();
     expect(templates.resourceTemplates.map((template) => template.uriTemplate)).toEqual(
-      expect.arrayContaining(["bid://{bid_key}", "prefecture://{lg_code}"]),
+      expect.arrayContaining([
+        "bid://{bid_key}",
+        "prefecture://{lg_code}",
+        "org://{organization_name}",
+      ]),
     );
 
     const completion = await client.complete({
@@ -73,6 +77,41 @@ describe("MCP contract", () => {
     });
     expect(JSON.parse(resource.contents[0]?.text ?? "{}")).toMatchObject({
       bid: { key: "KKJ-CACHED-001" },
+    });
+
+    await client.close();
+    await server.close();
+  });
+
+  it("reads organization summaries through org URI template", async () => {
+    const kkjClient = new KkjClient({
+      rateLimitPerSecond: 1000,
+      fetchImpl: async () =>
+        new Response(
+          [
+            "<Results><SearchResults><SearchHits>1</SearchHits><SearchResult>",
+            "<ResultId>1</ResultId><Key>KKJ-ORG-001</Key><ProjectName>Org Project</ProjectName>",
+            "<OrganizationName>鹿児島市</OrganizationName><Category>役務</Category>",
+            "<ProcedureType>一般競争入札</ProcedureType>",
+            "</SearchResult></SearchResults></Results>",
+          ].join(""),
+          { status: 200 },
+        ),
+    });
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    const server = createJpBidsServer({ kkjClient });
+    const client = new Client({ name: "org-resource-test", version: "0.1.0" });
+
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+
+    const resource = await client.readResource({ uri: "org://鹿児島市" });
+    expect(resource.contents[0]).toMatchObject({
+      mimeType: "application/json",
+    });
+    expect(JSON.parse(resource.contents[0]?.text ?? "{}")).toMatchObject({
+      organizationName: "鹿児島市",
+      returnedCount: 1,
+      categories: { 役務: 1 },
     });
 
     await client.close();

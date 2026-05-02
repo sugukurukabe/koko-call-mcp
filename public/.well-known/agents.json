@@ -1,0 +1,39 @@
+{
+  "schema_version": "0.1.0",
+  "name": "JP Bids MCP",
+  "version": "0.3.0",
+  "type": "mcp_server",
+  "homepage": "https://github.com/sugukurukabe/koko-call-mcp",
+  "repository": "https://github.com/sugukurukabe/koko-call-mcp",
+  "description": {
+    "ja": "日本の官公需入札情報を検索する読み取り専用MCPサーバー。",
+    "en": "A read-only MCP server for searching Japanese government procurement bid information.",
+    "id": "Server MCP read-only untuk mencari informasi tender pengadaan pemerintah Jepang."
+  },
+  "data_sources": [
+    {
+      "name": "中小企業庁 官公需情報ポータルサイト 検索API",
+      "url": "https://www.kkj.go.jp/",
+      "license_url": "https://www.kkj.go.jp/s/help/notes/",
+      "retention": "No upstream documents or attachment files are stored by the server."
+    }
+  ],
+  "capabilities": {
+    "tools": ["search_bids", "list_recent_bids", "get_bid_detail", "summarize_bids_by_org"],
+    "prompts": ["morning_bid_briefing", "competitor_radar", "bid_due_alert"],
+    "resources": ["attribution://kkj", "docs://api-reference", "codes://prefectures"],
+    "resource_templates": ["bid://{bid_key}", "prefecture://{lg_code}", "org://{organization_name}"]
+  },
+  "governance": {
+    "human_review_required": "Official procurement documents must be verified by a human before bidding decisions.",
+    "legal_disclaimer": "Results are reference information, not legal or bidding advice.",
+    "sampling": "Not implemented. The server does not initiate LLM sampling requests.",
+    "tasks": "Not implemented. Current searches are short-running and synchronous.",
+    "authentication": "The stdio package is local and read-only. Remote authentication will be designed separately if enterprise access control becomes necessary."
+  },
+  "security": {
+    "prompt_injection": "Upstream bid text is treated as untrusted data and returned as structured content.",
+    "logging": "Secrets and personal data must not be logged.",
+    "storage": "Residence-card, passport, or private documents are not processed by this server."
+  }
+}

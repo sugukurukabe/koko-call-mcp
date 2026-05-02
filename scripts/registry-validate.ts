@@ -32,11 +32,25 @@ interface WellKnownJson {
   transports?: string[];
 }
 
+interface AgentsJson {
+  name: string;
+  version: string;
+  repository?: string;
+  governance?: {
+    sampling?: string;
+    tasks?: string;
+    authentication?: string;
+  };
+}
+
 const packageJson = JSON.parse(await readFile("package.json", "utf8")) as PackageJson;
 const serverJson = JSON.parse(await readFile("server.json", "utf8")) as ServerJson;
 const wellKnownJson = JSON.parse(
   await readFile("public/.well-known/mcp-server.json", "utf8"),
 ) as WellKnownJson;
+const agentsJson = JSON.parse(
+  await readFile("public/.well-known/agents.json", "utf8"),
+) as AgentsJson;
 
 const errors: string[] = [];
 
@@ -52,6 +66,10 @@ if (packageJson.version !== wellKnownJson.version) {
   errors.push(`well-known version mismatch: ${packageJson.version} !== ${wellKnownJson.version}`);
 }
 
+if (packageJson.version !== agentsJson.version) {
+  errors.push(`agents.json version mismatch: ${packageJson.version} !== ${agentsJson.version}`);
+}
+
 const packageRepositoryUrl = packageJson.repository?.url
   ?.replace(/^git\+/, "")
   .replace(/\.git$/, "");
@@ -65,6 +83,17 @@ if (!wellKnownRepositoryUrl || packageRepositoryUrl !== wellKnownRepositoryUrl) 
   errors.push(
     `well-known repository URL mismatch: ${packageRepositoryUrl} !== ${wellKnownRepositoryUrl}`,
   );
+}
+
+const agentsRepositoryUrl = agentsJson.repository?.replace(/\.git$/, "");
+if (!agentsRepositoryUrl || packageRepositoryUrl !== agentsRepositoryUrl) {
+  errors.push(
+    `agents.json repository URL mismatch: ${packageRepositoryUrl} !== ${agentsRepositoryUrl}`,
+  );
+}
+
+if (!agentsJson.governance?.sampling || !agentsJson.governance.tasks) {
+  errors.push("agents.json must document sampling and tasks governance");
 }
 
 const npmPackage = serverJson.packages?.find((entry) => entry.identifier === packageJson.name);

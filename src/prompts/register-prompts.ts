@@ -24,7 +24,7 @@ export function registerPrompts(server: McpServer): void {
       argsSchema: {
         prefecture: prefectureCompletable.optional(),
         category: categoryCompletable.optional(),
-        days: z.string().optional().describe("確認する日数。未指定なら7日。"),
+        days: z.number().int().min(1).max(30).optional().describe("確認する日数。未指定なら7日。"),
       },
     },
     (args) => ({
