@@ -2,6 +2,12 @@
 
 ## 日本語
 
+### 0.3.4
+
+- `jp-bids-export` CLIを追加。
+- 入札候補をCSV/JSONで標準出力へ出力。
+- Google Sheets / Excel向けのCSVカラムを追加。
+
 ### 0.3.3
 
 - `jp-bids-slack-briefing` CLIを追加。
@@ -38,6 +44,12 @@
 
 ## English
 
+### 0.3.4
+
+- Added the `jp-bids-export` CLI.
+- Export bid candidates as CSV/JSON to stdout.
+- Added CSV columns designed for Google Sheets and Excel.
+
 ### 0.3.3
 
 - Added the `jp-bids-slack-briefing` CLI.
@@ -73,6 +85,12 @@
 - Initial implementation with Tools, Prompts, Resources, Resource Templates, Completion, Logging, stdio, and Streamable HTTP.
 
 ## Bahasa Indonesia
+
+### 0.3.4
+
+- Menambahkan CLI `jp-bids-export`.
+- Mengekspor kandidat tender sebagai CSV/JSON ke stdout.
+- Menambahkan kolom CSV yang cocok untuk Google Sheets dan Excel.
 
 ### 0.3.3
 
