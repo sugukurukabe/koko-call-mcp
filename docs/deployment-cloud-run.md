@@ -15,7 +15,7 @@ gcloud run deploy jp-bids-mcp \
   --concurrency 80 \
   --timeout 30s \
   --allow-unauthenticated \
-  --set-env-vars PORT=8080,JP_BIDS_RATE_LIMIT_PER_SECOND=1
+  --set-env-vars JP_BIDS_RATE_LIMIT_PER_SECOND=1
 ```
 
 推奨環境変数:
@@ -30,6 +30,7 @@ gcloud run deploy jp-bids-mcp \
 ```bash
 curl https://YOUR_CLOUD_RUN_URL/healthz
 npm run registry:validate
+npm run remote:health
 ```
 
 ## English
@@ -48,6 +49,7 @@ Post-deploy checks:
 ```bash
 curl https://YOUR_CLOUD_RUN_URL/healthz
 npm run registry:validate
+npm run remote:health
 ```
 
 ## Bahasa Indonesia
@@ -66,4 +68,5 @@ Pemeriksaan setelah deploy:
 ```bash
 curl https://YOUR_CLOUD_RUN_URL/healthz
 npm run registry:validate
+npm run remote:health
 ```

@@ -71,6 +71,7 @@ npm run publish:dry-run
 - `docs/reproducible-builds.md`
 - `docs/api-health-check.md`
 - `docs/releases/v0.3.1.md`
+- `docs/remote-release-checklist.md`
 - `docs/demo-script.md`
 
 ## English
