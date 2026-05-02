@@ -41,6 +41,12 @@ Local stdio:
 npx --yes jp-bids-mcp
 ```
 
+CSV export:
+
+```bash
+npx --yes jp-bids-export --prefecture 鹿児島県 --category 役務 --query システム --days 7 > bids.csv
+```
+
 Check without starting an MCP session:
 
 ```bash
@@ -86,6 +92,7 @@ Slack briefing job: `docs/slack-briefing.md`.
 ## Documentation
 
 - `docs/architecture.md`
+- `docs/export.md`
 - `docs/inspector.md`
 - `docs/deployment-cloud-run.md`
 - `docs/slack-briefing.md`

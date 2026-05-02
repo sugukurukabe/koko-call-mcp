@@ -23,6 +23,10 @@ Registry:   io.github.sugukurukabe/jp-bids
 <pre><code class="bash"><span class="hl-0">npx</span><span class="hl-1"> </span><span class="hl-2">--yes</span><span class="hl-1"> </span><span class="hl-3">jp-bids-mcp</span>
 </code><button type="button">Copy</button></pre>
 
+<p>CSV export:</p>
+<pre><code class="bash"><span class="hl-0">npx</span><span class="hl-1"> </span><span class="hl-2">--yes</span><span class="hl-1"> </span><span class="hl-3">jp-bids-export</span><span class="hl-1"> </span><span class="hl-2">--prefecture</span><span class="hl-1"> </span><span class="hl-3">鹿児島県</span><span class="hl-1"> </span><span class="hl-2">--category</span><span class="hl-1"> </span><span class="hl-3">役務</span><span class="hl-1"> </span><span class="hl-2">--query</span><span class="hl-1"> </span><span class="hl-3">システム</span><span class="hl-1"> </span><span class="hl-2">--days</span><span class="hl-1"> </span><span class="hl-5">7</span><span class="hl-1"> &gt; </span><span class="hl-3">bids.csv</span>
+</code><button type="button">Copy</button></pre>
+
 <p>Check without starting an MCP session:</p>
 <pre><code class="bash"><span class="hl-0">npx</span><span class="hl-1"> </span><span class="hl-2">--yes</span><span class="hl-1"> </span><span class="hl-3">jp-bids-mcp</span><span class="hl-1"> </span><span class="hl-2">--version</span>
 </code><button type="button">Copy</button></pre>
@@ -60,6 +64,7 @@ Registry:   io.github.sugukurukabe/jp-bids
 <h2 id="documentation" class="tsd-anchor-link">Documentation<a href="#documentation" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
 <ul>
 <li><code>docs/architecture.md</code></li>
+<li><code>docs/export.md</code></li>
 <li><code>docs/inspector.md</code></li>
 <li><code>docs/deployment-cloud-run.md</code></li>
 <li><code>docs/slack-briefing.md</code></li>
