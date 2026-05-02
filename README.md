@@ -81,6 +81,8 @@ npm run remote:mcp
 
 More examples: `examples/remote-smoke-prompts.md`.
 
+Slack briefing job: `docs/slack-briefing.md`.
+
 ## Documentation
 
 - `docs/architecture.md`

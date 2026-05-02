@@ -2,6 +2,12 @@
 
 ## 日本語
 
+### 0.3.3
+
+- `jp-bids-slack-briefing` CLIを追加。
+- Slack Bot tokenによる入札ブリーフィング投稿に対応。
+- Slack briefingのdry-run、設定、メッセージ整形、APIエラー処理をテスト。
+
 ### 0.3.2
 
 - Cloud Run remote endpoint `https://mcp.bid-jp.com/mcp` を追加。
@@ -32,6 +38,12 @@
 
 ## English
 
+### 0.3.3
+
+- Added the `jp-bids-slack-briefing` CLI.
+- Added bid briefing posts through Slack Bot tokens.
+- Tested Slack briefing dry-run, configuration, formatting, and API error handling.
+
 ### 0.3.2
 
 - Added Cloud Run remote endpoint `https://mcp.bid-jp.com/mcp`.
@@ -61,6 +73,12 @@
 - Initial implementation with Tools, Prompts, Resources, Resource Templates, Completion, Logging, stdio, and Streamable HTTP.
 
 ## Bahasa Indonesia
+
+### 0.3.3
+
+- Menambahkan CLI `jp-bids-slack-briefing`.
+- Menambahkan posting briefing tender melalui Slack Bot token.
+- Menguji dry-run, konfigurasi, formatting, dan penanganan error API untuk Slack briefing.
 
 ### 0.3.2
 
