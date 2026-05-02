@@ -70,7 +70,7 @@ npm run publish:dry-run
 - `docs/release.md`
 - `docs/reproducible-builds.md`
 - `docs/api-health-check.md`
-- `docs/releases/v0.3.0.md`
+- `docs/releases/v0.3.1.md`
 - `docs/demo-script.md`
 
 ## English

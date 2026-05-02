@@ -2,6 +2,12 @@
 
 ## 日本語
 
+### 0.3.1
+
+- `org://{organization_name}` Resource Template を追加。
+- Resource metadata/annotations と `agents.json` を追加。
+- Tasks、Sampling、OAuth、Cloud Run remoteの導入条件をADR化。
+
 ### 0.3.0
 
 - 公開パッケージ名を `jp-bids-mcp` に変更。
@@ -20,6 +26,12 @@
 
 ## English
 
+### 0.3.1
+
+- Added the `org://{organization_name}` Resource Template.
+- Added Resource metadata/annotations and `agents.json`.
+- Documented introduction criteria for Tasks, Sampling, OAuth, and Cloud Run remote metadata in an ADR.
+
 ### 0.3.0
 
 - Renamed the public package to `jp-bids-mcp`.
@@ -37,6 +49,12 @@
 - Initial implementation with Tools, Prompts, Resources, Resource Templates, Completion, Logging, stdio, and Streamable HTTP.
 
 ## Bahasa Indonesia
+
+### 0.3.1
+
+- Menambahkan Resource Template `org://{organization_name}`.
+- Menambahkan metadata/annotations Resource dan `agents.json`.
+- Mendokumentasikan kriteria pengenalan Tasks, Sampling, OAuth, dan metadata remote Cloud Run dalam ADR.
 
 ### 0.3.0
 
