@@ -27,7 +27,7 @@ async function check(path: string): Promise<void> {
 }
 
 try {
-  await check("/healthz");
+  await check("/readyz");
 
   const mcpGetResponse = await fetch(new URL("/mcp", remoteUrl), {
     headers: { Accept: "text/event-stream" },

@@ -35,7 +35,10 @@
 <pre><code class="bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">start:http</span>
 </code><button type="button">Copy</button></pre>
 
-<p>Streamable HTTP deployment is supported by the server, but the public MCP Registry metadata only advertises the stdio package until a live Cloud Run URL is deployed.</p>
+<p>Remote MCP endpoint:</p>
+<pre><code class="text">https://mcp.bid-jp.com/mcp
+</code><button type="button">Copy</button></pre>
+
 <h3 id="テスト" class="tsd-anchor-link">テスト<a href="#テスト" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <pre><code class="bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">check</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">bench</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">api:health</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">build:repro</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">release:gate</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">publish:dry-run</span>
 </code><button type="button">Copy</button></pre>
@@ -48,7 +51,7 @@
 <li><code>docs/release.md</code></li>
 <li><code>docs/reproducible-builds.md</code></li>
 <li><code>docs/api-health-check.md</code></li>
-<li><code>docs/releases/v0.3.1.md</code></li>
+<li><code>docs/releases/v0.3.2.md</code></li>
 <li><code>docs/remote-release-checklist.md</code></li>
 <li><code>docs/demo-script.md</code></li>
 </ul>
@@ -62,7 +65,7 @@
 <li>Every structured result includes required <code>attribution</code>.</li>
 <li>Supports both stdio and Streamable HTTP.</li>
 <li>Includes contract tests, property-based tests, benchmarks, mutation testing configuration, SBOM generation, CodeQL, and Dependency Review.</li>
-<li>The initial public Registry metadata advertises stdio only; remote Streamable HTTP metadata should be added after a live Cloud Run URL exists.</li>
+<li>Remote Streamable HTTP endpoint: <code>https://mcp.bid-jp.com/mcp</code>.</li>
 <li>Dynamic Resource Templates such as <code>org://{organization_name}</code> provide read-only context without overloading the model context window.</li>
 <li>Sampling, Tasks, and OAuth are intentionally not implemented yet; they will be added only after concrete requirements and ADR review.</li>
 </ul>
@@ -84,7 +87,7 @@
 <li>Setiap hasil terstruktur wajib menyertakan <code>attribution</code>.</li>
 <li>Mendukung stdio dan Streamable HTTP.</li>
 <li>Menyertakan contract test, property-based test, benchmark, konfigurasi mutation testing, SBOM, CodeQL, dan Dependency Review.</li>
-<li>Metadata Registry publik awal hanya mengiklankan stdio; metadata Streamable HTTP remote ditambahkan setelah URL Cloud Run live tersedia.</li>
+<li>Endpoint remote Streamable HTTP: <code>https://mcp.bid-jp.com/mcp</code>.</li>
 <li>Resource Template dinamis seperti <code>org://{organization_name}</code> menyediakan konteks read-only tanpa membebani context window model.</li>
 <li>Sampling, Tasks, dan OAuth sengaja belum diimplementasikan; fitur tersebut hanya ditambahkan setelah ada kebutuhan konkret dan review ADR.</li>
 </ul>

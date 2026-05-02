@@ -8,6 +8,11 @@ describe("HTTP transport app", () => {
     expect(response.body).toEqual({ ok: true, service: "JP Bids MCP" });
   });
 
+  it("serves readiness checks on a custom-domain friendly path", async () => {
+    const response = await request(createHttpApp()).get("/readyz").expect(200);
+    expect(response.body).toEqual({ ok: true, service: "JP Bids MCP" });
+  });
+
   it("rejects unsupported standalone SSE GET on /mcp", async () => {
     const response = await request(createHttpApp()).get("/mcp").expect(405);
     expect(response.body.error).toContain("SSE GET");

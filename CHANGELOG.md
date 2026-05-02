@@ -2,6 +2,12 @@
 
 ## 日本語
 
+### 0.3.2
+
+- Cloud Run remote endpoint `https://mcp.bid-jp.com/mcp` を追加。
+- custom domain向けの `/readyz` を追加。
+- README、`.well-known`、MCP Registry metadataへremote情報を反映。
+
 ### 0.3.1
 
 - `org://{organization_name}` Resource Template を追加。
@@ -26,6 +32,12 @@
 
 ## English
 
+### 0.3.2
+
+- Added Cloud Run remote endpoint `https://mcp.bid-jp.com/mcp`.
+- Added `/readyz` for custom-domain readiness checks.
+- Reflected remote metadata in README, `.well-known`, and MCP Registry metadata.
+
 ### 0.3.1
 
 - Added the `org://{organization_name}` Resource Template.
@@ -49,6 +61,12 @@
 - Initial implementation with Tools, Prompts, Resources, Resource Templates, Completion, Logging, stdio, and Streamable HTTP.
 
 ## Bahasa Indonesia
+
+### 0.3.2
+
+- Menambahkan endpoint remote Cloud Run `https://mcp.bid-jp.com/mcp`.
+- Menambahkan `/readyz` untuk pemeriksaan readiness custom domain.
+- Memperbarui metadata remote di README, `.well-known`, dan MCP Registry metadata.
 
 ### 0.3.1
 

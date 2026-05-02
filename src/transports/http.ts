@@ -20,6 +20,10 @@ export function createHttpApp(): express.Express {
     res.status(200).json({ ok: true, service: "JP Bids MCP" });
   });
 
+  app.get("/readyz", (_req, res) => {
+    res.status(200).json({ ok: true, service: "JP Bids MCP" });
+  });
+
   app.get("/mcp", (_req, res) => {
     res.status(405).json({ error: "SSE GET is not enabled for this stateless server" });
   });

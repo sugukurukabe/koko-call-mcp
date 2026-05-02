@@ -49,7 +49,11 @@ HTTP:
 npm run start:http
 ```
 
-Streamable HTTP deployment is supported by the server, but the public MCP Registry metadata only advertises the stdio package until a live Cloud Run URL is deployed.
+Remote MCP endpoint:
+
+```text
+https://mcp.bid-jp.com/mcp
+```
 
 ### テスト
 
@@ -70,7 +74,7 @@ npm run publish:dry-run
 - `docs/release.md`
 - `docs/reproducible-builds.md`
 - `docs/api-health-check.md`
-- `docs/releases/v0.3.1.md`
+- `docs/releases/v0.3.2.md`
 - `docs/remote-release-checklist.md`
 - `docs/demo-script.md`
 
@@ -87,7 +91,7 @@ Source: Small and Medium Enterprise Agency KKJ procurement search API.
 - Every structured result includes required `attribution`.
 - Supports both stdio and Streamable HTTP.
 - Includes contract tests, property-based tests, benchmarks, mutation testing configuration, SBOM generation, CodeQL, and Dependency Review.
-- The initial public Registry metadata advertises stdio only; remote Streamable HTTP metadata should be added after a live Cloud Run URL exists.
+- Remote Streamable HTTP endpoint: `https://mcp.bid-jp.com/mcp`.
 - Dynamic Resource Templates such as `org://{organization_name}` provide read-only context without overloading the model context window.
 - Sampling, Tasks, and OAuth are intentionally not implemented yet; they will be added only after concrete requirements and ADR review.
 
@@ -112,7 +116,7 @@ Sumber: API pencarian pengadaan KKJ dari Small and Medium Enterprise Agency.
 - Setiap hasil terstruktur wajib menyertakan `attribution`.
 - Mendukung stdio dan Streamable HTTP.
 - Menyertakan contract test, property-based test, benchmark, konfigurasi mutation testing, SBOM, CodeQL, dan Dependency Review.
-- Metadata Registry publik awal hanya mengiklankan stdio; metadata Streamable HTTP remote ditambahkan setelah URL Cloud Run live tersedia.
+- Endpoint remote Streamable HTTP: `https://mcp.bid-jp.com/mcp`.
 - Resource Template dinamis seperti `org://{organization_name}` menyediakan konteks read-only tanpa membebani context window model.
 - Sampling, Tasks, dan OAuth sengaja belum diimplementasikan; fitur tersebut hanya ditambahkan setelah ada kebutuhan konkret dan review ADR.
 
