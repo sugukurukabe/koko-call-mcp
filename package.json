@@ -76,6 +76,7 @@
     "docs:api": "typedoc",
     "api:health": "tsx scripts/api-health-check.ts",
     "remote:health": "tsx scripts/remote-health-check.ts",
+    "remote:domain": "tsx scripts/remote-domain-status.ts",
     "registry:validate": "tsx scripts/registry-validate.ts",
     "build:repro": "tsx scripts/reproducible-build.ts",
     "docs:check": "npm run docs:api && git diff --exit-code docs/api",
