@@ -16,35 +16,29 @@ Registry:   io.github.sugukurukabe/jp-bids
 
 日本の公共調達情報を、MCPクライアントから検索できるようにした。
 
-実装したのは、単なるAPI wrapperではない。MCPのprimitiveを分けている。
+最初に決めたのは、これは万能サーバーにしない、ということだった。入札検索に必要なものだけを置く。別の業務、別のデータ、別の認証は、必要になった時に別の設計として扱う。
 
-- Tools: 検索、直近一覧、詳細取得、発注機関別集計
-- Resources: 出典、API参照、都道府県コード
-- Resource Templates: `bid://{bid_key}`, `prefecture://{lg_code}`, `org://{organization_name}`
-- Prompts: 朝の入札確認、発注機関分析、締切確認
-- Completion: 都道府県コードや直近 `bid_key` の補完
-- Remote: Streamable HTTP on Cloud Run
-- Package: npm + MCP Registry
+MCPサーバーは、増やそうと思えばいくらでも機能を増やせる。だからこそ、最初に狭くする必要がある。
 
-## なぜToolsだけにしなかったか
+## Toolsだけにしなかった
 
-多くのMCP serverはToolsだけで終わる。
+MCPサーバーはToolsだけでも動く。
 
-でも公共データでは、アクションだけでは足りない。モデルに必要なのは、操作だけでなく、出典と文脈である。
+でも、公共データではそれだけだと弱い。モデルが必要とするのは、操作だけではなく、出典と文脈である。
 
-そのため、JP Bids MCPでは `attribution://kkj` をResourceとして返し、Toolの構造化出力にも出典を含めた。モデルが「どこから来たデータか」を失わないようにするためである。
+JP Bids MCPでは、検索のためのToolsに加えて、読み取り専用のResourcesとResource Templatesを用意した。たとえば、出典情報、API参照、都道府県コード、入札キー、発注機関ごとの文脈を、それぞれ別の入口として置いている。
 
-## Resource Template
+大きな検索結果を一度に渡すのではなく、必要なものだけを取りに行く。
 
-巨大な検索結果を一度にモデルへ渡すのではなく、必要なものだけをURIで取りに行く。
+これは派手な機能ではない。けれど、長く使うなら効いてくる。
 
-```text
-bid://{bid_key}
-prefecture://{lg_code}
-org://{organization_name}
-```
+## 出典を消さない
 
-この形にすると、クライアントは必要な文脈だけを読むことができる。MCPでは、これは小さな差に見える。しかし長く運用すると、この差が信頼性になる。
+公共情報を扱う時、モデルが一番やってはいけないことは、出典を失ったまま自信を持つことだと思っている。
+
+だから、Toolの構造化出力には出典を含めた。Resourceとしても出典を読めるようにした。
+
+これはプロンプトの問題ではなく、データ構造の問題である。
 
 ## 何を入れなかったか
 
@@ -56,14 +50,7 @@ Tasks、Sampling、OAuthはまだ入れていない。
 
 ## 公開したもの
 
-- GitHub
-- npm
-- MCP Registry
-- Cloud Run remote endpoint
-- SBOM
-- CodeQL
-- Scorecard
-- Reproducible build check
+実装は、ローカルstdioとremote Streamable HTTPの両方で使える。
 
 ```bash
 npx --yes jp-bids-mcp --version
@@ -74,6 +61,14 @@ remote endpoint:
 ```text
 https://mcp.bid-jp.com/mcp
 ```
+
+MCP Registryにも登録した。
+
+```text
+io.github.sugukurukabe/jp-bids
+```
+
+検証は、CI、CodeQL、Scorecard、SBOM、再現可能ビルド、remote MCPの疎通確認まで通している。
 
 ## 終わりに
 
