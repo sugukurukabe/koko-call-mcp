@@ -1,6 +1,6 @@
 {
   "name": "jp-bids-mcp",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "日本の官公需入札情報をMCPで検索・分析。Japan government procurement bid search and AI analysis through the Model Context Protocol.",
   "type": "module",
   "license": "Apache-2.0",

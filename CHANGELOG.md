@@ -139,6 +139,15 @@
 
 ## English
 
+### 0.7.1
+
+- **J-Grants MCP integration docs**: Published an end-to-end workflow guide combining JP Bids MCP with the Digital Agency's [J-Grants MCP](https://github.com/digital-go-jp/jgrants-mcp-server) (`examples/jgrants-integration/`). Includes trilingual READMEs (EN/JA/ID) and ready-to-use Claude Desktop / Cursor configuration files.
+- **Interoperability section**: Added "Interoperability / 相互運用" section to all three README language variants.
+- **docs/integrations/jgrants.md**: Added technical reference with responsibility boundary, tool mapping, and primary-source links.
+- **server.json**: Declared J-Grants MCP in `interoperability.complementary_servers`.
+- **docs/contributions/jgrants-roadmap.md**: Published a contribution roadmap (6 PR candidates) for the J-Grants MCP OSS.
+- **Zenn draft**: Added integration article draft at `docs/articles/zenn-jp-bids-jgrants.md`.
+
 ### 0.7.0
 
 - **Commercialization foundation**: Free/Pro tier split via `Authorization: Bearer jp-bids_xxx` header.
@@ -266,6 +275,15 @@
 - Initial implementation with Tools, Prompts, Resources, Resource Templates, Completion, Logging, stdio, and Streamable HTTP.
 
 ## Bahasa Indonesia
+
+### 0.7.1
+
+- **Dokumentasi integrasi J-Grants MCP**: Menerbitkan panduan alur kerja end-to-end yang menggabungkan JP Bids MCP dengan [J-Grants MCP](https://github.com/digital-go-jp/jgrants-mcp-server) dari Badan Digital Jepang (`examples/jgrants-integration/`). Termasuk README tiga bahasa (EN/JA/ID) dan file konfigurasi Claude Desktop / Cursor yang siap pakai.
+- **Bagian interoperabilitas**: Menambahkan bagian "Interoperabilitas / Interoperability / 相互運用" ke tiga varian bahasa README.
+- **docs/integrations/jgrants.md**: Menambahkan referensi teknis dengan batasan tanggung jawab, pemetaan alat, dan tautan sumber primer.
+- **server.json**: Mendeklarasikan J-Grants MCP di `interoperability.complementary_servers`.
+- **docs/contributions/jgrants-roadmap.md**: Menerbitkan peta jalan kontribusi (6 kandidat PR) untuk OSS J-Grants MCP.
+- **Draf Zenn**: Menambahkan draf artikel integrasi di `docs/articles/zenn-jp-bids-jgrants.md`.
 
 ### 0.7.0
 

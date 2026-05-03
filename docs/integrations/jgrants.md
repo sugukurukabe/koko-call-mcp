@@ -41,6 +41,7 @@ Menggabungkan keduanya memungkinkan satu sesi LLM mencakup kedua sisi pendanaan 
 | `rank_bids` | 自社プロファイルでスコアリング | Free |
 | `list_recent_bids` | 直近公告一覧 | Free |
 | `get_bid_detail` | 案件詳細 | Free |
+| `search_bids_app` | MCP Apps UIで検索・操作 | Pro |
 | `explain_bid_fit` | 適合度の詳細説明 | Pro |
 | `assess_bid_qualification` | 参加資格確認 | Pro |
 | `extract_bid_requirements` | PDF/HTML仕様書から要件を抽出 | Pro |

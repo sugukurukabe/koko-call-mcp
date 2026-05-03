@@ -19,7 +19,31 @@ PRs will be submitted in order, respecting the MIT license and existing design.
 - **問題**: `by_deadline_period.accepting` が常に `0` のまま更新されない。`acceptance_start_datetime` と `acceptance_end_datetime` の両端チェックが実装されていない。
 - **修正**: `start_date <= now <= end_date` の比較を追加して `accepting` を加算する。
 - **難易度**: 低（5行以内の修正）
-- **状態**: PR送信済み（マージ待ち）
+- **PR**: [#2](https://github.com/digital-go-jp/jgrants-mcp-server/pull/2)（マージ待ち）
+
+### PR #2: `stateless_http=True` 対応（Cloud Run / サーバレス互換）
+
+- **ファイル**: `jgrants_mcp_server/core.py` 末尾
+- **問題**: FastMCPはデフォルトで `stateless_http=False` でStreamable HTTPを起動する。Cloud Runなどステートレス環境ではセッション復元エラーが発生する。
+- **修正**: `mcp.run()` と `mcp.http_app()` に `stateless_http=True` を追加。
+- **難易度**: 低（2箇所の引数追加）
+- **PR**: [#3](https://github.com/digital-go-jp/jgrants-mcp-server/pull/3)（マージ待ち）
+
+### PR #3: 公式 Dockerfile 追加
+
+- **ファイル**: `Dockerfile` (新規), `.dockerignore` (新規)
+- **問題**: Dockerイメージがなく、Cloud Run / Fly.io / Renderへのデプロイが手動になる。
+- **修正**: マルチステージビルド + 非rootユーザー + `$PORT` 対応の本番用Dockerfileを追加。
+- **難易度**: 低
+- **PR**: [#4](https://github.com/digital-go-jp/jgrants-mcp-server/pull/4)（マージ待ち）
+
+### PR #4: pytest 単体テスト追加
+
+- **ファイル**: `tests/test_unit.py` (新規), `pytest.ini` (新規)
+- **問題**: 現状のテストはlive API接続前提の手動smokeのみ。CIで実行可能なテストがない。
+- **修正**: `_safe_path` と `get_subsidy_overview` を対象とした14件のユニットテスト。`test_accepting_count_currently_open` はPR #1のバグを証明するテスト（PR #1マージ前はFAIL、マージ後はPASS）。
+- **難易度**: 中（271行）
+- **PR**: [#5](https://github.com/digital-go-jp/jgrants-mcp-server/pull/5)（マージ待ち）
 
 ---
 
@@ -27,49 +51,12 @@ PRs will be submitted in order, respecting the MIT license and existing design.
 
 | # | タイトル | 対象ファイル | 難易度 | 想定行数 | 優先度 |
 |---|---|---|---|---|---|
-| 2 | `stateless_http=True` 対応（Cloud Run / サーバレス互換） | `core.py` | 低 | 1行 | 高 |
-| 3 | 公式 Dockerfile 追加 | `Dockerfile` (新規) | 低 | 15行 | 高 |
-| 4 | 英語版 README 翻訳 | `README.en.md` (新規) | 中 | 100行 | 中 |
-| 5 | 業種・地域の Completion 実装 | `core.py` | 中 | 50行 | 中 |
-| 6 | pytest 単体テスト追加 | `tests/` (新規) | 中 | 80行 | 中 |
+| 5 | 英語版 README 翻訳 | `README.en.md` (新規) | 中 | 100行 | 中 |
+| 6 | 業種・地域の Completion 実装 | `core.py` | 中 | 50行 | 中 |
 
 ---
 
-### PR #2: `stateless_http=True` 対応
-
-**問題**: FastMCPは `stateless_http=False`（デフォルト）でStreamable HTTPを起動する。Cloud RunやFly.ioなどのステートレス環境では、リクエストごとにプロセスが異なる可能性があるため、セッション状態を保持しないモードで動かすべき。
-
-**修正案**:
-
-```python
-# core.py の末尾
-if __name__ == "__main__":
-    mcp.run(transport="streamable-http", stateless_http=True)
-```
-
-**MCP仕様の根拠**: [MCP 2025-11-25 Streamable HTTP](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports#streamable-http) では `stateless_http` モードが規定されており、サーバレス環境向けに推奨される。
-
----
-
-### PR #3: 公式 Dockerfile 追加
-
-**問題**: 現在インストール手段は `git clone → pip install -e .` のみ。Dockerイメージがないため、Cloud Run・Fly.io・Renderへのデプロイが手動になる。
-
-**修正案** (`Dockerfile` 新規):
-
-```dockerfile
-FROM python:3.12-slim
-WORKDIR /app
-COPY pyproject.toml .
-RUN pip install --no-cache-dir .
-COPY jgrants_mcp_server/ ./jgrants_mcp_server/
-ENV PORT=8080
-CMD ["python", "-m", "jgrants_mcp_server.core"]
-```
-
----
-
-### PR #4: 英語版 README 翻訳
+### PR #5: 英語版 README 翻訳
 
 **問題**: READMEが日本語のみ。海外のMCPクライアントユーザーや、Anthropic/OpenAIのマーケットプレイスレビュアーが直接参照できない。
 
@@ -77,7 +64,7 @@ CMD ["python", "-m", "jgrants_mcp_server.core"]
 
 ---
 
-### PR #5: 業種・地域の Completion 実装
+### PR #6: 業種・地域の Completion 実装
 
 **問題**: `search_subsidies` の `industry`（業種）パラメータと `target_area_search`（地域）パラメータは、有効な値がAPIドキュメントで定義されているが、MCPの Completion プリミティブが実装されていない。LLMが誤った値を渡すリスクがある。
 
@@ -86,17 +73,6 @@ CMD ["python", "-m", "jgrants_mcp_server.core"]
 **MCP仕様の根拠**: [MCP 2025-11-25 Completion](https://modelcontextprotocol.io/specification/2025-11-25/server/utilities/completion) にて候補値を提供する仕様が定義されている。
 
 ---
-
-### PR #6: pytest 単体テスト追加
-
-**問題**: 現状のテストは live API接続を前提とした手動smokeテストのみ（`test_mcp.sh`）。CI上で繰り返し実行できる独立したテストがない。
-
-**修正案**: `tests/` ディレクトリを作成し、`httpx.AsyncClient` をモックした単体テストを追加する。
-
-対象：
-- `_search_subsidies_internal` のパラメータバリデーション
-- `get_subsidy_overview` の統計計算ロジック（修正済みの `accepting` カウントを含む）
-- `_safe_path` のパストラバーサル防止
 
 ---
 
@@ -111,3 +87,4 @@ CMD ["python", "-m", "jgrants_mcp_server.core"]
 ---
 
 *最終更新: 2026-05-04 / Last updated: 2026-05-04*
+*PR送信: #2, #3, #4, #5 → digital-go-jp/jgrants-mcp-server*
