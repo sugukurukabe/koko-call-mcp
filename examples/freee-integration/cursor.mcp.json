@@ -1,0 +1,15 @@
+{
+  "_comment": "Cursor MCP configuration for JP Bids MCP + freee MCP integration.",
+  "mcpServers": {
+    "jp-bids": {
+      "url": "https://mcp.bid-jp.com/mcp",
+      "type": "streamable-http",
+      "_comment": "Remote JP Bids MCP. Streamable HTTP is natively supported in Cursor."
+    },
+    "freee": {
+      "url": "https://mcp.freee.co.jp/mcp",
+      "type": "streamable-http",
+      "_comment": "Remote freee MCP. OAuth authentication is triggered on first use."
+    }
+  }
+}

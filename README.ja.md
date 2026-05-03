@@ -82,7 +82,9 @@ JP Bids MCPは[Jグランツ MCP](https://github.com/digital-go-jp/jgrants-mcp-s
 Claude Desktop・Cursor用の設定ファイルと3つのエンドツーエンドワークフロー例：[examples/jgrants-integration/](examples/jgrants-integration/)  
 技術的な連携詳細：[docs/integrations/jgrants.md](docs/integrations/jgrants.md)
 
-> JP Bids MCPとJグランツ MCPは別組織（スグクル株式会社・デジタル庁）が運営する独立サーバーです。結果は参考情報であり、必ず公式書類で確認してください。
+JP Bids MCPは[freee MCP](https://www.npmjs.com/package/freee-mcp)（freee株式会社）とも連携でき、入札→会計処理の自動化（資金余力確認、落札後の売上取引登録、請求書生成）が可能です。設定例：[examples/freee-integration/](examples/freee-integration/)
+
+> JP Bids MCP・Jグランツ MCP・freee MCPはそれぞれ別組織が運営する独立サーバーです。結果は参考情報であり、必ず公式書類で確認してください。
 
 ## ポリシー / Policies / Kebijakan
 

@@ -82,7 +82,9 @@ JP Bids MCP berpasangan dengan [J-Grants MCP](https://github.com/digital-go-jp/j
 File konfigurasi Claude Desktop dan Cursor yang siap digunakan beserta tiga contoh alur kerja end-to-end: [examples/jgrants-integration/](examples/jgrants-integration/)  
 Detail integrasi teknis: [docs/integrations/jgrants.md](docs/integrations/jgrants.md)
 
-> JP Bids MCP dan J-Grants MCP adalah server independen yang dioperasikan oleh organisasi berbeda (Sugukuru Inc. dan Badan Digital Jepang). Hasil adalah informasi referensi; selalu verifikasi dengan dokumen resmi.
+JP Bids MCP juga terintegrasi dengan [freee MCP](https://www.npmjs.com/package/freee-mcp) (freee K.K.) untuk otomatisasi pengadaan-ke-akuntansi — pemeriksaan kesiapan keuangan, pencatatan transaksi pasca-kontrak, dan pembuatan faktur dari data tender. Lihat [examples/freee-integration/](examples/freee-integration/).
+
+> JP Bids MCP, J-Grants MCP, dan freee MCP adalah server independen yang dioperasikan oleh organisasi berbeda. Hasil adalah informasi referensi; selalu verifikasi dengan dokumen resmi.
 
 ## Kebijakan / Policies / ポリシー
 

@@ -1,0 +1,17 @@
+{
+  "_comment": "Claude Desktop configuration for JP Bids MCP + freee MCP integration.",
+  "_comment_freee": "freee MCP Remote: OAuth authentication happens automatically on first connection.",
+  "_comment_jpbids": "JP Bids MCP is hosted remotely. mcp-remote bridges Streamable HTTP to stdio.",
+  "mcpServers": {
+    "jp-bids": {
+      "command": "npx",
+      "args": ["--yes", "mcp-remote", "https://mcp.bid-jp.com/mcp"],
+      "_comment": "Remote JP Bids MCP. During beta (until June 2026) no API key required."
+    },
+    "freee": {
+      "command": "npx",
+      "args": ["--yes", "mcp-remote", "https://mcp.freee.co.jp/mcp"],
+      "_comment": "Remote freee MCP. OAuth login is triggered on first use."
+    }
+  }
+}

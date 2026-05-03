@@ -142,7 +142,9 @@ JP Bids MCP pairs with the [J-Grants MCP](https://github.com/digital-go-jp/jgran
 See [examples/jgrants-integration/](examples/jgrants-integration/) for ready-to-use Claude Desktop and Cursor configuration files, and three end-to-end workflow examples.  
 Technical integration details: [docs/integrations/jgrants.md](docs/integrations/jgrants.md).
 
-> JP Bids MCP and J-Grants MCP are independent servers operated by separate organizations (Sugukuru Inc. and Digital Agency of Japan respectively). Results are reference information; always verify against official documents.
+JP Bids MCP also pairs with [freee MCP](https://www.npmjs.com/package/freee-mcp) (freee K.K.) for procurement-to-accounting automation — financial readiness checks, post-award deal entries, and invoice generation from bid data. See [examples/freee-integration/](examples/freee-integration/).
+
+> JP Bids MCP, J-Grants MCP, and freee MCP are independent servers operated by separate organizations. Results are reference information; always verify against official documents.
 
 ## Notes / 注意事項
 
