@@ -4,9 +4,11 @@ import type { KkjClient } from "../api/kkj-client.js";
 import { createAttribution } from "../domain/attribution.js";
 import { BidReviewPacketSchema } from "../domain/bid.js";
 import type { BidRankingOptions } from "../domain/bid-ranking.js";
+import { extractBidRequirements } from "../domain/bid-requirements.js";
 import { createBidReviewPacket } from "../domain/bid-review-packet.js";
 import { UserInputError } from "../lib/errors.js";
 import { toolError } from "../lib/tool-result.js";
+import { enrichWithDocumentExtraction } from "./document-extraction.js";
 
 const inputSchema = {
   bid_key: z
@@ -16,6 +18,15 @@ const inputSchema = {
   preferred_keywords: z.array(z.string().min(1)).optional(),
   avoid_keywords: z.array(z.string().min(1)).optional(),
   due_within_days: z.number().int().min(1).max(180).default(30),
+  fetch_documents: z
+    .boolean()
+    .default(false)
+    .describe("trueの場合、PDF/HTML抽出結果を社内検討メモへ反映する。"),
+  target_uris: z
+    .array(z.string().url())
+    .max(3)
+    .optional()
+    .describe("抽出対象URL。省略時は検索結果の公式公告ページ・添付資料URLから最大3件を使う。"),
 };
 
 export function registerCreateBidReviewPacket(server: McpServer, client: KkjClient): void {
@@ -49,7 +60,16 @@ export function registerCreateBidReviewPacket(server: McpServer, client: KkjClie
         if (args.avoid_keywords) {
           rankingOptions.avoidKeywords = args.avoid_keywords;
         }
-        const packet = createBidReviewPacket(result.bid, result.attribution, rankingOptions);
+        const baseRequirements = extractBidRequirements(result.bid, result.attribution);
+        const requirements = args.fetch_documents
+          ? await enrichWithDocumentExtraction(server, baseRequirements, args.target_uris)
+          : baseRequirements;
+        const packet = createBidReviewPacket(
+          result.bid,
+          result.attribution,
+          rankingOptions,
+          requirements,
+        );
         return {
           content: [{ type: "text" as const, text: packet.markdown }],
           structuredContent: packet,

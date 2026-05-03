@@ -15,7 +15,7 @@ export function createJpBidsServer(options: CreateJpBidsServerOptions = {}): Mcp
     {
       name: "JP Bids MCP",
       title: "JP Bids MCP",
-      version: "0.5.2",
+      version: "0.5.3",
       description: "Japan government procurement bid search through the Model Context Protocol.",
     },
     {

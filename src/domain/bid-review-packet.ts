@@ -1,5 +1,5 @@
 import type { Attribution } from "./attribution.js";
-import type { Bid, BidReviewPacket, RankedBid } from "./bid.js";
+import type { Bid, BidRequirementExtraction, BidReviewPacket, RankedBid } from "./bid.js";
 import { createBidCalendarExport } from "./bid-calendar.js";
 import type { BidRankingOptions } from "./bid-ranking.js";
 import { rankBid } from "./bid-ranking.js";
@@ -9,9 +9,10 @@ export function createBidReviewPacket(
   bid: Bid,
   attribution: Attribution,
   rankingOptions: BidRankingOptions = {},
+  requirementsOverride?: BidRequirementExtraction,
 ): BidReviewPacket {
   const rankedBid = rankBid(bid, rankingOptions);
-  const requirements = extractBidRequirements(bid, attribution);
+  const requirements = requirementsOverride ?? extractBidRequirements(bid, attribution);
   const calendar = createBidCalendarExport(bid, attribution);
   const title = `入札検討メモ: ${bid.projectName}`;
   return {
@@ -60,6 +61,10 @@ function toMarkdown(
       "検索結果から確認できる期限はありません",
     ),
     "",
+    "## PDF抽出された主要要件",
+    "",
+    ...extractedRequirementLines(requirements),
+    "",
     "## 確認すべき資料",
     "",
     ...toList(
@@ -89,4 +94,27 @@ function toMarkdown(
 function toList(values: string[], fallback: string): string[] {
   const items = values.filter((value) => value.length > 0);
   return (items.length > 0 ? items : [fallback]).map((value) => `- ${value}`);
+}
+
+function extractedRequirementLines(requirements: BidRequirementExtraction): string[] {
+  const extracted = requirements.extractedRequirements;
+  if (!extracted) {
+    return ["- PDF/HTML本文のAI抽出は未実行です。"];
+  }
+  return [
+    `- 参加資格: ${toInlineList(extracted.eligibility)}`,
+    `- 提出書類: ${toInlineList(extracted.requiredDocuments)}`,
+    `- 入札書提出期限: ${extracted.tenderSubmissionDeadline ?? "要確認"}`,
+    `- 開札日時: ${extracted.openingDate ?? "要確認"}`,
+    `- 入札説明会: ${extracted.briefingDate ?? "要確認"}`,
+    `- 質問期限: ${extracted.questionDeadline ?? "要確認"}`,
+    `- 納入期限: ${extracted.deliveryDeadline ?? "要確認"}`,
+    `- 連絡先: ${extracted.contactPoint ?? "要確認"}`,
+    `- 失格条件: ${toInlineList(extracted.disqualification)}`,
+    `- 曖昧点: ${toInlineList(extracted.ambiguousPoints)}`,
+  ];
+}
+
+function toInlineList(values: string[]): string {
+  return values.length > 0 ? values.join(" / ") : "要確認";
 }

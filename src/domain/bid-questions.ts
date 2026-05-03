@@ -1,10 +1,14 @@
 import type { Attribution } from "./attribution.js";
-import type { Bid, BidQuestionDraft } from "./bid.js";
+import type { Bid, BidQuestionDraft, BidRequirementExtraction } from "./bid.js";
 import { extractBidRequirements } from "./bid-requirements.js";
 
-export function draftBidQuestions(bid: Bid, attribution: Attribution): BidQuestionDraft {
-  const requirements = extractBidRequirements(bid, attribution);
-  const questions = requirements.missingRequirements.map((item) => toQuestion(item, bid));
+export function draftBidQuestions(
+  bid: Bid,
+  attribution: Attribution,
+  requirementsOverride?: BidRequirementExtraction,
+): BidQuestionDraft {
+  const requirements = requirementsOverride ?? extractBidRequirements(bid, attribution);
+  const questions = deriveQuestionTopics(requirements).map((item) => toQuestion(item, bid));
   const title = `質問書ドラフト: ${bid.projectName}`;
   return {
     bid,
@@ -30,6 +34,13 @@ function toQuestion(topic: string, bid: Bid): BidQuestionDraft["questions"][numb
       ...base,
       question: "本件に関する質問の提出期限、提出方法、回答予定日はいつでしょうか。",
       reason: "検索結果から質問期限を確認できないため。",
+    };
+  }
+  if (topic.includes("曖昧点")) {
+    return {
+      ...base,
+      question: topic.replace(/^曖昧点[:：]\s*/, ""),
+      reason: "PDF/公告文のAI抽出で、人間確認が必要な曖昧点として検出されたため。",
     };
   }
   if (topic.includes("提出書類")) {
@@ -67,6 +78,47 @@ function toQuestion(topic: string, bid: Bid): BidQuestionDraft["questions"][numb
     question: `${topic}について、公告または仕様書上の該当箇所を確認させてください。`,
     reason: "検索結果だけでは確認できないため。",
   };
+}
+
+function deriveQuestionTopics(requirements: BidRequirementExtraction): string[] {
+  const extracted = requirements.extractedRequirements;
+  if (!extracted) {
+    return requirements.missingRequirements;
+  }
+  const topics = [...requirements.missingRequirements];
+  if (extracted.eligibility.length > 0) {
+    removeTopics(topics, ["参加資格", "営業品目"]);
+  }
+  if (extracted.requiredDocuments.length > 0) {
+    removeTopics(topics, ["提出書類"]);
+  }
+  if (extracted.tenderSubmissionDeadline) {
+    removeTopics(topics, ["提出期限"]);
+  }
+  if (extracted.openingDate) {
+    removeTopics(topics, ["開札日"]);
+  }
+  if (extracted.deliveryDeadline || extracted.contractPeriod) {
+    removeTopics(topics, ["契約期間", "納入期限"]);
+  }
+  if (extracted.disqualification.length > 0) {
+    removeTopics(topics, ["失格", "注意事項"]);
+  }
+  for (const ambiguousPoint of extracted.ambiguousPoints) {
+    topics.push(`曖昧点: ${ambiguousPoint}`);
+  }
+  if (!extracted.questionDeadline) {
+    topics.push("質問期限");
+  }
+  return [...new Set(topics)];
+}
+
+function removeTopics(topics: string[], fragments: string[]): void {
+  for (let index = topics.length - 1; index >= 0; index -= 1) {
+    if (fragments.some((fragment) => topics[index]?.includes(fragment))) {
+      topics.splice(index, 1);
+    }
+  }
 }
 
 function toMarkdown(

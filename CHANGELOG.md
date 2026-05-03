@@ -2,6 +2,12 @@
 
 ## 日本語
 
+### 0.5.3
+
+- `create_bid_review_packet` に `fetch_documents` / `target_uris` を追加し、PDF/HTML抽出済みの参加資格・提出書類・期限・連絡先・失格条件を社内検討メモへ自動反映。
+- `draft_bid_questions` に `fetch_documents` / `target_uris` を追加し、PDF抽出で解決済みの質問を減らし、曖昧点だけを質問案に残せるようにした。
+- PDF/HTML抽出処理をtool共通helperへ切り出し、`extract_bid_requirements`、`create_bid_review_packet`、`draft_bid_questions` で同じ安全な一時取得・Vertex AI経路を使うようにした。
+
 ### 0.5.2
 
 - PDF抽出結果に `tenderSubmissionDeadline`、`openingDate`、`briefingDate`、`contactPoint` を追加し、提出期限・開札日時・説明会・連絡先を `rawNotes` ではなく構造化して返せるようにした。
@@ -84,6 +90,12 @@
 
 ## English
 
+### 0.5.3
+
+- Added `fetch_documents` / `target_uris` to `create_bid_review_packet`, automatically injecting PDF/HTML-extracted eligibility, documents, deadlines, contact points, and disqualification rules into the internal review memo.
+- Added `fetch_documents` / `target_uris` to `draft_bid_questions`, reducing questions already answered by PDF extraction and keeping ambiguous points as clarification drafts.
+- Moved PDF/HTML extraction into a shared tool helper so `extract_bid_requirements`, `create_bid_review_packet`, and `draft_bid_questions` use the same safe ephemeral fetch and Vertex AI path.
+
 ### 0.5.2
 
 - Added `tenderSubmissionDeadline`, `openingDate`, `briefingDate`, and `contactPoint` to PDF extraction results so submission/opening/briefing/contact details are returned as structured fields instead of only `rawNotes`.
@@ -165,6 +177,12 @@
 - Initial implementation with Tools, Prompts, Resources, Resource Templates, Completion, Logging, stdio, and Streamable HTTP.
 
 ## Bahasa Indonesia
+
+### 0.5.3
+
+- Menambahkan `fetch_documents` / `target_uris` ke `create_bid_review_packet`, sehingga eligibility, dokumen, deadline, kontak, dan aturan diskualifikasi hasil ekstraksi PDF/HTML otomatis masuk ke memo review internal.
+- Menambahkan `fetch_documents` / `target_uris` ke `draft_bid_questions`, sehingga pertanyaan yang sudah terjawab oleh ekstraksi PDF dikurangi dan hanya poin ambigu yang tetap menjadi draft klarifikasi.
+- Memindahkan ekstraksi PDF/HTML ke helper tool bersama agar `extract_bid_requirements`, `create_bid_review_packet`, dan `draft_bid_questions` memakai jalur ephemeral fetch dan Vertex AI yang sama.
 
 ### 0.5.2
 
