@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JP Bids MCP — 入札情報をAIで</title>
+<meta name="description" content="日本の官公需入札情報をAIアシスタントで検索・分析。Claude / Cursor / ChatGPT で即利用可能。">
+<link rel="icon" href="/favicon.png" type="image/png">
+<meta property="og:title" content="JP Bids MCP — 入札情報をAIで">
+<meta property="og:description" content="年間180万件の官公需入札情報をAIアシスタントから直接検索・分析。30秒で利用開始。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mcp.bid-jp.com">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#fafbfc;--fg:#1a1a2e;--accent:#2563eb;--accent-light:#dbeafe;--card-bg:#fff;--border:#e5e7eb;--muted:#6b7280;--green:#059669;--green-bg:#d1fae5;--radius:12px}
+body{font-family:"Inter",system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--fg);line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+
+.hero{text-align:center;padding:4rem 1.5rem 3rem;background:linear-gradient(180deg,#eff6ff 0%,var(--bg) 100%)}
+.hero-badge{display:inline-block;background:var(--green-bg);color:var(--green);font-size:.8rem;font-weight:600;padding:.3rem .8rem;border-radius:999px;margin-bottom:1.2rem;letter-spacing:.02em}
+.hero h1{font-size:clamp(2rem,5vw,3rem);font-weight:800;letter-spacing:-.02em;margin-bottom:.8rem}
+.hero h1 span{color:var(--accent)}
+.hero p{font-size:1.15rem;color:var(--muted);max-width:640px;margin:0 auto 2rem}
+.hero-actions{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.7rem 1.4rem;border-radius:8px;font-size:.95rem;font-weight:600;transition:all .15s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#1d4ed8;text-decoration:none}
+.btn-outline{background:var(--card-bg);color:var(--fg);border:1px solid var(--border)}
+.btn-outline:hover{border-color:var(--accent);text-decoration:none}
+
+.setup{max-width:700px;margin:0 auto;padding:0 1.5rem}
+.setup h2{font-size:1.3rem;font-weight:700;text-align:center;margin-bottom:1.5rem}
+.setup-card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:2.5rem}
+.setup-card .tab-bar{display:flex;border-bottom:1px solid var(--border)}
+.setup-card .tab{flex:1;padding:.6rem;text-align:center;font-size:.85rem;font-weight:600;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all .15s}
+.setup-card .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.setup-card .tab-panel{display:none;padding:1.2rem}
+.setup-card .tab-panel.active{display:block}
+pre{background:#1e293b;color:#e2e8f0;padding:1rem;border-radius:8px;overflow-x:auto;font-size:.85rem;line-height:1.6}
+pre .comment{color:#94a3b8}
+pre .string{color:#a5f3fc}
+pre .key{color:#c4b5fd}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;max-width:800px;margin:0 auto 3rem;padding:0 1.5rem}
+.stat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem;text-align:center}
+.stat-num{font-size:1.8rem;font-weight:800;color:var(--accent)}
+.stat-label{font-size:.85rem;color:var(--muted);margin-top:.2rem}
+
+.features{max-width:900px;margin:0 auto 3rem;padding:0 1.5rem}
+.features h2{font-size:1.3rem;font-weight:700;text-align:center;margin-bottom:1.5rem}
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem}
+.feature-card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem}
+.feature-icon{font-size:1.5rem;margin-bottom:.5rem}
+.feature-card h3{font-size:1rem;font-weight:700;margin-bottom:.3rem}
+.feature-card p{font-size:.88rem;color:var(--muted);line-height:1.5}
+
+.workflows{max-width:900px;margin:0 auto 3rem;padding:0 1.5rem}
+.workflows h2{font-size:1.3rem;font-weight:700;text-align:center;margin-bottom:.5rem}
+.workflows .sub{text-align:center;color:var(--muted);font-size:.9rem;margin-bottom:1.5rem}
+.workflow-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem}
+.workflow-card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem}
+.workflow-card .step{font-size:.8rem;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem}
+.workflow-card h3{font-size:.95rem;font-weight:700;margin-bottom:.3rem}
+.workflow-card p{font-size:.85rem;color:var(--muted);line-height:1.5}
+
+.ecosystem{max-width:700px;margin:0 auto 3rem;padding:0 1.5rem;text-align:center}
+.ecosystem h2{font-size:1.3rem;font-weight:700;margin-bottom:1rem}
+.eco-diagram{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;font-family:ui-monospace,monospace;font-size:.9rem;line-height:2}
+
+.cta{text-align:center;padding:3rem 1.5rem;background:linear-gradient(180deg,var(--bg) 0%,#eff6ff 100%)}
+.cta h2{font-size:1.5rem;font-weight:800;margin-bottom:.5rem}
+.cta p{color:var(--muted);margin-bottom:1.5rem}
+
+footer{text-align:center;padding:2rem 1.5rem;font-size:.8rem;color:var(--muted);border-top:1px solid var(--border)}
+footer a{color:var(--muted)}
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-badge">Beta — 2026年6月末まで全機能無料</div>
+  <h1>入札情報を<span>AIで</span></h1>
+  <p>年間180万件超の官公需入札を、AIアシスタントから直接検索・分析。<br>Claude / Cursor / ChatGPT で30秒で利用開始。</p>
+  <div class="hero-actions">
+    <a href="#setup" class="btn btn-primary">今すぐ使う</a>
+    <a href="https://github.com/sugukurukabe/koko-call-mcp" class="btn btn-outline">GitHub</a>
+  </div>
+</section>
+
+<section class="stats">
+  <div class="stat-card">
+    <div class="stat-num">14</div>
+    <div class="stat-label">AIツール</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">180万+</div>
+    <div class="stat-label">年間入札件数</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">30秒</div>
+    <div class="stat-label">セットアップ</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">¥0</div>
+    <div class="stat-label">ベータ期間中</div>
+  </div>
+</section>
+
+<section class="setup" id="setup">
+  <h2>セットアップ</h2>
+  <div class="setup-card">
+    <div class="tab-bar">
+      <div class="tab active" data-tab="remote">リモート（推奨）</div>
+      <div class="tab" data-tab="claude">Claude Desktop</div>
+      <div class="tab" data-tab="cursor">Cursor</div>
+    </div>
+    <div class="tab-panel active" id="tab-remote">
+      <p style="font-size:.9rem;color:var(--muted);margin-bottom:.8rem">インストール不要。リモートURLを登録するだけ。</p>
+      <pre><span class="comment"># MCP対応クライアントにこのURLを登録</span>
+<span class="string">https://mcp.bid-jp.com/mcp</span>
+
+<span class="comment"># トランスポート: Streamable HTTP</span>
+<span class="comment"># 認証: OAuth 2.0（自動）</span></pre>
+    </div>
+    <div class="tab-panel" id="tab-claude">
+      <p style="font-size:.9rem;color:var(--muted);margin-bottom:.8rem">claude_desktop_config.json に追加：</p>
+      <pre>{
+  <span class="key">"mcpServers"</span>: {
+    <span class="key">"jp-bids"</span>: {
+      <span class="key">"command"</span>: <span class="string">"npx"</span>,
+      <span class="key">"args"</span>: [<span class="string">"--yes"</span>, <span class="string">"mcp-remote"</span>,
+              <span class="string">"https://mcp.bid-jp.com/mcp"</span>]
+    }
+  }
+}</pre>
+    </div>
+    <div class="tab-panel" id="tab-cursor">
+      <p style="font-size:.9rem;color:var(--muted);margin-bottom:.8rem">.cursor/mcp.json に追加：</p>
+      <pre>{
+  <span class="key">"mcpServers"</span>: {
+    <span class="key">"jp-bids"</span>: {
+      <span class="key">"url"</span>: <span class="string">"https://mcp.bid-jp.com/mcp"</span>
+    }
+  }
+}</pre>
+    </div>
+  </div>
+</section>
+
+<section class="workflows">
+  <h2>顧客が実際にやること</h2>
+  <p class="sub">AIに話しかけるだけで、入札業務が変わる</p>
+  <div class="workflow-list">
+    <div class="workflow-card">
+      <div class="step">会話例 1</div>
+      <h3>「IT系の入札を探して」</h3>
+      <p>全国の入札情報から条件に合う案件を検索。AIが案件をスコアリングし、自社に合う順にランク付け。</p>
+    </div>
+    <div class="workflow-card">
+      <div class="step">会話例 2</div>
+      <h3>「この仕様書の要件を整理して」</h3>
+      <p>入札公告PDFをAIが読み取り、必須要件・評価項目・提出書類を構造化して一覧表示。</p>
+    </div>
+    <div class="workflow-card">
+      <div class="step">会話例 3</div>
+      <h3>「来週締切の案件をカレンダーに」</h3>
+      <p>締切が近い入札をiCalendar形式でエクスポート。Google / Outlook カレンダーに即追加。</p>
+    </div>
+    <div class="workflow-card">
+      <div class="step">会話例 4</div>
+      <h3>「農林水産省の発注傾向を分析」</h3>
+      <p>過去の落札実績から発注パターン・予算規模・競合の落札率を分析。戦略的な入札判断を支援。</p>
+    </div>
+    <div class="workflow-card">
+      <div class="step">会話例 5</div>
+      <h3>「うちの会社でこの入札に参加できる？」</h3>
+      <p>会社の資格情報と入札要件を照合し、参加可否を即判定。不足要件があれば取得方法も提示。</p>
+    </div>
+    <div class="workflow-card">
+      <div class="step">会話例 6</div>
+      <h3>「落札したらfreeeに売上を登録して」</h3>
+      <p>JP Bids MCP × freee MCP の連携で、落札情報から売上取引・請求書を自動生成。入札から経理まで一気通貫。</p>
+    </div>
+  </div>
+</section>
+
+<section class="features">
+  <h2>14のAIツール</h2>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="feature-icon">&#x1F50D;</div>
+      <h3>入札検索</h3>
+      <p>全文検索・機関名・地域・期間で絞り込み。ページネーション対応。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#x1F4CA;</div>
+      <h3>AIスコアリング</h3>
+      <p>Gemini連携で自社適合度を0-100で自動スコアリング。理由付き。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#x1F4C4;</div>
+      <h3>仕様書PDF解析</h3>
+      <p>入札公告の添付PDFからAIが要件・評価基準を構造化抽出。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#x1F4C5;</div>
+      <h3>締切カレンダー</h3>
+      <p>iCalendar(.ics)形式でエクスポート。締切管理を自動化。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#x1F3C6;</div>
+      <h3>落札実績分析</h3>
+      <p>過去の落札データから競合分析・予算傾向を可視化。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#x2705;</div>
+      <h3>資格適合チェック</h3>
+      <p>入札参加資格と自社要件を照合し、参加可否を即判定。</p>
+    </div>
+  </div>
+</section>
+
+<section class="ecosystem">
+  <h2>エコシステム連携</h2>
+  <div class="eco-diagram">
+    <strong>JP Bids MCP</strong>（入札）<br>
+    &nbsp;&nbsp;&#x2194;&nbsp;&nbsp;<a href="https://github.com/digital-go-jp/jgrants-mcp-server">J-Grants MCP</a>（補助金・デジタル庁）<br>
+    &nbsp;&nbsp;&#x2194;&nbsp;&nbsp;<a href="https://www.npmjs.com/package/freee-mcp">freee MCP</a>（会計・請求書）
+  </div>
+  <p style="font-size:.88rem;color:var(--muted);margin-top:.8rem">3つの独立MCPサーバーを組み合わせて、入札→補助金→会計をひとつのAI会話でカバー。</p>
+</section>
+
+<section class="cta">
+  <h2>今日から入札業務をAIで</h2>
+  <p>インストール不要。30秒でAIアシスタントに入札検索を追加。</p>
+  <div class="hero-actions">
+    <a href="#setup" class="btn btn-primary">セットアップへ</a>
+    <a href="https://github.com/sugukurukabe/koko-call-mcp" class="btn btn-outline">ドキュメント</a>
+  </div>
+</section>
+
+<footer>
+  <p>&copy; 2025-2026 <a href="https://sugukuru.co.jp">スグクル株式会社</a> &nbsp;|&nbsp; <a href="/privacy">プライバシー</a> &nbsp;|&nbsp; <a href="/terms">利用規約</a> &nbsp;|&nbsp; <a href="https://github.com/sugukurukabe/koko-call-mcp">GitHub</a></p>
+  <p style="margin-top:.5rem">データ出典: <a href="https://kkj.go.jp">中小企業庁 官公需情報ポータルサイト</a>（政府標準利用規約 第2.0版）</p>
+</footer>
+
+<script>
+document.querySelectorAll('.tab-bar').forEach(bar => {
+  bar.addEventListener('click', e => {
+    const tab = e.target.closest('.tab');
+    if (!tab) return;
+    const card = bar.closest('.setup-card');
+    for (const t of card.querySelectorAll('.tab')) t.classList.remove('active');
+    for (const p of card.querySelectorAll('.tab-panel')) p.classList.remove('active');
+    tab.classList.add('active');
+    card.querySelector(`#tab-${tab.dataset.tab}`).classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

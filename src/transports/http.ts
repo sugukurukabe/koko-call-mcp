@@ -70,6 +70,10 @@ export function createHttpApp(): express.Express {
     res.sendFile("terms.html", { root: "public" });
   });
 
+  app.get("/", (_req, res) => {
+    res.sendFile("index.html", { root: "public" });
+  });
+
   app.get("/health", (_req, res) => {
     res.status(200).json({ ok: true, service: "JP Bids MCP" });
   });
