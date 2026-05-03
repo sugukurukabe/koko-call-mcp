@@ -6,6 +6,7 @@ import {
 } from "../api/sampling-extractor.js";
 import { isVertexAiEnabled, VertexGeminiClient } from "../api/vertex-gemini-client.js";
 import type { BidRequirementExtraction } from "../domain/bid.js";
+import { isBillingEnabled, recordPdfExtractionUsage } from "../lib/billing.js";
 
 export const documentExtractionInputSchema = {
   fetch_documents: {
@@ -16,10 +17,21 @@ export const documentExtractionInputSchema = {
   },
 } as const;
 
+/**
+ * PDF/HTML書類を取得しAI抽出した結果でBidRequirementExtractionを強化する
+ * Enrich BidRequirementExtraction with AI-extracted content from PDF/HTML documents
+ * Memperkaya BidRequirementExtraction dengan konten yang diekstraksi AI dari dokumen PDF/HTML
+ *
+ * @param server - MCPサーバーインスタンス / MCP server instance / Instance server MCP
+ * @param extraction - 抽出元データ / Source extraction data / Data ekstraksi sumber
+ * @param targetUris - 対象URL / Target URIs / URI target
+ * @param stripeCustomerId - Stripe顧客ID（課金追跡用）/ Stripe customer ID (for billing tracking) / ID pelanggan Stripe (untuk pelacakan penagihan)
+ */
 export async function enrichWithDocumentExtraction(
   server: McpServer,
   extraction: BidRequirementExtraction,
   targetUris: string[] | undefined,
+  stripeCustomerId?: string,
 ): Promise<BidRequirementExtraction> {
   const candidateUris = targetUris ?? extraction.documentTargets.map((target) => target.uri);
   const uniqueUris = [...new Set(candidateUris.filter((uri) => uri.length > 0))].slice(0, 3);
@@ -34,6 +46,15 @@ export async function enrichWithDocumentExtraction(
   }
 
   const documents = await Promise.all(uniqueUris.map((uri) => fetchDocument(uri)));
+
+  // PDF取得成功時にStripe Meterイベントを送信（fire-and-forget、課金失敗はツール実行を止めない）
+  // Send Stripe Meter event on successful PDF fetch (fire-and-forget, billing failure must not block tool)
+  // Kirim acara Stripe Meter saat PDF berhasil diambil (fire-and-forget, kegagalan penagihan tidak menghentikan alat)
+  const billingCustomerId = stripeCustomerId ?? process.env.STRIPE_DEFAULT_CUSTOMER_ID;
+  if (isBillingEnabled() && billingCustomerId) {
+    void recordPdfExtractionUsage(billingCustomerId);
+  }
+
   const extractedFromDocuments = documents.map((document) => ({
     sourceUri: document.sourceUri,
     finalUri: document.finalUri,

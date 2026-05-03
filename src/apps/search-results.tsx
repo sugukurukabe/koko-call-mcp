@@ -17,6 +17,21 @@ function App() {
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [displayMode, setDisplayMode] = useState<string | null>(null);
   const [availableDisplayModes, setAvailableDisplayModes] = useState<string[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
+
+  const applySearchResult = (structuredContent: unknown) => {
+    if (!isBidSearchResult(structuredContent)) {
+      setError("Tool result did not include JP Bids structured content.");
+      return;
+    }
+    setResult(structuredContent);
+    setWorkspace(toWorkspaceViewModel(structuredContent));
+    setSelectedKey(structuredContent.bids[0]?.key ?? null);
+    setError(null);
+    setIsSearching(false);
+  };
+
   const {
     app,
     isConnected,
@@ -25,22 +40,22 @@ function App() {
     appInfo: {
       name: "jp-bids-workspace",
       title: "AI Bid Workspace",
-      version: "0.6.0",
+      version: "0.7.0",
       description:
         "Interactive workspace for JP Bids MCP — search, rank, extract, qualify, review.",
     },
     capabilities: {},
     strict: true,
     onAppCreated: (app) => {
-      app.addEventListener("toolresult", (toolResult: ToolResultLike) => {
-        if (!isBidSearchResult(toolResult.structuredContent)) {
-          setError("Tool result did not include JP Bids structured content.");
-          return;
-        }
-        setResult(toolResult.structuredContent);
-        setWorkspace(toWorkspaceViewModel(toolResult.structuredContent));
-        setSelectedKey(toolResult.structuredContent.bids[0]?.key ?? null);
+      app.addEventListener("toolinput", () => {
+        setIsSearching(true);
         setError(null);
+      });
+      app.addEventListener("toolresult", (toolResult: ToolResultLike) => {
+        applySearchResult(toolResult.structuredContent);
+      });
+      app.addEventListener("toolcancelled", () => {
+        setIsSearching(false);
       });
       app.addEventListener("hostcontextchanged", (context) => {
         setDisplayMode(context.displayMode ?? null);
@@ -77,6 +92,35 @@ function App() {
           <p className="eyebrow">JP Bids MCP</p>
           <h1>AI Bid Workspace</h1>
         </div>
+        <form
+          className="ws-search-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void handleInAppSearch(
+              app,
+              searchInput.trim(),
+              applySearchResult,
+              setIsSearching,
+              setError,
+            );
+          }}
+        >
+          <input
+            className="ws-search-input"
+            type="search"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="キーワードで再検索…"
+            disabled={isSearching || !isConnected}
+          />
+          <button
+            type="submit"
+            className="ws-search-btn"
+            disabled={isSearching || !isConnected || !searchInput.trim()}
+          >
+            {isSearching ? "…" : "検索"}
+          </button>
+        </form>
         <div className="ws-header-right">
           {availableDisplayModes.includes("fullscreen") && (
             <button
@@ -96,13 +140,16 @@ function App() {
 
       {error && <div className="notice error">{error}</div>}
       {actionMessage && <div className="notice compact">{actionMessage}</div>}
+      {isSearching && !workspace && <div className="notice">検索中…</div>}
 
       {!workspace ? (
-        <div className="notice">
-          <code>search_bids_app</code> を実行してください。
-        </div>
+        !isSearching && (
+          <div className="notice">
+            <code>search_bids_app</code> を実行するか、上の検索バーからキーワード検索してください。
+          </div>
+        )
       ) : (
-        <div className="ws-body">
+        <div className={`ws-body${isSearching ? " ws-body--loading" : ""}`}>
           {/* Priority Lane */}
           <aside className="priority-lane">
             <div className="lane-header">
@@ -331,6 +378,32 @@ function App() {
       )}
     </main>
   );
+}
+
+async function handleInAppSearch(
+  app: ReturnType<typeof useApp>["app"],
+  query: string,
+  applyResult: (structuredContent: unknown) => void,
+  setIsSearching: (v: boolean) => void,
+  setError: (msg: string) => void,
+): Promise<void> {
+  if (!app || !query) return;
+  setIsSearching(true);
+  try {
+    const result = await app.callServerTool({
+      name: "search_bids_app",
+      arguments: { query, limit: 20 },
+    });
+    if (result.isError) {
+      setError("検索でエラーが返されました。条件を変えて再試行してください。");
+      setIsSearching(false);
+      return;
+    }
+    applyResult(result.structuredContent);
+  } catch {
+    setError("検索リクエストが失敗しました。接続を確認してください。");
+    setIsSearching(false);
+  }
 }
 
 function isBidSearchResult(value: unknown): value is BidSearchResult {

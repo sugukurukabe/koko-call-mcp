@@ -3,6 +3,7 @@ import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import cors from "cors";
 import express from "express";
 import { KkjClient } from "../api/kkj-client.js";
+import { parseProApiKeys, parseTier } from "../lib/auth.js";
 import { parsePortEnv, parsePositiveNumberEnv } from "../lib/env.js";
 import { parseAllowedOrigins, validateOrigin } from "../lib/http.js";
 import { createJpBidsServer } from "../mcp.js";
@@ -12,12 +13,19 @@ const supportedProtocolVersions = new Set(["2025-11-25"]);
 export function createHttpApp(): express.Express {
   const app = express();
   const allowedOrigins = parseAllowedOrigins(process.env.ALLOWED_ORIGINS);
+  const proApiKeys = parseProApiKeys(process.env.JP_BIDS_PRO_API_KEYS);
   const sharedKkjClient = new KkjClient({
     rateLimitPerSecond: parsePositiveNumberEnv(
       process.env.JP_BIDS_RATE_LIMIT_PER_SECOND ?? process.env.KOKO_CALL_RATE_LIMIT_PER_SECOND,
       1,
     ),
   });
+
+  if (proApiKeys.size === 0 && process.env.K_SERVICE) {
+    console.error(
+      "[warning] JP_BIDS_PRO_API_KEYS is unset. All HTTP requests will be treated as Pro tier. Set this variable in production to enable Free/Pro tier separation.",
+    );
+  }
 
   app.use(express.json({ limit: "1mb" }));
   app.use(cors({ origin: allowedOrigins.size === 0 ? true : [...allowedOrigins] }));
@@ -46,7 +54,8 @@ export function createHttpApp(): express.Express {
       return;
     }
 
-    const server = createJpBidsServer({ kkjClient: sharedKkjClient });
+    const tier = parseTier(req.header("Authorization"), proApiKeys);
+    const server = createJpBidsServer({ kkjClient: sharedKkjClient, tier });
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
       enableJsonResponse: true,

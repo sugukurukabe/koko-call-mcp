@@ -1,6 +1,6 @@
 {
   "name": "jp-bids-mcp",
-  "version": "0.6.4",
+  "version": "0.7.0",
   "description": "JP Bids MCP provides Japan government procurement bid search through the Model Context Protocol.",
   "type": "module",
   "license": "Apache-2.0",
@@ -103,6 +103,7 @@
     "express": "^5.2.1",
     "fast-xml-parser": "^5.7.2",
     "lru-cache": "^11.3.5",
+    "stripe": "^22.1.0",
     "zod": "^4.4.1"
   },
   "devDependencies": {
