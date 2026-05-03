@@ -4,8 +4,10 @@ import type { KkjClient } from "../api/kkj-client.js";
 import { createAttribution } from "../domain/attribution.js";
 import { BidQualificationAssessmentSchema } from "../domain/bid.js";
 import { assessBidQualification } from "../domain/bid-qualification.js";
+import { extractBidRequirements } from "../domain/bid-requirements.js";
 import { UserInputError } from "../lib/errors.js";
 import { toolError } from "../lib/tool-result.js";
+import { enrichWithDocumentExtraction } from "./document-extraction.js";
 
 const inputSchema = {
   bid_key: z
@@ -28,6 +30,15 @@ const inputSchema = {
     .array(z.string().min(1))
     .default([])
     .describe("自社サービスに関係する語句。例: システム、保守、クラウド。"),
+  fetch_documents: z
+    .boolean()
+    .default(false)
+    .describe("trueの場合、PDF/HTML抽出結果を資格判定に反映する。"),
+  target_uris: z
+    .array(z.string().url())
+    .max(3)
+    .optional()
+    .describe("抽出対象URL。省略時は検索結果の公式公告ページ・添付資料URLから最大3件を使う。"),
 };
 
 export function registerAssessBidQualification(server: McpServer, client: KkjClient): void {
@@ -52,6 +63,10 @@ export function registerAssessBidQualification(server: McpServer, client: KkjCli
         const result = cached
           ? { bid: cached, attribution: createAttribution() }
           : await findBidByKey(client, args.bid_key);
+        const baseRequirements = extractBidRequirements(result.bid, result.attribution);
+        const requirements = args.fetch_documents
+          ? await enrichWithDocumentExtraction(server, baseRequirements, args.target_uris)
+          : baseRequirements;
         const assessment = assessBidQualification(
           result.bid,
           {
@@ -61,6 +76,7 @@ export function registerAssessBidQualification(server: McpServer, client: KkjCli
             serviceKeywords: args.service_keywords,
           },
           result.attribution,
+          requirements,
         );
         return {
           content: [{ type: "text" as const, text: formatAssessmentText(assessment) }],
@@ -103,6 +119,16 @@ function formatAssessmentText(
     "不明点:",
     ...toList(assessment.unknowns, "不明点は未検出"),
     "",
+    "PDF/HTML抽出で使用した要件:",
+    ...(assessment.requirementsUsed
+      ? [
+          `- 抽出mode: ${assessment.requirementsUsed.documentExtractionMode}`,
+          `- 参加資格: ${toListInline(assessment.requirementsUsed.eligibility)}`,
+          `- 提出書類: ${toListInline(assessment.requirementsUsed.requiredDocuments)}`,
+          `- 提出期限: ${assessment.requirementsUsed.tenderSubmissionDeadline ?? "要確認"}`,
+        ]
+      : ["- 未使用"]),
+    "",
     "次アクション:",
     ...assessment.nextActions.map((action) => `- ${action}`),
     "",
@@ -112,4 +138,8 @@ function formatAssessmentText(
 
 function toList(values: string[], fallback: string): string[] {
   return (values.length > 0 ? values : [fallback]).map((value) => `- ${value}`);
+}
+
+function toListInline(values: string[]): string {
+  return values.length > 0 ? values.join(" / ") : "要確認";
 }

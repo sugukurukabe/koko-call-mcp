@@ -234,6 +234,16 @@ export const BidQualificationAssessmentSchema = z.object({
   matches: z.array(z.string()),
   gaps: z.array(z.string()),
   unknowns: z.array(z.string()),
+  requirementsUsed: z
+    .object({
+      documentExtractionMode: z.enum(["none", "sampling", "vertex_ai"]),
+      eligibility: z.array(z.string()),
+      requiredDocuments: z.array(z.string()),
+      tenderSubmissionDeadline: z.string().nullable(),
+      openingDate: z.string().nullable(),
+      contactPoint: z.string().nullable(),
+    })
+    .optional(),
   nextActions: z.array(z.string()),
   attribution: AttributionSchema,
 });

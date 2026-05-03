@@ -48,4 +48,77 @@ describe("bid qualification assessment", () => {
     expect(assessment.status).toBe("not_eligible");
     expect(assessment.gaps.length).toBeGreaterThanOrEqual(2);
   });
+
+  it("uses extracted PDF eligibility when search metadata has no certification", () => {
+    const attribution = createAttribution();
+    const assessment = assessBidQualification(
+      {
+        resultId: 1,
+        key: "KKJ-003",
+        projectName: "マーカーレスモーションキャプチャーシステム",
+        prefectureName: "鹿児島県",
+        category: "物品",
+      },
+      {
+        qualifiedPrefectures: ["鹿児島県"],
+        qualifiedCategories: ["物品"],
+        certifications: ["A", "物品の販売"],
+        serviceKeywords: ["モーションキャプチャー"],
+      },
+      attribution,
+      {
+        bid: {
+          resultId: 1,
+          key: "KKJ-003",
+          projectName: "マーカーレスモーションキャプチャーシステム",
+        },
+        knownRequirements: {},
+        documentTargets: [],
+        missingRequirements: [],
+        extractionPlan: [],
+        safetyNotes: [],
+        extractedFromDocuments: [
+          {
+            sourceUri: "https://example.test/notice.pdf",
+            finalUri: "https://example.test/notice.pdf",
+            sha256: "a".repeat(64),
+            sizeBytes: 100,
+            mimeType: "application/pdf",
+            extractedAt: "2026-05-03T00:00:00.000Z",
+            mode: "vertex_ai",
+          },
+        ],
+        extractionWarnings: [],
+        attribution,
+        extractedRequirements: {
+          eligibility: ["全省庁統一資格 物品の販売 A、B又はC等級"],
+          requiredDocuments: ["入札書", "納入できることを証明する書類"],
+          questionDeadline: null,
+          tenderSubmissionDeadline: "2026-06-22 17:00",
+          openingDate: "2026-07-03 14:00",
+          briefingDate: null,
+          deliveryDeadline: "2026-10-30",
+          contractPeriod: null,
+          contactPoint: "契約係",
+          disqualification: [],
+          estimatedBudget: null,
+          evaluationCriteria: [],
+          ambiguousPoints: [],
+          rawNotes: [],
+        },
+      },
+    );
+
+    expect(assessment.status).toBe("eligible");
+    expect(assessment.matches).toEqual(
+      expect.arrayContaining([
+        "資格条件に一致候補: A",
+        "PDF抽出で入札書提出期限を確認: 2026-06-22 17:00",
+      ]),
+    );
+    expect(assessment.requirementsUsed).toMatchObject({
+      documentExtractionMode: "vertex_ai",
+      tenderSubmissionDeadline: "2026-06-22 17:00",
+    });
+  });
 });

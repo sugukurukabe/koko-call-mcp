@@ -2,6 +2,12 @@
 
 ## 日本語
 
+### 0.5.4
+
+- `assess_bid_qualification` に `fetch_documents` / `target_uris` を追加し、PDF/HTML抽出済みの参加資格・提出書類・期限を資格判定に反映。
+- 検索メタデータに資格条件がない案件でも、PDF本文の「全省庁統一資格」「等級」「営業品目」から自社資格との一致候補を判定できるようにした。
+- 資格判定結果に `requirementsUsed` を追加し、どの抽出modeと参加資格・提出書類・期限を判定に使ったかを返すようにした。
+
 ### 0.5.3
 
 - `create_bid_review_packet` に `fetch_documents` / `target_uris` を追加し、PDF/HTML抽出済みの参加資格・提出書類・期限・連絡先・失格条件を社内検討メモへ自動反映。
@@ -90,6 +96,12 @@
 
 ## English
 
+### 0.5.4
+
+- Added `fetch_documents` / `target_uris` to `assess_bid_qualification`, feeding PDF/HTML-extracted eligibility, required documents, and deadlines into qualification assessment.
+- When bid search metadata lacks certification requirements, the tool can now use PDF text such as unified government qualification, grade, and business category to find matching company credentials.
+- Added `requirementsUsed` to qualification results so callers can see which extraction mode and extracted requirements were used.
+
 ### 0.5.3
 
 - Added `fetch_documents` / `target_uris` to `create_bid_review_packet`, automatically injecting PDF/HTML-extracted eligibility, documents, deadlines, contact points, and disqualification rules into the internal review memo.
@@ -177,6 +189,12 @@
 - Initial implementation with Tools, Prompts, Resources, Resource Templates, Completion, Logging, stdio, and Streamable HTTP.
 
 ## Bahasa Indonesia
+
+### 0.5.4
+
+- Menambahkan `fetch_documents` / `target_uris` ke `assess_bid_qualification`, sehingga eligibility, dokumen wajib, dan deadline hasil ekstraksi PDF/HTML ikut dipakai dalam penilaian kualifikasi.
+- Ketika metadata pencarian tidak memiliki syarat sertifikasi, tool kini dapat memakai teks PDF seperti kualifikasi pemerintah terpadu, grade, dan kategori usaha untuk mencari kecocokan dengan kualifikasi perusahaan.
+- Menambahkan `requirementsUsed` ke hasil penilaian agar caller dapat melihat mode ekstraksi dan requirement yang digunakan.
 
 ### 0.5.3
 

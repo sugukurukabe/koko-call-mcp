@@ -1,5 +1,5 @@
 import type { Attribution } from "./attribution.js";
-import type { Bid, BidQualificationAssessment } from "./bid.js";
+import type { Bid, BidQualificationAssessment, BidRequirementExtraction } from "./bid.js";
 
 export interface CompanyQualificationProfile {
   qualifiedPrefectures?: string[];
@@ -12,6 +12,7 @@ export function assessBidQualification(
   bid: Bid,
   profile: CompanyQualificationProfile,
   attribution: Attribution,
+  requirements?: BidRequirementExtraction,
 ): BidQualificationAssessment {
   const normalizedProfile = {
     qualifiedPrefectures: profile.qualifiedPrefectures ?? [],
@@ -26,8 +27,16 @@ export function assessBidQualification(
 
   score += assessPrefecture(bid, normalizedProfile.qualifiedPrefectures, matches, gaps, unknowns);
   score += assessCategory(bid, normalizedProfile.qualifiedCategories, matches, gaps, unknowns);
-  score += assessCertification(bid, normalizedProfile.certifications, matches, gaps, unknowns);
+  score += assessCertification(
+    bid,
+    normalizedProfile.certifications,
+    matches,
+    gaps,
+    unknowns,
+    requirements,
+  );
   score += assessKeywords(bid, normalizedProfile.serviceKeywords, matches, unknowns);
+  score += assessExtractedDocuments(requirements, matches, unknowns);
 
   const confidence = clamp(score);
   return {
@@ -38,6 +47,9 @@ export function assessBidQualification(
     matches,
     gaps,
     unknowns,
+    ...(requirements?.extractedRequirements
+      ? { requirementsUsed: toRequirementsUsed(requirements) }
+      : {}),
     nextActions: [
       "公式公告・仕様書で参加資格、等級、営業品目を確認する",
       "自社の全省庁統一資格、自治体資格、営業品目と照合する",
@@ -100,8 +112,14 @@ function assessCertification(
   matches: string[],
   gaps: string[],
   unknowns: string[],
+  requirements: BidRequirementExtraction | undefined,
 ): number {
-  if (!bid.certification) {
+  const extractedEligibility = requirements?.extractedRequirements?.eligibility ?? [];
+  const certificationHaystack = [bid.certification, ...extractedEligibility].filter(
+    (value): value is string => Boolean(value),
+  );
+
+  if (certificationHaystack.length === 0) {
     unknowns.push("案件側の資格・等級条件が検索結果から確認できない");
     return -5;
   }
@@ -109,7 +127,7 @@ function assessCertification(
     unknowns.push("自社の資格・等級が未指定");
     return 0;
   }
-  const bidCertification = bid.certification.toLowerCase();
+  const bidCertification = certificationHaystack.join(" ").toLowerCase();
   const matched = certifications.find((certification) =>
     bidCertification.includes(certification.toLowerCase()),
   );
@@ -117,8 +135,35 @@ function assessCertification(
     matches.push(`資格条件に一致候補: ${matched}`);
     return 15;
   }
-  gaps.push(`資格条件の一致を確認できない: ${bid.certification}`);
+  gaps.push(`資格条件の一致を確認できない: ${certificationHaystack.join(" / ")}`);
   return -20;
+}
+
+function assessExtractedDocuments(
+  requirements: BidRequirementExtraction | undefined,
+  matches: string[],
+  unknowns: string[],
+): number {
+  const extracted = requirements?.extractedRequirements;
+  if (!extracted) {
+    return 0;
+  }
+  let score = 0;
+  if (extracted.requiredDocuments.length > 0) {
+    matches.push(`PDF抽出で提出書類を確認: ${extracted.requiredDocuments.join(", ")}`);
+    score += 5;
+  }
+  if (extracted.tenderSubmissionDeadline) {
+    matches.push(`PDF抽出で入札書提出期限を確認: ${extracted.tenderSubmissionDeadline}`);
+    score += 5;
+  }
+  if (extracted.openingDate) {
+    matches.push(`PDF抽出で開札日時を確認: ${extracted.openingDate}`);
+  }
+  if (!extracted.questionDeadline) {
+    unknowns.push("PDF抽出でも質問期限を確認できない");
+  }
+  return score;
 }
 
 function assessKeywords(
@@ -158,4 +203,24 @@ function toStatus(confidence: number, gaps: string[]): BidQualificationAssessmen
 
 function clamp(value: number): number {
   return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function toRequirementsUsed(
+  requirements: BidRequirementExtraction,
+): NonNullable<BidQualificationAssessment["requirementsUsed"]> {
+  const extracted = requirements.extractedRequirements;
+  return {
+    documentExtractionMode: requirements.extractedFromDocuments.some(
+      (document) => document.mode === "vertex_ai",
+    )
+      ? "vertex_ai"
+      : requirements.extractedFromDocuments.some((document) => document.mode === "sampling")
+        ? "sampling"
+        : "none",
+    eligibility: extracted?.eligibility ?? [],
+    requiredDocuments: extracted?.requiredDocuments ?? [],
+    tenderSubmissionDeadline: extracted?.tenderSubmissionDeadline ?? null,
+    openingDate: extracted?.openingDate ?? null,
+    contactPoint: extracted?.contactPoint ?? null,
+  };
 }
