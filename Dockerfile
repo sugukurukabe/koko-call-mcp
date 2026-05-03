@@ -1,8 +1,9 @@
 FROM node:24-alpine AS builder
 WORKDIR /app
-COPY package*.json tsconfig.json ./
+COPY package*.json tsconfig.json tsconfig.app.json vite.config.ts ./
 RUN npm ci --ignore-scripts
 COPY src ./src
+COPY ui ./ui
 RUN npm run build
 
 FROM node:24-alpine AS runner
