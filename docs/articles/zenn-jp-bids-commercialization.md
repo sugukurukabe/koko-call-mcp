@@ -90,7 +90,7 @@ UIは、エージェントを動かすためのリモコンだ。クリックひ
 
 根拠は単純だ。Vertex AIでPDF1件を処理するコストは約1〜3円。月30件込みのPro料金として990円は、原価より十分大きい。競合するSaaSの1/3以下の価格でもある。
 
-`Authorization: Bearer jp-bids_xxx` ヘッダーを付けると、14ツール全部と MCP Apps UIが解放される。ヘッダーなしでは、検索・一覧・詳細・スコアリングの4ツールのみ。PDF抽出とAI分析は、実際にコストがかかる処理だから、Proに置いた。
+`Authorization: Bearer jp-bids_xxx` ヘッダーを付けると、17ツール全部と MCP Apps UIが解放される。ヘッダーなしでは、検索・一覧・詳細・スコアリングの4ツールのみ。PDF抽出・AI分析・保存検索は、実際にコストがかかる処理だから、Proに置いた。
 
 PDF抽出が発生するたびに、Stripe Metersへイベントが飛ぶ。月30件を超えた分は1件10円で請求される。Stripe v2のMeter API、`stripe.v2.billing.meterEvents.create()` で実装した。課金処理は fire-and-forget——成功しなくてもツールの実行は止まらない。
 

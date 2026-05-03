@@ -119,7 +119,7 @@ URI設計パターン:
 新ツール追加時のチェックリスト:
 1. `npm run lint` — biome check
 2. `npm run build` — TypeScript コンパイル
-3. `npm run test` — vitest（99テスト）
+3. `npm run test` — vitest（103テスト）
 4. `npm run docs:check` — typedoc 生成
 5. `npm run registry:validate` — server.json 整合性
 6. `npm run release:gate` — 全ゲート通過

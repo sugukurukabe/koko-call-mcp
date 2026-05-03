@@ -29,4 +29,20 @@ describe("HTTP transport app", () => {
       supported: ["2025-11-25"],
     });
   });
+
+  it("serves usage stats on /stats", async () => {
+    const response = await request(createHttpApp()).get("/stats").expect(200);
+    expect(response.body).toMatchObject({
+      service: "JP Bids MCP",
+      mcpRequestCount: expect.any(Number),
+      uptimeSeconds: expect.any(Number),
+      nodeVersion: expect.any(String),
+    });
+    expect(response.body.startedAt).toBeDefined();
+  });
+
+  it("serves landing page on /", async () => {
+    const response = await request(createHttpApp()).get("/").expect(200);
+    expect(response.headers["content-type"]).toMatch(/html/);
+  });
 });

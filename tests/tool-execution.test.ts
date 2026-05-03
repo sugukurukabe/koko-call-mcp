@@ -562,4 +562,75 @@ describe("MCP tool execution", () => {
     await client.close();
     await server.close();
   });
+
+  it("save_search → list_saved_searches → check_saved_search roundtrip", async () => {
+    const xml = await readFile("tests/fixtures/kkj-search.xml", "utf8");
+    const kkjClient = new KkjClient({
+      rateLimitPerSecond: 1000,
+      fetchImpl: async () => new Response(xml, { status: 200 }),
+    });
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    const server = createJpBidsServer({ kkjClient });
+    const client = new Client({ name: "saved-search-test", version: "0.1.0" });
+
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+
+    const saveResult = await client.callTool({
+      name: "save_search",
+      arguments: { name: "テスト検索", query: "システム", prefecture: "鹿児島県" },
+    });
+    expect(saveResult.isError).not.toBe(true);
+    const saveContent = JSON.parse(
+      (saveResult.content as Array<{ type: string; text: string }>)[0].text,
+    );
+    expect(saveContent.saved).toBe(true);
+    expect(saveContent.totalSaved).toBeGreaterThanOrEqual(1);
+
+    const listResult = await client.callTool({
+      name: "list_saved_searches",
+      arguments: {},
+    });
+    expect(listResult.isError).not.toBe(true);
+    const listContent = JSON.parse(
+      (listResult.content as Array<{ type: string; text: string }>)[0].text,
+    );
+    expect(listContent.totalSaved).toBeGreaterThanOrEqual(1);
+    expect(listContent.searches.some((s: { name: string }) => s.name === "テスト検索")).toBe(true);
+
+    const checkResult = await client.callTool({
+      name: "check_saved_search",
+      arguments: { name: "テスト検索" },
+    });
+    expect(checkResult.isError).not.toBe(true);
+    const checkContent = JSON.parse(
+      (checkResult.content as Array<{ type: string; text: string }>)[0].text,
+    );
+    expect(checkContent.name).toBe("テスト検索");
+    expect(checkContent.checkedAt).toBeDefined();
+
+    await client.close();
+    await server.close();
+  });
+
+  it("check_saved_search returns error for unknown name", async () => {
+    const xml = await readFile("tests/fixtures/kkj-search.xml", "utf8");
+    const kkjClient = new KkjClient({
+      rateLimitPerSecond: 1000,
+      fetchImpl: async () => new Response(xml, { status: 200 }),
+    });
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    const server = createJpBidsServer({ kkjClient });
+    const client = new Client({ name: "saved-search-err-test", version: "0.1.0" });
+
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+
+    const result = await client.callTool({
+      name: "check_saved_search",
+      arguments: { name: "存在しない検索" },
+    });
+    expect(result.isError).toBe(true);
+
+    await client.close();
+    await server.close();
+  });
 });

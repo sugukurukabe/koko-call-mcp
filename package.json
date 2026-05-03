@@ -56,8 +56,7 @@
     "CHANGELOG.md",
     "SECURITY.md",
     "CITATION.cff",
-    "server.json",
-    "public/.well-known/agents.json"
+    "server.json"
   ],
   "engines": {
     "node": ">=20 <25"
