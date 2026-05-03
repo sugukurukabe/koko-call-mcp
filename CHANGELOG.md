@@ -2,6 +2,17 @@
 
 ## 日本語
 
+### 0.6.0
+
+- MCP Apps UIを「検索結果表」から「AI Bid Workspace」に刷新。
+- Priority Lane: 優先度カード（提出期限日数、PDF有無、スコア、追う/要確認/見送り）で案件を一覧。
+- Selected Bid Workbench: 選択案件の期限・発注機関・公式URL・スコアを一画面で確認。
+- Action Dock: 仕事の言葉で操作（読む / 判定 / まとめる / 聞く / 公式 / CSV出力 / 文脈同期）。各ボタンはsendMessageでAI Bid Radarツール名とJSON引数をchatへ送信。
+- Evidence & Safety Panel: sourceUri、ファイル種別、サイズ、出典、未信頼データ警告を表示。
+- ViewModelを追加し、deadline urgency / hasPdf / quickScore / priorityLabel をReact外で計算。
+- ダークモード対応CSS。
+- 4ペルソナに基づくUX設計: 営業責任者 / 入札事務担当 / 経営者 / 新人担当者。
+
 ### 0.5.4
 
 - `assess_bid_qualification` に `fetch_documents` / `target_uris` を追加し、PDF/HTML抽出済みの参加資格・提出書類・期限を資格判定に反映。
@@ -96,6 +107,17 @@
 
 ## English
 
+### 0.6.0
+
+- Redesigned the MCP Apps UI from a search-results table into an AI Bid Workspace.
+- Priority Lane: bid cards with deadline countdown, PDF availability, quick score, and pursue/review/skip labels.
+- Selected Bid Workbench: view deadlines, organization, official URL, and score for the selected bid.
+- Action Dock: task-oriented buttons (Read / Assess / Summarize / Ask / Official / CSV / Context Sync) that send AI Bid Radar tool names and JSON arguments to chat via sendMessage.
+- Evidence & Safety Panel: displays source URI, file type, size, attribution, and untrusted-data warnings.
+- Added a ViewModel layer that computes deadline urgency, hasPdf, quickScore, and priorityLabel outside React.
+- Dark mode CSS support.
+- UX designed for four personas: sales manager, bid administrator, executive, junior staff.
+
 ### 0.5.4
 
 - Added `fetch_documents` / `target_uris` to `assess_bid_qualification`, feeding PDF/HTML-extracted eligibility, required documents, and deadlines into qualification assessment.
@@ -189,6 +211,17 @@
 - Initial implementation with Tools, Prompts, Resources, Resource Templates, Completion, Logging, stdio, and Streamable HTTP.
 
 ## Bahasa Indonesia
+
+### 0.6.0
+
+- Mendesain ulang UI MCP Apps dari tabel hasil pencarian menjadi AI Bid Workspace.
+- Priority Lane: kartu tender dengan hitung mundur deadline, ketersediaan PDF, skor cepat, dan label kejar/review/lewati.
+- Selected Bid Workbench: melihat deadline, organisasi, URL resmi, dan skor untuk tender yang dipilih.
+- Action Dock: tombol berbasis tugas (Baca / Nilai / Rangkum / Tanya / Resmi / CSV / Sinkronisasi Konteks) yang mengirim nama tool AI Bid Radar dan argumen JSON ke chat melalui sendMessage.
+- Evidence & Safety Panel: menampilkan source URI, tipe file, ukuran, atribusi, dan peringatan data tidak tepercaya.
+- Menambahkan layer ViewModel yang menghitung deadline urgency, hasPdf, quickScore, dan priorityLabel di luar React.
+- Dukungan CSS dark mode.
+- UX dirancang untuk empat persona: manajer penjualan, admin tender, eksekutif, staf junior.
 
 ### 0.5.4
 
