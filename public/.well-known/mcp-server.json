@@ -1,10 +1,11 @@
 {
   "name": "JP Bids MCP",
   "version": "0.7.0",
-  "description": "Japan Government Procurement Search MCP Server.",
-  "homepage": "https://github.com/sugukurukabe/koko-call-mcp",
+  "description": "日本の官公需入札情報をMCPで検索・AI分析。Japan government procurement bid search and AI analysis through MCP.",
+  "homepage": "https://mcp.bid-jp.com",
   "repository": "https://github.com/sugukurukabe/koko-call-mcp",
   "license": "Apache-2.0",
+  "privacy_policy": "https://mcp.bid-jp.com/privacy",
   "endpoints": {
     "mcp": "https://mcp.bid-jp.com/mcp"
   },

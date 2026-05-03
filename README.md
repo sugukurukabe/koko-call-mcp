@@ -130,6 +130,9 @@ Slack briefing job: `docs/slack-briefing.md`.
 - `docs/adr/`
 - `public/.well-known/agents.json`
 
-## Notes
+## Notes / 注意事項
 
+このサーバーは入札情報の添付ファイルを保存しません。入札判断前に必ず公式調達書類を確認してください。  
 This server does not store upstream documents or attachment files. Results are reference information and should be verified against official procurement documents before bidding decisions.
+
+[Privacy Policy / プライバシーポリシー](https://mcp.bid-jp.com/privacy)

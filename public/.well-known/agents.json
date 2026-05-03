@@ -3,12 +3,13 @@
   "name": "JP Bids MCP",
   "version": "0.7.0",
   "type": "mcp_server",
-  "homepage": "https://github.com/sugukurukabe/koko-call-mcp",
+  "homepage": "https://mcp.bid-jp.com",
   "repository": "https://github.com/sugukurukabe/koko-call-mcp",
+  "privacy_policy": "https://mcp.bid-jp.com/privacy",
   "description": {
-    "ja": "日本の官公需入札情報を検索する読み取り専用MCPサーバー。",
-    "en": "A read-only MCP server for searching Japanese government procurement bid information.",
-    "id": "Server MCP read-only untuk mencari informasi tender pengadaan pemerintah Jepang."
+    "ja": "日本の官公需入札情報をMCPで検索・AI分析するサーバー。",
+    "en": "Search and AI-analyze Japanese government procurement bids through MCP.",
+    "id": "Server MCP untuk mencari dan menganalisis pengadaan pemerintah Jepang dengan AI."
   },
   "data_sources": [
     {
