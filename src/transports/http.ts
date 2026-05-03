@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import cors from "cors";
@@ -7,13 +8,29 @@ import { parseProApiKeys, parseTier } from "../lib/auth.js";
 import { parsePortEnv, parsePositiveNumberEnv } from "../lib/env.js";
 import { parseAllowedOrigins, validateOrigin } from "../lib/http.js";
 import { createJpBidsServer } from "../mcp.js";
+import { verifyJwt } from "../oauth/jwt.js";
+import { createOAuthRouter } from "../oauth/router.js";
 
 const supportedProtocolVersions = new Set(["2025-11-25"]);
+
+function resolveOAuthSecret(): string | undefined {
+  const explicit = process.env.JP_BIDS_OAUTH_SECRET;
+  if (explicit) return explicit;
+  if (process.env.K_SERVICE) {
+    const generated = randomBytes(32).toString("hex");
+    console.error(
+      "[warning] JP_BIDS_OAUTH_SECRET is unset. Generated an ephemeral key. OAuth tokens will not survive restarts or work across instances. Set this variable in production.",
+    );
+    return generated;
+  }
+  return undefined;
+}
 
 export function createHttpApp(): express.Express {
   const app = express();
   const allowedOrigins = parseAllowedOrigins(process.env.ALLOWED_ORIGINS);
   const proApiKeys = parseProApiKeys(process.env.JP_BIDS_PRO_API_KEYS);
+  const oauthSecret = resolveOAuthSecret();
   const sharedKkjClient = new KkjClient({
     rateLimitPerSecond: parsePositiveNumberEnv(
       process.env.JP_BIDS_RATE_LIMIT_PER_SECOND ?? process.env.KOKO_CALL_RATE_LIMIT_PER_SECOND,
@@ -30,13 +47,30 @@ export function createHttpApp(): express.Express {
   app.use(express.json({ limit: "1mb" }));
   app.use(cors({ origin: allowedOrigins.size === 0 ? true : [...allowedOrigins] }));
   app.use(validateOrigin(allowedOrigins));
+
+  if (oauthSecret) {
+    app.use(createOAuthRouter(oauthSecret));
+  }
+
   app.use("/.well-known", express.static("public/.well-known"));
+
+  app.get("/favicon.ico", (_req, res) => {
+    res.sendFile("favicon.ico", { root: "public" });
+  });
+
+  app.get("/favicon.png", (_req, res) => {
+    res.sendFile("favicon.png", { root: "public" });
+  });
 
   app.get("/privacy", (_req, res) => {
     res.sendFile("privacy.html", { root: "public" });
   });
 
-  app.get("/healthz", (_req, res) => {
+  app.get("/terms", (_req, res) => {
+    res.sendFile("terms.html", { root: "public" });
+  });
+
+  app.get("/health", (_req, res) => {
     res.status(200).json({ ok: true, service: "JP Bids MCP" });
   });
 
@@ -58,7 +92,34 @@ export function createHttpApp(): express.Express {
       return;
     }
 
-    const tier = parseTier(req.header("Authorization"), proApiKeys);
+    // OAuth有効時: Bearerトークンがなければ401を返してOAuthフローを起動する
+    // When OAuth is enabled: return 401 without Bearer token to trigger OAuth flow
+    // Saat OAuth aktif: kembalikan 401 tanpa Bearer token untuk memulai alur OAuth
+    const authHeader = req.header("Authorization");
+    if (oauthSecret && !authHeader) {
+      const proto = req.header("x-forwarded-proto") || req.protocol;
+      const host = req.header("x-forwarded-host") || req.header("host") || "localhost:8080";
+      const base = `${proto}://${host}`;
+      res.status(401).set("WWW-Authenticate", `Bearer resource_metadata="${base}/.well-known/oauth-protected-resource/mcp"`).json({ error: "unauthorized" });
+      return;
+    }
+
+    // JWT（OAuth）またはAPIキーのどちらでも受け付ける
+    // Accept either JWT (OAuth) or API key
+    // Terima JWT (OAuth) atau API key
+    if (oauthSecret && authHeader) {
+      const match = /^Bearer\s+(.+)$/i.exec(authHeader.trim());
+      const token = match?.[1];
+      if (token && token.includes(".")) {
+        const jwt = verifyJwt(token, oauthSecret);
+        if (!jwt) {
+          res.status(401).json({ error: "invalid_token" });
+          return;
+        }
+      }
+    }
+
+    const tier = parseTier(authHeader, proApiKeys);
     const server = createJpBidsServer({ kkjClient: sharedKkjClient, tier });
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,

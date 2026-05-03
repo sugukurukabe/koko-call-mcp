@@ -4,7 +4,7 @@ import { createHttpApp } from "../src/transports/http.js";
 
 describe("HTTP transport app", () => {
   it("serves health checks", async () => {
-    const response = await request(createHttpApp()).get("/healthz").expect(200);
+    const response = await request(createHttpApp()).get("/health").expect(200);
     expect(response.body).toEqual({ ok: true, service: "JP Bids MCP" });
   });
 
