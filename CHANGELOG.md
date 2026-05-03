@@ -2,6 +2,13 @@
 
 ## 日本語
 
+### 0.6.2
+
+- `create_bid_calendar` に `fetch_documents` / `target_uris` を追加し、PDF抽出済みの説明会日時をICSカレンダーに追加。
+- 検索メタデータに提出期限や開札日がない場合、PDF抽出結果から補完してカレンダーに反映。
+- PDF抽出で質問期限・納入期限が確認済みならmissingDatesから除外。
+- 全14ツール中、PDF/HTML本文抽出を使えるツールが8ツールに到達。
+
 ### 0.6.1
 
 - `explain_bid_fit` に `fetch_documents` / `target_uris` を追加し、PDF抽出済みの参加資格・提出期限・連絡先・曖昧点を追跡判断チェックリストに反映。
@@ -113,6 +120,13 @@
 
 ## English
 
+### 0.6.2
+
+- Added `fetch_documents` / `target_uris` to `create_bid_calendar`, adding PDF-extracted briefing dates to the ICS calendar.
+- When search metadata lacks submission or opening dates, PDF extraction results fill in the calendar events.
+- If PDF extraction confirms question or delivery deadlines, they are removed from missingDates.
+- 8 out of 14 tools now support PDF/HTML document extraction.
+
 ### 0.6.1
 
 - Added `fetch_documents` / `target_uris` to `explain_bid_fit`, injecting PDF-extracted eligibility, submission deadline, contact point, and ambiguous points into the confirmation checklist.
@@ -223,6 +237,13 @@
 - Initial implementation with Tools, Prompts, Resources, Resource Templates, Completion, Logging, stdio, and Streamable HTTP.
 
 ## Bahasa Indonesia
+
+### 0.6.2
+
+- Menambahkan `fetch_documents` / `target_uris` ke `create_bid_calendar`, menambahkan tanggal briefing hasil ekstraksi PDF ke kalender ICS.
+- Jika metadata pencarian tidak memiliki deadline pengajuan atau pembukaan, hasil ekstraksi PDF mengisi event kalender.
+- Jika ekstraksi PDF mengonfirmasi deadline pertanyaan atau pengiriman, item tersebut dihapus dari missingDates.
+- 8 dari 14 tool kini mendukung ekstraksi dokumen PDF/HTML.
 
 ### 0.6.1
 

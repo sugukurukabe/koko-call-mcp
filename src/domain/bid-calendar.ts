@@ -1,24 +1,30 @@
 import type { Attribution } from "./attribution.js";
-import type { Bid, BidCalendarExport } from "./bid.js";
+import type { Bid, BidCalendarExport, ExtractedBidRequirements } from "./bid.js";
 
 type CalendarEvent = BidCalendarExport["events"][number];
 
-export function createBidCalendarExport(bid: Bid, attribution: Attribution): BidCalendarExport {
-  const events = buildEvents(bid);
+export function createBidCalendarExport(
+  bid: Bid,
+  attribution: Attribution,
+  extractedRequirements?: ExtractedBidRequirements,
+): BidCalendarExport {
+  const events = buildEvents(bid, extractedRequirements);
   return {
     format: "ics",
     filename: `jp-bids-${sanitizeFilename(bid.key)}.ics`,
     eventCount: events.length,
     ics: toIcs(bid, events, attribution),
     events,
-    missingDates: findMissingDates(bid),
+    missingDates: findMissingDates(bid, extractedRequirements),
     attribution,
   };
 }
 
-function buildEvents(bid: Bid): CalendarEvent[] {
+function buildEvents(bid: Bid, extracted?: ExtractedBidRequirements): CalendarEvent[] {
   const events: CalendarEvent[] = [];
-  const submissionDate = normalizeDate(bid.tenderSubmissionDeadline);
+  const submissionDate =
+    normalizeDate(bid.tenderSubmissionDeadline) ??
+    normalizeDate(extracted?.tenderSubmissionDeadline ?? undefined);
   if (submissionDate) {
     const internalReviewDate = addDays(submissionDate, -2);
     events.push({
@@ -35,7 +41,8 @@ function buildEvents(bid: Bid): CalendarEvent[] {
     });
   }
 
-  const openingDate = normalizeDate(bid.openingTendersEvent);
+  const openingDate =
+    normalizeDate(bid.openingTendersEvent) ?? normalizeDate(extracted?.openingDate ?? undefined);
   if (openingDate) {
     events.push({
       title: `開札日: ${bid.projectName}`,
@@ -55,18 +62,31 @@ function buildEvents(bid: Bid): CalendarEvent[] {
     });
   }
 
+  const briefingDate = normalizeDate(extracted?.briefingDate ?? undefined);
+  if (briefingDate) {
+    events.push({
+      title: `入札説明会: ${bid.projectName}`,
+      date: briefingDate,
+      kind: "internal_review",
+      sourceField: "extractedRequirements.briefingDate",
+    });
+  }
+
   return events;
 }
 
-function findMissingDates(bid: Bid): string[] {
-  const missing: string[] = ["質問期限"];
-  if (!bid.tenderSubmissionDeadline) {
+function findMissingDates(bid: Bid, extracted?: ExtractedBidRequirements): string[] {
+  const missing: string[] = [];
+  if (!extracted?.questionDeadline) {
+    missing.push("質問期限");
+  }
+  if (!bid.tenderSubmissionDeadline && !extracted?.tenderSubmissionDeadline) {
     missing.push("提出期限");
   }
-  if (!bid.openingTendersEvent) {
+  if (!bid.openingTendersEvent && !extracted?.openingDate) {
     missing.push("開札日");
   }
-  if (!bid.periodEndTime) {
+  if (!bid.periodEndTime && !extracted?.deliveryDeadline) {
     missing.push("納入期限または契約終了日");
   }
   return missing;

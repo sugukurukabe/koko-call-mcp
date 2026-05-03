@@ -4,14 +4,25 @@ import type { KkjClient } from "../api/kkj-client.js";
 import { createAttribution } from "../domain/attribution.js";
 import { BidCalendarExportSchema } from "../domain/bid.js";
 import { createBidCalendarExport } from "../domain/bid-calendar.js";
+import { extractBidRequirements } from "../domain/bid-requirements.js";
 import { UserInputError } from "../lib/errors.js";
 import { toolError } from "../lib/tool-result.js";
+import { enrichWithDocumentExtraction } from "./document-extraction.js";
 
 const inputSchema = {
   bid_key: z
     .string()
     .min(1)
     .describe("search_bids、rank_bids、またはlist_recent_bidsが返したKeyフィールド"),
+  fetch_documents: z
+    .boolean()
+    .default(false)
+    .describe("trueの場合、PDF/HTML抽出結果の説明会日時・提出期限をカレンダーに追加する。"),
+  target_uris: z
+    .array(z.string().url())
+    .max(3)
+    .optional()
+    .describe("抽出対象URL。省略時は検索結果の公式公告ページ・添付資料URLから最大3件を使う。"),
 };
 
 export function registerCreateBidCalendar(server: McpServer, client: KkjClient): void {
@@ -36,7 +47,15 @@ export function registerCreateBidCalendar(server: McpServer, client: KkjClient):
         const result = cached
           ? { bid: cached, attribution: createAttribution() }
           : await findBidByKey(client, args.bid_key);
-        const calendar = createBidCalendarExport(result.bid, result.attribution);
+        const baseReq = extractBidRequirements(result.bid, result.attribution);
+        const requirements = args.fetch_documents
+          ? await enrichWithDocumentExtraction(server, baseReq, args.target_uris)
+          : baseReq;
+        const calendar = createBidCalendarExport(
+          result.bid,
+          result.attribution,
+          requirements.extractedRequirements,
+        );
         return {
           content: [{ type: "text" as const, text: formatCalendarText(calendar) }],
           structuredContent: calendar,
