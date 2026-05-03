@@ -4,8 +4,10 @@ import type { KkjClient } from "../api/kkj-client.js";
 import { createAttribution } from "../domain/attribution.js";
 import { BidFitExplanationSchema } from "../domain/bid.js";
 import { type BidRankingOptions, bidRankingScoringPolicy, rankBid } from "../domain/bid-ranking.js";
+import { extractBidRequirements } from "../domain/bid-requirements.js";
 import { UserInputError } from "../lib/errors.js";
 import { toolError } from "../lib/tool-result.js";
+import { enrichWithDocumentExtraction } from "./document-extraction.js";
 
 const inputSchema = {
   bid_key: z
@@ -21,6 +23,15 @@ const inputSchema = {
     .optional()
     .describe("避けたい語句。例: 工事、常駐、夜間。"),
   due_within_days: z.number().int().min(1).max(180).default(30),
+  fetch_documents: z
+    .boolean()
+    .default(false)
+    .describe("trueの場合、PDF/HTML抽出結果を追跡判断の説明に反映する。"),
+  target_uris: z
+    .array(z.string().url())
+    .max(3)
+    .optional()
+    .describe("抽出対象URL。省略時は検索結果の公式公告ページ・添付資料URLから最大3件を使う。"),
 };
 
 export function registerExplainBidFit(server: McpServer, client: KkjClient): void {
@@ -58,16 +69,36 @@ export function registerExplainBidFit(server: McpServer, client: KkjClient): voi
           rankingOptions.avoidKeywords = args.avoid_keywords;
         }
         const rankedBid = rankBid(result.bid, rankingOptions);
+        const baseRequirements = extractBidRequirements(result.bid, result.attribution);
+        const requirements = args.fetch_documents
+          ? await enrichWithDocumentExtraction(server, baseRequirements, args.target_uris)
+          : baseRequirements;
+        const extracted = requirements.extractedRequirements;
+        const checklist = [
+          "公式公告ページまたは仕様書PDFで参加条件を確認する",
+          "全省庁統一資格・自治体資格・営業品目が一致するか確認する",
+          "質問期限、提出期限、開札日を社内カレンダーへ登録する",
+          "過去落札者、落札価格、競合常連の有無を確認する",
+          "概算工数、外注費、交通費、粗利を確認する",
+        ];
+        if (extracted) {
+          if (extracted.eligibility.length > 0) {
+            checklist.push(`PDF抽出で確認済みの参加資格: ${extracted.eligibility.join(" / ")}`);
+          }
+          if (extracted.tenderSubmissionDeadline) {
+            checklist.push(`PDF抽出で確認済みの提出期限: ${extracted.tenderSubmissionDeadline}`);
+          }
+          if (extracted.contactPoint) {
+            checklist.push(`連絡先: ${extracted.contactPoint}`);
+          }
+          for (const point of extracted.ambiguousPoints) {
+            checklist.push(`曖昧点（要確認）: ${point}`);
+          }
+        }
         const explanation = {
           rankedBid,
           fitSummary: formatFitSummary(rankedBid),
-          confirmationChecklist: [
-            "公式公告ページまたは仕様書PDFで参加条件を確認する",
-            "全省庁統一資格・自治体資格・営業品目が一致するか確認する",
-            "質問期限、提出期限、開札日を社内カレンダーへ登録する",
-            "過去落札者、落札価格、競合常連の有無を確認する",
-            "概算工数、外注費、交通費、粗利を確認する",
-          ],
+          confirmationChecklist: checklist,
           attribution: result.attribution,
           scoringPolicy: bidRankingScoringPolicy,
         };

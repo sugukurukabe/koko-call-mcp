@@ -1,6 +1,11 @@
-import type { BidRankingResult, BidShortlistExport, RankedBid } from "./bid.js";
+import type {
+  BidRankingResult,
+  BidRequirementExtraction,
+  BidShortlistExport,
+  RankedBid,
+} from "./bid.js";
 
-const shortlistColumns = [
+const baseColumns = [
   "priority",
   "score",
   "key",
@@ -19,23 +24,39 @@ const shortlistColumns = [
   "official_url",
 ];
 
-export function exportBidShortlistCsv(result: BidRankingResult): BidShortlistExport {
-  const rows = result.rankedBids.map(toShortlistRow);
-  const csv = [shortlistColumns, ...rows].map((row) => row.map(escapeCsvCell).join(",")).join("\n");
+const pdfExtraColumns = [
+  "pdf_eligibility",
+  "pdf_required_documents",
+  "pdf_submission_deadline",
+  "pdf_opening_date",
+  "pdf_contact_point",
+];
+
+export function exportBidShortlistCsv(
+  result: BidRankingResult,
+  extractionMap?: Map<string, BidRequirementExtraction>,
+): BidShortlistExport {
+  const hasPdfData = extractionMap && extractionMap.size > 0;
+  const columns = hasPdfData ? [...baseColumns, ...pdfExtraColumns] : baseColumns;
+  const rows = result.rankedBids.map((rankedBid) => toShortlistRow(rankedBid, extractionMap));
+  const csv = [columns, ...rows].map((row) => row.map(escapeCsvCell).join(",")).join("\n");
   return {
     format: "csv",
     filename: "jp-bids-shortlist.csv",
     rankedCount: result.rankedCount,
     csv,
-    columns: shortlistColumns,
+    columns,
     attribution: result.attribution,
     scoringPolicy: result.scoringPolicy,
   };
 }
 
-function toShortlistRow(rankedBid: RankedBid): string[] {
+function toShortlistRow(
+  rankedBid: RankedBid,
+  extractionMap?: Map<string, BidRequirementExtraction>,
+): string[] {
   const { bid } = rankedBid;
-  return [
+  const base = [
     rankedBid.priority,
     String(rankedBid.score),
     bid.key,
@@ -52,6 +73,18 @@ function toShortlistRow(rankedBid: RankedBid): string[] {
     rankedBid.risks.join(" / "),
     rankedBid.nextActions[0] ?? "",
     bid.externalDocumentUri ?? "",
+  ];
+  if (!extractionMap || extractionMap.size === 0) {
+    return base;
+  }
+  const extracted = extractionMap.get(bid.key)?.extractedRequirements;
+  return [
+    ...base,
+    extracted?.eligibility.join(" / ") ?? "",
+    extracted?.requiredDocuments.join(" / ") ?? "",
+    extracted?.tenderSubmissionDeadline ?? "",
+    extracted?.openingDate ?? "",
+    extracted?.contactPoint ?? "",
   ];
 }
 

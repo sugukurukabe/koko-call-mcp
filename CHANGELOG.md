@@ -2,6 +2,12 @@
 
 ## 日本語
 
+### 0.6.1
+
+- `explain_bid_fit` に `fetch_documents` / `target_uris` を追加し、PDF抽出済みの参加資格・提出期限・連絡先・曖昧点を追跡判断チェックリストに反映。
+- `export_bid_shortlist` に `fetch_documents` を追加し、上位3件のPDF抽出結果をCSVにpdf_eligibility等5列として追加。
+- 全14ツールのうち、PDF/HTML本文抽出を使えるツールが7ツールに到達。
+
 ### 0.6.0
 
 - MCP Apps UIを「検索結果表」から「AI Bid Workspace」に刷新。
@@ -107,6 +113,12 @@
 
 ## English
 
+### 0.6.1
+
+- Added `fetch_documents` / `target_uris` to `explain_bid_fit`, injecting PDF-extracted eligibility, submission deadline, contact point, and ambiguous points into the confirmation checklist.
+- Added `fetch_documents` to `export_bid_shortlist`, appending five PDF extraction columns (eligibility, required documents, submission deadline, opening date, contact point) for the top 3 bids.
+- 7 out of 14 tools now support PDF/HTML document extraction.
+
 ### 0.6.0
 
 - Redesigned the MCP Apps UI from a search-results table into an AI Bid Workspace.
@@ -211,6 +223,12 @@
 - Initial implementation with Tools, Prompts, Resources, Resource Templates, Completion, Logging, stdio, and Streamable HTTP.
 
 ## Bahasa Indonesia
+
+### 0.6.1
+
+- Menambahkan `fetch_documents` / `target_uris` ke `explain_bid_fit`, sehingga eligibility, deadline pengajuan, kontak, dan poin ambigu hasil ekstraksi PDF masuk ke checklist konfirmasi.
+- Menambahkan `fetch_documents` ke `export_bid_shortlist`, menambahkan lima kolom ekstraksi PDF (eligibility, dokumen wajib, deadline pengajuan, tanggal pembukaan, kontak) untuk 3 tender teratas.
+- 7 dari 14 tool kini mendukung ekstraksi dokumen PDF/HTML.
 
 ### 0.6.0
 

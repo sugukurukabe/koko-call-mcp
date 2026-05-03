@@ -1,10 +1,12 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { KkjClient } from "../api/kkj-client.js";
-import { BidShortlistExportSchema } from "../domain/bid.js";
+import { type BidRequirementExtraction, BidShortlistExportSchema } from "../domain/bid.js";
 import { type BidRankingOptions, rankBidSearchResult } from "../domain/bid-ranking.js";
+import { extractBidRequirements } from "../domain/bid-requirements.js";
 import { exportBidShortlistCsv } from "../domain/bid-shortlist.js";
 import { toolError } from "../lib/tool-result.js";
+import { enrichWithDocumentExtraction } from "./document-extraction.js";
 import { buildSearchBidsParams, searchBidsInputSchema } from "./search-bids.js";
 
 const inputSchema = {
@@ -19,6 +21,10 @@ const inputSchema = {
     .describe("避けたい語句。例: 工事、常駐、夜間。"),
   due_within_days: z.number().int().min(1).max(180).default(30),
   shortlist_limit: z.number().int().min(1).max(50).default(10),
+  fetch_documents: z
+    .boolean()
+    .default(false)
+    .describe("trueの場合、上位案件のPDF/HTML抽出結果をCSVに参加資格・提出期限列として追加する。"),
 };
 
 export function registerExportBidShortlist(server: McpServer, client: KkjClient): void {
@@ -51,7 +57,16 @@ export function registerExportBidShortlist(server: McpServer, client: KkjClient)
           rankingOptions.avoidKeywords = args.avoid_keywords;
         }
         const ranked = rankBidSearchResult(searchResult, rankingOptions);
-        const exported = exportBidShortlistCsv(ranked);
+        let extractionMap: Map<string, BidRequirementExtraction> | undefined;
+        if (args.fetch_documents) {
+          extractionMap = new Map();
+          for (const rankedBid of ranked.rankedBids.slice(0, 3)) {
+            const baseReq = extractBidRequirements(rankedBid.bid, ranked.attribution);
+            const enriched = await enrichWithDocumentExtraction(server, baseReq, undefined);
+            extractionMap.set(rankedBid.bid.key, enriched);
+          }
+        }
+        const exported = exportBidShortlistCsv(ranked, extractionMap);
         return {
           content: [
             {
