@@ -2,6 +2,7 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import cors from "cors";
 import express from "express";
+import { KkjClient } from "../api/kkj-client.js";
 import { parsePortEnv, parsePositiveNumberEnv } from "../lib/env.js";
 import { parseAllowedOrigins, validateOrigin } from "../lib/http.js";
 import { createJpBidsServer } from "../mcp.js";
@@ -11,6 +12,12 @@ const supportedProtocolVersions = new Set(["2025-11-25"]);
 export function createHttpApp(): express.Express {
   const app = express();
   const allowedOrigins = parseAllowedOrigins(process.env.ALLOWED_ORIGINS);
+  const sharedKkjClient = new KkjClient({
+    rateLimitPerSecond: parsePositiveNumberEnv(
+      process.env.JP_BIDS_RATE_LIMIT_PER_SECOND ?? process.env.KOKO_CALL_RATE_LIMIT_PER_SECOND,
+      1,
+    ),
+  });
 
   app.use(express.json({ limit: "1mb" }));
   app.use(cors({ origin: allowedOrigins.size === 0 ? true : [...allowedOrigins] }));
@@ -39,14 +46,7 @@ export function createHttpApp(): express.Express {
       return;
     }
 
-    const server = createJpBidsServer({
-      kkjClientOptions: {
-        rateLimitPerSecond: parsePositiveNumberEnv(
-          process.env.JP_BIDS_RATE_LIMIT_PER_SECOND ?? process.env.KOKO_CALL_RATE_LIMIT_PER_SECOND,
-          1,
-        ),
-      },
-    });
+    const server = createJpBidsServer({ kkjClient: sharedKkjClient });
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
       enableJsonResponse: true,

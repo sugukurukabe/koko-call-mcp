@@ -2,6 +2,12 @@
 
 ## 日本語
 
+### 0.5.1
+
+- Streamable HTTP transportで`KkjClient`をプロセス内共有に変更し、`search_bids`後の`extract_bid_requirements` / `get_bid_detail` がremote環境でも直近bid cacheを参照できるようにした。
+- v0.5.0向けのremote extraction smoke script `remote:extraction` を追加。
+- MCP server factoryのversion表示を最新化。
+
 ### 0.5.0
 
 - `extract_bid_requirements` に `fetch_documents` と `target_uris` を追加し、公式公告ページ・添付資料を一時取得して要件抽出できるようにした。
@@ -71,6 +77,12 @@
 
 ## English
 
+### 0.5.1
+
+- Changed the Streamable HTTP transport to share one process-local `KkjClient`, so `extract_bid_requirements` / `get_bid_detail` can read the recent bid cache after `search_bids` in remote deployments.
+- Added the v0.5 remote extraction smoke script: `remote:extraction`.
+- Updated the MCP server factory version string.
+
 ### 0.5.0
 
 - Added `fetch_documents` and `target_uris` to `extract_bid_requirements` so official notice pages and attachments can be fetched ephemerally for requirement extraction.
@@ -139,6 +151,12 @@
 - Initial implementation with Tools, Prompts, Resources, Resource Templates, Completion, Logging, stdio, and Streamable HTTP.
 
 ## Bahasa Indonesia
+
+### 0.5.1
+
+- Mengubah Streamable HTTP transport agar memakai satu `KkjClient` bersama di dalam proses, sehingga `extract_bid_requirements` / `get_bid_detail` dapat membaca cache tender terbaru setelah `search_bids` pada deployment remote.
+- Menambahkan script smoke extraction remote v0.5: `remote:extraction`.
+- Memperbarui string versi di MCP server factory.
 
 ### 0.5.0
 
