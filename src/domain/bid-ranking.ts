@@ -175,7 +175,7 @@ function parseKkjDate(value: string | undefined): Date | null {
 }
 
 function startOfDay(value: Date): Date {
-  return new Date(value.getFullYear(), value.getMonth(), value.getDate());
+  return new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate()));
 }
 
 function clampScore(score: number): number {

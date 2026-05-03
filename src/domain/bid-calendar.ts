@@ -130,21 +130,13 @@ function normalizeDate(value: string | undefined): string | null {
   if (!parsed) {
     return null;
   }
-  return [
-    String(parsed.getFullYear()).padStart(4, "0"),
-    String(parsed.getMonth() + 1).padStart(2, "0"),
-    String(parsed.getDate()).padStart(2, "0"),
-  ].join("-");
+  return parsed.toISOString().slice(0, 10);
 }
 
 function addDays(date: string, days: number): string {
-  const value = new Date(`${date}T00:00:00+09:00`);
-  value.setDate(value.getDate() + days);
-  return [
-    String(value.getFullYear()).padStart(4, "0"),
-    String(value.getMonth() + 1).padStart(2, "0"),
-    String(value.getDate()).padStart(2, "0"),
-  ].join("-");
+  const value = new Date(`${date}T00:00:00Z`);
+  value.setUTCDate(value.getUTCDate() + days);
+  return value.toISOString().slice(0, 10);
 }
 
 function formatIcsDate(date: string): string {

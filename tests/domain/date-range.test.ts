@@ -26,29 +26,23 @@ describe("parseJapaneseDateToDate", () => {
   it("parses ISO date strings", () => {
     const date = parseJapaneseDateToDate("2026-06-22");
     expect(date).not.toBeNull();
-    expect(date?.getFullYear()).toBe(2026);
-    expect(date?.getMonth()).toBe(5);
-    expect(date?.getDate()).toBe(22);
+    expect(date?.toISOString().slice(0, 10)).toBe("2026-06-22");
   });
 
   it("parses slash-separated dates", () => {
     const date = parseJapaneseDateToDate("2026/06/22");
-    expect(date?.getFullYear()).toBe(2026);
+    expect(date?.toISOString().slice(0, 10)).toBe("2026-06-22");
   });
 
   it("parses wareki Reiwa dates", () => {
     const date = parseJapaneseDateToDate("令和8年6月22日17時00分");
     expect(date).not.toBeNull();
-    expect(date?.getFullYear()).toBe(2026);
-    expect(date?.getMonth()).toBe(5);
-    expect(date?.getDate()).toBe(22);
+    expect(date?.toISOString().slice(0, 10)).toBe("2026-06-22");
   });
 
   it("parses wareki with R prefix", () => {
     const date = parseJapaneseDateToDate("R8年5月11日");
-    expect(date?.getFullYear()).toBe(2026);
-    expect(date?.getMonth()).toBe(4);
-    expect(date?.getDate()).toBe(11);
+    expect(date?.toISOString().slice(0, 10)).toBe("2026-05-11");
   });
 
   it("returns null for empty or invalid input", () => {
