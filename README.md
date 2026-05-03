@@ -130,6 +130,20 @@ Slack briefing job: `docs/slack-briefing.md`.
 - `docs/adr/`
 - `public/.well-known/agents.json`
 
+## Interoperability / 相互運用 / Interoperabilitas
+
+JP Bids MCP pairs with the [J-Grants MCP](https://github.com/digital-go-jp/jgrants-mcp-server) (Digital Agency of Japan) to cover both government contracts and grants in a single conversation.
+
+```
+# Search bids (JP Bids MCP) and grants (J-Grants MCP) simultaneously
+"鹿児島県のITシステム調達案件と、中小企業向けDX補助金を同時に探してください。"
+```
+
+See [examples/jgrants-integration/](examples/jgrants-integration/) for ready-to-use Claude Desktop and Cursor configuration files, and three end-to-end workflow examples.  
+Technical integration details: [docs/integrations/jgrants.md](docs/integrations/jgrants.md).
+
+> JP Bids MCP and J-Grants MCP are independent servers operated by separate organizations (Sugukuru Inc. and Digital Agency of Japan respectively). Results are reference information; always verify against official documents.
+
 ## Notes / 注意事項
 
 このサーバーは入札情報の添付ファイルを保存しません。入札判断前に必ず公式調達書類を確認してください。  

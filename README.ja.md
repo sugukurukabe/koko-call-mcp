@@ -70,6 +70,20 @@ npx --yes jp-bids-export --prefecture 鹿児島県 --category 役務 --query シ
 
 中小企業庁 官公需情報ポータルサイト 検索API。このサーバーは入札情報の添付ファイルを保存しません。入札決定前に必ず公式調達書類を確認してください。
 
+## 相互運用 / Interoperability / Interoperabilitas
+
+JP Bids MCPは[Jグランツ MCP](https://github.com/digital-go-jp/jgrants-mcp-server)（デジタル庁）と連携することで、入札と補助金をひとつの会話で扱えます。
+
+```
+# 入札（JP Bids MCP）と補助金（Jグランツ MCP）を同時に探す
+"鹿児島県のITシステム調達案件と、中小企業向けDX補助金を同時に探してください。"
+```
+
+Claude Desktop・Cursor用の設定ファイルと3つのエンドツーエンドワークフロー例：[examples/jgrants-integration/](examples/jgrants-integration/)  
+技術的な連携詳細：[docs/integrations/jgrants.md](docs/integrations/jgrants.md)
+
+> JP Bids MCPとJグランツ MCPは別組織（スグクル株式会社・デジタル庁）が運営する独立サーバーです。結果は参考情報であり、必ず公式書類で確認してください。
+
 ## ポリシー / Policies / Kebijakan
 
 - [プライバシーポリシー / Privacy Policy](https://mcp.bid-jp.com/privacy)

@@ -2,6 +2,15 @@
 
 ## 日本語
 
+### 0.7.1
+
+- **Jグランツ MCP 連携ドキュメント追加**: デジタル庁の [Jグランツ MCP](https://github.com/digital-go-jp/jgrants-mcp-server) と JP Bids MCP を組み合わせるエンドツーエンドワークフローガイドを公開（`examples/jgrants-integration/`）。日本語・英語・インドネシア語の3言語 README と Claude Desktop / Cursor 用設定ファイルを収録。
+- **相互運用セクション**: README 3言語版（英/日/印）に「Interoperability / 相互運用」セクションを追加。
+- **docs/integrations/jgrants.md**: 責任分界・ツール対応表・一次情報リンクをまとめた技術リファレンスを追加。
+- **server.json**: `interoperability.complementary_servers` フィールドに Jグランツ MCP サーバーを宣言。
+- **docs/contributions/jgrants-roadmap.md**: Jグランツ MCP OSS への貢献ロードマップ（6本の PR 候補）を公開。
+- **Zenn草稿**: `docs/articles/zenn-jp-bids-jgrants.md` に連携の意義・デモ・貢献PRを解説する記事草稿を追加。
+
 ### 0.7.0
 
 - **商用化基盤**: Free/Proティア分岐を実装。`Authorization: Bearer jp-bids_xxx` ヘッダーで判定。

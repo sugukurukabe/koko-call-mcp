@@ -1,0 +1,16 @@
+{
+  "_comment": "Cursor MCP configuration for JP Bids MCP + J-Grants MCP integration.",
+  "_comment_jgrants": "J-Grants MCP must be running locally first: cd jgrants-mcp-server && python -m jgrants_mcp_server.core",
+  "mcpServers": {
+    "jp-bids": {
+      "url": "https://mcp.bid-jp.com/mcp",
+      "type": "streamable-http",
+      "_comment": "Remote JP Bids MCP. Streamable HTTP is natively supported in Cursor."
+    },
+    "jgrants": {
+      "url": "http://127.0.0.1:8000/mcp",
+      "type": "streamable-http",
+      "_comment": "Local J-Grants MCP (digital-go-jp/jgrants-mcp-server). Start it before opening Cursor."
+    }
+  }
+}

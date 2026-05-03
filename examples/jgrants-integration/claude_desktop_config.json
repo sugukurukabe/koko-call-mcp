@@ -1,0 +1,21 @@
+{
+  "_comment": "Claude Desktop configuration for JP Bids MCP + J-Grants MCP integration.",
+  "_comment_jgrants": "J-Grants MCP must be running locally first: cd jgrants-mcp-server && python -m jgrants_mcp_server.core",
+  "_comment_jpbids": "JP Bids MCP is hosted remotely. mcp-remote bridges Streamable HTTP to stdio.",
+  "mcpServers": {
+    "jp-bids": {
+      "command": "npx",
+      "args": ["--yes", "mcp-remote", "https://mcp.bid-jp.com/mcp"],
+      "_comment": "Remote JP Bids MCP. During beta (until June 2026) no API key required."
+    },
+    "jgrants": {
+      "command": "npx",
+      "args": [
+        "--yes",
+        "mcp-remote",
+        "http://127.0.0.1:8000/mcp"
+      ],
+      "_comment": "Local J-Grants MCP (digital-go-jp/jgrants-mcp-server). Start it before launching Claude Desktop."
+    }
+  }
+}

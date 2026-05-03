@@ -70,6 +70,20 @@ Selama beta (sampai akhir Juni 2026), Pro juga gratis. Tidak perlu API key.
 
 API Pencarian Portal Informasi Pengadaan Pemerintah, Badan UKM Jepang. Server ini tidak menyimpan dokumen lampiran tender. Selalu verifikasi dengan dokumen pengadaan resmi sebelum mengajukan penawaran.
 
+## Interoperabilitas / Interoperability / 相互運用
+
+JP Bids MCP berpasangan dengan [J-Grants MCP](https://github.com/digital-go-jp/jgrants-mcp-server) (Badan Digital Jepang) untuk mencakup tender pemerintah dan subsidi dalam satu percakapan.
+
+```
+# Cari tender (JP Bids MCP) dan subsidi (J-Grants MCP) secara bersamaan
+"Tolong cari tender pengadaan sistem IT di Kagoshima dan subsidi DX untuk usaha kecil secara bersamaan."
+```
+
+File konfigurasi Claude Desktop dan Cursor yang siap digunakan beserta tiga contoh alur kerja end-to-end: [examples/jgrants-integration/](examples/jgrants-integration/)  
+Detail integrasi teknis: [docs/integrations/jgrants.md](docs/integrations/jgrants.md)
+
+> JP Bids MCP dan J-Grants MCP adalah server independen yang dioperasikan oleh organisasi berbeda (Sugukuru Inc. dan Badan Digital Jepang). Hasil adalah informasi referensi; selalu verifikasi dengan dokumen resmi.
+
 ## Kebijakan / Policies / ポリシー
 
 - [Kebijakan Privasi / Privacy Policy](https://mcp.bid-jp.com/privacy)
