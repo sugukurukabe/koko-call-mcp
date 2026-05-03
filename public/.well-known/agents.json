@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "name": "JP Bids MCP",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "type": "mcp_server",
   "homepage": "https://mcp.bid-jp.com",
   "repository": "https://github.com/sugukurukabe/koko-call-mcp",
