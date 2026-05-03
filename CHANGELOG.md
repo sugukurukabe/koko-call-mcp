@@ -2,6 +2,16 @@
 
 ## 日本語
 
+### 0.7.0
+
+- **商用化基盤**: Free/Proティア分岐を実装。`Authorization: Bearer jp-bids_xxx` ヘッダーで判定。
+- **ベータ期間**: 2026年6月末まで全ユーザーにProティアを無料開放。
+- **API Key認証**: `JP_BIDS_PRO_API_KEYS` 環境変数でProキーを管理。Freeは検索/一覧/詳細/ランキングの4ツール。
+- **Stripe Meters**: PDF抽出ごとに `jp_bids_pdf_extraction` Meterイベントを送信（fire-and-forget）。`STRIPE_SECRET_KEY` + `STRIPE_DEFAULT_CUSTOMER_ID` で有効化。
+- **UIバグ修正**: MCP Apps内に検索バーを追加（`callServerTool`）。2回目の検索でパネルが開かない問題を回避。
+- **`toolinput` イベント**: 検索中のローディング状態を表示。古いデータはグレーアウト。
+- Stripe SDK（`stripe` v2 Billing Meter Events API）を追加。
+
 ### 0.6.2
 
 - `create_bid_calendar` に `fetch_documents` / `target_uris` を追加し、PDF抽出済みの説明会日時をICSカレンダーに追加。
@@ -120,6 +130,16 @@
 
 ## English
 
+### 0.7.0
+
+- **Commercialization foundation**: Free/Pro tier split via `Authorization: Bearer jp-bids_xxx` header.
+- **Beta period**: All users get Pro tier free through end of June 2026.
+- **API Key auth**: `JP_BIDS_PRO_API_KEYS` env var manages Pro keys. Free tier: 4 tools (search/list/detail/rank).
+- **Stripe Meters**: Fires `jp_bids_pdf_extraction` meter event per PDF extraction (fire-and-forget). Enable with `STRIPE_SECRET_KEY` + `STRIPE_DEFAULT_CUSTOMER_ID`.
+- **UI bug fix**: Added in-app search bar (`callServerTool`) to work around hosts not reopening the panel on 2nd search.
+- **`toolinput` event**: Shows loading state and dims stale results during new searches.
+- Added Stripe SDK (v2 Billing Meter Events API).
+
 ### 0.6.2
 
 - Added `fetch_documents` / `target_uris` to `create_bid_calendar`, adding PDF-extracted briefing dates to the ICS calendar.
@@ -237,6 +257,16 @@
 - Initial implementation with Tools, Prompts, Resources, Resource Templates, Completion, Logging, stdio, and Streamable HTTP.
 
 ## Bahasa Indonesia
+
+### 0.7.0
+
+- **Fondasi komersialisasi**: Pemisahan tier Free/Pro via header `Authorization: Bearer jp-bids_xxx`.
+- **Periode beta**: Semua pengguna mendapatkan tier Pro gratis hingga akhir Juni 2026.
+- **Autentikasi API Key**: Variabel lingkungan `JP_BIDS_PRO_API_KEYS` mengelola kunci Pro. Tier Free: 4 alat (search/list/detail/rank).
+- **Stripe Meters**: Mengirim acara meter `jp_bids_pdf_extraction` per ekstraksi PDF (fire-and-forget). Aktifkan dengan `STRIPE_SECRET_KEY` + `STRIPE_DEFAULT_CUSTOMER_ID`.
+- **Perbaikan bug UI**: Menambahkan bilah pencarian dalam aplikasi (`callServerTool`) untuk mengatasi host yang tidak membuka ulang panel pada pencarian ke-2.
+- **Acara `toolinput`**: Menampilkan status pemuatan dan meredupkan hasil lama selama pencarian baru.
+- Menambahkan Stripe SDK (v2 Billing Meter Events API).
 
 ### 0.6.2
 
