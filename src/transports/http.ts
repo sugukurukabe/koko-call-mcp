@@ -32,6 +32,10 @@ export function createHttpApp(): express.Express {
   app.use(validateOrigin(allowedOrigins));
   app.use("/.well-known", express.static("public/.well-known"));
 
+  app.get("/privacy", (_req, res) => {
+    res.sendFile("privacy.html", { root: "public" });
+  });
+
   app.get("/healthz", (_req, res) => {
     res.status(200).json({ ok: true, service: "JP Bids MCP" });
   });

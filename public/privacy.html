@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy — JP Bids MCP</title>
+<style>
+body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #222; }
+h1 { font-size: 1.4rem; border-bottom: 1px solid #ddd; padding-bottom: 0.5rem; }
+h2 { font-size: 1.1rem; margin-top: 2rem; }
+p, ul { margin: 0.8rem 0; }
+ul { padding-left: 1.5rem; }
+.lang { color: #888; font-size: 0.85rem; margin-bottom: 2rem; }
+footer { margin-top: 3rem; border-top: 1px solid #ddd; padding-top: 1rem; font-size: 0.85rem; color: #666; }
+</style>
+</head>
+<body>
+<h1>Privacy Policy / プライバシーポリシー</h1>
+<p class="lang">Last updated: 2026-05-04</p>
+
+<h2>1. 収集する情報 / Information We Collect</h2>
+<p>JP Bids MCP は、ユーザーの個人情報を収集・保存しません。MCPリクエストに含まれるクエリパラメータ（検索キーワード、都道府県、カテゴリ等）はリクエスト処理にのみ使用し、処理完了後に破棄します。</p>
+<p>JP Bids MCP does not collect or store personal information. Query parameters included in MCP requests (search keywords, prefecture, category, etc.) are used only for request processing and discarded after completion.</p>
+
+<h2>2. サードパーティへのデータ送信 / Third-Party Data Sharing</h2>
+<ul>
+<li><strong>中小企業庁 官公需情報ポータルサイト (KKJ)</strong>: 検索クエリを中小企業庁APIに転送します。中小企業庁のプライバシーポリシーが適用されます。</li>
+<li><strong>Google Vertex AI</strong>: PDF抽出機能使用時、添付資料の内容をVertex AI Geminiに送信します。Google Cloud のデータ処理規約が適用されます。ドキュメントはサーバー側に保存されません。</li>
+<li><strong>Stripe</strong>: Pro tierの従量課金に使用します。Stripe Customer IDのみを送信し、検索内容は送信しません。</li>
+</ul>
+<p>Search queries are forwarded to the SME Agency (KKJ) API. When PDF extraction is used, attachment content is sent to Google Vertex AI Gemini for processing. Documents are never stored on our servers. Stripe is used for Pro tier usage billing; only the Stripe Customer ID is transmitted.</p>
+
+<h2>3. ログ / Logging</h2>
+<p>Cloud Run のインフラログ（HTTPステータスコード、レスポンスタイム等）は Google Cloud の標準ログ保持ポリシーに従い保持されます。検索クエリの内容はログに記録しません。</p>
+<p>Infrastructure logs (HTTP status codes, response times) are retained per Google Cloud's standard log retention policy. Search query content is not logged.</p>
+
+<h2>4. Cookie / Cookies</h2>
+<p>JP Bids MCP は Cookie を使用しません。</p>
+<p>JP Bids MCP does not use cookies.</p>
+
+<h2>5. データの保存 / Data Storage</h2>
+<p>入札情報の添付ファイル（PDF等）は一時的にメモリ上で処理し、レスポンス送信後に即座に破棄します。ディスクやデータベースへの永続化は行いません。</p>
+<p>Bid attachment files (PDFs, etc.) are processed in memory only and discarded immediately after the response is sent. No data is persisted to disk or database.</p>
+
+<h2>6. お問い合わせ / Contact</h2>
+<p>プライバシーに関するお問い合わせは <a href="https://github.com/sugukurukabe/koko-call-mcp/issues">GitHub Issues</a> までお願いします。</p>
+
+<footer>
+<p>Sugukuru Inc. / スグクル株式会社 — <a href="https://mcp.bid-jp.com">mcp.bid-jp.com</a></p>
+</footer>
+</body>
+</html>
