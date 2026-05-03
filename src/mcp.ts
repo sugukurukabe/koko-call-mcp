@@ -47,3 +47,10 @@ export function createJpBidsServer(options: CreateJpBidsServerOptions = {}): Mcp
   registerResources(server, client);
   return server;
 }
+
+// Smithery ディレクトリ掲載用サンドボックスサーバー
+// Sandbox server for Smithery directory scanning
+// Server sandbox untuk pemindaian direktori Smithery
+export function createSandboxServer(): McpServer {
+  return createJpBidsServer();
+}
