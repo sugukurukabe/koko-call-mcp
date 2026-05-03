@@ -1,5 +1,5 @@
 {
-  "entryPoints": ["src/mcp.ts", "src/api/kkj-client.ts", "src/domain/bid.ts"],
+  "entryPoints": ["src/mcp.ts", "src/api/kkj-client.ts", "src/domain/bid.ts", "src/lib/auth.ts"],
   "out": "docs/api",
   "excludePrivate": true,
   "excludeInternal": true,
