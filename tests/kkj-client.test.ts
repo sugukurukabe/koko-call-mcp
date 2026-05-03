@@ -86,7 +86,7 @@ describe("KkjClient", () => {
     });
     const result = await client.search({ Query: "システム", Count: 1 });
     expect(result.returnedCount).toBe(1);
-    expect(requests[0]?.headers.get("User-Agent")).toBe("JP Bids MCP/0.3.4");
+    expect(requests[0]?.headers.get("User-Agent")).toBe("JP Bids MCP/0.4.0");
   });
 });
 

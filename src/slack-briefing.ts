@@ -5,10 +5,11 @@ import {
   parseSlackBriefingConfig,
   sendSlackBriefing,
 } from "./jobs/slack-briefing.js";
+import { parsePositiveNumberEnv } from "./lib/env.js";
 
 const config = parseSlackBriefingConfig(process.env);
 const client = new KkjClient({
-  rateLimitPerSecond: Number(process.env.JP_BIDS_RATE_LIMIT_PER_SECOND ?? 1),
+  rateLimitPerSecond: parsePositiveNumberEnv(process.env.JP_BIDS_RATE_LIMIT_PER_SECOND, 1),
 });
 
 const briefing = await createSlackBriefing(client, config);

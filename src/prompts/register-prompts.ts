@@ -67,23 +67,35 @@ export function registerPrompts(server: McpServer): void {
     "bid_due_alert",
     {
       title: "締切間近の入札確認",
-      description: "来週までに入札開始・締切が近い案件を洗い出す。",
+      description: "提出期限・開札日が近い案件を洗い出す。",
       argsSchema: {
         prefecture: prefectureCompletable.optional(),
         category: categoryCompletable.optional(),
         query: z.string().optional(),
+        days: z
+          .number()
+          .int()
+          .min(1)
+          .max(60)
+          .optional()
+          .describe("何日先までを締切間近とみなすか。未指定なら7日。"),
       },
     },
-    (args) => ({
-      messages: [
-        {
-          role: "user",
-          content: {
-            type: "text",
-            text: `search_bids を使って、${args.prefecture ?? "全国"} の ${args.category ?? "全カテゴリ"} から、${args.query ?? "自社に関係しそうな"} 締切間近の官公需入札を確認してください。案件名、機関、締切、必要資格、次アクションを表で整理してください。`,
+    (args) => {
+      const days = args.days ?? 7;
+      const today = new Date().toISOString().slice(0, 10);
+      const until = new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);
+      return {
+        messages: [
+          {
+            role: "user",
+            content: {
+              type: "text",
+              text: `search_bids を due_after=${today} due_before=${until} で呼び、${args.prefecture ?? "全国"} の ${args.category ?? "全カテゴリ"} から ${args.query ?? "自社に関係しそうな"} 提出期限間近 (${days}日以内) の官公需入札を洗い出してください。締切が過ぎていない案件のみに絞り、案件名・機関・提出期限・開札日・必要資格・次アクションを表で整理してください。`,
+            },
           },
-        },
-      ],
-    }),
+        ],
+      };
+    },
   );
 }

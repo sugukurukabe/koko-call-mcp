@@ -57,6 +57,8 @@ npx --yes jp-bids-mcp --version
 
 - Read-only search for Japanese public procurement notices.
 - Typed MCP tools with structured attribution.
+- AI Bid Radar ranking to sort bid candidates by practical follow-up priority.
+- Optional MCP Apps table UI for search results.
 - Resources and Resource Templates for targeted context.
 - Remote Streamable HTTP and local stdio transports.
 
@@ -65,6 +67,16 @@ Data source: 中小企業庁 官公需情報ポータルサイト 検索API.
 ## Tools
 
 - `search_bids`
+- `search_bids_app`
+- `rank_bids`
+- `explain_bid_fit`
+- `assess_bid_qualification`
+- `extract_bid_requirements`
+- `export_bid_shortlist`
+- `create_bid_calendar`
+- `create_bid_review_packet`
+- `draft_bid_questions`
+- `analyze_past_awards`
 - `list_recent_bids`
 - `get_bid_detail`
 - `summarize_bids_by_org`
@@ -73,7 +85,10 @@ Data source: 中小企業庁 官公需情報ポータルサイト 検索API.
 
 - `attribution://kkj`
 - `docs://api-reference`
+- `docs://agentic-cloud-roadmap`
+- `docs://agentic-security-storage-readiness`
 - `codes://prefectures`
+- `ui://jp-bids/search-results.html`
 - `bid://{bid_key}`
 - `prefecture://{lg_code}`
 - `org://{organization_name}`
@@ -92,9 +107,13 @@ Slack briefing job: `docs/slack-briefing.md`.
 ## Documentation
 
 - `docs/architecture.md`
+- `docs/ai-bid-radar.md`
+- `docs/agentic-cloud-roadmap.md`
+- `docs/agentic-security-storage-readiness.md`
 - `docs/export.md`
 - `docs/inspector.md`
 - `docs/deployment-cloud-run.md`
+- `docs/mcp-apps.md`
 - `docs/slack-briefing.md`
 - `docs/remote-release-checklist.md`
 - `docs/submissions/mcp-directories.md`

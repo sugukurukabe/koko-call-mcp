@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "name": "JP Bids MCP",
-  "version": "0.3.4",
+  "version": "0.4.0",
   "type": "mcp_server",
   "homepage": "https://github.com/sugukurukabe/koko-call-mcp",
   "repository": "https://github.com/sugukurukabe/koko-call-mcp",
@@ -19,15 +19,37 @@
     }
   ],
   "capabilities": {
-    "tools": ["search_bids", "list_recent_bids", "get_bid_detail", "summarize_bids_by_org"],
+    "tools": [
+      "search_bids",
+      "search_bids_app",
+      "rank_bids",
+      "explain_bid_fit",
+      "assess_bid_qualification",
+      "extract_bid_requirements",
+      "export_bid_shortlist",
+      "create_bid_calendar",
+      "create_bid_review_packet",
+      "draft_bid_questions",
+      "analyze_past_awards",
+      "list_recent_bids",
+      "get_bid_detail",
+      "summarize_bids_by_org"
+    ],
     "prompts": ["morning_bid_briefing", "competitor_radar", "bid_due_alert"],
-    "resources": ["attribution://kkj", "docs://api-reference", "codes://prefectures"],
+    "resources": [
+      "attribution://kkj",
+      "docs://api-reference",
+      "docs://agentic-cloud-roadmap",
+      "docs://agentic-security-storage-readiness",
+      "codes://prefectures",
+      "ui://jp-bids/search-results.html"
+    ],
     "resource_templates": ["bid://{bid_key}", "prefecture://{lg_code}", "org://{organization_name}"]
   },
   "governance": {
     "human_review_required": "Official procurement documents must be verified by a human before bidding decisions.",
     "legal_disclaimer": "Results are reference information, not legal or bidding advice.",
-    "sampling": "Not implemented. The server does not initiate LLM sampling requests.",
+    "sampling": "Server does not initiate LLM sampling. The optional MCP Apps view (`ui://jp-bids/search-results.html`) may invoke the host-side sampling/createMessage capability and falls back to chat when the host does not advertise sampling.",
     "tasks": "Not implemented. Current searches are short-running and synchronous.",
     "authentication": "The stdio package is local and read-only. Remote authentication will be designed separately if enterprise access control becomes necessary."
   },

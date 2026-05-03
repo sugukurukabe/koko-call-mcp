@@ -35,6 +35,8 @@ Registry:   io.github.sugukurukabe/jp-bids
 <ul>
 <li>Read-only search for Japanese public procurement notices.</li>
 <li>Typed MCP tools with structured attribution.</li>
+<li>AI Bid Radar ranking to sort bid candidates by practical follow-up priority.</li>
+<li>Optional MCP Apps table UI for search results.</li>
 <li>Resources and Resource Templates for targeted context.</li>
 <li>Remote Streamable HTTP and local stdio transports.</li>
 </ul>
@@ -42,6 +44,16 @@ Registry:   io.github.sugukurukabe/jp-bids
 <h2 id="tools" class="tsd-anchor-link">Tools<a href="#tools" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
 <ul>
 <li><code>search_bids</code></li>
+<li><code>search_bids_app</code></li>
+<li><code>rank_bids</code></li>
+<li><code>explain_bid_fit</code></li>
+<li><code>assess_bid_qualification</code></li>
+<li><code>extract_bid_requirements</code></li>
+<li><code>export_bid_shortlist</code></li>
+<li><code>create_bid_calendar</code></li>
+<li><code>create_bid_review_packet</code></li>
+<li><code>draft_bid_questions</code></li>
+<li><code>analyze_past_awards</code></li>
 <li><code>list_recent_bids</code></li>
 <li><code>get_bid_detail</code></li>
 <li><code>summarize_bids_by_org</code></li>
@@ -50,7 +62,10 @@ Registry:   io.github.sugukurukabe/jp-bids
 <ul>
 <li><code>attribution://kkj</code></li>
 <li><code>docs://api-reference</code></li>
+<li><code>docs://agentic-cloud-roadmap</code></li>
+<li><code>docs://agentic-security-storage-readiness</code></li>
 <li><code>codes://prefectures</code></li>
+<li><code>ui://jp-bids/search-results.html</code></li>
 <li><code>bid://{bid_key}</code></li>
 <li><code>prefecture://{lg_code}</code></li>
 <li><code>org://{organization_name}</code></li>
@@ -64,9 +79,13 @@ Registry:   io.github.sugukurukabe/jp-bids
 <h2 id="documentation" class="tsd-anchor-link">Documentation<a href="#documentation" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
 <ul>
 <li><code>docs/architecture.md</code></li>
+<li><code>docs/ai-bid-radar.md</code></li>
+<li><code>docs/agentic-cloud-roadmap.md</code></li>
+<li><code>docs/agentic-security-storage-readiness.md</code></li>
 <li><code>docs/export.md</code></li>
 <li><code>docs/inspector.md</code></li>
 <li><code>docs/deployment-cloud-run.md</code></li>
+<li><code>docs/mcp-apps.md</code></li>
 <li><code>docs/slack-briefing.md</code></li>
 <li><code>docs/remote-release-checklist.md</code></li>
 <li><code>docs/submissions/mcp-directories.md</code></li>

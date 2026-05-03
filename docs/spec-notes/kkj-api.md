@@ -4,6 +4,7 @@
 
 - 対象は中小企業庁 官公需情報ポータルサイト検索API。エンドポイントは `http://www.kkj.go.jp/api/`、認証なし、XMLレスポンス。
 - `Query`, `Project_Name`, `Organization_Name`, `LG_Code` のいずれか1つ以上が必須。複数条件はAPI側でAND結合される。
+- `LG_Code` はカンマ区切りで複数の都道府県コードを渡せる（API ガイド「数値[,数値...]」表記）。`list_recent_bids` 全国モードはこの仕様に基づき47都道府県をまとめて指定する。
 - `Count` は最大1,000。API側にページングはないため、大量検索は期間・都道府県・カテゴリで絞る。
 - 期間は `YYYY-MM-DD/YYYY-MM-DD`, `YYYY-MM-DD/`, `/YYYY-MM-DD`, `YYYY-MM-DD` の形式を使う。
 - `LgCode`, `PrefectureName`, `CityCode`, `CityName`, `Attachments` などは欠損し得るため、正規化層では optional として扱う。
@@ -13,6 +14,7 @@
 
 - The source is the Small and Medium Enterprise Agency KKJ procurement search API. Endpoint: `http://www.kkj.go.jp/api/`; no authentication; XML response.
 - At least one of `Query`, `Project_Name`, `Organization_Name`, or `LG_Code` is required. Multiple conditions are ANDed by the API.
+- `LG_Code` accepts a comma-separated list of prefecture codes (the API guide writes `数値[,数値...]`). `list_recent_bids`'s nationwide mode relies on this by joining all 47 prefecture codes.
 - `Count` is capped at 1,000. The API has no native pagination, so large searches must be narrowed by date, prefecture, or category.
 - Date ranges use `YYYY-MM-DD/YYYY-MM-DD`, `YYYY-MM-DD/`, `/YYYY-MM-DD`, or `YYYY-MM-DD`.
 - Fields such as `LgCode`, `PrefectureName`, `CityCode`, `CityName`, and `Attachments` may be missing and are modeled as optional.
@@ -22,6 +24,7 @@
 
 - Sumber data adalah API pencarian pengadaan pemerintah dari Small and Medium Enterprise Agency. Endpoint: `http://www.kkj.go.jp/api/`; tanpa autentikasi; respons XML.
 - Minimal salah satu dari `Query`, `Project_Name`, `Organization_Name`, atau `LG_Code` wajib ada. Beberapa kondisi digabung sebagai AND oleh API.
+- `LG_Code` menerima daftar kode prefektur yang dipisahkan koma (panduan API menuliskan `数値[,数値...]`). Mode nasional `list_recent_bids` memanfaatkan hal ini dengan menggabungkan 47 kode prefektur sekaligus.
 - `Count` maksimal 1.000. API tidak memiliki pagination bawaan, sehingga pencarian besar harus dipersempit dengan tanggal, prefektur, atau kategori.
 - Rentang tanggal memakai format `YYYY-MM-DD/YYYY-MM-DD`, `YYYY-MM-DD/`, `/YYYY-MM-DD`, atau `YYYY-MM-DD`.
 - Field seperti `LgCode`, `PrefectureName`, `CityCode`, `CityName`, dan `Attachments` bisa kosong, sehingga dimodelkan sebagai optional.

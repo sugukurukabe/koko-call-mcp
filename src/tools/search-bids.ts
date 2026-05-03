@@ -13,7 +13,7 @@ import { formatKkjDateRange } from "../domain/date-range.js";
 import { PrefectureNameSchema, toLgCode } from "../domain/prefectures.js";
 import { jsonText, toolError } from "../lib/tool-result.js";
 
-const inputSchema = {
+export const searchBidsInputSchema = {
   query: z
     .string()
     .min(1)
@@ -27,14 +27,16 @@ const inputSchema = {
   organization_name: z.string().min(1).optional(),
   issued_after: z.string().optional().describe("公告日 YYYY-MM-DD 以降"),
   issued_before: z.string().optional().describe("公告日 YYYY-MM-DD 以前"),
-  due_after: z.string().optional().describe("入札開始日 YYYY-MM-DD 以降"),
-  due_before: z.string().optional().describe("入札開始日 YYYY-MM-DD 以前"),
+  due_after: z.string().optional().describe("入札書提出期限 YYYY-MM-DD 以降"),
+  due_before: z.string().optional().describe("入札書提出期限 YYYY-MM-DD 以前"),
   opening_after: z.string().optional().describe("開札日 YYYY-MM-DD 以降"),
   opening_before: z.string().optional().describe("開札日 YYYY-MM-DD 以前"),
   period_end_after: z.string().optional().describe("納入期限日 YYYY-MM-DD 以降"),
   period_end_before: z.string().optional().describe("納入期限日 YYYY-MM-DD 以前"),
   limit: z.number().int().min(1).max(1000).default(20),
 };
+const SearchBidsInputObject = z.object(searchBidsInputSchema);
+export type SearchBidsInput = z.infer<typeof SearchBidsInputObject>;
 
 export function registerSearchBids(server: McpServer, client: KkjClient): void {
   server.registerTool(
@@ -42,8 +44,8 @@ export function registerSearchBids(server: McpServer, client: KkjClient): void {
     {
       title: "官公需入札検索",
       description:
-        "日本全国の官公需入札情報を検索する。全文検索は query、件名だけの絞り込みは project_name、発注機関は organization_name を使う。公告日、入札開始日、開札日、納入期限日でも絞り込める。",
-      inputSchema,
+        "日本全国の官公需入札情報を検索する。全文検索は query、件名だけの絞り込みは project_name、発注機関は organization_name を使う。公告日、入札書提出期限、開札日、納入期限日でも絞り込める。",
+      inputSchema: searchBidsInputSchema,
       outputSchema: BidSearchResultSchema.shape,
       annotations: {
         readOnlyHint: true,
@@ -54,46 +56,7 @@ export function registerSearchBids(server: McpServer, client: KkjClient): void {
     },
     async (args) => {
       try {
-        const params: KkjSearchParams = {
-          Count: args.limit,
-        };
-        if (args.query) {
-          params.Query = args.query;
-        }
-        if (args.project_name) {
-          params.Project_Name = args.project_name;
-        }
-        if (args.organization_name) {
-          params.Organization_Name = args.organization_name;
-        }
-        if (args.prefecture) {
-          params.LG_Code = toLgCode(args.prefecture);
-        }
-        if (args.category) {
-          params.Category = categoryCodes[args.category];
-        }
-        if (args.procedure_type) {
-          params.Procedure_Type = procedureTypeCodes[args.procedure_type];
-        }
-        if (args.certification && args.certification.length > 0) {
-          params.Certification = args.certification.join(",");
-        }
-        const issueRange = formatKkjDateRange(args.issued_after, args.issued_before);
-        if (issueRange) {
-          params.CFT_Issue_Date = issueRange;
-        }
-        const dueRange = formatKkjDateRange(args.due_after, args.due_before);
-        if (dueRange) {
-          params.Tender_Submission_Deadline = dueRange;
-        }
-        const openingRange = formatKkjDateRange(args.opening_after, args.opening_before);
-        if (openingRange) {
-          params.Opening_Tenders_Event = openingRange;
-        }
-        const periodEndRange = formatKkjDateRange(args.period_end_after, args.period_end_before);
-        if (periodEndRange) {
-          params.Period_End_Time = periodEndRange;
-        }
+        const params = buildSearchBidsParams(args);
         const result = await client.search(params);
         return {
           content: [{ type: "text" as const, text: formatSearchSummary(result) }],
@@ -109,7 +72,51 @@ export function registerSearchBids(server: McpServer, client: KkjClient): void {
   );
 }
 
-function formatSearchSummary(result: z.infer<typeof BidSearchResultSchema>): string {
+export function buildSearchBidsParams(args: SearchBidsInput): KkjSearchParams {
+  const params: KkjSearchParams = {
+    Count: args.limit,
+  };
+  if (args.query) {
+    params.Query = args.query;
+  }
+  if (args.project_name) {
+    params.Project_Name = args.project_name;
+  }
+  if (args.organization_name) {
+    params.Organization_Name = args.organization_name;
+  }
+  if (args.prefecture) {
+    params.LG_Code = toLgCode(args.prefecture);
+  }
+  if (args.category) {
+    params.Category = categoryCodes[args.category];
+  }
+  if (args.procedure_type) {
+    params.Procedure_Type = procedureTypeCodes[args.procedure_type];
+  }
+  if (args.certification && args.certification.length > 0) {
+    params.Certification = args.certification.join(",");
+  }
+  const issueRange = formatKkjDateRange(args.issued_after, args.issued_before);
+  if (issueRange) {
+    params.CFT_Issue_Date = issueRange;
+  }
+  const dueRange = formatKkjDateRange(args.due_after, args.due_before);
+  if (dueRange) {
+    params.Tender_Submission_Deadline = dueRange;
+  }
+  const openingRange = formatKkjDateRange(args.opening_after, args.opening_before);
+  if (openingRange) {
+    params.Opening_Tenders_Event = openingRange;
+  }
+  const periodEndRange = formatKkjDateRange(args.period_end_after, args.period_end_before);
+  if (periodEndRange) {
+    params.Period_End_Time = periodEndRange;
+  }
+  return params;
+}
+
+export function formatSearchSummary(result: z.infer<typeof BidSearchResultSchema>): string {
   const lines = [
     `${result.searchHits}件ヒット（取得 ${result.returnedCount}件）`,
     `出典: ${result.attribution.dataSource}`,

@@ -1,6 +1,6 @@
 {
   "name": "jp-bids-mcp",
-  "version": "0.3.4",
+  "version": "0.4.0",
   "description": "JP Bids MCP provides Japan government procurement bid search through the Model Context Protocol.",
   "type": "module",
   "license": "Apache-2.0",
@@ -63,7 +63,10 @@
     "node": ">=20 <25"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json && chmod +x dist/server.js dist/slack-briefing.js dist/export-bids.js",
+    "build": "npm run build:server && npm run typecheck:ui && npm run build:ui",
+    "build:server": "tsc -p tsconfig.json && chmod +x dist/server.js dist/slack-briefing.js dist/export-bids.js",
+    "build:ui": "vite build",
+    "typecheck:ui": "tsc -p tsconfig.app.json",
     "dev": "tsx src/server.ts",
     "dev:http": "tsx src/server.ts --http",
     "start": "node dist/server.js",
@@ -92,6 +95,7 @@
     "publish:dry-run": "npm publish --dry-run --access public --ignore-scripts"
   },
   "dependencies": {
+    "@modelcontextprotocol/ext-apps": "^1.7.1",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
@@ -110,15 +114,22 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "@types/supertest": "^7.2.0",
+    "@vitejs/plugin-react": "^6.0.1",
     "ajv-formats-draft2019": "^1.6.1",
     "fast-check": "^4.7.0",
     "libxmljs2": "^0.37.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
     "supertest": "^7.2.2",
     "tinybench": "^6.0.1",
     "tsx": "^4.21.0",
     "typedoc": "^0.28.19",
     "typescript": "^6.0.3",
+    "vite": "^8.0.10",
+    "vite-plugin-singlefile": "^2.3.3",
     "vitest": "^4.1.5"
   }
 }

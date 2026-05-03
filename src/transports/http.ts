@@ -2,6 +2,7 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import cors from "cors";
 import express from "express";
+import { parsePortEnv, parsePositiveNumberEnv } from "../lib/env.js";
 import { parseAllowedOrigins, validateOrigin } from "../lib/http.js";
 import { createJpBidsServer } from "../mcp.js";
 
@@ -40,10 +41,9 @@ export function createHttpApp(): express.Express {
 
     const server = createJpBidsServer({
       kkjClientOptions: {
-        rateLimitPerSecond: Number(
-          process.env.JP_BIDS_RATE_LIMIT_PER_SECOND ??
-            process.env.KOKO_CALL_RATE_LIMIT_PER_SECOND ??
-            1,
+        rateLimitPerSecond: parsePositiveNumberEnv(
+          process.env.JP_BIDS_RATE_LIMIT_PER_SECOND ?? process.env.KOKO_CALL_RATE_LIMIT_PER_SECOND,
+          1,
         ),
       },
     });
@@ -71,8 +71,21 @@ export function createHttpApp(): express.Express {
 
 export async function startHttpServer(): Promise<void> {
   const app = createHttpApp();
-  const port = Number(process.env.PORT ?? 8080);
+  const port = parsePortEnv(process.env.PORT, 8080);
   const host = process.env.HTTP_HOST ?? (process.env.K_SERVICE ? "0.0.0.0" : "127.0.0.1");
+  const allowedOrigins = parseAllowedOrigins(process.env.ALLOWED_ORIGINS);
+
+  if (allowedOrigins.size === 0) {
+    if (process.env.K_SERVICE) {
+      console.error(
+        "[warning] ALLOWED_ORIGINS is unset. Browser requests from any Origin can reach this MCP endpoint. Set ALLOWED_ORIGINS to a comma-separated allowlist before exposing publicly.",
+      );
+    } else {
+      console.error(
+        "[info] ALLOWED_ORIGINS is unset. Local development allows any Origin. Set ALLOWED_ORIGINS for staging or production.",
+      );
+    }
+  }
 
   app.listen(port, host, () => {
     console.error(`JP Bids MCP listening on http://${host}:${port}/mcp`);

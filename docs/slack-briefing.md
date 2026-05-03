@@ -41,7 +41,7 @@ npm run slack:briefing
 Cloud Run Job dry-run:
 
 ```bash
-IMAGE=asia-northeast1-docker.pkg.dev/ssw-compass-prod-494613/cloud-run-source-deploy/jp-bids-mcp:0.3.4
+IMAGE=asia-northeast1-docker.pkg.dev/ssw-compass-prod-494613/cloud-run-source-deploy/jp-bids-mcp:0.4.0
 
 gcloud run jobs deploy jp-bids-slack-briefing \
   --image "$IMAGE" \
@@ -100,7 +100,7 @@ npm run slack:briefing
 Cloud Run Job dry-run:
 
 ```bash
-IMAGE=asia-northeast1-docker.pkg.dev/ssw-compass-prod-494613/cloud-run-source-deploy/jp-bids-mcp:0.3.4
+IMAGE=asia-northeast1-docker.pkg.dev/ssw-compass-prod-494613/cloud-run-source-deploy/jp-bids-mcp:0.4.0
 
 gcloud run jobs deploy jp-bids-slack-briefing \
   --image "$IMAGE" \
@@ -159,7 +159,7 @@ npm run slack:briefing
 Cloud Run Job dry-run:
 
 ```bash
-IMAGE=asia-northeast1-docker.pkg.dev/ssw-compass-prod-494613/cloud-run-source-deploy/jp-bids-mcp:0.3.4
+IMAGE=asia-northeast1-docker.pkg.dev/ssw-compass-prod-494613/cloud-run-source-deploy/jp-bids-mcp:0.4.0
 
 gcloud run jobs deploy jp-bids-slack-briefing \
   --image "$IMAGE" \

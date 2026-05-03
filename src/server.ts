@@ -2,7 +2,7 @@
 import { startHttpServer } from "./transports/http.js";
 import { startStdioServer } from "./transports/stdio.js";
 
-const version = "0.3.4";
+const version = "0.4.0";
 const args = new Set(process.argv.slice(2));
 
 if (args.has("--help") || args.has("-h")) {
