@@ -155,7 +155,7 @@ async function fetchWithTimeout(
       signal: controller.signal,
       headers: {
         Accept: "application/pdf,text/html;q=0.8,*/*;q=0.1",
-        "User-Agent": "JP Bids MCP PDF Fetcher/0.6.2",
+        "User-Agent": "JP Bids MCP PDF Fetcher/0.6.3",
       },
     });
   } catch (error) {

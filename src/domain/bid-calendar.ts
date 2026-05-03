@@ -128,15 +128,22 @@ function normalizeDate(value: string | undefined): string | null {
   if (!value) {
     return null;
   }
-  const match = /(\d{4})[-/](\d{2})[-/](\d{2})/.exec(value);
-  if (!match) {
-    return null;
+  const isoMatch = /(\d{4})[-/](\d{1,2})[-/](\d{1,2})/.exec(value);
+  if (isoMatch) {
+    const [, year, month, day] = isoMatch;
+    if (year && month && day) {
+      return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+    }
   }
-  const [, year, month, day] = match;
-  if (!year || !month || !day) {
-    return null;
+  const warekiMatch = /(?:令和|R)\s*(\d{1,2})年\s*(\d{1,2})月\s*(\d{1,2})日/.exec(value);
+  if (warekiMatch) {
+    const [, era, month, day] = warekiMatch;
+    if (era && month && day) {
+      const westernYear = 2018 + Number(era);
+      return `${westernYear}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+    }
   }
-  return `${year}-${month}-${day}`;
+  return null;
 }
 
 function addDays(date: string, days: number): string {
