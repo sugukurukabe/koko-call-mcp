@@ -1,5 +1,9 @@
 # JP Bids MCP
 
+[![npm version](https://img.shields.io/npm/v/jp-bids-mcp)](https://www.npmjs.com/package/jp-bids-mcp)
+[![CI](https://github.com/sugukurukabe/koko-call-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/sugukurukabe/koko-call-mcp/actions/workflows/ci.yml)
+[![License: BSL-1.1](https://img.shields.io/badge/License-BSL--1.1-blue.svg)](LICENSE)
+
 日本の官公需入札情報をMCPで検索・AI分析するサーバー。  
 Search and AI-analyze Japanese public procurement notices through MCP.  
 Server MCP untuk mencari dan menganalisis pengadaan pemerintah Jepang dengan AI.

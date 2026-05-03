@@ -121,6 +121,7 @@
     "@types/react-dom": "^19.2.3",
     "@types/supertest": "^7.2.0",
     "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/coverage-v8": "^4.1.5",
     "ajv-formats-draft2019": "^1.6.1",
     "fast-check": "^4.7.0",
     "libxmljs2": "^0.37.0",
