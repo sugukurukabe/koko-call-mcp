@@ -12,6 +12,26 @@ JP Bids MCP adalah server MCP untuk mencari dan menganalisis pengumuman pengadaa
 > During beta (until end of June 2026), all features are free.  
 > Selama beta (sampai akhir Juni 2026), semua fitur gratis.
 
+## AIに話しかけるだけ
+
+```text
+「鹿児島県のIT系入札を探して、うちに合う順にランク付けして」
+```
+
+→ 14件ヒット → AIスコアリング → 上位3件の要件整理 → カレンダー登録 → 全部ひとつの会話で。
+
+```text
+「この仕様書PDFの必須要件と評価項目を整理して」
+```
+
+→ PDF自動取得 → 要件抽出 → 参加資格チェック → 不足項目の取得方法まで提示。
+
+```text
+「農林水産省の過去3年の発注傾向を分析して」
+```
+
+→ 落札実績取得 → 予算規模・競合・落札率を分析 → 次の入札戦略を提案。
+
 ## クイックスタート / Quick Start / Mulai Cepat
 
 ```text
