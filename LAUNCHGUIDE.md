@@ -31,7 +31,7 @@ Government bid search, Procurement analysis, Bid qualification assessment, Tende
 - Full-text search across all 47 prefectures and all procurement categories
 - Resource Templates for deep-linking individual bids, prefectures, and organizations
 - Both remote Streamable HTTP and local stdio transports supported
-- Free tier with 4 core tools; Pro tier with 14 tools (all free during beta)
+- Free tier with 4 core tools; Pro tier with 17 tools (all free during beta)
 
 ## Getting Started
 - "Search for IT system bids in Tokyo published this week"

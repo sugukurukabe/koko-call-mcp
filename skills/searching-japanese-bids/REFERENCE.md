@@ -1,6 +1,6 @@
 # JP Bids MCP — Tool Reference
 
-Full input schemas and edge cases for all 14 tools. Loaded only when needed for parameter-level details.
+Full input schemas and edge cases for all 17 tools. Loaded only when needed for parameter-level details.
 
 ## Free tier tools (always available)
 
@@ -119,6 +119,27 @@ Aggregates historical award data. Returns top winning organizations, average awa
 ### `summarize_bids_by_org`
 
 Roll-up by procuring organization showing recent activity volume, typical contract sizes, and category mix.
+
+### `save_search`
+
+Save search criteria for later re-use and new-bid checking.
+
+| Param | Notes |
+|---|---|
+| `name` | Human-readable label |
+| `criteria` | Object with optional `keyword`, `prefecture`, `category`, `organization` |
+
+### `check_saved_search`
+
+Run a saved search and return only bids published since the last check. Foundation for Webhook alert extensions.
+
+| Param | Notes |
+|---|---|
+| `name` | Name of the saved search |
+
+### `list_saved_searches`
+
+Returns all saved search entries with their criteria and last-checked timestamps. No parameters.
 
 ## Common error responses
 

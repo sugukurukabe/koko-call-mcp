@@ -7,7 +7,7 @@ JP Bids MCP が解決する、顧客ごとの具体的な課題。
 **課題**: 既存の検索UIに加え、AI対話型のアクセスを顧客に提供したい。自社でMCP基盤を開発するコストと時間が障壁。
 
 **JP Bids MCPでの解決**:
-- 14ツール・Remote Streamable HTTP・OAuth 2.0が即利用可能
+- 17ツール・Remote Streamable HTTP・OAuth 2.0が即利用可能
 - 自社ブランドでラベリングし、既存顧客にAI機能を追加提供
 - Free/Proティア分離済み。¥990/月の課金基盤が稼働中
 - MCP Apps UIで、Claude.aiのサイドパネルに入札一覧を表示
@@ -28,7 +28,7 @@ AI:   JP Bids MCPで検索 → 8件ヒット
 | 開発期間 | 3-6ヶ月 | 即日 |
 | MCP仕様準拠 | 要学習 | 2025-11-25仕様完全準拠 |
 | OAuth 2.0 | 要実装 | 実装済み（PKCE + DCR） |
-| AI分析機能 | 要設計 | 14ツール即利用 |
+| AI分析機能 | 要設計 | 17ツール即利用 |
 | 保守コスト | エンジニア人件費 | サブスク or 買収 |
 
 ---
@@ -92,7 +92,7 @@ AI:       search_bids → 23件
 - `server.json`: MCP Registry メタデータの標準構造
 - `src/oauth/`: PKCE + DCR + JWT の実装パターン
 - `src/transports/http.ts`: Streamable HTTP の実装パターン
-- `src/tools/`: 14ツールの設計パターン（zod入力・構造化出力・エラーハンドリング）
+- `src/tools/`: 17ツールの設計パターン（zod入力・構造化出力・エラーハンドリング）
 - `examples/`: エコシステム連携の設定テンプレート
 
 ---
@@ -122,8 +122,8 @@ AI:     get_bid_detail で案件情報取得
 | 指標 | 値 |
 |------|-----|
 | MCP仕様バージョン | 2025-11-25（最新） |
-| ツール数 | 14 |
-| テスト数 | 95 (22ファイル) |
+| ツール数 | 17 |
+| テスト数 | 99 (23ファイル) |
 | コードカバレッジ | 71% |
 | CIチェック | lint + build + test + docs + security |
 | トランスポート | stdio + Streamable HTTP |

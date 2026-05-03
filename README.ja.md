@@ -56,13 +56,16 @@ npx --yes jp-bids-export --prefecture 鹿児島県 --category 役務 --query シ
 | `draft_bid_questions` | 質問書ドラフト生成 | Pro |
 | `analyze_past_awards` | 落札実績の分析 | Pro |
 | `summarize_bids_by_org` | 発注機関別サマリー | Pro |
+| `save_search` | 検索条件を保存 | Pro |
+| `check_saved_search` | 保存検索の新着確認 | Pro |
+| `list_saved_searches` | 保存検索の一覧 | Pro |
 
 ## 料金 / Pricing / Harga
 
 | プラン | 料金 | 機能 |
 |---|---|---|
 | **Free** | 無料 | 検索・ランキング・詳細取得 |
-| **Pro** | ¥990/月 | 全14ツール＋MCP Apps UI＋PDF抽出 |
+| **Pro** | ¥990/月 | 全17ツール＋MCP Apps UI＋PDF抽出＋保存検索 |
 
 ベータ期間（〜2026年6月末）はProも無料。APIキー不要。
 

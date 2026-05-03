@@ -56,13 +56,16 @@ npx --yes jp-bids-export --prefecture 鹿児島県 --category 役務 --query シ
 | `draft_bid_questions` | Buat draf pertanyaan klarifikasi | Pro |
 | `analyze_past_awards` | Analisis riwayat pemenang tender | Pro |
 | `summarize_bids_by_org` | Ringkasan per instansi | Pro |
+| `save_search` | Simpan kriteria pencarian | Pro |
+| `check_saved_search` | Periksa tender baru tersimpan | Pro |
+| `list_saved_searches` | Daftar pencarian tersimpan | Pro |
 
 ## Harga / Pricing / 料金
 
 | Paket | Harga | Fitur |
 |---|---|---|
 | **Free** | Gratis | Pencarian, peringkat, detail |
-| **Pro** | ¥990/bulan | 14 alat + UI MCP Apps + ekstraksi PDF |
+| **Pro** | ¥990/bulan | 17 alat + UI MCP Apps + ekstraksi PDF + pencarian tersimpan |
 
 Selama beta (sampai akhir Juni 2026), Pro juga gratis. Tidak perlu API key.
 

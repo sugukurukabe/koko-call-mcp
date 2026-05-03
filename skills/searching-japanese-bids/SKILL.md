@@ -100,7 +100,7 @@ User asks: "Add bid deadlines to my calendar"
 - **Prefecture names use Japanese**: `"東京都"`, `"鹿児島県"`. Pass through user input as-is; the server accepts both display names and `lg_code`.
 - **Categories are 役務 (services) / 物品 (goods) / 工事 (construction)**. Map English requests accordingly.
 - **Never guess `bid_key`**. Always obtain from a prior search or `list_recent_bids` result.
-- **Free tier vs Pro tier**: All 14 tools are free during the beta period (until end of June 2026). After that, Pro tools require an API key. Do not block users; the server returns clear errors when quota is exceeded.
+- **Free tier vs Pro tier**: All 17 tools are free during the beta period (until end of June 2026). After that, Pro tools require an API key. Do not block users; the server returns clear errors when quota is exceeded.
 
 ## Resources
 

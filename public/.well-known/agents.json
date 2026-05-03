@@ -35,7 +35,10 @@
       "analyze_past_awards",
       "list_recent_bids",
       "get_bid_detail",
-      "summarize_bids_by_org"
+      "summarize_bids_by_org",
+      "save_search",
+      "check_saved_search",
+      "list_saved_searches"
     ],
     "prompts": ["morning_bid_briefing", "competitor_radar", "bid_due_alert"],
     "resources": [

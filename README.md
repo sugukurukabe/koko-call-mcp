@@ -142,6 +142,7 @@ Slack briefing job: `docs/slack-briefing.md`.
 ## Documentation
 
 - `docs/use-cases.md`
+- `docs/extensibility.md`
 - `docs/architecture.md`
 - `docs/ai-bid-radar.md`
 - `docs/agentic-cloud-roadmap.md`

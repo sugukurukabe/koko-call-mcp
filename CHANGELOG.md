@@ -14,6 +14,12 @@
 - **server.json**: `interoperability.complementary_servers` に freee MCP を追加。
 - **デジタル庁 Jグランツ MCP へ4本のPR送信**: バグ修正・`stateless_http=True`・Dockerfile・pytest ユニットテスト14件。
 - **品質**: biome format / optional chain 修正、typedoc 再生成、`.well-known` メタデータのバージョン統一。
+- **保存検索＋新着通知**: `save_search` / `check_saved_search` / `list_saved_searches` の3ツールを追加（14→17ツール）。Webhook拡張の起点。
+- **ホワイトラベル対応**: 環境変数6つでブランド名・URL・組織名を切替可能（`src/lib/branding.ts`）。コード変更不要でOEM提供に対応。
+- **利用統計エンドポイント**: `/stats` でリクエスト数・稼働時間を返す。買い手がトラクションを確認可能。
+- **プロダクトランディングページ**: `https://mcp.bid-jp.com/` にBefore/After比較・セットアップタブ・会話例・エコシステム図を表示。
+- **拡張性ガイド**: `docs/extensibility.md` にツール追加・データソース追加・ティア追加・通知拡張の手順を文書化。
+- **GitHub Release v0.7.1**: タグ・リリースノート・Discussions有効化・アナウンス投稿。
 
 ### 0.7.0
 
@@ -155,6 +161,12 @@
 - **server.json**: Added freee MCP to `interoperability.complementary_servers`.
 - **4 PRs to Digital Agency's J-Grants MCP**: Bug fix, `stateless_http=True`, Dockerfile, pytest unit tests (14 cases).
 - **Quality**: biome format fixes, optional chain lint fix, typedoc regeneration, `.well-known` metadata version alignment.
+- **Saved Search + Alerts**: Added `save_search` / `check_saved_search` / `list_saved_searches` (14→17 tools). Foundation for Webhook notifications.
+- **White-label support**: 6 environment variables to switch brand name, URL, and organization (`src/lib/branding.ts`). OEM-ready without code changes.
+- **Usage stats endpoint**: `/stats` returns request count and uptime for acquirers to verify traction.
+- **Product landing page**: `https://mcp.bid-jp.com/` with Before/After comparison, setup tabs, conversation examples, ecosystem diagram.
+- **Extensibility guide**: `docs/extensibility.md` documenting tool/data source/tier/notification extension patterns.
+- **GitHub Release v0.7.1**: Tag, release notes, Discussions enabled, announcement posted.
 
 ### 0.7.0
 
@@ -296,6 +308,12 @@
 - **server.json**: Menambahkan freee MCP ke `interoperability.complementary_servers`.
 - **4 PR ke J-Grants MCP Badan Digital**: Perbaikan bug, `stateless_http=True`, Dockerfile, pytest unit test (14 kasus).
 - **Kualitas**: Perbaikan format biome, perbaikan lint optional chain, regenerasi typedoc, penyelarasan versi metadata `.well-known`.
+- **Pencarian Tersimpan + Peringatan**: Menambahkan `save_search` / `check_saved_search` / `list_saved_searches` (14→17 alat). Fondasi untuk notifikasi Webhook.
+- **Dukungan white-label**: 6 variabel lingkungan untuk mengganti nama merek, URL, dan organisasi (`src/lib/branding.ts`). Siap OEM tanpa perubahan kode.
+- **Endpoint statistik penggunaan**: `/stats` mengembalikan jumlah permintaan dan waktu aktif.
+- **Halaman landing produk**: `https://mcp.bid-jp.com/` dengan perbandingan Before/After, tab pengaturan, contoh percakapan, diagram ekosistem.
+- **Panduan perluasan**: `docs/extensibility.md` mendokumentasikan pola perluasan alat/sumber data/tier/notifikasi.
+- **GitHub Release v0.7.1**: Tag, catatan rilis, Discussions diaktifkan, pengumuman diposting.
 
 ### 0.7.0
 
