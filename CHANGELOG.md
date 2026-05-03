@@ -10,6 +10,10 @@
 - **server.json**: `interoperability.complementary_servers` フィールドに Jグランツ MCP サーバーを宣言。
 - **docs/contributions/jgrants-roadmap.md**: Jグランツ MCP OSS への貢献ロードマップ（6本の PR 候補）を公開。
 - **Zenn草稿**: `docs/articles/zenn-jp-bids-jgrants.md` に連携の意義・デモ・貢献PRを解説する記事草稿を追加。
+- **freee MCP 連携ドキュメント追加**: freee 会計 / 人事労務 / 請求書 MCP と JP Bids MCP を組み合わせる4つのワークフロー（入札前資金確認・落札後売上登録・請求書生成・費用対効果分析）と設定ファイルを公開（`examples/freee-integration/`）。
+- **server.json**: `interoperability.complementary_servers` に freee MCP を追加。
+- **デジタル庁 Jグランツ MCP へ4本のPR送信**: バグ修正・`stateless_http=True`・Dockerfile・pytest ユニットテスト14件。
+- **品質**: biome format / optional chain 修正、typedoc 再生成、`.well-known` メタデータのバージョン統一。
 
 ### 0.7.0
 
@@ -147,6 +151,10 @@
 - **server.json**: Declared J-Grants MCP in `interoperability.complementary_servers`.
 - **docs/contributions/jgrants-roadmap.md**: Published a contribution roadmap (6 PR candidates) for the J-Grants MCP OSS.
 - **Zenn draft**: Added integration article draft at `docs/articles/zenn-jp-bids-jgrants.md`.
+- **freee MCP integration docs**: Published 4 procurement-to-accounting workflows (financial readiness check, post-award deal entry, invoice generation, bid expense ROI analysis) with config files (`examples/freee-integration/`).
+- **server.json**: Added freee MCP to `interoperability.complementary_servers`.
+- **4 PRs to Digital Agency's J-Grants MCP**: Bug fix, `stateless_http=True`, Dockerfile, pytest unit tests (14 cases).
+- **Quality**: biome format fixes, optional chain lint fix, typedoc regeneration, `.well-known` metadata version alignment.
 
 ### 0.7.0
 
@@ -284,6 +292,10 @@
 - **server.json**: Mendeklarasikan J-Grants MCP di `interoperability.complementary_servers`.
 - **docs/contributions/jgrants-roadmap.md**: Menerbitkan peta jalan kontribusi (6 kandidat PR) untuk OSS J-Grants MCP.
 - **Draf Zenn**: Menambahkan draf artikel integrasi di `docs/articles/zenn-jp-bids-jgrants.md`.
+- **Dokumentasi integrasi freee MCP**: Menerbitkan 4 alur kerja pengadaan-ke-akuntansi (pemeriksaan kesiapan keuangan, pencatatan transaksi, pembuatan faktur, analisis ROI biaya tender) dengan file konfigurasi (`examples/freee-integration/`).
+- **server.json**: Menambahkan freee MCP ke `interoperability.complementary_servers`.
+- **4 PR ke J-Grants MCP Badan Digital**: Perbaikan bug, `stateless_http=True`, Dockerfile, pytest unit test (14 kasus).
+- **Kualitas**: Perbaikan format biome, perbaikan lint optional chain, regenerasi typedoc, penyelarasan versi metadata `.well-known`.
 
 ### 0.7.0
 

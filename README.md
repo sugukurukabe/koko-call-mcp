@@ -125,7 +125,9 @@ Slack briefing job: `docs/slack-briefing.md`.
 - `docs/slack-briefing.md`
 - `docs/remote-release-checklist.md`
 - `docs/submissions/mcp-directories.md`
+- `docs/integrations/jgrants.md`
 - `docs/articles/zenn-jp-bids-mcp.md`
+- `docs/articles/zenn-jp-bids-jgrants.md`
 - `docs/articles/note-public-data-mcp.md`
 - `docs/adr/`
 - `public/.well-known/agents.json`
