@@ -180,6 +180,10 @@ function formatRequirementText(extracted: z.infer<typeof BidRequirementExtractio
           `- 参加資格: ${toInlineList(extracted.extractedRequirements.eligibility)}`,
           `- 提出書類: ${toInlineList(extracted.extractedRequirements.requiredDocuments)}`,
           `- 質問期限: ${extracted.extractedRequirements.questionDeadline ?? "要確認"}`,
+          `- 入札書提出期限: ${extracted.extractedRequirements.tenderSubmissionDeadline ?? "要確認"}`,
+          `- 開札日時: ${extracted.extractedRequirements.openingDate ?? "要確認"}`,
+          `- 説明会: ${extracted.extractedRequirements.briefingDate ?? "要確認"}`,
+          `- 連絡先: ${extracted.extractedRequirements.contactPoint ?? "要確認"}`,
           `- 失格条件: ${toInlineList(extracted.extractedRequirements.disqualification)}`,
         ]
       : ["- 未実行または抽出不可"]),

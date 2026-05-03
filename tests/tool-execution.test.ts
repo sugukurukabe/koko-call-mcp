@@ -279,7 +279,9 @@ describe("MCP tool execution", () => {
           recommendedProcessor: "gemini_document_understanding",
         }),
       ]),
-      safetyNotes: expect.arrayContaining(["このMVPはPDF本文を保存・取得しない"]),
+      safetyNotes: expect.arrayContaining([
+        "PDF/HTML本文は必要時のみ一時取得し、サーバーに保存しない",
+      ]),
     });
     expect(fetchCount).toBe(1);
 

@@ -31,7 +31,7 @@ describe("bid requirements extraction", () => {
     );
     expect(extracted.missingRequirements).toEqual(expect.arrayContaining(["質問期限"]));
     expect(extracted.safetyNotes).toEqual(
-      expect.arrayContaining(["このMVPはPDF本文を保存・取得しない"]),
+      expect.arrayContaining(["PDF/HTML本文は必要時のみ一時取得し、サーバーに保存しない"]),
     );
   });
 });

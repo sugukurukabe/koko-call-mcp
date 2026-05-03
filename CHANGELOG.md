@@ -2,6 +2,13 @@
 
 ## 日本語
 
+### 0.5.2
+
+- PDF抽出結果に `tenderSubmissionDeadline`、`openingDate`、`briefingDate`、`contactPoint` を追加し、提出期限・開札日時・説明会・連絡先を `rawNotes` ではなく構造化して返せるようにした。
+- `extract_bid_requirements` のテキスト要約に提出期限、開札日時、説明会、連絡先を表示。
+- PDF/HTML処理の安全メモを「一時取得・非保存」の実装に合わせて修正。
+- `remote:extraction` のverbose出力で新しい構造化項目を確認できるようにした。
+
 ### 0.5.1
 
 - Streamable HTTP transportで`KkjClient`をプロセス内共有に変更し、`search_bids`後の`extract_bid_requirements` / `get_bid_detail` がremote環境でも直近bid cacheを参照できるようにした。
@@ -77,6 +84,13 @@
 
 ## English
 
+### 0.5.2
+
+- Added `tenderSubmissionDeadline`, `openingDate`, `briefingDate`, and `contactPoint` to PDF extraction results so submission/opening/briefing/contact details are returned as structured fields instead of only `rawNotes`.
+- Added those fields to the `extract_bid_requirements` text summary.
+- Updated safety notes to match the implemented ephemeral-fetch / no-storage policy.
+- Extended `remote:extraction` verbose output to show the new structured fields.
+
 ### 0.5.1
 
 - Changed the Streamable HTTP transport to share one process-local `KkjClient`, so `extract_bid_requirements` / `get_bid_detail` can read the recent bid cache after `search_bids` in remote deployments.
@@ -151,6 +165,13 @@
 - Initial implementation with Tools, Prompts, Resources, Resource Templates, Completion, Logging, stdio, and Streamable HTTP.
 
 ## Bahasa Indonesia
+
+### 0.5.2
+
+- Menambahkan `tenderSubmissionDeadline`, `openingDate`, `briefingDate`, dan `contactPoint` ke hasil ekstraksi PDF agar tenggat pengajuan, pembukaan, briefing, dan kontak dikembalikan sebagai field terstruktur, bukan hanya `rawNotes`.
+- Menambahkan field tersebut ke ringkasan teks `extract_bid_requirements`.
+- Memperbarui catatan keamanan agar sesuai dengan kebijakan pengambilan sementara dan tanpa penyimpanan.
+- Memperluas output verbose `remote:extraction` untuk menampilkan field terstruktur baru.
 
 ### 0.5.1
 

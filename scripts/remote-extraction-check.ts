@@ -5,6 +5,9 @@ const remoteMcpUrl = process.env.JP_BIDS_REMOTE_MCP_URL ?? "https://mcp.bid-jp.c
 const runDocumentFetch =
   process.env.JP_BIDS_REMOTE_EXTRACTION_FETCH === "1" ||
   process.env.JP_BIDS_REMOTE_EXTRACTION_FETCH === "true";
+const verbose =
+  process.env.JP_BIDS_REMOTE_EXTRACTION_VERBOSE === "1" ||
+  process.env.JP_BIDS_REMOTE_EXTRACTION_VERBOSE === "true";
 const fallbackTargetUri =
   process.env.JP_BIDS_REMOTE_EXTRACTION_TARGET_URI ?? "https://example.com/";
 
@@ -72,9 +75,32 @@ try {
   }
 
   const structuredExtraction = extractionResult.structuredContent as {
-    bid?: { key?: string };
+    bid?: { key?: string; projectName?: string };
     knownRequirements?: Record<string, unknown>;
-    extractedFromDocuments?: unknown[];
+    extractedRequirements?: {
+      eligibility?: string[];
+      requiredDocuments?: string[];
+      questionDeadline?: string | null;
+      tenderSubmissionDeadline?: string | null;
+      openingDate?: string | null;
+      briefingDate?: string | null;
+      deliveryDeadline?: string | null;
+      contractPeriod?: string | null;
+      contactPoint?: string | null;
+      disqualification?: string[];
+      estimatedBudget?: string | null;
+      evaluationCriteria?: string[];
+      ambiguousPoints?: string[];
+      rawNotes?: string[];
+    };
+    extractedFromDocuments?: Array<{
+      sourceUri?: string;
+      finalUri?: string;
+      mimeType?: string;
+      mode?: string;
+      sizeBytes?: number;
+      sha256?: string;
+    }>;
     extractionWarnings?: string[];
   };
   if (structuredExtraction.bid?.key !== bid.key) {
@@ -92,8 +118,30 @@ try {
       `fetch_documents: ${runDocumentFetch ? "true" : "false"}`,
       `documents: ${structuredExtraction.extractedFromDocuments?.length ?? 0}`,
       `warnings: ${structuredExtraction.extractionWarnings?.length ?? 0}`,
+      ...(structuredExtraction.extractedRequirements
+        ? [
+            `eligibility: ${summaryList(structuredExtraction.extractedRequirements.eligibility)}`,
+            `requiredDocuments: ${summaryList(structuredExtraction.extractedRequirements.requiredDocuments)}`,
+            `questionDeadline: ${structuredExtraction.extractedRequirements.questionDeadline ?? "none"}`,
+            `tenderSubmissionDeadline: ${structuredExtraction.extractedRequirements.tenderSubmissionDeadline ?? "none"}`,
+            `openingDate: ${structuredExtraction.extractedRequirements.openingDate ?? "none"}`,
+            `briefingDate: ${structuredExtraction.extractedRequirements.briefingDate ?? "none"}`,
+            `contactPoint: ${structuredExtraction.extractedRequirements.contactPoint ?? "none"}`,
+            `ambiguousPoints: ${summaryList(structuredExtraction.extractedRequirements.ambiguousPoints)}`,
+          ]
+        : ["extractedRequirements: none"]),
     ].join("\n"),
   );
+  if (verbose) {
+    console.error(JSON.stringify(structuredExtraction, null, 2));
+  }
 } finally {
   await client.close();
+}
+
+function summaryList(values: string[] | undefined): string {
+  if (!values || values.length === 0) {
+    return "none";
+  }
+  return values.slice(0, 3).join(" / ");
 }
