@@ -17,6 +17,26 @@ npm:        jp-bids-mcp
 Registry:   io.github.sugukurukabe/jp-bids
 ```
 
+## AIに話しかけるだけ / Just Ask Your AI
+
+```text
+「鹿児島県のIT系入札を探して、うちに合う順にランク付けして」
+```
+
+→ 14件ヒット → AIスコアリング → 上位3件の要件整理 → カレンダー登録 → 全部ひとつの会話で。
+
+```text
+「この仕様書PDFの必須要件と評価項目を整理して」
+```
+
+→ PDF自動取得 → 要件抽出 → 参加資格チェック → 不足項目の取得方法まで提示。
+
+```text
+「農林水産省の過去3年の発注傾向を分析して」
+```
+
+→ 落札実績取得 → 予算規模・競合・落札率を分析 → 次の入札戦略を提案。
+
 ## Quick Start / クイックスタート
 
 Use the remote endpoint from any Streamable HTTP compatible MCP client:
@@ -118,6 +138,7 @@ Slack briefing job: `docs/slack-briefing.md`.
 
 ## Documentation
 
+- `docs/use-cases.md`
 - `docs/architecture.md`
 - `docs/ai-bid-radar.md`
 - `docs/agentic-cloud-roadmap.md`
