@@ -78,6 +78,26 @@ export function createHttpApp(): express.Express {
     res.status(200).json({ ok: true, service: "JP Bids MCP" });
   });
 
+  // 利用統計: 買い手がトラクションを確認できるエンドポイント
+  // Usage stats: endpoint for acquirers to verify traction
+  // Statistik penggunaan: endpoint bagi pembeli untuk memverifikasi traksi
+  let requestCount = 0;
+  const startedAt = new Date().toISOString();
+  app.use("/mcp", (_req, _res, next) => {
+    requestCount++;
+    next();
+  });
+  app.get("/stats", (_req, res) => {
+    res.status(200).json({
+      service: "JP Bids MCP",
+      version: "0.7.1",
+      startedAt,
+      uptimeSeconds: Math.floor(process.uptime()),
+      mcpRequestCount: requestCount,
+      nodeVersion: process.version,
+    });
+  });
+
   app.get("/readyz", (_req, res) => {
     res.status(200).json({ ok: true, service: "JP Bids MCP" });
   });

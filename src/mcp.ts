@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { KkjClient, type KkjClientOptions } from "./api/kkj-client.js";
 import { registerSearchResultsApp } from "./apps/register-search-app.js";
 import type { Tier } from "./lib/auth.js";
+import { getBranding } from "./lib/branding.js";
 import { registerPrompts } from "./prompts/register-prompts.js";
 import { registerResources } from "./resources/register-resources.js";
 import { registerTools } from "./tools/register-tools.js";
@@ -17,11 +18,12 @@ export interface CreateJpBidsServerOptions {
 
 export function createJpBidsServer(options: CreateJpBidsServerOptions = {}): McpServer {
   const tier: Tier = options.tier ?? "pro";
+  const branding = getBranding();
   const server = new McpServer(
     {
-      name: "JP Bids MCP",
-      title: "JP Bids MCP",
-      version: "0.7.0",
+      name: branding.serviceName,
+      title: branding.serviceName,
+      version: "0.7.1",
       description: "Japan government procurement bid search through the Model Context Protocol.",
     },
     {

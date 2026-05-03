@@ -112,6 +112,9 @@ npx --yes jp-bids-mcp --version
 | `draft_bid_questions` | 質問書ドラフト / Draft questions | Pro |
 | `analyze_past_awards` | 落札実績分析 / Past awards analysis | Pro |
 | `summarize_bids_by_org` | 発注機関別まとめ / Summary by org | Pro |
+| `save_search` | 検索条件を保存 / Save search criteria | Pro |
+| `check_saved_search` | 保存検索の新着確認 / Check for new bids | Pro |
+| `list_saved_searches` | 保存検索の一覧 / List saved searches | Pro |
 
 ## Resources
 

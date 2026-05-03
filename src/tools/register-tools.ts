@@ -12,6 +12,7 @@ import { registerExtractBidRequirements } from "./extract-bid-requirements.js";
 import { registerGetBidDetail } from "./get-bid-detail.js";
 import { registerListRecentBids } from "./list-recent-bids.js";
 import { registerRankBids } from "./rank-bids.js";
+import { registerSavedSearchAlert } from "./saved-search-alert.js";
 import { registerSearchBids } from "./search-bids.js";
 import { registerSummarizeBidsByOrg } from "./summarize-bids-by-org.js";
 
@@ -38,6 +39,7 @@ const PRO_ONLY_REGISTRATIONS = [
   registerDraftBidQuestions,
   registerAnalyzePastAwards,
   registerSummarizeBidsByOrg,
+  registerSavedSearchAlert,
 ] as const;
 
 export function registerTools(server: McpServer, client: KkjClient, tier: Tier = "pro"): void {
