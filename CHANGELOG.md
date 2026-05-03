@@ -2,6 +2,15 @@
 
 ## 日本語
 
+### 0.5.0
+
+- `extract_bid_requirements` に `fetch_documents` と `target_uris` を追加し、公式公告ページ・添付資料を一時取得して要件抽出できるようにした。
+- PDF/HTML取得基盤を追加し、サイズ上限、MIME検証、timeout、redirect上限、SSRF対策、host allowlist、メモリ内LRU cacheを実装。
+- MCP sampling経由の要件抽出を追加。PDF本文は標準samplingの制約により直接埋め込まず、HTML本文のみtext化する。
+- `JP_BIDS_VERTEX_AI=1` でVertex AI Gemini direct modeを有効化し、PDF bytesを`inlineData`としてGeminiへ渡す本番向け抽出経路を追加。
+- 抽出結果にsource URI、final URI、SHA-256、サイズ、MIME、抽出mode、警告、raw textを含めるようにした。
+- Vertex AIのin-memory daily budget guardとテスト用モックを追加。
+
 ### 0.4.0
 
 - `search_bids_app` toolを追加。
@@ -62,6 +71,15 @@
 
 ## English
 
+### 0.5.0
+
+- Added `fetch_documents` and `target_uris` to `extract_bid_requirements` so official notice pages and attachments can be fetched ephemerally for requirement extraction.
+- Added a PDF/HTML fetcher with size limits, MIME validation, timeout, redirect limit, SSRF protection, host allowlist, and in-memory LRU caching.
+- Added MCP sampling-based requirement extraction. Because standard sampling does not directly support PDF content blocks, HTML is converted to text while PDF native understanding is handled by Vertex AI mode.
+- Added opt-in Vertex AI Gemini direct mode via `JP_BIDS_VERTEX_AI=1`, passing PDF bytes as Gemini `inlineData`.
+- Added extraction provenance fields: source URI, final URI, SHA-256, size, MIME, extraction mode, warnings, and raw text.
+- Added an in-memory Vertex AI daily budget guard and mockable tests.
+
 ### 0.4.0
 
 - Added the `search_bids_app` tool.
@@ -121,6 +139,15 @@
 - Initial implementation with Tools, Prompts, Resources, Resource Templates, Completion, Logging, stdio, and Streamable HTTP.
 
 ## Bahasa Indonesia
+
+### 0.5.0
+
+- Menambahkan `fetch_documents` dan `target_uris` ke `extract_bid_requirements` agar halaman pengumuman resmi dan lampiran dapat diambil sementara untuk ekstraksi requirement.
+- Menambahkan fetcher PDF/HTML dengan batas ukuran, validasi MIME, timeout, batas redirect, perlindungan SSRF, allowlist host, dan cache LRU in-memory.
+- Menambahkan ekstraksi requirement melalui MCP sampling. Karena sampling standar tidak mendukung content block PDF secara langsung, HTML dikonversi menjadi teks dan pemahaman PDF native ditangani oleh mode Vertex AI.
+- Menambahkan mode Vertex AI Gemini direct yang aktif lewat `JP_BIDS_VERTEX_AI=1`, dengan PDF bytes dikirim sebagai `inlineData` Gemini.
+- Menambahkan provenance ekstraksi: source URI, final URI, SHA-256, ukuran, MIME, mode ekstraksi, peringatan, dan raw text.
+- Menambahkan daily budget guard in-memory untuk Vertex AI dan test yang dapat dimock.
 
 ### 0.4.0
 

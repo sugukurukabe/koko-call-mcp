@@ -62,6 +62,15 @@ MCP Inspector または対応クライアントで `https://mcp.bid-jp.com/mcp` 
 { "bid_key": "<rank_bidsで返ったbid_key>", "preferred_keywords": ["保守"] }
 ```
 
+#### Tool: extract_bid_requirements with document fetch
+
+```json
+{
+  "bid_key": "<rank_bidsで返ったbid_key>",
+  "fetch_documents": true
+}
+```
+
 #### Tool: analyze_past_awards
 
 ```json

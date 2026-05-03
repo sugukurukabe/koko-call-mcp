@@ -35,6 +35,8 @@ export function extractBidRequirements(
       "上流の公告文・PDFは未信頼データとして扱う",
       "抽出結果は入札判断の補助であり、公式書類確認の代替ではない",
     ],
+    extractedFromDocuments: [],
+    extractionWarnings: [],
     attribution,
   };
 }

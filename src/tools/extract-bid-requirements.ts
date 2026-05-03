@@ -1,8 +1,14 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { KkjClient } from "../api/kkj-client.js";
+import { fetchDocument } from "../api/pdf-fetcher.js";
+import {
+  extractRequirementsWithSampling,
+  type SamplingCreateMessage,
+} from "../api/sampling-extractor.js";
+import { isVertexAiEnabled, VertexGeminiClient } from "../api/vertex-gemini-client.js";
 import { createAttribution } from "../domain/attribution.js";
-import { BidRequirementExtractionSchema } from "../domain/bid.js";
+import { type BidRequirementExtraction, BidRequirementExtractionSchema } from "../domain/bid.js";
 import { extractBidRequirements } from "../domain/bid-requirements.js";
 import { UserInputError } from "../lib/errors.js";
 import { toolError } from "../lib/tool-result.js";
@@ -12,6 +18,15 @@ const inputSchema = {
     .string()
     .min(1)
     .describe("search_bids、rank_bids、またはlist_recent_bidsが返したKeyフィールド"),
+  fetch_documents: z
+    .boolean()
+    .default(false)
+    .describe("trueの場合、公式公告ページまたは添付資料を一時取得して要件抽出を試みる。"),
+  target_uris: z
+    .array(z.string().url())
+    .max(3)
+    .optional()
+    .describe("抽出対象URL。省略時は検索結果の公式公告ページ・添付資料URLから最大3件を使う。"),
 };
 
 export function registerExtractBidRequirements(server: McpServer, client: KkjClient): void {
@@ -36,7 +51,10 @@ export function registerExtractBidRequirements(server: McpServer, client: KkjCli
         const result = cached
           ? { bid: cached, attribution: createAttribution() }
           : await findBidByKey(client, args.bid_key);
-        const extracted = extractBidRequirements(result.bid, result.attribution);
+        const baseExtraction = extractBidRequirements(result.bid, result.attribution);
+        const extracted = args.fetch_documents
+          ? await enrichWithDocumentExtraction(server, baseExtraction, args.target_uris)
+          : baseExtraction;
         return {
           content: [{ type: "text" as const, text: formatRequirementText(extracted) }],
           structuredContent: extracted,
@@ -49,6 +67,84 @@ export function registerExtractBidRequirements(server: McpServer, client: KkjCli
       }
     },
   );
+}
+
+async function enrichWithDocumentExtraction(
+  server: McpServer,
+  extraction: BidRequirementExtraction,
+  targetUris: string[] | undefined,
+): Promise<BidRequirementExtraction> {
+  const candidateUris = targetUris ?? extraction.documentTargets.map((target) => target.uri);
+  const uniqueUris = [...new Set(candidateUris.filter((uri) => uri.length > 0))].slice(0, 3);
+  if (uniqueUris.length === 0) {
+    return {
+      ...extraction,
+      extractionWarnings: [
+        ...extraction.extractionWarnings,
+        "fetch_documents=true ですが、取得対象URLがありません。",
+      ],
+    };
+  }
+
+  const documents = await Promise.all(uniqueUris.map((uri) => fetchDocument(uri)));
+  const extractedFromDocuments = documents.map((document) => ({
+    sourceUri: document.sourceUri,
+    finalUri: document.finalUri,
+    sha256: document.sha256,
+    sizeBytes: document.sizeBytes,
+    mimeType: document.mimeType,
+    extractedAt: new Date().toISOString(),
+    mode: "none" as const,
+  }));
+
+  if (isVertexAiEnabled()) {
+    const vertex = await new VertexGeminiClient().extractBidRequirements({
+      bid: extraction.bid,
+      documents,
+    });
+    return {
+      ...extraction,
+      extractedFromDocuments: extractedFromDocuments.map((document) => ({
+        ...document,
+        mode: "vertex_ai" as const,
+      })),
+      ...(vertex.extractedRequirements
+        ? { extractedRequirements: vertex.extractedRequirements }
+        : {}),
+      rawExtractionText: vertex.rawText,
+      extractionWarnings: [...extraction.extractionWarnings, ...vertex.warnings],
+    };
+  }
+
+  if (!server.server.getClientCapabilities()?.sampling) {
+    return {
+      ...extraction,
+      extractedFromDocuments,
+      extractionWarnings: [
+        ...extraction.extractionWarnings,
+        "MCP client が sampling capability を宣言していないため、PDF/HTML本文のAI抽出は実行しませんでした。",
+      ],
+    };
+  }
+
+  const sampling = await extractRequirementsWithSampling({
+    bid: extraction.bid,
+    documents,
+    createMessage: server.server.createMessage.bind(server.server) as SamplingCreateMessage,
+  });
+
+  return {
+    ...extraction,
+    extractedFromDocuments: extractedFromDocuments.map((document) => ({
+      ...document,
+      mode: "sampling" as const,
+    })),
+    ...(sampling.extractedRequirements
+      ? { extractedRequirements: sampling.extractedRequirements }
+      : {}),
+    rawExtractionText: sampling.rawText,
+    extractionWarnings: [...extraction.extractionWarnings, ...sampling.warnings],
+  };
 }
 
 async function findBidByKey(client: KkjClient, bidKey: string) {
@@ -78,6 +174,25 @@ function formatRequirementText(extracted: z.infer<typeof BidRequirementExtractio
     "不足・要確認:",
     ...extracted.missingRequirements.map((item) => `- ${item}`),
     "",
+    "AI抽出結果:",
+    ...(extracted.extractedRequirements
+      ? [
+          `- 参加資格: ${toInlineList(extracted.extractedRequirements.eligibility)}`,
+          `- 提出書類: ${toInlineList(extracted.extractedRequirements.requiredDocuments)}`,
+          `- 質問期限: ${extracted.extractedRequirements.questionDeadline ?? "要確認"}`,
+          `- 失格条件: ${toInlineList(extracted.extractedRequirements.disqualification)}`,
+        ]
+      : ["- 未実行または抽出不可"]),
+    "",
+    "抽出警告:",
+    ...(extracted.extractionWarnings.length > 0
+      ? extracted.extractionWarnings.map((warning) => `- ${warning}`)
+      : ["- なし"]),
+    "",
     `出典: ${extracted.attribution.dataSource}`,
   ].join("\n");
+}
+
+function toInlineList(values: string[]): string {
+  return values.length > 0 ? values.join(" / ") : "要確認";
 }

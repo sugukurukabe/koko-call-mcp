@@ -58,6 +58,7 @@ npx --yes jp-bids-mcp --version
 - Read-only search for Japanese public procurement notices.
 - Typed MCP tools with structured attribution.
 - AI Bid Radar ranking to sort bid candidates by practical follow-up priority.
+- PDF/HTML requirement extraction with ephemeral fetch, SSRF guard, MCP sampling fallback, and opt-in Vertex AI Gemini direct mode.
 - Optional MCP Apps table UI for search results.
 - Resources and Resource Templates for targeted context.
 - Remote Streamable HTTP and local stdio transports.

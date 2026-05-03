@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "name": "JP Bids MCP",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "type": "mcp_server",
   "homepage": "https://github.com/sugukurukabe/koko-call-mcp",
   "repository": "https://github.com/sugukurukabe/koko-call-mcp",
@@ -49,13 +49,13 @@
   "governance": {
     "human_review_required": "Official procurement documents must be verified by a human before bidding decisions.",
     "legal_disclaimer": "Results are reference information, not legal or bidding advice.",
-    "sampling": "Server does not initiate LLM sampling. The optional MCP Apps view (`ui://jp-bids/search-results.html`) may invoke the host-side sampling/createMessage capability and falls back to chat when the host does not advertise sampling.",
+    "sampling": "The optional MCP Apps view may invoke host-side sampling/createMessage. `extract_bid_requirements` may also use host-side sampling for HTML/text extraction when `fetch_documents=true`; native PDF extraction requires opt-in Vertex AI direct mode.",
     "tasks": "Not implemented. Current searches are short-running and synchronous.",
     "authentication": "The stdio package is local and read-only. Remote authentication will be designed separately if enterprise access control becomes necessary."
   },
   "security": {
     "prompt_injection": "Upstream bid text is treated as untrusted data and returned as structured content.",
     "logging": "Secrets and personal data must not be logged.",
-    "storage": "Residence-card, passport, or private documents are not processed by this server."
+    "storage": "Fetched bid PDF/HTML documents are processed ephemerally in memory and are not stored by the server."
   }
 }

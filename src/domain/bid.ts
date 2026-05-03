@@ -101,6 +101,23 @@ export const BidShortlistExportSchema = z.object({
 
 export type BidShortlistExport = z.infer<typeof BidShortlistExportSchema>;
 
+export const ExtractedBidRequirementsSchema = z
+  .object({
+    eligibility: z.array(z.string()),
+    requiredDocuments: z.array(z.string()),
+    questionDeadline: z.string().nullable(),
+    deliveryDeadline: z.string().nullable(),
+    contractPeriod: z.string().nullable(),
+    disqualification: z.array(z.string()),
+    estimatedBudget: z.string().nullable(),
+    evaluationCriteria: z.array(z.string()),
+    ambiguousPoints: z.array(z.string()),
+    rawNotes: z.array(z.string()),
+  })
+  .strict();
+
+export type ExtractedBidRequirements = z.infer<typeof ExtractedBidRequirementsSchema>;
+
 export const BidRequirementExtractionSchema = z.object({
   bid: BidSchema,
   knownRequirements: z.object({
@@ -130,6 +147,22 @@ export const BidRequirementExtractionSchema = z.object({
   missingRequirements: z.array(z.string()),
   extractionPlan: z.array(z.string()),
   safetyNotes: z.array(z.string()),
+  extractedFromDocuments: z
+    .array(
+      z.object({
+        sourceUri: z.string(),
+        finalUri: z.string(),
+        sha256: z.string(),
+        sizeBytes: z.number().int().nonnegative(),
+        mimeType: z.string(),
+        extractedAt: z.string(),
+        mode: z.enum(["sampling", "vertex_ai", "none"]),
+      }),
+    )
+    .default([]),
+  extractedRequirements: ExtractedBidRequirementsSchema.optional(),
+  extractionWarnings: z.array(z.string()).default([]),
+  rawExtractionText: z.string().optional(),
   attribution: AttributionSchema,
 });
 
