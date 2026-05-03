@@ -16,7 +16,8 @@ function isValidRedirectUri(uri: string): boolean {
   try {
     const url = new URL(uri);
     if (url.protocol === "https:") return true;
-    if ((url.hostname === "localhost" || url.hostname === "127.0.0.1") && url.protocol === "http:") return true;
+    if ((url.hostname === "localhost" || url.hostname === "127.0.0.1") && url.protocol === "http:")
+      return true;
     return false;
   } catch {
     return false;
@@ -119,12 +120,17 @@ export function createOAuthRouter(secret: string): Router {
     const redirectUris = body.redirect_uris as string[] | undefined;
 
     if (!redirectUris || !Array.isArray(redirectUris) || redirectUris.length === 0) {
-      res.status(400).json({ error: "invalid_client_metadata", error_description: "redirect_uris is required" });
+      res
+        .status(400)
+        .json({ error: "invalid_client_metadata", error_description: "redirect_uris is required" });
       return;
     }
     for (const uri of redirectUris) {
       if (!isValidRedirectUri(uri)) {
-        res.status(400).json({ error: "invalid_redirect_uri", error_description: `Invalid redirect URI: ${uri}` });
+        res.status(400).json({
+          error: "invalid_redirect_uri",
+          error_description: `Invalid redirect URI: ${uri}`,
+        });
         return;
       }
     }
@@ -144,7 +150,16 @@ export function createOAuthRouter(secret: string): Router {
   // --- Authorization Endpoint ---
   router.get("/oauth/authorize", (req: Request, res: Response) => {
     const q = req.query as Record<string, string>;
-    const { client_id, redirect_uri, state, scope, code_challenge, code_challenge_method, response_type, resource } = q;
+    const {
+      client_id,
+      redirect_uri,
+      state,
+      scope,
+      code_challenge,
+      code_challenge_method,
+      response_type,
+      resource,
+    } = q;
 
     if (response_type !== "code") {
       res.status(400).json({ error: "unsupported_response_type" });
@@ -155,7 +170,9 @@ export function createOAuthRouter(secret: string): Router {
       return;
     }
     if (!code_challenge || code_challenge_method !== "S256") {
-      res.status(400).json({ error: "invalid_request", error_description: "PKCE with S256 is required" });
+      res
+        .status(400)
+        .json({ error: "invalid_request", error_description: "PKCE with S256 is required" });
       return;
     }
 
@@ -184,7 +201,16 @@ export function createOAuthRouter(secret: string): Router {
 
   router.post("/oauth/authorize", (req: Request, res: Response) => {
     const body = req.body as Record<string, string>;
-    const { client_id, redirect_uri, state, scope, code_challenge, code_challenge_method, action, resource } = body;
+    const {
+      client_id,
+      redirect_uri,
+      state,
+      scope,
+      code_challenge,
+      code_challenge_method,
+      action,
+      resource,
+    } = body;
 
     if (!redirect_uri || !isValidRedirectUri(redirect_uri)) {
       res.status(400).json({ error: "invalid_request" });
@@ -236,17 +262,26 @@ export function createOAuthRouter(secret: string): Router {
   return router;
 }
 
-function handleAuthCodeGrant(req: Request, res: Response, body: Record<string, string>, secret: string): void {
+function handleAuthCodeGrant(
+  req: Request,
+  res: Response,
+  body: Record<string, string>,
+  secret: string,
+): void {
   const { code, code_verifier, client_id, redirect_uri } = body;
 
   if (!code || !code_verifier) {
-    res.status(400).json({ error: "invalid_request", error_description: "code and code_verifier are required" });
+    res
+      .status(400)
+      .json({ error: "invalid_request", error_description: "code and code_verifier are required" });
     return;
   }
 
   const payload = verifyJwt(code, secret);
   if (!payload || payload.type !== "authorization_code") {
-    res.status(400).json({ error: "invalid_grant", error_description: "Invalid or expired authorization code" });
+    res
+      .status(400)
+      .json({ error: "invalid_grant", error_description: "Invalid or expired authorization code" });
     return;
   }
 
@@ -264,8 +299,16 @@ function handleAuthCodeGrant(req: Request, res: Response, body: Record<string, s
   const sub = client_id || (payload.client_id as string) || "";
   const scope = (payload.scope as string) || "mcp:read";
 
-  const accessToken = signJwt({ sub, aud: `${base}/mcp`, scope, type: "access_token" }, secret, 3600);
-  const refreshToken = signJwt({ sub, aud: `${base}/mcp`, scope, type: "refresh_token" }, secret, 30 * 24 * 3600);
+  const accessToken = signJwt(
+    { sub, aud: `${base}/mcp`, scope, type: "access_token" },
+    secret,
+    3600,
+  );
+  const refreshToken = signJwt(
+    { sub, aud: `${base}/mcp`, scope, type: "refresh_token" },
+    secret,
+    30 * 24 * 3600,
+  );
 
   res.json({
     access_token: accessToken,
@@ -276,17 +319,26 @@ function handleAuthCodeGrant(req: Request, res: Response, body: Record<string, s
   });
 }
 
-function handleRefreshGrant(req: Request, res: Response, body: Record<string, string>, secret: string): void {
+function handleRefreshGrant(
+  req: Request,
+  res: Response,
+  body: Record<string, string>,
+  secret: string,
+): void {
   const { refresh_token } = body;
 
   if (!refresh_token) {
-    res.status(400).json({ error: "invalid_request", error_description: "refresh_token is required" });
+    res
+      .status(400)
+      .json({ error: "invalid_request", error_description: "refresh_token is required" });
     return;
   }
 
   const payload = verifyJwt(refresh_token, secret);
   if (!payload || payload.type !== "refresh_token") {
-    res.status(400).json({ error: "invalid_grant", error_description: "Invalid or expired refresh token" });
+    res
+      .status(400)
+      .json({ error: "invalid_grant", error_description: "Invalid or expired refresh token" });
     return;
   }
 
@@ -294,8 +346,16 @@ function handleRefreshGrant(req: Request, res: Response, body: Record<string, st
   const sub = (payload.sub as string) || "";
   const scope = (payload.scope as string) || "mcp:read";
 
-  const accessToken = signJwt({ sub, aud: `${base}/mcp`, scope, type: "access_token" }, secret, 3600);
-  const newRefresh = signJwt({ sub, aud: `${base}/mcp`, scope, type: "refresh_token" }, secret, 30 * 24 * 3600);
+  const accessToken = signJwt(
+    { sub, aud: `${base}/mcp`, scope, type: "access_token" },
+    secret,
+    3600,
+  );
+  const newRefresh = signJwt(
+    { sub, aud: `${base}/mcp`, scope, type: "refresh_token" },
+    secret,
+    30 * 24 * 3600,
+  );
 
   res.json({
     access_token: accessToken,

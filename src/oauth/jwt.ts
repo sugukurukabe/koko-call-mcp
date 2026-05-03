@@ -44,7 +44,9 @@ export function verifyJwt(token: string, secret: string): JwtPayload | null {
   if (parts.length !== 3) return null;
   const [h, p, s] = parts as [string, string, string];
 
-  const expected = Buffer.from(createHmac("sha256", secret).update(`${h}.${p}`).digest("base64url"));
+  const expected = Buffer.from(
+    createHmac("sha256", secret).update(`${h}.${p}`).digest("base64url"),
+  );
   const actual = Buffer.from(s);
   if (expected.length !== actual.length || !timingSafeEqual(expected, actual)) return null;
 

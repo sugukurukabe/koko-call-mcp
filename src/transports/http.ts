@@ -100,7 +100,13 @@ export function createHttpApp(): express.Express {
       const proto = req.header("x-forwarded-proto") || req.protocol;
       const host = req.header("x-forwarded-host") || req.header("host") || "localhost:8080";
       const base = `${proto}://${host}`;
-      res.status(401).set("WWW-Authenticate", `Bearer resource_metadata="${base}/.well-known/oauth-protected-resource/mcp"`).json({ error: "unauthorized" });
+      res
+        .status(401)
+        .set(
+          "WWW-Authenticate",
+          `Bearer resource_metadata="${base}/.well-known/oauth-protected-resource/mcp"`,
+        )
+        .json({ error: "unauthorized" });
       return;
     }
 
@@ -110,7 +116,7 @@ export function createHttpApp(): express.Express {
     if (oauthSecret && authHeader) {
       const match = /^Bearer\s+(.+)$/i.exec(authHeader.trim());
       const token = match?.[1];
-      if (token && token.includes(".")) {
+      if (token?.includes(".")) {
         const jwt = verifyJwt(token, oauthSecret);
         if (!jwt) {
           res.status(401).json({ error: "invalid_token" });
