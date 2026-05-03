@@ -13,7 +13,7 @@ PRs will be submitted in order, respecting the MIT license and existing design.
 
 ## 送信済み / Submitted
 
-### PR #1: `get_subsidy_overview` の `accepting` カウントバグ修正
+### GitHub PR #2: `get_subsidy_overview` の `accepting` カウントバグ修正
 
 - **ファイル**: `jgrants_mcp_server/core.py` L266–L303
 - **問題**: `by_deadline_period.accepting` が常に `0` のまま更新されない。`acceptance_start_datetime` と `acceptance_end_datetime` の両端チェックが実装されていない。
@@ -21,7 +21,7 @@ PRs will be submitted in order, respecting the MIT license and existing design.
 - **難易度**: 低（5行以内の修正）
 - **PR**: [#2](https://github.com/digital-go-jp/jgrants-mcp-server/pull/2)（マージ待ち）
 
-### PR #2: `stateless_http=True` 対応（Cloud Run / サーバレス互換）
+### GitHub PR #3: `stateless_http=True` 対応（Cloud Run / サーバレス互換）
 
 - **ファイル**: `jgrants_mcp_server/core.py` 末尾
 - **問題**: FastMCPはデフォルトで `stateless_http=False` でStreamable HTTPを起動する。Cloud Runなどステートレス環境ではセッション復元エラーが発生する。
@@ -29,7 +29,7 @@ PRs will be submitted in order, respecting the MIT license and existing design.
 - **難易度**: 低（2箇所の引数追加）
 - **PR**: [#3](https://github.com/digital-go-jp/jgrants-mcp-server/pull/3)（マージ待ち）
 
-### PR #3: 公式 Dockerfile 追加
+### GitHub PR #4: 公式 Dockerfile 追加
 
 - **ファイル**: `Dockerfile` (新規), `.dockerignore` (新規)
 - **問題**: Dockerイメージがなく、Cloud Run / Fly.io / Renderへのデプロイが手動になる。
@@ -37,11 +37,11 @@ PRs will be submitted in order, respecting the MIT license and existing design.
 - **難易度**: 低
 - **PR**: [#4](https://github.com/digital-go-jp/jgrants-mcp-server/pull/4)（マージ待ち）
 
-### PR #4: pytest 単体テスト追加
+### GitHub PR #5: pytest 単体テスト追加
 
 - **ファイル**: `tests/test_unit.py` (新規), `pytest.ini` (新規)
 - **問題**: 現状のテストはlive API接続前提の手動smokeのみ。CIで実行可能なテストがない。
-- **修正**: `_safe_path` と `get_subsidy_overview` を対象とした14件のユニットテスト。`test_accepting_count_currently_open` はPR #1のバグを証明するテスト（PR #1マージ前はFAIL、マージ後はPASS）。
+- **修正**: `_safe_path` と `get_subsidy_overview` を対象とした14件のユニットテスト。`test_accepting_count_currently_open` はPR #1のバグを証明するテスト（PR #2マージ前はFAIL、マージ後はPASS）。
 - **難易度**: 中（271行）
 - **PR**: [#5](https://github.com/digital-go-jp/jgrants-mcp-server/pull/5)（マージ待ち）
 
@@ -56,7 +56,7 @@ PRs will be submitted in order, respecting the MIT license and existing design.
 
 ---
 
-### PR #5: 英語版 README 翻訳
+### 候補A: 英語版 README 翻訳
 
 **問題**: READMEが日本語のみ。海外のMCPクライアントユーザーや、Anthropic/OpenAIのマーケットプレイスレビュアーが直接参照できない。
 
@@ -64,7 +64,7 @@ PRs will be submitted in order, respecting the MIT license and existing design.
 
 ---
 
-### PR #6: 業種・地域の Completion 実装
+### 候補B: 業種・地域の Completion 実装
 
 **問題**: `search_subsidies` の `industry`（業種）パラメータと `target_area_search`（地域）パラメータは、有効な値がAPIドキュメントで定義されているが、MCPの Completion プリミティブが実装されていない。LLMが誤った値を渡すリスクがある。
 

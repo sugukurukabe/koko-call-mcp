@@ -102,8 +102,8 @@ python -m jgrants_mcp_server.core
 LLMが実行する呼び出し：
 
 1. `search_bids(query="システム", prefecture="鹿児島県", category="役務", limit=10)`
-2. `rank_bids(bids=[...], company_profile={...})`
-3. `search_subsidies(keyword="DX", target_number_of_employees="21-50人", acceptance=1)`
+2. `rank_bids(query="システム", prefecture="鹿児島県", preferred_keywords=["DX","クラウド"], shortlist_limit=5)`
+3. `search_subsidies(keyword="DX", target_number_of_employees="50名以下", acceptance=1)`
 
 結果として得られるもの：
 - スコア順の入札案件リスト（締切・金額・推奨理由付き）
@@ -122,8 +122,8 @@ LLMが実行する呼び出し：
 
 1. `search_subsidies(keyword="AI システム", acceptance=1)`
 2. `search_bids(query="AI システム開発")`
-3. `rank_bids(bids=[...], company_profile={...})`
-4. `create_bid_review_packet(bid_key="...", additional_notes="補助金: ものづくり補助金（締切2026-06-30）を申請予定")`
+3. `rank_bids(query="AI システム開発", preferred_keywords=["機械学習"], shortlist_limit=3)`
+4. `create_bid_review_packet(bid_key="...")`
 
 ## デジタル庁OSSへの貢献
 

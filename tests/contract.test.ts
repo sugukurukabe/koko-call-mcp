@@ -29,6 +29,9 @@ describe("MCP contract", () => {
         "list_recent_bids",
         "get_bid_detail",
         "summarize_bids_by_org",
+        "save_search",
+        "check_saved_search",
+        "list_saved_searches",
       ]),
     );
 
