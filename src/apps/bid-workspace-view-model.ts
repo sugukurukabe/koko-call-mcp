@@ -1,4 +1,5 @@
 import type { Bid, BidSearchResult } from "../domain/bid.js";
+import { parseJapaneseDateToDate } from "../domain/date-range.js";
 
 export interface BidCardViewModel {
   key: string;
@@ -70,11 +71,8 @@ export function toBidCardViewModel(bid: Bid, now: Date = new Date()): BidCardVie
 }
 
 function computeDaysUntilDeadline(deadline: string | undefined, now: Date): number | null {
-  if (!deadline) {
-    return null;
-  }
-  const parsed = new Date(deadline);
-  if (Number.isNaN(parsed.getTime())) {
+  const parsed = parseJapaneseDateToDate(deadline);
+  if (!parsed) {
     return null;
   }
   return Math.ceil((parsed.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));

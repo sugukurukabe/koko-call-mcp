@@ -1,4 +1,5 @@
 import type { Bid, BidRankingResult, BidSearchResult, RankedBid } from "./bid.js";
+import { parseJapaneseDateToDate } from "./date-range.js";
 
 export interface BidRankingOptions {
   preferredKeywords?: string[];
@@ -170,12 +171,7 @@ function scoreProcedure(bid: Bid, reasons: string[]): number {
 }
 
 function parseKkjDate(value: string | undefined): Date | null {
-  if (!value) {
-    return null;
-  }
-  const normalized = value.replaceAll("/", "-").slice(0, 10);
-  const date = new Date(`${normalized}T00:00:00+09:00`);
-  return Number.isNaN(date.getTime()) ? null : date;
+  return parseJapaneseDateToDate(value);
 }
 
 function startOfDay(value: Date): Date {

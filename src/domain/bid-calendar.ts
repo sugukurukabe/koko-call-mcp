@@ -1,5 +1,6 @@
 import type { Attribution } from "./attribution.js";
 import type { Bid, BidCalendarExport, ExtractedBidRequirements } from "./bid.js";
+import { parseJapaneseDateToDate } from "./date-range.js";
 
 type CalendarEvent = BidCalendarExport["events"][number];
 
@@ -125,25 +126,15 @@ function toIcs(bid: Bid, events: CalendarEvent[], attribution: Attribution): str
 }
 
 function normalizeDate(value: string | undefined): string | null {
-  if (!value) {
+  const parsed = parseJapaneseDateToDate(value);
+  if (!parsed) {
     return null;
   }
-  const isoMatch = /(\d{4})[-/](\d{1,2})[-/](\d{1,2})/.exec(value);
-  if (isoMatch) {
-    const [, year, month, day] = isoMatch;
-    if (year && month && day) {
-      return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-    }
-  }
-  const warekiMatch = /(?:令和|R)\s*(\d{1,2})年\s*(\d{1,2})月\s*(\d{1,2})日/.exec(value);
-  if (warekiMatch) {
-    const [, era, month, day] = warekiMatch;
-    if (era && month && day) {
-      const westernYear = 2018 + Number(era);
-      return `${westernYear}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-    }
-  }
-  return null;
+  return [
+    String(parsed.getFullYear()).padStart(4, "0"),
+    String(parsed.getMonth() + 1).padStart(2, "0"),
+    String(parsed.getDate()).padStart(2, "0"),
+  ].join("-");
 }
 
 function addDays(date: string, days: number): string {
