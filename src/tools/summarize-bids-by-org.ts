@@ -16,7 +16,8 @@ export function registerSummarizeBidsByOrg(server: McpServer, client: KkjClient)
     "summarize_bids_by_org",
     {
       title: "発注機関別の入札傾向分析",
-      description: "発注機関名を指定して、カテゴリ別・公示種別別の入札傾向と直近案件を集計する。",
+      description:
+        "発注機関名を指定してカテゴリ別・公示種別別の入札傾向と直近案件を集計する。Summarize bid trends and recent notices for a specific procurement organization by category and procedure type. Ringkas tren tender dan pengumuman terbaru untuk instansi tertentu berdasarkan kategori.",
       inputSchema,
       outputSchema: OrganizationSummarySchema.shape,
       annotations: {

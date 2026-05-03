@@ -47,7 +47,7 @@ export function registerAssessBidQualification(server: McpServer, client: KkjCli
     {
       title: "入札資格適合MVP判定",
       description:
-        "1件の入札Keyについて、自社の対応地域、カテゴリ、資格、サービスキーワードと照合し、参加できそうかをMVP判定する。外部資格DB連携前の社内確認用で、最終判断ではない。",
+        "1件の入札について自社の地域・カテゴリ・資格と照合し参加可否をMVP判定する。Check bid participation eligibility against your company's region, category, and certifications. Periksa kelayakan mengikuti tender berdasarkan wilayah, kategori, dan sertifikasi perusahaan.",
       inputSchema,
       outputSchema: BidQualificationAssessmentSchema.shape,
       annotations: {

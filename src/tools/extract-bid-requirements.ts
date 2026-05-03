@@ -30,7 +30,7 @@ export function registerExtractBidRequirements(server: McpServer, client: KkjCli
     {
       title: "入札要件抽出MVP",
       description:
-        "1件の入札Keyについて、検索結果メタデータと添付資料情報から参加条件・期限・確認すべきPDFを構造化する。PDF本文は保存せず、Gemini / Document AI連携前の安全な要件整理として使う。",
+        "1件の入札の参加条件・期限・確認すべきPDFを構造化する。PDFは保存しない。Extract bid requirements, deadlines, and PDF checklist from metadata and attachments without storing files. Ekstrak persyaratan tender, tenggat waktu, dan daftar PDF tanpa menyimpan berkas.",
       inputSchema,
       outputSchema: BidRequirementExtractionSchema.shape,
       annotations: {

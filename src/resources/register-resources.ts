@@ -21,7 +21,8 @@ export function registerResources(server: McpServer, client: KkjClient): void {
     "attribution://kkj",
     {
       title: "KKJ Attribution",
-      description: "官公需情報ポータルサイトの出典情報。",
+      description:
+        "官公需情報ポータルサイトの出典情報。Attribution metadata for the KKJ procurement portal. Metadata atribusi untuk portal pengadaan KKJ.",
       mimeType: "application/json",
       annotations: {
         audience: ["user", "assistant"],
@@ -45,7 +46,8 @@ export function registerResources(server: McpServer, client: KkjClient): void {
     "docs://api-reference",
     {
       title: "KKJ API Reference",
-      description: "JP Bids MCPで使うKKJ APIパラメータの要約。",
+      description:
+        "JP Bids MCPで使うKKJ APIパラメータの要約。Summary of KKJ API parameters used by JP Bids MCP. Ringkasan parameter API KKJ yang digunakan JP Bids MCP.",
       mimeType: "text/markdown",
       annotations: {
         audience: ["assistant"],
@@ -76,7 +78,8 @@ export function registerResources(server: McpServer, client: KkjClient): void {
     "codes://prefectures",
     {
       title: "JIS X0401 Prefecture Codes",
-      description: "都道府県名とLG_Codeの対応表。",
+      description:
+        "都道府県名とLG_Codeの対応表。Mapping of prefecture names to JIS X0401 LG codes. Peta nama prefektur ke kode LG JIS X0401.",
       mimeType: "application/json",
       annotations: {
         audience: ["user", "assistant"],
@@ -101,7 +104,7 @@ export function registerResources(server: McpServer, client: KkjClient): void {
     {
       title: "Agentic Cloud Roadmap",
       description:
-        "Google-managed MCP、Gemini Enterprise、Workspace、Agentic Data Cloudに基づくAI Bid Radar拡張ロードマップ。",
+        "Google-managed MCP・Gemini Enterprise・Agentic Data Cloudに基づくAI Bid Radar拡張ロードマップ。AI Bid Radar expansion roadmap based on Google-managed MCP and Gemini Enterprise. Peta jalan perluasan AI Bid Radar berbasis Google-managed MCP dan Gemini Enterprise.",
       mimeType: "text/markdown",
       annotations: {
         audience: ["assistant"],
@@ -126,7 +129,7 @@ export function registerResources(server: McpServer, client: KkjClient): void {
     {
       title: "Agentic Security & Storage Readiness",
       description:
-        "Cloud Storage Smart Storage、Gemini Enterprise Agent Platform、Fraud Defense、multicloud securityに基づくAI Bid Radar readiness note。",
+        "Cloud Storage・Gemini Enterprise Agent Platform・Fraud Defenseに基づくAI Bid Radar readiness note。AI Bid Radar readiness note on agentic security, smart storage, and multicloud. Catatan kesiapan AI Bid Radar tentang keamanan agen, penyimpanan cerdas, dan multicloud.",
       mimeType: "text/markdown",
       annotations: {
         audience: ["assistant"],
@@ -155,7 +158,8 @@ export function registerResources(server: McpServer, client: KkjClient): void {
     }),
     {
       title: "Bid Detail Template",
-      description: "直近検索済みのbid_keyを補完し、該当Keyの検索導線を返す。",
+      description:
+        "直近検索済みのbid_keyを補完し、該当Keyの詳細を返す。Complete recent bid_key values and return cached bid details. Lengkapi nilai bid_key terbaru dan kembalikan detail tender yang di-cache.",
       mimeType: "application/json",
       annotations: {
         audience: ["assistant"],
@@ -200,7 +204,8 @@ export function registerResources(server: McpServer, client: KkjClient): void {
     }),
     {
       title: "Prefecture Code Template",
-      description: "LG_Codeから都道府県名を参照する。",
+      description:
+        "LG_Codeから都道府県名を参照する。Look up prefecture name from a JIS LG_Code. Cari nama prefektur berdasarkan kode LG JIS.",
       mimeType: "application/json",
       annotations: {
         audience: ["user", "assistant"],
@@ -232,7 +237,8 @@ export function registerResources(server: McpServer, client: KkjClient): void {
     }),
     {
       title: "Organization Summary Template",
-      description: "発注機関名から直近1年の入札傾向を読み取り専用コンテキストとして返す。",
+      description:
+        "発注機関名から直近1年の入札傾向を読み取り専用コンテキストとして返す。Return past-year bid trends for a procurement organization as read-only context. Kembalikan tren tender setahun terakhir untuk instansi pengadaan sebagai konteks hanya-baca.",
       mimeType: "application/json",
       annotations: {
         audience: ["assistant"],

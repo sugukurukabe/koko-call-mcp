@@ -33,7 +33,7 @@ export function registerExportBidShortlist(server: McpServer, client: KkjClient)
     {
       title: "入札検討shortlist CSV",
       description:
-        "官公需入札を検索・ランキングし、Google SheetsやExcelに貼れる社内検討用CSVを返す。スコア、判断、理由、リスク、次アクションを含める。",
+        "入札を検索・ランキングしてGoogle Sheets/Excel用のCSVを返す。スコア・判断・リスク・次アクション付き。Search and rank bids, then export a CSV shortlist for Google Sheets/Excel with scores and next actions. Cari, peringkat, dan ekspor shortlist CSV untuk Google Sheets/Excel.",
       inputSchema,
       outputSchema: BidShortlistExportSchema.shape,
       annotations: {

@@ -40,7 +40,7 @@ export function registerExplainBidFit(server: McpServer, client: KkjClient): voi
     {
       title: "入札追跡判断の説明",
       description:
-        "1件の入札Keyについて、追うべきか、要確認か、見送るべきかを理由・リスク・次アクション付きで説明する。最終判断ではなく公式書類確認のための社内検討メモとして使う。",
+        "1件の入札について追うべきか・要確認か・見送るべきかを理由・リスク・次アクション付きで説明する。Explain bid fit with rationale, risks, and next actions for one bid. Jelaskan kesesuaian tender dengan alasan, risiko, dan langkah selanjutnya.",
       inputSchema,
       outputSchema: BidFitExplanationSchema.shape,
       annotations: {

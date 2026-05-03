@@ -20,7 +20,8 @@ export function registerPrompts(server: McpServer): void {
     "morning_bid_briefing",
     {
       title: "朝の入札ブリーフィング",
-      description: "指定地域・カテゴリの直近入札を営業朝会向けに要約する。",
+      description:
+        "指定地域・カテゴリの直近入札を営業朝会向けに要約する。Summarize recent bids by region and category for morning sales briefing. Ringkas tender terbaru berdasarkan wilayah dan kategori untuk briefing pagi tim penjualan.",
       argsSchema: {
         prefecture: prefectureCompletable.optional(),
         category: categoryCompletable.optional(),
@@ -44,7 +45,8 @@ export function registerPrompts(server: McpServer): void {
     "competitor_radar",
     {
       title: "競合・発注機関レーダー",
-      description: "発注機関名を軸に過去案件の傾向を整理する。",
+      description:
+        "発注機関名を軸に過去案件の傾向を整理する。Analyze past bid trends for a specific procurement organization. Analisis tren tender masa lalu untuk instansi pengadaan tertentu.",
       argsSchema: {
         organization_name: z.string().min(1),
         since: z.string().optional().describe("YYYY-MM-DD。未指定なら過去1年。"),
@@ -67,7 +69,8 @@ export function registerPrompts(server: McpServer): void {
     "bid_due_alert",
     {
       title: "締切間近の入札確認",
-      description: "提出期限・開札日が近い案件を洗い出す。",
+      description:
+        "提出期限・開札日が近い案件を洗い出す。Find bids with upcoming submission deadlines or opening dates. Temukan tender dengan tenggat waktu pengiriman atau tanggal pembukaan yang mendekat.",
       argsSchema: {
         prefecture: prefectureCompletable.optional(),
         category: categoryCompletable.optional(),

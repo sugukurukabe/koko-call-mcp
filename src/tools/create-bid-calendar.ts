@@ -31,7 +31,7 @@ export function registerCreateBidCalendar(server: McpServer, client: KkjClient):
     {
       title: "入札締切カレンダーICS",
       description:
-        "1件の入札Keyについて、提出期限、社内確認日、開札日、納入期限をGoogle Calendar/Outlookに取り込めるICS形式で返す。検索結果に無い質問期限は捏造せずmissingDatesに入れる。",
+        "入札の提出期限・開札日・納入期限をGoogle Calendar/OutlookへインポートできるICS形式で返す。Generate an ICS calendar file with bid deadlines for Google Calendar or Outlook. Buat file kalender ICS untuk tenggat waktu tender di Google Calendar atau Outlook.",
       inputSchema,
       outputSchema: BidCalendarExportSchema.shape,
       annotations: {

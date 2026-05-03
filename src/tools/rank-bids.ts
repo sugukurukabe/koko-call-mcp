@@ -38,7 +38,7 @@ export function registerRankBids(server: McpServer, client: KkjClient): void {
     {
       title: "追うべき入札ランキング",
       description:
-        "官公需入札を検索し、AI Bid RadarのMVPとして追うべき順にスコアリングする。参加可否の最終判断ではなく、公式書類・資格・過去落札を確認するための候補整理に使う。",
+        "官公需入札を検索し、追うべき順にスコアリングする。候補整理用であり参加可否の最終判断ではない。Search and score bids by follow-up priority using AI Bid Radar. Cari dan peringkat tender berdasarkan prioritas tindak lanjut dengan AI Bid Radar.",
       inputSchema: rankBidsInputSchema,
       outputSchema: BidRankingResultSchema.shape,
       annotations: {

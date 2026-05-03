@@ -44,7 +44,7 @@ export function registerSearchBids(server: McpServer, client: KkjClient): void {
     {
       title: "官公需入札検索",
       description:
-        "日本全国の官公需入札情報を検索する。全文検索は query、件名だけの絞り込みは project_name、発注機関は organization_name を使う。公告日、入札書提出期限、開札日、納入期限日でも絞り込める。",
+        "日本全国の官公需入札情報を検索する。全文検索は query、件名は project_name、発注機関は organization_name を使う。Search Japanese public procurement bids by keyword, project name, or organization. Cari tender pengadaan pemerintah Jepang berdasarkan kata kunci, nama proyek, atau instansi.",
       inputSchema: searchBidsInputSchema,
       outputSchema: BidSearchResultSchema.shape,
       annotations: {

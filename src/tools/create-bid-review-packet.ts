@@ -35,7 +35,7 @@ export function registerCreateBidReviewPacket(server: McpServer, client: KkjClie
     {
       title: "入札社内検討パック",
       description:
-        "1件の入札Keyについて、判断サマリー、理由、リスク、要件、締切、次アクションをMarkdownの社内検討メモとして返す。Google Docs/Notion/稟議への貼り付けを想定する。",
+        "入札1件の判断サマリー・理由・リスク・要件・締切・次アクションをMarkdown社内メモとして返す。Generate a Markdown review packet with decision summary, risks, and next actions for one bid. Buat ringkasan tinjauan Markdown dengan keputusan, risiko, dan langkah selanjutnya untuk satu tender.",
       inputSchema,
       outputSchema: BidReviewPacketSchema.shape,
       annotations: {
