@@ -69,3 +69,8 @@ Selama beta (sampai akhir Juni 2026), Pro juga gratis. Tidak perlu API key.
 ## Sumber Data
 
 API Pencarian Portal Informasi Pengadaan Pemerintah, Badan UKM Jepang. Server ini tidak menyimpan dokumen lampiran tender. Selalu verifikasi dengan dokumen pengadaan resmi sebelum mengajukan penawaran.
+
+## Kebijakan / Policies / ポリシー
+
+- [Kebijakan Privasi / Privacy Policy](https://mcp.bid-jp.com/privacy)
+- [Ketentuan Layanan / Terms of Service](https://mcp.bid-jp.com/terms)

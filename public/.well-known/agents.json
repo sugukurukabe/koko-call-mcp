@@ -6,6 +6,7 @@
   "homepage": "https://mcp.bid-jp.com",
   "repository": "https://github.com/sugukurukabe/koko-call-mcp",
   "privacy_policy": "https://mcp.bid-jp.com/privacy",
+  "terms_of_service": "https://mcp.bid-jp.com/terms",
   "description": {
     "ja": "日本の官公需入札情報をMCPで検索・AI分析するサーバー。",
     "en": "Search and AI-analyze Japanese government procurement bids through MCP.",
@@ -52,7 +53,7 @@
     "legal_disclaimer": "Results are reference information, not legal or bidding advice.",
     "sampling": "The optional MCP Apps view may invoke host-side sampling/createMessage. `extract_bid_requirements` may also use host-side sampling for HTML/text extraction when `fetch_documents=true`; native PDF extraction requires opt-in Vertex AI direct mode.",
     "tasks": "Not implemented. Current searches are short-running and synchronous.",
-    "authentication": "The stdio package is local and read-only. Remote authentication will be designed separately if enterprise access control becomes necessary."
+    "authentication": "Remote endpoint supports OAuth 2.0 with Dynamic Client Registration (RFC 7591) and PKCE S256, per MCP authorization spec 2025-11-25. Stdio package is local and unauthenticated."
   },
   "security": {
     "prompt_injection": "Upstream bid text is treated as untrusted data and returned as structured content.",

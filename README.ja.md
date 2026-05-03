@@ -69,3 +69,8 @@ npx --yes jp-bids-export --prefecture 鹿児島県 --category 役務 --query シ
 ## データ出典
 
 中小企業庁 官公需情報ポータルサイト 検索API。このサーバーは入札情報の添付ファイルを保存しません。入札決定前に必ず公式調達書類を確認してください。
+
+## ポリシー / Policies / Kebijakan
+
+- [プライバシーポリシー / Privacy Policy](https://mcp.bid-jp.com/privacy)
+- [利用規約 / Terms of Service](https://mcp.bid-jp.com/terms)

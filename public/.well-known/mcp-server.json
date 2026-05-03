@@ -6,8 +6,15 @@
   "repository": "https://github.com/sugukurukabe/koko-call-mcp",
   "license": "Apache-2.0",
   "privacy_policy": "https://mcp.bid-jp.com/privacy",
+  "terms_of_service": "https://mcp.bid-jp.com/terms",
   "endpoints": {
     "mcp": "https://mcp.bid-jp.com/mcp"
+  },
+  "authentication": {
+    "type": "oauth2",
+    "authorization_servers": ["https://mcp.bid-jp.com"],
+    "dynamic_client_registration_supported": true,
+    "pkce_methods": ["S256"]
   },
   "capabilities": {
     "tools": {
