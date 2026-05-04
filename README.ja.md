@@ -1,5 +1,9 @@
 # JP Bids MCP — 日本語ガイド
 
+[![Smithery](https://smithery.ai/badge/a-kabe-1qio/jp-bids-mcp)](https://smithery.ai/servers/a-kabe-1qio/jp-bids-mcp)
+[![Glama](https://glama.ai/mcp/servers/badge)](https://glama.ai/mcp/servers)
+[![mcp.so](https://img.shields.io/badge/mcp.so-listed-brightgreen)](https://mcp.so)
+
 ## 概要 / Overview / Gambaran Umum
 
 JP Bids MCP は、中小企業庁「官公需情報ポータルサイト」の入札情報をModel Context Protocolで検索・AI分析するサーバーです。

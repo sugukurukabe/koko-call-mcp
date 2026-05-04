@@ -1,5 +1,9 @@
 # JP Bids MCP — Panduan Bahasa Indonesia
 
+[![Smithery](https://smithery.ai/badge/a-kabe-1qio/jp-bids-mcp)](https://smithery.ai/servers/a-kabe-1qio/jp-bids-mcp)
+[![Glama](https://glama.ai/mcp/servers/badge)](https://glama.ai/mcp/servers)
+[![mcp.so](https://img.shields.io/badge/mcp.so-listed-brightgreen)](https://mcp.so)
+
 ## Gambaran Umum / Overview / 概要
 
 JP Bids MCP adalah server MCP untuk mencari dan menganalisis pengumuman pengadaan pemerintah Jepang dari portal KKJ (Badan UKM).
