@@ -9,6 +9,7 @@ import { parsePortEnv, parsePositiveNumberEnv } from "../lib/env.js";
 import { parseAllowedOrigins, validateOrigin } from "../lib/http.js";
 import { createJpBidsServer } from "../mcp.js";
 import { verifyJwt } from "../oauth/jwt.js";
+import { VERSION } from "../lib/version.js";
 import { createOAuthRouter } from "../oauth/router.js";
 
 const supportedProtocolVersions = new Set(["2025-11-25"]);
@@ -106,7 +107,7 @@ export function createHttpApp(): express.Express {
   app.get("/stats", (_req, res) => {
     res.status(200).json({
       service: "JP Bids MCP",
-      version: "0.7.1",
+      version: VERSION,
       startedAt,
       uptimeSeconds: Math.floor(process.uptime()),
       mcpRequestCount: requestCount,

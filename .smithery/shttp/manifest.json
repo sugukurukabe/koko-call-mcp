@@ -7,7 +7,7 @@
       "serverInfo": {
         "name": "JP Bids MCP",
         "title": "JP Bids MCP",
-        "version": "0.7.1",
+        "version": "0.7.2",
         "description": "Japan government procurement bid search through the Model Context Protocol."
       },
       "tools": [

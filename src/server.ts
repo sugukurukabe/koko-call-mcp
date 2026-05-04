@@ -1,8 +1,8 @@
 #!/usr/bin/env node
+import { VERSION } from "./lib/version.js";
 import { startHttpServer } from "./transports/http.js";
 import { startStdioServer } from "./transports/stdio.js";
 
-const version = "0.7.0";
 const args = new Set(process.argv.slice(2));
 
 if (args.has("--help") || args.has("-h")) {
@@ -34,7 +34,7 @@ if (args.has("--help") || args.has("-h")) {
 }
 
 if (args.has("--version") || args.has("-v")) {
-  process.stdout.write(`${version}\n`);
+  process.stdout.write(`${VERSION}\n`);
   process.exit(0);
 }
 

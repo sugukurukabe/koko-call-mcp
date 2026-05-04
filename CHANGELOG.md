@@ -8,11 +8,9 @@
 - **相互運用セクション**: README 3言語版（英/日/印）に「Interoperability / 相互運用」セクションを追加。
 - **docs/integrations/jgrants.md**: 責任分界・ツール対応表・一次情報リンクをまとめた技術リファレンスを追加。
 - **server.json**: `interoperability.complementary_servers` フィールドに Jグランツ MCP サーバーを宣言。
-- **docs/contributions/jgrants-roadmap.md**: Jグランツ MCP OSS への貢献ロードマップ（6本の PR 候補）を公開。
-- **Zenn草稿**: `docs/articles/zenn-jp-bids-jgrants.md` に連携の意義・デモ・貢献PRを解説する記事草稿を追加。
+- **Zenn草稿**: `docs/articles/zenn-jp-bids-jgrants.md` に連携の意義とデモを解説する記事草稿を追加。
 - **freee MCP 連携ドキュメント追加**: freee 会計 / 人事労務 / 請求書 MCP と JP Bids MCP を組み合わせる4つのワークフロー（入札前資金確認・落札後売上登録・請求書生成・費用対効果分析）と設定ファイルを公開（`examples/freee-integration/`）。
 - **server.json**: `interoperability.complementary_servers` に freee MCP を追加。
-- **デジタル庁 Jグランツ MCP へ4本のPR送信**: バグ修正・`stateless_http=True`・Dockerfile・pytest ユニットテスト14件。
 - **品質**: biome format / optional chain 修正、typedoc 再生成、`.well-known` メタデータのバージョン統一。
 - **保存検索＋新着通知**: `save_search` / `check_saved_search` / `list_saved_searches` の3ツールを追加（14→17ツール）。Webhook拡張の起点。
 - **ホワイトラベル対応**: 環境変数6つでブランド名・URL・組織名を切替可能（`src/lib/branding.ts`）。コード変更不要でOEM提供に対応。
@@ -155,11 +153,9 @@
 - **Interoperability section**: Added "Interoperability / 相互運用" section to all three README language variants.
 - **docs/integrations/jgrants.md**: Added technical reference with responsibility boundary, tool mapping, and primary-source links.
 - **server.json**: Declared J-Grants MCP in `interoperability.complementary_servers`.
-- **docs/contributions/jgrants-roadmap.md**: Published a contribution roadmap (6 PR candidates) for the J-Grants MCP OSS.
 - **Zenn draft**: Added integration article draft at `docs/articles/zenn-jp-bids-jgrants.md`.
 - **freee MCP integration docs**: Published 4 procurement-to-accounting workflows (financial readiness check, post-award deal entry, invoice generation, bid expense ROI analysis) with config files (`examples/freee-integration/`).
 - **server.json**: Added freee MCP to `interoperability.complementary_servers`.
-- **4 PRs to Digital Agency's J-Grants MCP**: Bug fix, `stateless_http=True`, Dockerfile, pytest unit tests (14 cases).
 - **Quality**: biome format fixes, optional chain lint fix, typedoc regeneration, `.well-known` metadata version alignment.
 - **Saved Search + Alerts**: Added `save_search` / `check_saved_search` / `list_saved_searches` (14→17 tools). Foundation for Webhook notifications.
 - **White-label support**: 6 environment variables to switch brand name, URL, and organization (`src/lib/branding.ts`). OEM-ready without code changes.
@@ -302,11 +298,9 @@
 - **Bagian interoperabilitas**: Menambahkan bagian "Interoperabilitas / Interoperability / 相互運用" ke tiga varian bahasa README.
 - **docs/integrations/jgrants.md**: Menambahkan referensi teknis dengan batasan tanggung jawab, pemetaan alat, dan tautan sumber primer.
 - **server.json**: Mendeklarasikan J-Grants MCP di `interoperability.complementary_servers`.
-- **docs/contributions/jgrants-roadmap.md**: Menerbitkan peta jalan kontribusi (6 kandidat PR) untuk OSS J-Grants MCP.
 - **Draf Zenn**: Menambahkan draf artikel integrasi di `docs/articles/zenn-jp-bids-jgrants.md`.
 - **Dokumentasi integrasi freee MCP**: Menerbitkan 4 alur kerja pengadaan-ke-akuntansi (pemeriksaan kesiapan keuangan, pencatatan transaksi, pembuatan faktur, analisis ROI biaya tender) dengan file konfigurasi (`examples/freee-integration/`).
 - **server.json**: Menambahkan freee MCP ke `interoperability.complementary_servers`.
-- **4 PR ke J-Grants MCP Badan Digital**: Perbaikan bug, `stateless_http=True`, Dockerfile, pytest unit test (14 kasus).
 - **Kualitas**: Perbaikan format biome, perbaikan lint optional chain, regenerasi typedoc, penyelarasan versi metadata `.well-known`.
 - **Pencarian Tersimpan + Peringatan**: Menambahkan `save_search` / `check_saved_search` / `list_saved_searches` (14→17 alat). Fondasi untuk notifikasi Webhook.
 - **Dukungan white-label**: 6 variabel lingkungan untuk mengganti nama merek, URL, dan organisasi (`src/lib/branding.ts`). Siap OEM tanpa perubahan kode.

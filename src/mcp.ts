@@ -3,6 +3,7 @@ import { KkjClient, type KkjClientOptions } from "./api/kkj-client.js";
 import { registerSearchResultsApp } from "./apps/register-search-app.js";
 import type { Tier } from "./lib/auth.js";
 import { getBranding } from "./lib/branding.js";
+import { VERSION } from "./lib/version.js";
 import { registerPrompts } from "./prompts/register-prompts.js";
 import { registerResources } from "./resources/register-resources.js";
 import { registerTools } from "./tools/register-tools.js";
@@ -23,16 +24,18 @@ export function createJpBidsServer(options: CreateJpBidsServerOptions = {}): Mcp
     {
       name: branding.serviceName,
       title: branding.serviceName,
-      version: "0.7.1",
+      version: VERSION,
       description: "Japan government procurement bid search through the Model Context Protocol.",
     },
     {
+      // 宣言する capability は実装が伴うものだけに限定する（mcp-reference-build 原則）
+      // Only declare capabilities the server actually implements (mcp-reference-build principle)
+      // Hanya nyatakan kapabilitas yang benar-benar diimplementasikan server (prinsip mcp-reference-build)
       capabilities: {
         tools: { listChanged: false },
         resources: { listChanged: false, subscribe: false },
         prompts: { listChanged: false },
         completions: {},
-        logging: {},
       },
       instructions:
         tier === "pro"

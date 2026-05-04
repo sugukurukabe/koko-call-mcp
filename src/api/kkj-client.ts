@@ -4,6 +4,7 @@ import { createAttribution } from "../domain/attribution.js";
 import type { Bid, BidSearchResult } from "../domain/bid.js";
 import { UpstreamError, UserInputError } from "../lib/errors.js";
 import { TokenBucketRateLimiter } from "../lib/rate-limiter.js";
+import { VERSION } from "../lib/version.js";
 
 export interface KkjSearchParams {
   Query?: string;
@@ -53,7 +54,7 @@ export class KkjClient {
   constructor(options: KkjClientOptions = {}) {
     this.fetchImpl = options.fetchImpl ?? fetch;
     this.endpoint = options.endpoint ?? defaultEndpoint;
-    this.userAgent = options.userAgent ?? "JP Bids MCP/0.7.0";
+    this.userAgent = options.userAgent ?? `JP Bids MCP/${VERSION}`;
     this.timeoutMs = options.timeoutMs ?? 10_000;
     this.cache = new LRUCache<string, BidSearchResult>({
       max: 500,

@@ -40,7 +40,7 @@ function App() {
     appInfo: {
       name: "jp-bids-workspace",
       title: "AI Bid Workspace",
-      version: "0.7.0",
+      version: "0.7.2",
       description:
         "Interactive workspace for JP Bids MCP — search, rank, extract, qualify, review.",
     },

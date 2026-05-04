@@ -3,6 +3,7 @@
 // Modul penagihan penggunaan ekstraksi PDF menggunakan Stripe Meters
 
 import Stripe from "stripe";
+import { VERSION } from "./version.js";
 
 // Stripe Meter イベント名（Stripeダッシュボードで作成するMeterのAPI名に対応）
 // Stripe Meter event name (matches the Meter API name created in Stripe dashboard)
@@ -24,7 +25,7 @@ function getStripe(): Stripe | null {
       apiVersion: "2026-04-22.dahlia",
       appInfo: {
         name: "JP Bids MCP",
-        version: "0.7.0",
+        version: VERSION,
         url: "https://mcp.bid-jp.com",
       },
     });

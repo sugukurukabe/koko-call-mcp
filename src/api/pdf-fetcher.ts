@@ -4,6 +4,7 @@ import { isIP } from "node:net";
 import { LRUCache } from "lru-cache";
 import { parsePositiveNumberEnv } from "../lib/env.js";
 import { UpstreamError, UserInputError } from "../lib/errors.js";
+import { VERSION } from "../lib/version.js";
 
 export interface FetchedDocument {
   sourceUri: string;
@@ -155,7 +156,7 @@ async function fetchWithTimeout(
       signal: controller.signal,
       headers: {
         Accept: "application/pdf,text/html;q=0.8,*/*;q=0.1",
-        "User-Agent": "JP Bids MCP PDF Fetcher/0.7.0",
+        "User-Agent": `JP Bids MCP PDF Fetcher/${VERSION}`,
       },
     });
   } catch (error) {
