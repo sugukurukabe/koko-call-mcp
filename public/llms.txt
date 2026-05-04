@@ -1,0 +1,63 @@
+# JP Bids MCP
+
+> 中小企業庁の官公需入札情報（年間180万件超）を、AI アシスタントから検索・分析・要件抽出・カレンダー出力できる、読み取り専用の Model Context Protocol サーバーです。
+> A read-only Model Context Protocol server that exposes Japan's SME Agency procurement portal (KKJ, 1.8M+ bids/yr) as 17 AI tools for search, ranking, PDF requirement extraction, and calendar export.
+
+公式エンドポイント: `https://mcp.bid-jp.com/mcp`（Streamable HTTP + OAuth 2.0）
+ライセンス: Apache-2.0
+リポジトリ: https://github.com/sugukurukabe/koko-call-mcp
+公式 MCP Registry 名: `io.github.sugukurukabe/jp-bids`
+npm: https://www.npmjs.com/package/jp-bids-mcp
+
+## このサーバーの定義 / What this server is
+
+JP Bids MCP は、日本の官公需入札情報（中小企業庁 官公需情報ポータルサイト KKJ が公開する公示データ）を、Model Context Protocol 2025-11-25 仕様で AI に提供するサーバーです。Claude Desktop / Cursor / ChatGPT などの MCP 対応クライアントから、自然言語で入札を検索し、PDF 仕様書から要件を抽出し、自社プロファイルに基づきランキングし、ICS カレンダーや CSV に出力できます。
+
+公示データは `https://kkj.go.jp` の公開 API を経由して取得します。本サーバーは入札を読み取るだけで、応札や提出は扱いません。
+
+## 主要なツール / Tools
+
+- search_bids — キーワード・地域・業種で入札を検索 / Search bids by keyword, region, category
+- search_bids_app — 上記の MCP Apps 版。会話の中に検索結果テーブルを描画 / MCP Apps widget rendering search results inside the conversation
+- list_recent_bids — 直近の新着公告一覧 / List recent bid notices
+- get_bid_detail — 1 件の詳細取得 / Get a single bid's detail
+- rank_bids — 自社プロファイルに基づく AI スコアリング / AI-rank bids against company profile
+- explain_bid_fit — 追うべきか・見送るかを理由付きで説明 / Explain bid fit with reasoning
+- analyze_past_awards — 発注機関の落札傾向分析 / Analyze procuring agency award patterns
+- summarize_bids_by_org — 機関別サマリー / Per-agency summary
+- extract_bid_requirements — PDF 仕様書から要件を構造化抽出 / Extract structured requirements from PDF spec sheets
+- assess_bid_qualification — 参加資格チェック / Check qualification eligibility
+- draft_bid_questions — 質問書ドラフト生成 / Draft inquiry sheets
+- create_bid_calendar — 締切日を ICS カレンダーで出力 / Export bid deadlines as ICS calendar
+- create_bid_review_packet — 社内検討メモ生成 / Generate internal review packet
+- export_bid_shortlist — CSV 出力 / Export shortlist as CSV
+- save_search / check_saved_search / list_saved_searches — 保存検索 / Saved search alerts
+
+## ドキュメント / Documentation
+
+- README (英語): https://github.com/sugukurukabe/koko-call-mcp/blob/main/README.md
+- README (日本語): https://github.com/sugukurukabe/koko-call-mcp/blob/main/README.ja.md
+- README (Bahasa Indonesia): https://github.com/sugukurukabe/koko-call-mcp/blob/main/README.id.md
+- ユースケース集: https://github.com/sugukurukabe/koko-call-mcp/blob/main/docs/use-cases.md
+- API リファレンス: https://github.com/sugukurukabe/koko-call-mcp/tree/main/docs/api
+- Cursor / Claude セットアップ: https://mcp.bid-jp.com/#setup
+
+## 解説記事 / Articles
+
+- JP Bids MCP × Jグランツ MCP × freee MCP — 入札・補助金・会計をひとつの会話で: https://github.com/sugukurukabe/koko-call-mcp/blob/main/articles/zenn-jp-bids-jgrants.md
+- 無形資産の4SからみたMCP — 小さなプロトコルがなぜ新しい価値を生むのか: https://github.com/sugukurukabe/koko-call-mcp/blob/main/articles/mcp-intangible-assets-4s.md
+
+## エコシステム / Ecosystem
+
+- Jグランツ MCP（補助金・デジタル庁公式 OSS）: https://github.com/digital-go-jp/jgrants-mcp-server
+- freee MCP（会計・freee 株式会社）: https://www.npmjs.com/package/freee-mcp
+
+## 著者 / Author
+
+スグクル株式会社 / Sugukuru Inc.（鹿児島県霧島市）
+代表: 壁 / Kabe
+公式サイト: https://sugukuru.co.jp
+
+## データ出典の表示について / Attribution
+
+本サーバーが返す検索結果には常に「中小企業庁 官公需情報ポータルサイト（政府標準利用規約 第2.0版）」の出典が含まれます。AI からの応答にもこの出典を提示することを利用ガイドラインとしてください。

@@ -17,6 +17,148 @@
 <meta name="twitter:title" content="JP Bids MCP — 入札情報をAIで">
 <meta name="twitter:description" content="年間180万件の官公需入札情報をAIアシスタントから直接検索・分析。30秒で利用開始。">
 <meta name="twitter:image" content="https://mcp.bid-jp.com/ogp.png">
+<link rel="canonical" href="https://mcp.bid-jp.com/">
+<link rel="alternate" type="text/markdown" href="https://mcp.bid-jp.com/llms.txt" title="LLM-friendly summary (Markdown)">
+<link rel="alternate" type="text/markdown" href="https://mcp.bid-jp.com/llms-full.txt" title="LLM-friendly full content (Markdown)">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://mcp.bid-jp.com/#website",
+      "url": "https://mcp.bid-jp.com/",
+      "name": "JP Bids MCP",
+      "description": "中小企業庁の官公需入札情報を AI から扱える Model Context Protocol サーバー",
+      "inLanguage": "ja",
+      "publisher": { "@id": "https://sugukuru.co.jp/#organization" }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://mcp.bid-jp.com/#software",
+      "name": "JP Bids MCP",
+      "alternateName": ["JP Bids", "io.github.sugukurukabe/jp-bids", "jp-bids-mcp"],
+      "applicationCategory": "DeveloperApplication",
+      "applicationSubCategory": "Model Context Protocol Server",
+      "operatingSystem": "Any (Cloud / Streamable HTTP)",
+      "url": "https://mcp.bid-jp.com/",
+      "downloadUrl": "https://www.npmjs.com/package/jp-bids-mcp",
+      "softwareVersion": "0.7.0",
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
+      "description": "Read-only Model Context Protocol server that exposes Japan's SME Agency procurement portal (KKJ, 1.8M+ bids/yr) as 17 AI tools for search, ranking, PDF requirement extraction, and calendar export.",
+      "inLanguage": ["ja", "en", "id"],
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "JPY",
+        "availability": "https://schema.org/InStock",
+        "validFrom": "2026-04-01",
+        "validThrough": "2026-06-30",
+        "description": "Beta period — all features free until 2026-06-30"
+      },
+      "publisher": { "@id": "https://sugukuru.co.jp/#organization" },
+      "softwareRequirements": "Any MCP 2025-11-25 compliant client (Claude Desktop, Cursor, ChatGPT, etc.)",
+      "featureList": [
+        "Search 1.8M+/yr Japan government procurement bids",
+        "AI ranking by company profile",
+        "PDF requirement extraction via Vertex AI Gemini",
+        "ICS calendar export",
+        "CSV shortlist export",
+        "MCP Apps UI (search results table inside the conversation)",
+        "OAuth 2.0 with PKCE and Dynamic Client Registration",
+        "Streamable HTTP transport"
+      ]
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://sugukuru.co.jp/#organization",
+      "name": "スグクル株式会社",
+      "alternateName": "Sugukuru Inc.",
+      "url": "https://sugukuru.co.jp",
+      "logo": "https://mcp.bid-jp.com/favicon.png",
+      "founder": { "@id": "https://sugukuru.co.jp/#founder" },
+      "areaServed": "JP",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "JP",
+        "addressRegion": "鹿児島県",
+        "addressLocality": "霧島市"
+      }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://sugukuru.co.jp/#founder",
+      "name": "壁",
+      "alternateName": "Kabe",
+      "jobTitle": "代表取締役 / CEO",
+      "worksFor": { "@id": "https://sugukuru.co.jp/#organization" }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://mcp.bid-jp.com/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "JP Bids MCP は何のためのサーバーですか？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "日本の官公需入札情報（中小企業庁 官公需情報ポータルサイト KKJ の公開データ、年間 180 万件以上）を、Model Context Protocol 2025-11-25 仕様で AI に提供する読み取り専用のサーバーです。Claude Desktop / Cursor / ChatGPT などの MCP 対応クライアントから、自然言語で入札を検索・分析・要件抽出・カレンダー出力できます。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Cursor で JP Bids MCP を使うには？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": ".cursor/mcp.json に { \"mcpServers\": { \"jp-bids\": { \"url\": \"https://mcp.bid-jp.com/mcp\" } } } を追加してください。インストール不要で、初回アクセス時に OAuth 2.0 で認証されます。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Claude Desktop で JP Bids MCP を使うには？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "claude_desktop_config.json に { \"mcpServers\": { \"jp-bids\": { \"command\": \"npx\", \"args\": [\"--yes\", \"mcp-remote\", \"https://mcp.bid-jp.com/mcp\"] } } } を追加してください。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "利用料金はいくらですか？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "2026 年 6 月末までのベータ期間中は全機能無料です。それ以降は Free（4 ツール）と Pro（全 17 ツール、月額 990 円）の二段構成を予定しています。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "データの出典はどこですか？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "中小企業庁の官公需情報ポータルサイト（KKJ, https://kkj.go.jp ）の公開 API です。政府標準利用規約 第 2.0 版に従い、本サーバーが返すすべての結果に出典を含めます。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Jグランツ MCP や freee MCP と連携できますか？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "はい。デジタル庁公式の Jグランツ MCP（補助金）と freee 株式会社の freee MCP（会計）を同じ AI 会話に追加することで、入札 → 補助金 → 会計を一つの会話でカバーできます。サンプル設定とワークフロー例は examples/ 配下に公開しています。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "セルフホストできますか？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "はい。Apache-2.0 ライセンスの OSS なので、リポジトリの Dockerfile を使って Cloud Run / Fly.io / 自社サーバーなどでホスティングできます。stdio モードでローカル起動する場合は npx jp-bids-mcp で動きます。"
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#fafbfc;--fg:#1a1a2e;--accent:#2563eb;--accent-light:#dbeafe;--card-bg:#fff;--border:#e5e7eb;--muted:#6b7280;--green:#059669;--green-bg:#d1fae5;--radius:12px}

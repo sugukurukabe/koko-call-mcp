@@ -74,6 +74,18 @@ export function createHttpApp(): express.Express {
     res.sendFile("terms.html", { root: "public" });
   });
 
+  app.get("/robots.txt", (_req, res) => {
+    res.type("text/plain").sendFile("robots.txt", { root: "public" });
+  });
+
+  app.get("/llms.txt", (_req, res) => {
+    res.type("text/markdown; charset=utf-8").sendFile("llms.txt", { root: "public" });
+  });
+
+  app.get("/llms-full.txt", (_req, res) => {
+    res.type("text/markdown; charset=utf-8").sendFile("llms-full.txt", { root: "public" });
+  });
+
   app.get("/", (_req, res) => {
     res.sendFile("index.html", { root: "public" });
   });
