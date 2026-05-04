@@ -158,7 +158,7 @@ npx jp-bids-mcp
 - 所在: 鹿児島県霧島市
 - 代表: 壁 / Kabe（経営歴 6 年）
 - 公式サイト: https://sugukuru.co.jp
-- 公式 OSS Lab: Sugukuru OSS Lab
+- OSS 活動: スグクル株式会社が公開する公共データ向け MCP サーバー群
 
 ## 10. よくある質問 / FAQ
 
