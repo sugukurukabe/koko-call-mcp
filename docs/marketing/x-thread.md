@@ -1,51 +1,40 @@
-# X（Twitter）投稿スレッド
+# X 投稿テキスト
 
-> 壁の手動作業: 3連投をスレッド形式で投稿する。1→2→3の順で返信として投稿。
+> 壁の手動作業: 下記をそのまま投稿。
+> 原則: 露出は目的ではない。成果物が届くために最小限の信号を出すだけ。
+> ブランド比較・煽り・「ぜひ試して」系の community 営業表現は使わない。
 
 ---
 
-## スレッド A: 営業・入札担当者向け（日本語）
+## スレッド A: 入札実務に近い読者向け（日本語）
 
-**1/3（最初のツイート）**
+**1/3**
 ```
-官公需入札の調査、まだ手作業でやってますか？
+中小企業庁の官公需情報ポータルサイトには、
+年間180万件超の入札公告が公開されている。
+ただし、人間が一件ずつ読める形では公開されていない。
 
-「鹿児島県のIT系入札を探して、うちに合う順に並べて」
-
-AIに話しかけるだけで全部終わります。
-
-手作業2時間15分 → 約2分。
-
-JP Bids MCP、ベータ期間中は全機能無料。
+JP Bids MCP は、その公開情報をAIが読める形に整えるサーバーです。
 
 https://mcp.bid-jp.com
 ```
 
 **2/3（1のリプライ）**
 ```
-具体的にできること:
+仕様書PDFは、20ページ目の先に参加資格が書かれていることがある。
+読み終わってから「うちの資格では出せない」と気づく作業を、
+何度繰り返しただろうか。
 
-→ 全国180万件/年の入札情報をキーワード・都道府県・区分で絞り込み
-→ 仕様書PDFを自動取得して必須要件・評価基準を構造化
-→ 参加資格の適合チェック（全省庁統一資格）
-→ 締切日をICSカレンダーへ登録
-→ 社内検討メモをMarkdownで生成
-
-Claude / Cursor / ChatGPT から使えます。
+extract_bid_requirements は、その20ページを構造化して返す。
+資格不適合は最初の3秒で分かる。
 ```
 
 **3/3（2のリプライ）**
 ```
-技術的背景:
+コードは BSL-1.1 で公開、Cloud Run で運用、ベータ期間中は無料。
+売却・OEMの相談も受けます。
 
-MCP 2025-11-25仕様完全準拠
-17ツール / Streamable HTTP / OAuth 2.0
-デジタル庁 Jグランツ MCP との連携デモも公開
-
-コード:
-https://github.com/sugukurukabe/koko-call-mcp
-
-#MCP #官公需 #AI
+GitHub: https://github.com/sugukurukabe/koko-call-mcp
 ```
 
 ---
@@ -54,85 +43,73 @@ https://github.com/sugukurukabe/koko-call-mcp
 
 **1/3**
 ```
-JP Bids MCP をリリースしました。
+JP Bids MCP を公開しました。
 
-日本の官公需入札情報（年間180万件）を
-MCP 2025-11-25 仕様で公開するサーバー。
+中小企業庁の官公需情報ポータルサイト（KKJ）を、
+Model Context Protocol 2025-11-25 仕様で扱うサーバー。
 
-17ツール / Streamable HTTP / OAuth 2.0 PKCE / outputSchema全対応
+仕様準拠は宣言ではなく、tool ごとの inputSchema / outputSchema / annotations と
+7 primitives の実装で担保しています。
 
 https://github.com/sugukurukabe/koko-call-mcp
 ```
 
 **2/3（リプライ）**
 ```
-デジタル庁が公開している Jグランツ MCP に
-バグ修正・Cloud Run対応・Dockerfile・pytestを
-4本PRとして送信しました。
+副産物として、デジタル庁が公開している jgrants-mcp-server に PR を4本送っています。
 
-入札（KKJ）× 補助金（Jグランツ）× 会計（freee）の
-3 MCP連携デモも公開。
+- accepting カウントが常に0を返すバグ修正
+- Cloud Run 用 stateless_http=True
+- Dockerfile（マルチステージ）
+- pytest 14件
 
-公共データMCPのエコシステムを少しずつ広げています。
+公共データのMCPは、まだ揃っていない。揃える側に回りたい。
 ```
 
 **3/3（リプライ）**
 ```
-技術的こだわり:
+Streamable HTTP + OAuth 2.0（PKCE / DCR）、Smithery Quality 90+。
 
-- MCP 7プリミティブ実装（Tools/Resources/Templates/Prompts/Completion/Logging/Notifications）
-- server.json / agents.json / mcp-server.json の標準メタデータ
-- biome lint / 103テスト / GitHub Actions CI
-
-Smithery / Glama / mcp.so に掲載中。
-
-#MCP #TypeScript #GovTech
+依存している原典はひとつ。中小企業庁 KKJ Web-API です。
+それを正確に翻訳する以上のことを、サーバーはしていません。
 ```
 
 ---
 
-## スレッド C: 英語（HN/dev.toとのクロスポスト）
+## スレッド C: 英語（HN / dev.to と整合）
 
 **1/2**
 ```
-Built an MCP server for Japanese government procurement.
+JP Bids MCP — an MCP server for Japan's SME Agency procurement portal (KKJ).
+1.8M+ public bids per year, exposed as 17 tools.
+MCP 2025-11-25 spec, all 7 primitives, Streamable HTTP, OAuth 2.0 (PKCE + DCR).
 
-180万件/yr (1.8M) public bids from the SME Agency portal.
-17 tools: search, rank, extract PDF specs, check qualifications, export CSV, generate calendar ICS.
-
-Streamable HTTP + OAuth 2.0. Free during beta.
-
-https://mcp.bid-jp.com
+https://github.com/sugukurukabe/koko-call-mcp
 ```
 
 **2/2（リプライ）**
 ```
-Also contributed 4 PRs to @digital_go_jp's J-Grants MCP server:
+Built alongside 4 PRs to Japan's Digital Agency jgrants-mcp-server:
+bug fix, Cloud Run support, Dockerfile, 14 pytest cases.
 
-1. Bug fix: accepting count always returned 0
-2. stateless_http=True for Cloud Run
-3. Official Dockerfile
-4. 14 pytest unit tests
+KKJ + J-Grants together cover procurement and subsidies in one conversation.
 
-Building Japan's public data MCP ecosystem one PR at a time.
-
-github.com/sugukurukabe/koko-call-mcp
+Endpoint: https://mcp.bid-jp.com/mcp
 ```
 
 ---
 
-## 投稿タイミング推奨
+## 投稿時の判断基準
 
-| スレッド | 投稿時間 | 理由 |
-|---------|---------|------|
-| A（営業向け） | 平日 8:00〜9:00 | 始業前チェックに引っかかる |
-| B（エンジニア向け） | 平日 12:00〜13:00 | ランチタイム |
-| C（英語） | 日本時間 22:00〜23:00 | 欧米の朝〜昼に重なる |
+- **画像**: 1枚だけ。tool 実行の生のレスポンスを切り出したスクリーンショット（`extract_bid_requirements` の構造化出力など）。プロモ画像・ロゴ単体は載せない。
+- **時間帯**: 平日朝が読者と一致しやすい。ただし「最適時間」の最適化に意味はない。書いたら出す。
+- **ハッシュタグ**: 付けない。MCP / GovTech タグは検索流入のためでなく、検索者が偶然たどり着けるための地図として最小限。今回は無くてよい。
+- **連投の間隔**: 30秒以上空ける（X側の自動結合バグ対策）。
 
 ---
 
-## 画像素材の説明（壁がスクリーンショット撮影）
+## 投稿しないことを選んだ場合
 
-1. **Before/Afterテーブル**: `https://mcp.bid-jp.com` のランディングページにある表を画面録画
-2. **Claude会話デモ**: Cursorまたはクロードで `search_bids → rank_bids` を実行した会話スクリーンショット
-3. **Smitheryバッジ**: https://smithery.ai/servers/a-kabe-1qio/jp-bids-mcp の画面
+このスレッドを出さなくても、Zenn と GitHub は残る。
+露出は目的ではなく、成果物が届くための補助である。
+今日に納得が来ない文章なら、明日まで保留してよい。
