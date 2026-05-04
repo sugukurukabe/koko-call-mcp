@@ -46,7 +46,7 @@ JP Bids MCP を公開しました。
 `search_bids_app` という tool は、AI の返答の中に
 検索結果のテーブルがそのまま描画されます（MCP Apps 対応クライアントで）。
 
-会話の続きに表が現れる、という体験を試したかった。
+会話の中に、JSON でも外部リンクでもなく、表が置かれる。
 
 https://github.com/sugukurukabe/koko-call-mcp
 ```
