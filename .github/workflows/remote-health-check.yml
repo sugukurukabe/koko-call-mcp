@@ -20,4 +20,6 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run remote:health
-      - run: npm run remote:mcp
+      # remote:mcp は OAuth 保護下のため CI では 401 が正常動作。
+      # ローカルでの手動確認用に残す。
+      # - run: npm run remote:mcp
