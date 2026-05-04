@@ -6,7 +6,6 @@ topics: ["mcp", "claude", "govtech", "公共調達", "freee"]
 published: true
 ---
 
-<!-- 草稿 / Draft — 公開前にレビュー必須 -->
 
 # JP Bids MCP × Jグランツ MCP × freee MCP — 入札・補助金・会計をひとつの会話で
 
