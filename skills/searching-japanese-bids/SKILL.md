@@ -5,7 +5,7 @@ description: Searches, ranks, and analyzes Japanese government procurement bids 
 
 # Searching Japanese Bids
 
-JP Bids MCP exposes the Japanese SME Agency procurement portal (KKJ) as 14 MCP tools. This skill tells Claude when to use which tool and how to combine them for common workflows.
+JP Bids MCP exposes the Japanese SME Agency procurement portal (KKJ) as 17 MCP tools. This skill tells Claude when to use which tool and how to combine them for common workflows.
 
 ## When to use
 
