@@ -1,7 +1,6 @@
 # JP Bids MCP — Panduan Bahasa Indonesia
 
 [![Smithery](https://smithery.ai/badge/a-kabe-1qio/jp-bids-mcp)](https://smithery.ai/servers/a-kabe-1qio/jp-bids-mcp)
-[![mcp.so](https://img.shields.io/badge/mcp.so-listed-brightgreen)](https://mcp.so/server/sugukurukabe/koko-call-mcp)
 
 ## Gambaran Umum / Overview / 概要
 
@@ -40,7 +39,7 @@ JP Bids MCP は、中小企業庁「官公需情報ポータルサイト」の�
 ```text
 Remote MCP: https://mcp.bid-jp.com/mcp
 npm:        jp-bids-mcp
-Registry:   io.github.sugukurukabe/jp-bids
+Registry metadata name: io.github.sugukurukabe/jp-bids
 ```
 
 ### Claude.ai / ChatGPT / Klien MCP

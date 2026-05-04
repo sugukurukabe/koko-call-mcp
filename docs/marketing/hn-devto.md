@@ -23,13 +23,13 @@ I built an MCP server (Model Context Protocol) that exposes Japan's government p
 
 **Why Japan's public procurement:**
 - ~¥8 trillion/yr market, ~360k SMEs participating
-- Existing services (Grabion, NJSS) are web-UI + email alert only—zero AI integration
+- Existing services are primarily web UI and email-alert products, while agent-native workflows are still rare
 - KKJ has a public API but it's barely used outside of scrapers
 
 **Technical choices:**
-- MCP 2025-11-25 spec (latest), full 7-primitive implementation: Tools, Resources, Resource Templates, Prompts, Completion, Logging, Notifications
+- MCP 2025-11-25 targeted implementation: Tools, Resources, Resource Templates, Prompts, and Completion
 - Streamable HTTP transport + OAuth 2.0 (PKCE + DCR)
-- outputSchema + annotations on every tool (Smithery quality score)
+- outputSchema + annotations on every tool
 - Deployed on Cloud Run, custom domain mcp.bid-jp.com
 - 103 tests, biome lint, TypeDoc API docs, GitHub Actions CI
 
@@ -62,7 +62,7 @@ mcp, typescript, govtech, opensource
 ```markdown
 ## Why Government Procurement Data?
 
-Japan's SME Agency publishes 1.8M+ public procurement notices per year via a public API. The data is there. The API is documented. But as of early 2026, no one had wrapped it in an MCP server.
+Japan's SME Agency publishes 1.8M+ public procurement notices per year via a public API. The data is there. The API is documented. But public, agent-native MCP examples for this domain are still rare.
 
 That's a gap worth filling — not just for utility, but as a demonstration of what reference-quality MCP looks like on public data.
 
@@ -79,17 +79,15 @@ That's a gap worth filling — not just for utility, but as a demonstration of w
 | Action | `create_bid_calendar`, `export_bid_shortlist`, `draft_bid_questions` |
 | Alerts | `save_search`, `check_saved_search`, `list_saved_searches` |
 
-## MCP Spec Compliance
+## MCP Spec Support
 
-The server implements all 7 MCP primitives from the 2025-11-25 spec:
+The server implements the core MCP primitives needed for public procurement search:
 
 - **Tools** — 17 tools with full inputSchema descriptions and outputSchema
 - **Resources** — KKJ attribution, API reference, prefecture codes, Search Results App
 - **Resource Templates** — bid-by-key template
 - **Prompts** — morning briefing, competitor radar, deadline alert
 - **Completion** — prefecture name and category autocomplete
-- **Logging** — MCP protocol logging for debug
-- **Notifications** — tools/list_changed on dynamic tool registration
 
 Every tool has:
 - `title` (human-readable)

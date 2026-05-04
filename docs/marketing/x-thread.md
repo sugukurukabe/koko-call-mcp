@@ -83,7 +83,7 @@ extract_bid_requirements は、その20ページを構造化して返す。
 ### B の続き（任意・1本）
 
 ```
-Resources / Resource Templates / Prompts / Completion / Logging も実装してあります。
+Resources / Resource Templates / Prompts / Completion も実装してあります。
 
 MCP は tool の集まりではなく、対話の中で振る舞う小さな制度として
 扱える、ということを確かめたかった。

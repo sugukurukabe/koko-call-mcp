@@ -56,7 +56,7 @@
 
 | 項目 | 内容 |
 |------|------|
-| プロトコル | Model Context Protocol 2025-11-25（最新仕様） |
+| プロトコル | Model Context Protocol 2025-11-25 |
 | データソース | 中小企業庁 官公需情報ポータル（年間180万件） |
 | ツール数 | 17（検索・ランキング・PDF解析・資格確認・カレンダー・CSV出力） |
 | トランスポート | Streamable HTTP + OAuth 2.0 |
@@ -126,8 +126,8 @@ Jグランツ MCP（補助金）  freee MCP（会計）
 | ビルド | CI/CD (GitHub Actions) |
 | リント | biome（zero-config） |
 | ライセンス | Apache-2.0 |
-| MCP仕様準拠 | 7プリミティブ全実装 |
-| 掲載ディレクトリ | Smithery / mcp.so / 公式 MCP Registry |
+| MCP仕様対応 | Tools / Resources / Resource Templates / Prompts / Completion |
+| 掲載ディレクトリ | Smithery（mcp.so は未掲載のため除外） |
 
 ---
 

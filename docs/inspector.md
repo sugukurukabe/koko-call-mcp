@@ -47,7 +47,7 @@ https://mcp.bid-jp.com/mcp
 }
 ```
 
-Inspectorでは Tools、Prompts、Resources、Resource Templates、Completion、Notifications を確認してください。
+Inspectorでは Tools、Prompts、Resources、Resource Templates、Completion を確認してください。
 
 ## English
 
@@ -96,7 +96,7 @@ Sample input:
 }
 ```
 
-Verify Tools, Prompts, Resources, Resource Templates, Completion, and Notifications.
+Verify Tools, Prompts, Resources, Resource Templates, and Completion.
 
 ## Bahasa Indonesia
 
@@ -145,4 +145,4 @@ Contoh input:
 }
 ```
 
-Verifikasi Tools, Prompts, Resources, Resource Templates, Completion, dan Notifications.
+Verifikasi Tools, Prompts, Resources, Resource Templates, dan Completion.

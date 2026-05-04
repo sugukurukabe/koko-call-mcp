@@ -22,7 +22,7 @@ published: true
 
 これを Model Context Protocol（MCP）で解消しようというのが、本記事のテーマです。
 
-## 2つのMCPサーバー — 入札と補助金、それぞれの公式実装
+## 2つのMCPサーバー — 入札と補助金、それぞれの公開実装
 
 JP Bids MCP（入札）と Jグランツ MCP（補助金）は、同じ MCP 2025-11-25 仕様に従いながら、それぞれ独立に開発されている読み取り専用サーバーです。両者を同じ AI 会話に追加することで、入札と補助金が一つの文脈で扱えるようになります。
 
@@ -132,7 +132,7 @@ LLMが実行する呼び出し：
 
 ## freee MCP との連携 — 入札の前後を会計でつなぐ
 
-freee MCP は、freee 株式会社が提供する、freee 会計の取引・請求書・残高を MCP 経由で操作できる公式 SDK ベースのサーバーです（[npm: freee-mcp](https://www.npmjs.com/package/freee-mcp)）。これを JP Bids MCP の前後に置くと、入札の準備（資金余力の確認）と落札後の処理（売上登録・請求書発行）まで、一つの会話で完結できます。
+freee MCP は、freee 株式会社が提供する freee API を、MCP 経由で扱うためのサーバーです（[npm: freee-mcp](https://www.npmjs.com/package/freee-mcp)）。これを JP Bids MCP の前後に置くと、入札の準備（資金余力の確認）と落札後の処理（売上登録・請求書発行）まで、一つの会話で完結できます。
 
 1. **入札前**: freeeから預金残高・売掛金を取得し、入札の資金余力を自動判定
 2. **落札後**: 案件メタデータ（発注機関名・落札額）からfreeeに売上取引を自動登録
@@ -173,9 +173,9 @@ MCP Apps（旧称: MCP-UI）は、MCP の tool 実行結果を JSON ではなく
 
 ### プロンプト2: `Rank these bids for a 50-person IT consulting firm`
 
-ランキングを実行する前に、エージェントは MCP の Elicitation 機能で、判定に必要な追加情報をユーザーへ確認します。
+ランキングを実行する前に、エージェントはツールの入力スキーマに沿って、判定に必要な追加情報をユーザーへ確認します。
 
-![Elicitationで判定条件を確認する様子](/images/zenn-jp-bids-jgrants/03-rank-elicitation.png)
+![ランキング前に判定条件を確認する様子](/images/zenn-jp-bids-jgrants/03-rank-elicitation.png)
 *専門領域・地域希望・全省庁統一資格の有無を、ランキング前に対話で確定します*
 
 回答を得ると `rank_bids` が実行され、スコア順の表が会話に描画されます。各案件には Pursue / Review のタグと、件数の少なさ・期限不明などの注意点が添えられます。

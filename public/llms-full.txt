@@ -16,7 +16,7 @@ JP Bids MCP は、日本の官公需入札情報を Model Context Protocol (MCP)
 - 認証: OAuth 2.0 Authorization Code + PKCE + Dynamic Client Registration
 - ライセンス: Apache-2.0
 - データ出典: 中小企業庁 官公需情報ポータルサイト（KKJ, https://kkj.go.jp ）
-- 公式 MCP Registry 名: `io.github.sugukurukabe/jp-bids`
+- MCP Registry metadata name: `io.github.sugukurukabe/jp-bids`
 
 ## 2. 17 のツール / 17 Tools
 
@@ -52,19 +52,17 @@ JP Bids MCP は、日本の官公需入札情報を Model Context Protocol (MCP)
 - `check_saved_search(name)` — 新着確認 / Check saved search for new notices
 - `list_saved_searches()` — 保存検索の一覧 / List all saved searches
 
-## 3. MCP 仕様準拠 / MCP Spec Compliance
+## 3. MCP 仕様対応 / MCP Spec Support
 
-JP Bids MCP は MCP 2025-11-25 仕様の **7 プリミティブすべて** を実装します。
+JP Bids MCP は MCP 2025-11-25 仕様に基づき、入札検索に必要な主要 primitive を実装します。Logging / Notifications は現行版では宣言していません。
 
 | プリミティブ | 実装 |
 |---|---|
 | Tools | 17 ツール、すべてに `inputSchema`, `outputSchema`, `annotations` を付与 |
 | Resources | KKJ 出典、API リファレンス、都道府県コード、Search Results App |
 | Resource Templates | `bid://{key}` の動的解決 |
-| Prompts | morning briefing / competitor radar / deadline alert |
+| Prompts | morning briefing / competitor radar / deadline alert（tier により一部非表示） |
 | Completion | 都道府県名・カテゴリ名のオートコンプリート |
-| Logging | MCP プロトコルログでデバッグ可能 |
-| Notifications | `tools/list_changed` を tool 動的登録時に発火 |
 
 ## 4. セットアップ / Setup
 

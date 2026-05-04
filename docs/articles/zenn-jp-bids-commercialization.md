@@ -56,7 +56,7 @@ search_bids_app      — MCP Apps UI付き検索
 
 ## MCP Apps UIのこと
 
-MCPの仕様書（2025-11-25）には、Toolsの他にResources、Prompts、Completion、Logging、Samplingが定義されている。さらに、`@modelcontextprotocol/ext-apps` という実験的な拡張があり、MCPサーバーがHTMLのUIパネルをクライアントに埋め込めるようになっている。
+MCPの仕様書（2025-11-25）には、Toolsの他にResources、Prompts、Completionなどが定義されている。さらに、`@modelcontextprotocol/ext-apps` という実験的な拡張があり、MCPサーバーがHTMLのUIパネルをクライアントに埋め込めるようになっている。
 
 「実験段階だから後回し」ではなく、「だからこそ先に実装して真のフィードバックをする」と判断した。
 
@@ -80,7 +80,7 @@ UIは、エージェントを動かすためのリモコンだ。クリックひ
 
 **Vertex AI の直接呼び出し**。PDFをテキストに変換してからLLMへ送る方式ではなく、Gemini 2.5 Flashのネイティブ画像認識でPDFをそのまま処理している。`@google/genai` SDKを使い、1件あたり推定1〜3円のコストで動作する。
 
-**7プリミティブ全部**。MCPには7つの基本要素がある——Tools、Resources、Resource Templates、Prompts、Completion、Logging、Sampling。JP Bids MCPはそのすべてを実装している。Toolsだけのサーバーは動くが、公共データの信頼性はResourcesとPromptsで担保される。
+**Toolsだけで終わらせない**。JP Bids MCPは、Tools、Resources、Resource Templates、Prompts、Completionを組み合わせている。Toolsだけのサーバーは動くが、公共データの信頼性はResourcesとPromptsで担保される。
 
 **SSRF対策**。外部URLからPDFを取得するツールは、攻撃ベクターになりえる。プライベートIPレンジとループバックアドレスへのリクエストを検証でブロックしている。外部PDFを扱うMCPサーバーの設計として、この制限は省けない。
 

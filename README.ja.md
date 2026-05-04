@@ -1,7 +1,6 @@
 # JP Bids MCP — 日本語ガイド
 
 [![Smithery](https://smithery.ai/badge/a-kabe-1qio/jp-bids-mcp)](https://smithery.ai/servers/a-kabe-1qio/jp-bids-mcp)
-[![mcp.so](https://img.shields.io/badge/mcp.so-listed-brightgreen)](https://mcp.so/server/sugukurukabe/koko-call-mcp)
 
 ## 概要 / Overview / Gambaran Umum
 
@@ -40,7 +39,7 @@ JP Bids MCP adalah server MCP untuk mencari dan menganalisis pengumuman pengadaa
 ```text
 リモートMCP: https://mcp.bid-jp.com/mcp
 npm:         jp-bids-mcp
-Registry:    io.github.sugukurukabe/jp-bids
+Registry metadata name: io.github.sugukurukabe/jp-bids
 ```
 
 ### Claude.ai / ChatGPT / MCP対応クライアント

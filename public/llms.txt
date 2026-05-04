@@ -6,7 +6,7 @@
 公式エンドポイント: `https://mcp.bid-jp.com/mcp`（Streamable HTTP + OAuth 2.0）
 ライセンス: Apache-2.0
 リポジトリ: https://github.com/sugukurukabe/koko-call-mcp
-公式 MCP Registry 名: `io.github.sugukurukabe/jp-bids`
+MCP Registry metadata name: `io.github.sugukurukabe/jp-bids`
 npm: https://www.npmjs.com/package/jp-bids-mcp
 
 ## このサーバーの定義 / What this server is

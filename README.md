@@ -4,7 +4,6 @@
 [![CI](https://github.com/sugukurukabe/koko-call-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/sugukurukabe/koko-call-mcp/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Smithery](https://smithery.ai/badge/a-kabe-1qio/jp-bids-mcp)](https://smithery.ai/servers/a-kabe-1qio/jp-bids-mcp)
-[![mcp.so](https://img.shields.io/badge/mcp.so-listed-brightgreen)](https://mcp.so/server/sugukurukabe/koko-call-mcp)
 
 日本の官公需入札情報をMCPで検索・AI分析するサーバー。  
 Search and AI-analyze Japanese public procurement notices through MCP.  
@@ -16,7 +15,7 @@ Server MCP untuk mencari dan menganalisis pengadaan pemerintah Jepang dengan AI.
 ```text
 Remote MCP: https://mcp.bid-jp.com/mcp
 npm:        jp-bids-mcp
-Registry:   io.github.sugukurukabe/jp-bids
+Registry metadata name: io.github.sugukurukabe/jp-bids
 ```
 
 ## AIに話しかけるだけ / Just Ask Your AI
