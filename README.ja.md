@@ -1,8 +1,7 @@
 # JP Bids MCP — 日本語ガイド
 
 [![Smithery](https://smithery.ai/badge/a-kabe-1qio/jp-bids-mcp)](https://smithery.ai/servers/a-kabe-1qio/jp-bids-mcp)
-[![Glama](https://glama.ai/mcp/servers/badge)](https://glama.ai/mcp/servers)
-[![mcp.so](https://img.shields.io/badge/mcp.so-listed-brightgreen)](https://mcp.so)
+[![mcp.so](https://img.shields.io/badge/mcp.so-listed-brightgreen)](https://mcp.so/server/sugukurukabe/koko-call-mcp)
 
 ## 概要 / Overview / Gambaran Umum
 

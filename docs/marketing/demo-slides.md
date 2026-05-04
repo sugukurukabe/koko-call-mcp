@@ -127,7 +127,7 @@ Jグランツ MCP（補助金）  freee MCP（会計）
 | リント | biome（zero-config） |
 | ライセンス | BSL-1.1（商用権保持） |
 | MCP仕様準拠 | 7プリミティブ全実装 |
-| 掲載ディレクトリ | Smithery / Glama / mcp.so |
+| 掲載ディレクトリ | Smithery / mcp.so / 公式 MCP Registry |
 
 ---
 

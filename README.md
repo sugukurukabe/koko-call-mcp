@@ -4,8 +4,7 @@
 [![CI](https://github.com/sugukurukabe/koko-call-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/sugukurukabe/koko-call-mcp/actions/workflows/ci.yml)
 [![License: BSL-1.1](https://img.shields.io/badge/License-BSL--1.1-blue.svg)](LICENSE)
 [![Smithery](https://smithery.ai/badge/a-kabe-1qio/jp-bids-mcp)](https://smithery.ai/servers/a-kabe-1qio/jp-bids-mcp)
-[![Glama](https://glama.ai/mcp/servers/badge)](https://glama.ai/mcp/servers)
-[![mcp.so](https://img.shields.io/badge/mcp.so-listed-brightgreen)](https://mcp.so)
+[![mcp.so](https://img.shields.io/badge/mcp.so-listed-brightgreen)](https://mcp.so/server/sugukurukabe/koko-call-mcp)
 
 日本の官公需入札情報をMCPで検索・AI分析するサーバー。  
 Search and AI-analyze Japanese public procurement notices through MCP.  
