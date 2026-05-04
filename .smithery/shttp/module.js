@@ -37409,6 +37409,32 @@ function isFileNotFound(error51) {
   return typeof error51 === "object" && error51 !== null && "code" in error51 && error51.code === "ENOENT";
 }
 
+// src/lib/branding.ts
+var DEFAULT_BRANDING = {
+  serviceName: "JP Bids MCP",
+  serviceShortName: "JP Bids",
+  organizationName: "Sugukuru Inc.",
+  serviceUrl: "https://mcp.bid-jp.com",
+  contactUrl: "https://sugukuru.co.jp",
+  dataAttribution: "\u4E2D\u5C0F\u4F01\u696D\u5E81 \u5B98\u516C\u9700\u60C5\u5831\u30DD\u30FC\u30BF\u30EB\u30B5\u30A4\u30C8\uFF08\u653F\u5E9C\u6A19\u6E96\u5229\u7528\u898F\u7D04 \u7B2C2.0\u7248\uFF09"
+};
+var cachedBranding = null;
+function getBranding() {
+  if (cachedBranding) return cachedBranding;
+  cachedBranding = {
+    serviceName: process.env.JP_BIDS_BRAND_NAME ?? DEFAULT_BRANDING.serviceName,
+    serviceShortName: process.env.JP_BIDS_BRAND_SHORT_NAME ?? DEFAULT_BRANDING.serviceShortName,
+    organizationName: process.env.JP_BIDS_BRAND_ORG ?? DEFAULT_BRANDING.organizationName,
+    serviceUrl: process.env.JP_BIDS_BRAND_URL ?? DEFAULT_BRANDING.serviceUrl,
+    contactUrl: process.env.JP_BIDS_BRAND_CONTACT ?? DEFAULT_BRANDING.contactUrl,
+    dataAttribution: process.env.JP_BIDS_BRAND_ATTRIBUTION ?? DEFAULT_BRANDING.dataAttribution
+  };
+  if (process.env.JP_BIDS_BRAND_NAME) {
+    console.error(`[info] White-label branding active: ${cachedBranding.serviceName}`);
+  }
+  return cachedBranding;
+}
+
 // src/prompts/register-prompts.ts
 var prefectureCompletable = completable(
   PrefectureNameSchema,
@@ -74829,6 +74855,153 @@ function formatRankingSummary(result) {
   return lines.join("\n");
 }
 
+// src/tools/saved-search-alert.ts
+var savedSearches = /* @__PURE__ */ new Map();
+var SavedSearchSchema = external_exports.object({
+  name: external_exports.string().min(1).max(100).describe("\u4FDD\u5B58\u691C\u7D22\u306E\u540D\u524D\uFF08\u4F8B: \u300C\u9E7F\u5150\u5CF6IT\u6848\u4EF6\u300D\uFF09\u3002Name for this saved search."),
+  query: external_exports.string().optional().describe("\u30AD\u30FC\u30EF\u30FC\u30C9\u3002Keyword."),
+  prefecture: external_exports.union([PrefectureNameSchema, external_exports.array(PrefectureNameSchema)]).optional(),
+  category: CategorySchema.optional(),
+  organization_name: external_exports.string().optional().describe("\u767A\u6CE8\u6A5F\u95A2\u540D\u3002Organization name.")
+});
+var CheckAlertSchema = external_exports.object({
+  name: external_exports.string().min(1).describe("\u78BA\u8A8D\u3059\u308B\u4FDD\u5B58\u691C\u7D22\u306E\u540D\u524D\u3002Name of saved search to check.")
+});
+var ListSavedSchema = external_exports.object({});
+function registerSavedSearchAlert(server, client) {
+  server.registerTool(
+    "save_search",
+    {
+      title: "\u691C\u7D22\u6761\u4EF6\u3092\u4FDD\u5B58",
+      description: "\u5165\u672D\u691C\u7D22\u6761\u4EF6\u3092\u540D\u524D\u4ED8\u304D\u3067\u4FDD\u5B58\u3059\u308B\u3002\u4FDD\u5B58\u3057\u305F\u6761\u4EF6\u306F check_saved_search \u3067\u65B0\u7740\u78BA\u8A8D\u306B\u4F7F\u3048\u308B\u3002Save named bid search criteria for recurring alert checks. Simpan kriteria pencarian tender bernama untuk pemeriksaan peringatan berulang.",
+      inputSchema: SavedSearchSchema.shape,
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false
+      }
+    },
+    async (args) => {
+      const criteria = {
+        query: args.query,
+        prefecture: args.prefecture,
+        category: args.category,
+        organization_name: args.organization_name,
+        limit: 20
+      };
+      savedSearches.set(args.name, {
+        name: args.name,
+        criteria,
+        createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+        lastCheckedAt: null
+      });
+      return {
+        content: [
+          {
+            type: "text",
+            text: jsonText({
+              saved: true,
+              name: args.name,
+              criteria,
+              totalSaved: savedSearches.size,
+              nextStep: "check_saved_search \u3067\u3053\u306E\u6761\u4EF6\u306E\u65B0\u7740\u5165\u672D\u3092\u78BA\u8A8D\u3067\u304D\u307E\u3059\u3002Use check_saved_search to check for new bids matching this criteria."
+            })
+          }
+        ]
+      };
+    }
+  );
+  server.registerTool(
+    "check_saved_search",
+    {
+      title: "\u4FDD\u5B58\u691C\u7D22\u306E\u65B0\u7740\u78BA\u8A8D",
+      description: "\u4FDD\u5B58\u3057\u305F\u691C\u7D22\u6761\u4EF6\u3067\u65B0\u7740\u5165\u672D\u3092\u78BA\u8A8D\u3059\u308B\u3002\u524D\u56DE\u30C1\u30A7\u30C3\u30AF\u4EE5\u964D\u306E\u65B0\u7740\u306E\u307F\u3092\u8FD4\u3059\u3002Check for new bids since last check using saved search criteria. Periksa tender baru sejak pemeriksaan terakhir menggunakan kriteria tersimpan.",
+      inputSchema: CheckAlertSchema.shape,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true
+      }
+    },
+    async (args) => {
+      const saved = savedSearches.get(args.name);
+      if (!saved) {
+        return toolError(
+          null,
+          `\u300C${args.name}\u300D\u3068\u3044\u3046\u4FDD\u5B58\u691C\u7D22\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093\u3002save_search \u3067\u5148\u306B\u6761\u4EF6\u3092\u4FDD\u5B58\u3057\u3066\u304F\u3060\u3055\u3044\u3002`
+        );
+      }
+      try {
+        const criteria = { ...saved.criteria };
+        if (saved.lastCheckedAt) {
+          criteria.issued_after = saved.lastCheckedAt.slice(0, 10);
+        }
+        const params = buildSearchBidsParams(criteria);
+        const result = await client.search(params);
+        const now = (/* @__PURE__ */ new Date()).toISOString();
+        saved.lastCheckedAt = now;
+        return {
+          content: [
+            {
+              type: "text",
+              text: jsonText({
+                name: args.name,
+                newBidsCount: result.searchHits,
+                bids: result.bids.slice(0, 10).map((bid) => ({
+                  projectName: bid.projectName,
+                  organizationName: bid.organizationName,
+                  prefectureName: bid.prefectureName,
+                  cftIssueDate: bid.cftIssueDate,
+                  tenderSubmissionDeadline: bid.tenderSubmissionDeadline,
+                  key: bid.key
+                })),
+                checkedAt: now,
+                previousCheck: saved.lastCheckedAt,
+                attribution: result.attribution,
+                webhookHint: "\u3053\u306E\u6A5F\u80FD\u3092\u5B9A\u671F\u5B9F\u884C\u3059\u308B\u306B\u306F\u3001Webhook\u901A\u77E5\u3092\u8A2D\u5B9A\u3067\u304D\u307E\u3059\u3002\u5C06\u6765\u306E\u30D0\u30FC\u30B8\u30E7\u30F3\u3067Slack/\u30E1\u30FC\u30EB/Webhook\u901A\u77E5\u306B\u5BFE\u5FDC\u4E88\u5B9A\u3067\u3059\u3002"
+              })
+            }
+          ]
+        };
+      } catch (error51) {
+        return toolError(error51, "\u4FDD\u5B58\u691C\u7D22\u306E\u78BA\u8A8D\u4E2D\u306B\u30A8\u30E9\u30FC\u304C\u767A\u751F\u3057\u307E\u3057\u305F\u3002");
+      }
+    }
+  );
+  server.registerTool(
+    "list_saved_searches",
+    {
+      title: "\u4FDD\u5B58\u691C\u7D22\u306E\u4E00\u89A7",
+      description: "\u4FDD\u5B58\u3055\u308C\u3066\u3044\u308B\u691C\u7D22\u6761\u4EF6\u306E\u4E00\u89A7\u3092\u8FD4\u3059\u3002List all saved search criteria. Daftar semua kriteria pencarian yang tersimpan.",
+      inputSchema: ListSavedSchema.shape,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false
+      }
+    },
+    async () => ({
+      content: [
+        {
+          type: "text",
+          text: jsonText({
+            totalSaved: savedSearches.size,
+            searches: [...savedSearches.values()].map((s) => ({
+              name: s.name,
+              criteria: s.criteria,
+              createdAt: s.createdAt,
+              lastCheckedAt: s.lastCheckedAt
+            }))
+          })
+        }
+      ]
+    })
+  );
+}
+
 // src/tools/summarize-bids-by-org.ts
 var inputSchema11 = {
   organization_name: external_exports.string().min(1).describe("\u5206\u6790\u5BFE\u8C61\u306E\u767A\u6CE8\u6A5F\u95A2\u540D"),
@@ -74912,7 +75085,8 @@ var PRO_ONLY_REGISTRATIONS = [
   registerCreateBidReviewPacket,
   registerDraftBidQuestions,
   registerAnalyzePastAwards,
-  registerSummarizeBidsByOrg
+  registerSummarizeBidsByOrg,
+  registerSavedSearchAlert
 ];
 function registerTools(server, client, tier = "pro") {
   for (const register of FREE_TIER_REGISTRATIONS) {
@@ -74928,11 +75102,12 @@ function registerTools(server, client, tier = "pro") {
 // src/mcp.ts
 function createJpBidsServer(options = {}) {
   const tier = options.tier ?? "pro";
+  const branding = getBranding();
   const server = new McpServer(
     {
-      name: "JP Bids MCP",
-      title: "JP Bids MCP",
-      version: "0.7.0",
+      name: branding.serviceName,
+      title: branding.serviceName,
+      version: "0.7.1",
       description: "Japan government procurement bid search through the Model Context Protocol."
     },
     {

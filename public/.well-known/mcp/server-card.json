@@ -1,0 +1,93 @@
+{
+  "serverInfo": {
+    "name": "JP Bids MCP",
+    "version": "0.7.1"
+  },
+  "authentication": {
+    "required": true,
+    "schemes": ["oauth2"]
+  },
+  "tools": [
+    {
+      "name": "search_bids",
+      "description": "日本全国の官公需入札情報を検索する。Search Japanese public procurement bids."
+    },
+    {
+      "name": "search_bids_app",
+      "description": "官公需入札検索テーブル。MCP Apps対応クライアントで検索結果を表で表示。"
+    },
+    {
+      "name": "rank_bids",
+      "description": "入札案件を自社条件でAIスコアリング。Rank bids by company fit."
+    },
+    {
+      "name": "list_recent_bids",
+      "description": "直近の入札公告一覧を取得。List recent bid announcements."
+    },
+    {
+      "name": "get_bid_detail",
+      "description": "案件の詳細情報を取得。Get bid detail by key."
+    },
+    {
+      "name": "explain_bid_fit",
+      "description": "入札案件の適合度をAIが詳細説明。AI-powered fit explanation."
+    },
+    {
+      "name": "assess_bid_qualification",
+      "description": "入札参加資格の自動確認。Auto-check bid qualification."
+    },
+    {
+      "name": "extract_bid_requirements",
+      "description": "PDF/HTML仕様書から要件を構造化抽出。Extract requirements from specs."
+    },
+    {
+      "name": "export_bid_shortlist",
+      "description": "CSV/JSONエクスポート。Export shortlisted bids."
+    },
+    {
+      "name": "create_bid_calendar",
+      "description": "締切日のICSカレンダー生成。Generate ICS calendar for deadlines."
+    },
+    {
+      "name": "create_bid_review_packet",
+      "description": "社内検討メモ自動生成。Generate internal review packet."
+    },
+    {
+      "name": "draft_bid_questions",
+      "description": "質問書ドラフト生成。Draft clarification questions."
+    },
+    {
+      "name": "analyze_past_awards",
+      "description": "落札実績の分析。Analyze historical award data."
+    },
+    {
+      "name": "summarize_bids_by_org",
+      "description": "発注機関別サマリー。Summarize bids by organization."
+    },
+    {
+      "name": "save_search",
+      "description": "検索条件を保存する。Save search criteria for alerts."
+    },
+    {
+      "name": "check_saved_search",
+      "description": "保存検索の新着確認。Check for new bids since last check."
+    },
+    {
+      "name": "list_saved_searches",
+      "description": "保存検索の一覧。List all saved searches."
+    }
+  ],
+  "resources": [
+    { "uri": "attribution://kkj", "name": "KKJ Attribution" },
+    { "uri": "docs://api-reference", "name": "API Reference" },
+    { "uri": "docs://agentic-cloud-roadmap", "name": "Agentic Cloud Roadmap" },
+    { "uri": "docs://agentic-security-storage-readiness", "name": "Security & Storage Readiness" },
+    { "uri": "codes://prefectures", "name": "Prefecture Codes" },
+    { "uri": "ui://jp-bids/search-results.html", "name": "Search Results App" }
+  ],
+  "prompts": [
+    { "name": "morning_bid_briefing", "description": "今日の入札ブリーフィング" },
+    { "name": "competitor_radar", "description": "競合動向レーダー" },
+    { "name": "bid_due_alert", "description": "締切アラート" }
+  ]
+}
