@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>JP Bids MCP — 提案スライド</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+  <style>
+    :root {
+      --r-main-font: 'Hiragino Sans', 'Yu Gothic', 'Noto Sans JP', sans-serif;
+      --r-heading-font: 'Hiragino Sans', 'Yu Gothic', 'Noto Sans JP', sans-serif;
+      --r-main-font-size: 28px;
+      --r-main-color: #111827;
+      --r-heading-color: #0f172a;
+      --r-link-color: #b91c1c;
+      --r-background-color: #ffffff;
+    }
+    .reveal h1 {
+      font-size: 64px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .reveal h2 {
+      font-size: 44px;
+      font-weight: 700;
+      border-bottom: 4px solid #0f172a;
+      padding-bottom: 12px;
+      margin-bottom: 32px;
+      text-align: left;
+    }
+    .reveal h3 {
+      font-size: 32px;
+      color: #1e293b;
+      text-align: left;
+    }
+    .reveal section {
+      text-align: left;
+    }
+    .reveal table {
+      font-size: 22px;
+      width: 100%;
+      border-collapse: collapse;
+      margin: 24px 0;
+    }
+    .reveal th {
+      background: #0f172a;
+      color: #ffffff;
+      padding: 10px 16px;
+      text-align: left;
+      font-weight: 600;
+      border: none;
+    }
+    .reveal td {
+      padding: 10px 16px;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: top;
+    }
+    .reveal pre {
+      font-size: 18px;
+      box-shadow: none;
+      background: #f3f4f6;
+      border-radius: 8px;
+      padding: 18px 24px;
+    }
+    .reveal pre code {
+      background: transparent;
+      color: #111827;
+      font-family: 'JetBrains Mono', 'Menlo', monospace;
+      max-height: 100%;
+    }
+    .reveal blockquote {
+      background: #f8fafc;
+      border-left: 4px solid #b91c1c;
+      padding: 16px 24px;
+      font-size: 28px;
+      color: #1e293b;
+      margin: 24px 0;
+    }
+    .reveal ul, .reveal ol {
+      font-size: 28px;
+      line-height: 1.6;
+    }
+    .reveal .accent {
+      color: #b91c1c;
+      font-weight: 700;
+    }
+    .reveal .lead {
+      text-align: center;
+    }
+    .reveal .lead h1 {
+      font-size: 80px;
+      margin-bottom: 32px;
+    }
+    .reveal .lead h2 {
+      font-size: 36px;
+      border: none;
+      text-align: center;
+      color: #475569;
+      font-weight: 400;
+    }
+    .reveal .lead p {
+      font-size: 22px;
+      color: #6b7280;
+      margin-top: 48px;
+    }
+    .reveal .lead code {
+      font-size: 22px;
+      color: #b91c1c;
+    }
+    .reveal .footnote {
+      position: absolute;
+      bottom: 24px;
+      right: 32px;
+      font-size: 14px;
+      color: #9ca3af;
+    }
+    .reveal .arrow {
+      text-align: center;
+      font-size: 36px;
+      color: #b91c1c;
+      margin: 12px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <section class="lead">
+        <h1>JP Bids MCP</h1>
+        <h2>官公需入札調査をAIに任せる</h2>
+        <p>Model Context Protocol 2025-11-25 仕様準拠</p>
+        <p><code>https://mcp.bid-jp.com</code></p>
+        <p>スグクル株式会社</p>
+      </section>
+
+      <section>
+        <h2>課題 — 入札調査は時間がかかりすぎる</h2>
+        <h3>入札担当者の1日</h3>
+        <table>
+          <thead>
+            <tr><th>工程</th><th style="text-align:right">時間</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>入札情報検索</td><td style="text-align:right">30分</td></tr>
+            <tr><td>仕様書PDF読み込み</td><td style="text-align:right">1時間</td></tr>
+            <tr><td>参加資格確認</td><td style="text-align:right">30分</td></tr>
+            <tr><td>締切管理登録</td><td style="text-align:right">15分</td></tr>
+            <tr><td><strong>合計 / 1件</strong></td><td style="text-align:right"><strong>2時間15分</strong></td></tr>
+          </tbody>
+        </table>
+        <p>週10件なら <span class="accent">22.5時間</span>。本業に使う時間がない。</p>
+      </section>
+
+      <section>
+        <h2>解決策 — AIに話しかけるだけ</h2>
+        <blockquote>「鹿児島県のIT系入札を探して、うちに合う順にランク付けして」</blockquote>
+        <div class="arrow">↓</div>
+        <pre><code class="language-text">検索 → スコアリング → PDF解析 → カレンダー登録
+約 2 分</code></pre>
+        <p style="font-size:30px; margin-top:24px;">
+          2時間15分 → <span class="accent">約2分</span>。同じ時間でカバーできる件数が60倍に。
+        </p>
+      </section>
+
+      <section>
+        <h2>JP Bids MCP とは</h2>
+        <h3>技術基盤</h3>
+        <table>
+          <tbody>
+            <tr><td>プロトコル</td><td>Model Context Protocol 2025-11-25（最新仕様）</td></tr>
+            <tr><td>データソース</td><td>中小企業庁 官公需情報ポータル（年間180万件）</td></tr>
+            <tr><td>ツール数</td><td>17（検索・ランキング・PDF解析・資格確認・カレンダー・CSV出力）</td></tr>
+            <tr><td>トランスポート</td><td>Streamable HTTP + OAuth 2.0</td></tr>
+            <tr><td>対応クライアント</td><td>Claude / Cursor / ChatGPT（MCP対応ツール全般）</td></tr>
+            <tr><td>デプロイ</td><td>Cloud Run（asia-northeast1）</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>17ツール</h2>
+        <table>
+          <thead><tr><th style="width:18%">区分</th><th>ツール</th></tr></thead>
+          <tbody>
+            <tr><td>検索・発見</td><td><code>search_bids</code> / <code>list_recent_bids</code> / <code>get_bid_detail</code></td></tr>
+            <tr><td>分析・判断</td><td><code>rank_bids</code> / <code>explain_bid_fit</code> / <code>analyze_past_awards</code> / <code>summarize_bids_by_org</code></td></tr>
+            <tr><td>書類・資格</td><td><code>extract_bid_requirements</code> / <code>assess_bid_qualification</code> / <code>draft_bid_questions</code></td></tr>
+            <tr><td>アクション</td><td><code>create_bid_calendar</code> / <code>create_bid_review_packet</code> / <code>export_bid_shortlist</code></td></tr>
+            <tr><td>アラート</td><td><code>save_search</code> / <code>check_saved_search</code> / <code>list_saved_searches</code></td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:22px; color:#475569; margin-top:24px;">
+          会話の中に検索結果テーブルを描画する MCP Apps（<code>search_bids_app</code>）にも対応。
+        </p>
+      </section>
+
+      <section>
+        <h2>エコシステム — 他MCPとの連携</h2>
+        <h3>入札だけじゃない</h3>
+        <pre><code>JP Bids MCP（入札）
+     ↕
+Jグランツ MCP（補助金）  ↔  freee MCP（会計）</code></pre>
+        <h3>3つのワークフロー例</h3>
+        <ol>
+          <li>入札応募費用を freee で確認 → 採算が合えば応募</li>
+          <li>落札後の売上を freee へ自動登録</li>
+          <li>補助金と入札を同時に検索して最適な収益を試算</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>技術品質</h2>
+        <h3>信頼できるコードベース</h3>
+        <table>
+          <tbody>
+            <tr><td>テスト</td><td>100件以上のユニット・統合テスト</td></tr>
+            <tr><td>ビルド</td><td>GitHub Actions による継続的インテグレーション</td></tr>
+            <tr><td>リント</td><td>biome（zero-config）</td></tr>
+            <tr><td>ライセンス</td><td>BSL-1.1（商用権保持）</td></tr>
+            <tr><td>MCP仕様準拠</td><td>7プリミティブすべてを実装</td></tr>
+            <tr><td>掲載ディレクトリ</td><td>Smithery / Glama / mcp.so</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>収益モデル</h2>
+        <h3>現行（ベータ）</h3>
+        <ul>
+          <li>Free: 4ツール無料</li>
+          <li>Pro: ¥990/月（17ツール全機能）</li>
+        </ul>
+        <h3 style="margin-top:24px;">拡張シナリオ</h3>
+        <ul>
+          <li><strong>OEMライセンス</strong>: 御社ブランドで提供 — 月額固定 + API従量課金</li>
+          <li><strong>エンタープライズ</strong>: 大手向けプライベートインスタンス — 月額50〜200万円</li>
+          <li><strong>データ販売</strong>: 落札実績の統計レポート — 月額10〜50万円</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>提案内容</h2>
+        <h3>3つの選択肢</h3>
+        <table>
+          <thead><tr><th>形態</th><th>内容</th><th>目線</th></tr></thead>
+          <tbody>
+            <tr><td><strong>完全売却</strong></td><td>コード + ドメイン + npm + MCP Registry 名</td><td>応相談</td></tr>
+            <tr><td><strong>OEMライセンス（独占）</strong></td><td>御社ブランドで提供。開発・運用はスグクル継続</td><td>月額固定 + 従量</td></tr>
+            <tr><td><strong>技術提携</strong></td><td>御社サービスに API 組込み。レベニューシェア</td><td>売上の10〜20%</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>次のステップ</h2>
+        <h3>今日決めること</h3>
+        <ul>
+          <li>デモ環境へのアクセス付与<br>
+            <span style="font-size:22px; color:#475569;">→ <code>https://mcp.bid-jp.com</code> にアクセスするだけ</span>
+          </li>
+          <li>技術的な詳細確認<br>
+            <span style="font-size:22px; color:#475569;">→ GitHub リポジトリを共有 / コードレビュー・技術質問対応（2週間以内）</span>
+          </li>
+          <li>条件交渉の開始<br>
+            <span style="font-size:22px; color:#475569;">→ まず電話 1 本 or メール返信だけで OK</span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="lead">
+        <h1>ありがとうございました</h1>
+        <p style="margin-top:64px;">スグクル株式会社 / 壁</p>
+        <p><code>https://sugukuru.co.jp</code></p>
+        <p><code>https://mcp.bid-jp.com</code></p>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: 'c/t',
+      transition: 'fade',
+      controls: true,
+      progress: true,
+      plugins: [ RevealHighlight ]
+    });
+  </script>
+</body>
+</html>

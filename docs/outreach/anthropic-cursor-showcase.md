@@ -28,7 +28,6 @@ An MCP server that exposes Japan's government procurement portal (KKJ, 1.8M+ bid
 - Full 7-primitive implementation: Tools, Resources, Resource Templates, Prompts, Completion, Logging, Notifications
 - Streamable HTTP + OAuth 2.0 (PKCE + DCR)
 - outputSchema + annotations on every tool (Smithery quality: 90+)
-- Contributed 4 PRs to Japan's Digital Agency jgrants-mcp-server
 - J-Grants (subsidies) + freee (accounting) MCP interoperability demos
 
 **Real-world impact:**

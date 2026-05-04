@@ -34,9 +34,7 @@ I built an MCP server (Model Context Protocol) that exposes Japan's government p
 - 103 tests, biome lint, TypeDoc API docs, GitHub Actions CI
 
 **Ecosystem:**
-Also contributed 4 PRs to the Japanese Digital Agency's J-Grants MCP server (subsidies): bug fix, Cloud Run serverless support, Dockerfile, and 14 pytest unit tests.
-
-Full J-Grants + freee MCP workflow demos are published in the repo.
+J-Grants + freee MCP workflow demos are published in the repo, showing how procurement, subsidies, and accounting can be combined in one conversation across three independent MCP servers.
 
 **Free during beta (until June 2026)**
 Remote: https://mcp.bid-jp.com/mcp
@@ -109,16 +107,11 @@ The remote endpoint at `https://mcp.bid-jp.com/mcp` uses:
 - JWT verification
 - Free/Pro tier separation via API keys
 
-## Contributing to the Digital Agency's J-Grants MCP
+## Working alongside the J-Grants MCP
 
-Japan's Digital Agency published `jgrants-mcp-server` (subsidies data) in early 2026. I submitted 4 PRs:
+Japan's Digital Agency published `jgrants-mcp-server` (subsidies data) in early 2026. JP Bids MCP and J-Grants MCP are independent servers, but they were designed to be combined.
 
-1. **Bug fix**: `accepting` count in `get_subsidy_overview` always returned 0
-2. **Cloud Run support**: `stateless_http=True` in FastMCP
-3. **Dockerfile**: multi-stage build for container deployment
-4. **Tests**: 14 pytest unit tests, including one that intentionally fails on `main` to prove the bug
-
-The combination of JP Bids + J-Grants covers the full public funding landscape: procurement + subsidies in one AI conversation.
+In one conversation, an agent can search for procurement bids, look up matching subsidies as funding sources, and connect both into a single decision. Demo workflows for this combination are in the repository.
 
 ## Try It
 

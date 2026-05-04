@@ -132,7 +132,7 @@ MCPは、この性質を**設計上、最初から持っている** プロトコ
 
 - デジタル庁が公開した [Jグランツ MCP](https://github.com/digital-go-jp/jgrants-mcp-server) は、補助金APIをラップしたサーバーですが、その存在自体が「行政データはMCP化できる」という実例として広く参照されています。
 - [Smithery](https://smithery.ai/) や [Glama](https://glama.ai/mcp/servers)、[mcp.so](https://mcp.so) のようなレジストリは、各サーバーのschemaやannotationsをスキャンして、業務領域ごとに地図を作ろうとしています。
-- 私たち自身、Jグランツ MCPのコードを精読する過程で、`accepting` カウントが常に0になるバグを見つけ、PRとしてデジタル庁リポジトリに送りました（[#2 ほか合計4本](https://github.com/digital-go-jp/jgrants-mcp-server/pulls)）。これは spillover が一方通行ではないことの小さな証左です。
+- ある領域のMCPサーバーを実装すると、隣接サーバーのコードを読む機会が自然に増えます。読んでいるうちに気づいた小さな改善は、issue や pull request として相手のリポジトリに戻っていきます。spillover は、一方通行ではありません。
 
 ### 未来に起きそうなこと
 
