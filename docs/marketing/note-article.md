@@ -59,6 +59,49 @@ JP Bids MCP は、KKJ の公開データを Claude / Cursor / ChatGPT などの 
 
 ---
 
+## 実際の画面 — Claude Desktop で動かすと、こうなります
+
+ここまでは言葉で書いてきたので、実際に Claude Desktop で JP Bids MCP を動かしている画面を 5 枚お見せします。これは MCP Apps（旧称 MCP-UI）という仕組みに対応しているため、検索結果は JSON でも外部リンクでもなく、**会話の中に直接、業務画面として現れます**。
+
+### ステップ 1: 「東京都で今週公示された IT 系入札を検索して」と話しかける
+
+まず、Claude のチャット欄に検索のお願いを送ります。すると、JP Bids MCP の検索ウィジェットが、会話の続きとしてその場に立ち上がります。
+
+![検索ウィジェットが Claude の会話の中に立ち上がる様子](https://raw.githubusercontent.com/sugukurukabe/koko-call-mcp/main/images/zenn-jp-bids-jgrants/01-search-app-loading.png)
+*検索の最中。ウィジェット自体が会話に置かれていて、キーワードを変えながら何度でも再検索できます*
+
+### ステップ 2: 検索結果と、AI の解説が、横に並んで表示される
+
+検索が完了すると、ヒット件数（この例では 113 件）と、先頭 20 件の表が描画されます。表の横には、Claude による「特に注目すべき案件のピックアップ」が並びます。
+
+![検索結果テーブルと AI の解説が並ぶ画面](https://raw.githubusercontent.com/sugukurukabe/koko-call-mcp/main/images/zenn-jp-bids-jgrants/02-search-app-results.png)
+*「AI Bid Workspace」と書かれた業務画面。CSV 出力ボタンと再検索ボックスを内蔵しています*
+
+### ステップ 3: 「これらをうちの会社向けにランク付けして」とお願いする
+
+次に、ランキングをお願いします。すると Claude は、いきなりランク付けを実行する前に、判定に必要な追加情報を聞き返してきます。これが MCP の「Elicitation（必要情報の対話的取得）」という機能です。
+
+![Claude が判定基準をユーザーに確認する画面](https://raw.githubusercontent.com/sugukurukabe/koko-call-mcp/main/images/zenn-jp-bids-jgrants/03-rank-elicitation.png)
+*専門領域・地域希望・全省庁統一資格の有無を、対話の中で確定します*
+
+### ステップ 4: スコア順に並んだランキング表が、会話の中に現れる
+
+質問に答えると、`rank_bids` ツールが実行され、自社プロファイルに合わせてスコア順に並んだ表が描画されます。各案件には Pursue（追うべき）/ Review（要検討）のタグと、件数の少なさや期限不明などの注意点が添えられます。
+
+![スコア順に並んだランキング表](https://raw.githubusercontent.com/sugukurukabe/koko-call-mcp/main/images/zenn-jp-bids-jgrants/04-rank-table.png)
+*スコア・案件名・発注機関・都道府県・公告リンクが並ぶランキング表*
+
+### ステップ 5: 最後に、Claude が「で、どうすべきか」を要約してくれる
+
+ランキングが終わると、Claude は Pursue 上位案件の理由付け、共通リスク、Review 案件をスキップする判断を、ひとつの返答にまとめてくれます。
+
+![Pursue / Review の意思決定要約](https://raw.githubusercontent.com/sugukurukabe/koko-call-mcp/main/images/zenn-jp-bids-jgrants/05-rank-summary.png)
+*「上位 3 件の理由」「共通の注意点」「見送り判断」が、ひとつの会話の中にまとまります*
+
+ここまでが 5 枚です。手作業なら 2 時間 15 分かかっていた工程が、5 ステップの会話で終わります。**JSON でも、外部リンクでもなく、会話の続きに業務画面が静かに置かれる** という体験は、MCP Apps と JP Bids MCP の組み合わせがあって初めて成立します。
+
+---
+
 ## どうやって始めるのか — Cursor / Claude Desktop / ChatGPT 別の設定
 
 JP Bids MCP は、MCP に対応した AI クライアントなら、どれでも同じように使えます。
