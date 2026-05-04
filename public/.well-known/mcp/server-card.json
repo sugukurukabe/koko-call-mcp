@@ -1,7 +1,7 @@
 {
   "serverInfo": {
     "name": "JP Bids MCP",
-    "version": "0.7.1"
+    "version": "0.7.2"
   },
   "authentication": {
     "required": true,
@@ -10,71 +10,280 @@
   "tools": [
     {
       "name": "search_bids",
-      "description": "日本全国の官公需入札情報を検索する。Search Japanese public procurement bids."
+      "description": "日本全国の官公需入札情報を検索する。全文検索は query、件名は project_name、発注機関は organization_name を使う。Search Japanese public procurement bids by keyword, project name, or organization.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "description": "自由記述キーワード。複数キーワードはAND結合で検索されます。" },
+          "project_name": { "type": "string", "description": "件名で絞り込む場合に指定します。" },
+          "prefecture": { "type": "string", "description": "都道府県名で絞り込む。配列で複数指定可。例: 鹿児島県、東京都。" },
+          "category": { "type": "string", "description": "入札区分。物品、役務、工事、その他。" },
+          "procedure_type": { "type": "string", "description": "公示種別。一般競争入札、指名競争入札、随意契約など。" },
+          "certification": { "type": "array", "description": "全省庁統一資格の等級。A、B、C、D から複数指定可。" },
+          "organization_name": { "type": "string", "description": "発注機関名で絞り込む。例: 農林水産省、防衛省。" },
+          "issued_after": { "type": "string", "description": "公告日 YYYY-MM-DD 以降" },
+          "issued_before": { "type": "string", "description": "公告日 YYYY-MM-DD 以前" },
+          "due_after": { "type": "string", "description": "入札書提出期限 YYYY-MM-DD 以降" },
+          "due_before": { "type": "string", "description": "入札書提出期限 YYYY-MM-DD 以前" },
+          "opening_after": { "type": "string", "description": "開札日 YYYY-MM-DD 以降" },
+          "opening_before": { "type": "string", "description": "開札日 YYYY-MM-DD 以前" },
+          "period_end_after": { "type": "string", "description": "納入期限日 YYYY-MM-DD 以降" },
+          "period_end_before": { "type": "string", "description": "納入期限日 YYYY-MM-DD 以前" },
+          "limit": { "type": "number", "description": "取得件数の上限。デフォルト20、最大1000。" }
+        }
+      },
+      "outputSchema": true,
+      "annotations": { "readOnlyHint": true, "idempotentHint": true }
     },
     {
       "name": "search_bids_app",
-      "description": "官公需入札検索テーブル。MCP Apps対応クライアントで検索結果を表で表示。"
+      "description": "官公需入札検索テーブル。MCP Apps対応クライアントで検索結果を表で表示。Search bids with interactive table UI for MCP Apps-compatible clients.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "description": "自由記述キーワード。" },
+          "prefecture": { "type": "string", "description": "都道府県名で絞り込む。" },
+          "category": { "type": "string", "description": "入札区分。" },
+          "limit": { "type": "number", "description": "取得件数の上限。" }
+        }
+      },
+      "outputSchema": true,
+      "annotations": { "readOnlyHint": true, "idempotentHint": true }
     },
     {
       "name": "rank_bids",
-      "description": "入札案件を自社条件でAIスコアリング。Rank bids by company fit."
+      "description": "官公需入札を検索し、追うべき順にスコアリングする。候補整理用であり参加可否の最終判断ではない。Search and score bids by follow-up priority using AI Bid Radar.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "description": "自由記述キーワード。複数キーワードはAND結合で検索されます。" },
+          "prefecture": { "type": "string", "description": "都道府県名で絞り込む。配列で複数指定可。" },
+          "category": { "type": "string", "description": "入札区分。物品、役務、工事、その他。" },
+          "procedure_type": { "type": "string", "description": "公示種別。一般競争入札、指名競争入札、随意契約など。" },
+          "preferred_keywords": { "type": "array", "description": "優先したい語句。例: ソフトウェア、保守、クラウド。" },
+          "avoid_keywords": { "type": "array", "description": "避けたい語句。例: 工事、常駐、夜間。" },
+          "due_within_days": { "type": "number", "description": "この日数以内に提出期限が来る案件を優先します。" },
+          "shortlist_limit": { "type": "number", "description": "ランキング結果として返す最大件数。" },
+          "limit": { "type": "number", "description": "取得件数の上限。デフォルト20、最大1000。" }
+        }
+      },
+      "outputSchema": true,
+      "annotations": { "readOnlyHint": true, "idempotentHint": true }
     },
     {
       "name": "list_recent_bids",
-      "description": "直近の入札公告一覧を取得。List recent bid announcements."
+      "description": "過去1〜30日間に公告された新着官公需入札を一覧する。毎朝の営業チェックに使う。List recently published bid notices for daily morning sales checks.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "prefecture": { "type": "string", "description": "都道府県名で絞り込む。例: 鹿児島県。" },
+          "category": { "type": "string", "description": "入札区分。物品、役務、工事、その他。" },
+          "days": { "type": "number", "description": "過去何日分の公告を取得するか。デフォルト7日。" },
+          "limit": { "type": "number", "description": "取得件数の上限。デフォルト50。" }
+        }
+      },
+      "outputSchema": true,
+      "annotations": { "readOnlyHint": true, "idempotentHint": true }
     },
     {
       "name": "get_bid_detail",
-      "description": "案件の詳細情報を取得。Get bid detail by key."
+      "description": "入札案件の詳細情報を取得する。Keyフィールドを指定。Get detailed bid information by key.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "bid_key": { "type": "string", "description": "search_bids等が返したKeyフィールド" }
+        },
+        "required": ["bid_key"]
+      },
+      "outputSchema": true,
+      "annotations": { "readOnlyHint": true, "idempotentHint": true }
     },
     {
       "name": "explain_bid_fit",
-      "description": "入札案件の適合度をAIが詳細説明。AI-powered fit explanation."
+      "description": "1件の入札について追うべきか・要確認か・見送るべきかを理由・リスク・次アクション付きで説明する。Explain bid fit with rationale, risks, and next actions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "bid_key": { "type": "string", "description": "search_bids、rank_bids、またはlist_recent_bidsが返したKeyフィールド" },
+          "preferred_keywords": { "type": "array", "description": "優先したい語句。例: ソフトウェア、保守、クラウド。" },
+          "avoid_keywords": { "type": "array", "description": "避けたい語句。例: 工事、常駐、夜間。" },
+          "due_within_days": { "type": "number", "description": "この日数以内に提出期限が来る案件を優先。デフォルト30日。" },
+          "fetch_documents": { "type": "boolean", "description": "trueの場合、PDF/HTML抽出結果を追跡判断の説明に反映する。" },
+          "target_uris": { "type": "array", "description": "抽出対象URL。省略時は検索結果の公式公告ページ・添付資料URLから最大3件を使う。" }
+        },
+        "required": ["bid_key"]
+      },
+      "outputSchema": true,
+      "annotations": { "readOnlyHint": true, "idempotentHint": true }
     },
     {
       "name": "assess_bid_qualification",
-      "description": "入札参加資格の自動確認。Auto-check bid qualification."
+      "description": "入札参加資格を自動確認する。Auto-check bid participation qualification.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "bid_key": { "type": "string", "description": "対象案件のKeyフィールド" },
+          "company_certifications": { "type": "array", "description": "自社が保有する全省庁統一資格の等級" },
+          "company_prefecture": { "type": "string", "description": "自社の所在地都道府県" },
+          "fetch_documents": { "type": "boolean", "description": "trueの場合、仕様書から参加資格を抽出する。" },
+          "target_uris": { "type": "array", "description": "抽出対象URL。" }
+        },
+        "required": ["bid_key"]
+      },
+      "outputSchema": true,
+      "annotations": { "readOnlyHint": true, "idempotentHint": true }
     },
     {
       "name": "extract_bid_requirements",
-      "description": "PDF/HTML仕様書から要件を構造化抽出。Extract requirements from specs."
+      "description": "PDF/HTML仕様書から要件を構造化抽出する。Extract and structure requirements from bid specification documents.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "bid_key": { "type": "string", "description": "対象案件のKeyフィールド" },
+          "fetch_documents": { "type": "boolean", "description": "trueの場合、添付PDF/HTMLから要件を自動抽出する。" },
+          "target_uris": { "type": "array", "description": "抽出対象URL。省略時は公式公告ページから最大3件。" }
+        },
+        "required": ["bid_key"]
+      },
+      "outputSchema": true,
+      "annotations": { "readOnlyHint": true, "idempotentHint": true }
     },
     {
       "name": "export_bid_shortlist",
-      "description": "CSV/JSONエクスポート。Export shortlisted bids."
+      "description": "入札を検索・ランキングしてGoogle Sheets/Excel用のCSVを返す。スコア・判断・リスク・次アクション付き。Search, rank, and export CSV shortlist.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "description": "自由記述キーワード。複数キーワードはAND結合で検索されます。" },
+          "prefecture": { "type": "string", "description": "都道府県名で絞り込む。配列で複数指定可。" },
+          "category": { "type": "string", "description": "入札区分。物品、役務、工事、その他。" },
+          "preferred_keywords": { "type": "array", "description": "優先したい語句。例: ソフトウェア、保守、クラウド。" },
+          "avoid_keywords": { "type": "array", "description": "避けたい語句。例: 工事、常駐、夜間。" },
+          "due_within_days": { "type": "number", "description": "この日数以内に提出期限が来る案件を優先。デフォルト30日。" },
+          "shortlist_limit": { "type": "number", "description": "CSV出力する最大件数。デフォルト10件。" },
+          "fetch_documents": { "type": "boolean", "description": "trueの場合、上位案件のPDF/HTML抽出結果をCSVに追加する。" },
+          "limit": { "type": "number", "description": "取得件数の上限。デフォルト20、最大1000。" }
+        }
+      },
+      "outputSchema": true,
+      "annotations": { "readOnlyHint": true, "idempotentHint": true }
     },
     {
       "name": "create_bid_calendar",
-      "description": "締切日のICSカレンダー生成。Generate ICS calendar for deadlines."
+      "description": "締切日のICSカレンダーを生成する。Generate ICS calendar events for bid deadlines.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "bid_keys": { "type": "array", "description": "カレンダーに追加する案件のKeyフィールドの配列" }
+        },
+        "required": ["bid_keys"]
+      },
+      "outputSchema": true,
+      "annotations": { "readOnlyHint": true, "idempotentHint": true }
     },
     {
       "name": "create_bid_review_packet",
-      "description": "社内検討メモ自動生成。Generate internal review packet."
+      "description": "入札1件の判断サマリー・理由・リスク・要件・締切・次アクションをMarkdown社内メモとして返す。Generate a Markdown review packet for one bid.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "bid_key": { "type": "string", "description": "search_bids、rank_bids、またはlist_recent_bidsが返したKeyフィールド" },
+          "preferred_keywords": { "type": "array", "description": "優先したい語句。例: ソフトウェア、保守、クラウド。" },
+          "avoid_keywords": { "type": "array", "description": "避けたい語句。例: 工事、常駐、夜間。" },
+          "due_within_days": { "type": "number", "description": "この日数以内に提出期限が来る案件を優先。デフォルト30日。" },
+          "fetch_documents": { "type": "boolean", "description": "trueの場合、PDF/HTML抽出結果を社内検討メモへ反映する。" },
+          "target_uris": { "type": "array", "description": "抽出対象URL。省略時は検索結果の公式公告ページ・添付資料URLから最大3件を使う。" }
+        },
+        "required": ["bid_key"]
+      },
+      "outputSchema": true,
+      "annotations": { "readOnlyHint": true, "idempotentHint": true }
     },
     {
       "name": "draft_bid_questions",
-      "description": "質問書ドラフト生成。Draft clarification questions."
+      "description": "質問書のドラフトを生成する。Draft clarification questions for a bid.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "bid_key": { "type": "string", "description": "対象案件のKeyフィールド" },
+          "focus_areas": { "type": "array", "description": "質問したい重点分野。例: 納期、仕様、評価基準。" },
+          "fetch_documents": { "type": "boolean", "description": "trueの場合、仕様書から曖昧点を自動抽出して質問に反映する。" },
+          "target_uris": { "type": "array", "description": "抽出対象URL。" }
+        },
+        "required": ["bid_key"]
+      },
+      "outputSchema": true,
+      "annotations": { "readOnlyHint": true, "idempotentHint": true }
     },
     {
       "name": "analyze_past_awards",
-      "description": "落札実績の分析。Analyze historical award data."
+      "description": "過去公告を集計し発注機関の頻度・カテゴリ偏り・月次トレンドを返す。Analyze past bid announcements to surface procurement patterns.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "description": "自由記述キーワード。例: システム、保守、クラウド。" },
+          "prefecture": { "type": "string", "description": "都道府県名で絞り込む。配列で複数指定可。" },
+          "category": { "type": "string", "description": "入札区分。物品、役務、工事、その他。" },
+          "procedure_type": { "type": "string", "description": "公示種別。一般競争入札、指名競争入札、随意契約など。" },
+          "organization_name": { "type": "string", "description": "発注機関名で絞り込む場合に指定。" },
+          "window_days": { "type": "number", "description": "過去何日分の公告を集計対象にするか。デフォルト365日。" },
+          "limit": { "type": "number", "description": "KKJ API から取得する公告件数の上限。" }
+        }
+      },
+      "outputSchema": true,
+      "annotations": { "readOnlyHint": true, "idempotentHint": true }
     },
     {
       "name": "summarize_bids_by_org",
-      "description": "発注機関別サマリー。Summarize bids by organization."
+      "description": "発注機関名を指定してカテゴリ別・公示種別別の入札傾向と直近案件を集計する。Summarize bid trends for a specific procurement organization.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "organization_name": { "type": "string", "description": "分析対象の発注機関名" },
+          "since": { "type": "string", "description": "YYYY-MM-DD 以降。未指定なら過去1年。" },
+          "limit": { "type": "number", "description": "集計対象の最大取得件数。デフォルト200。" }
+        },
+        "required": ["organization_name"]
+      },
+      "outputSchema": true,
+      "annotations": { "readOnlyHint": true, "idempotentHint": true }
     },
     {
       "name": "save_search",
-      "description": "検索条件を保存する。Save search criteria for alerts."
+      "description": "入札検索条件を名前付きで保存する。保存した条件は check_saved_search で新着確認に使える。Save named bid search criteria for recurring alert checks.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "保存検索の名前（例: 「鹿児島IT案件」）。Name for this saved search." },
+          "query": { "type": "string", "description": "キーワード。Keyword." },
+          "prefecture": { "type": "string", "description": "都道府県名で絞り込む。配列で複数指定可。" },
+          "category": { "type": "string", "description": "入札区分。物品、役務、工事、その他。" },
+          "organization_name": { "type": "string", "description": "発注機関名。Organization name." }
+        },
+        "required": ["name"]
+      },
+      "outputSchema": true,
+      "annotations": { "idempotentHint": true }
     },
     {
       "name": "check_saved_search",
-      "description": "保存検索の新着確認。Check for new bids since last check."
+      "description": "保存した検索条件で新着入札を確認する。前回チェック以降の新着のみを返す。Check for new bids since last check using saved search criteria.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "確認する保存検索の名前。Name of saved search to check." }
+        },
+        "required": ["name"]
+      },
+      "outputSchema": true,
+      "annotations": { "readOnlyHint": true, "idempotentHint": true }
     },
     {
       "name": "list_saved_searches",
-      "description": "保存検索の一覧。List all saved searches."
+      "description": "保存されている検索条件の一覧を返す。List all saved search criteria.",
+      "inputSchema": { "type": "object", "properties": {} },
+      "outputSchema": true,
+      "annotations": { "readOnlyHint": true, "idempotentHint": true }
     }
   ],
   "resources": [

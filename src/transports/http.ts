@@ -54,6 +54,10 @@ export function createHttpApp(): express.Express {
 
   app.use("/.well-known", express.static("public/.well-known"));
 
+  app.get("/ogp.png", (_req, res) => {
+    res.sendFile("ogp.png", { root: "public" });
+  });
+
   app.get("/favicon.ico", (_req, res) => {
     res.sendFile("favicon.ico", { root: "public" });
   });

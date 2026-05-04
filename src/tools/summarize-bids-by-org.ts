@@ -8,7 +8,13 @@ import { toolError } from "../lib/tool-result.js";
 const inputSchema = {
   organization_name: z.string().min(1).describe("分析対象の発注機関名"),
   since: z.string().optional().describe("YYYY-MM-DD 以降。未指定なら過去1年。"),
-  limit: z.number().int().min(1).max(1000).default(200),
+  limit: z
+    .number()
+    .int()
+    .min(1)
+    .max(1000)
+    .default(200)
+    .describe("集計対象の最大取得件数。デフォルト200。"),
 };
 
 export function registerSummarizeBidsByOrg(server: McpServer, client: KkjClient): void {

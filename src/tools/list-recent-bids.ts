@@ -8,10 +8,22 @@ import { PrefectureNameSchema, prefectureEntries, toLgCode } from "../domain/pre
 import { toolError } from "../lib/tool-result.js";
 
 const inputSchema = {
-  prefecture: PrefectureNameSchema.optional(),
-  category: CategorySchema.optional(),
-  days: z.number().int().min(1).max(30).default(7),
-  limit: z.number().int().min(1).max(1000).default(50),
+  prefecture: PrefectureNameSchema.optional().describe("都道府県名で絞り込む。例: 鹿児島県。"),
+  category: CategorySchema.optional().describe("入札区分。物品、役務、工事、その他。"),
+  days: z
+    .number()
+    .int()
+    .min(1)
+    .max(30)
+    .default(7)
+    .describe("過去何日分の公告を取得するか。デフォルト7日。"),
+  limit: z
+    .number()
+    .int()
+    .min(1)
+    .max(1000)
+    .default(50)
+    .describe("取得件数の上限。デフォルト50。"),
 };
 
 export function registerListRecentBids(server: McpServer, client: KkjClient): void {

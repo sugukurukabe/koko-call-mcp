@@ -20,11 +20,21 @@ export const searchBidsInputSchema = {
     .optional()
     .describe("自由記述キーワード。複数キーワードはAND結合で検索されます。"),
   project_name: z.string().min(1).optional().describe("件名で絞り込む場合に指定します。"),
-  prefecture: z.union([PrefectureNameSchema, z.array(PrefectureNameSchema)]).optional(),
-  category: CategorySchema.optional(),
-  procedure_type: ProcedureTypeSchema.optional(),
-  certification: z.array(CertificationSchema).optional(),
-  organization_name: z.string().min(1).optional(),
+  prefecture: z
+    .union([PrefectureNameSchema, z.array(PrefectureNameSchema)])
+    .optional()
+    .describe("都道府県名で絞り込む。配列で複数指定可。例: 鹿児島県、東京都。"),
+  category: CategorySchema.optional().describe("入札区分。物品、役務、工事、その他。"),
+  procedure_type: ProcedureTypeSchema.optional().describe("公示種別。一般競争入札、指名競争入札、随意契約など。"),
+  certification: z
+    .array(CertificationSchema)
+    .optional()
+    .describe("全省庁統一資格の等級。A、B、C、D から複数指定可。"),
+  organization_name: z
+    .string()
+    .min(1)
+    .optional()
+    .describe("発注機関名で絞り込む。例: 農林水産省、防衛省。"),
   issued_after: z.string().optional().describe("公告日 YYYY-MM-DD 以降"),
   issued_before: z.string().optional().describe("公告日 YYYY-MM-DD 以前"),
   due_after: z.string().optional().describe("入札書提出期限 YYYY-MM-DD 以降"),
@@ -33,7 +43,13 @@ export const searchBidsInputSchema = {
   opening_before: z.string().optional().describe("開札日 YYYY-MM-DD 以前"),
   period_end_after: z.string().optional().describe("納入期限日 YYYY-MM-DD 以降"),
   period_end_before: z.string().optional().describe("納入期限日 YYYY-MM-DD 以前"),
-  limit: z.number().int().min(1).max(1000).default(20),
+  limit: z
+    .number()
+    .int()
+    .min(1)
+    .max(1000)
+    .default(20)
+    .describe("取得件数の上限。デフォルト20、最大1000。"),
 };
 const SearchBidsInputObject = z.object(searchBidsInputSchema);
 export type SearchBidsInput = z.infer<typeof SearchBidsInputObject>;

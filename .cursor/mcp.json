@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "jp-bids-mcp": {
+      "command": "node",
+      "args": ["dist/server.js"],
+      "env": {
+        "JP_BIDS_VERTEX_AI": "1",
+        "GOOGLE_CLOUD_PROJECT": "sugukuru-main",
+        "GOOGLE_CLOUD_LOCATION": "asia-northeast1"
+      }
+    }
+  }
+}

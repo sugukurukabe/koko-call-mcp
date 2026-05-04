@@ -14,6 +14,45 @@ const savedSearches: Map<
   { name: string; criteria: SearchBidsInput; createdAt: string; lastCheckedAt: string | null }
 > = new Map();
 
+const SaveSearchOutputSchema = z.object({
+  saved: z.boolean(),
+  name: z.string(),
+  criteria: z.record(z.string(), z.unknown()),
+  totalSaved: z.number(),
+  nextStep: z.string(),
+});
+
+const CheckSavedSearchOutputSchema = z.object({
+  name: z.string(),
+  newBidsCount: z.number(),
+  bids: z.array(
+    z.object({
+      projectName: z.string(),
+      organizationName: z.string().nullable(),
+      prefectureName: z.string().nullable(),
+      cftIssueDate: z.string().nullable(),
+      tenderSubmissionDeadline: z.string().nullable(),
+      key: z.string(),
+    }),
+  ),
+  checkedAt: z.string(),
+  previousCheck: z.string().nullable(),
+  attribution: z.record(z.string(), z.unknown()),
+  webhookHint: z.string(),
+});
+
+const ListSavedSearchesOutputSchema = z.object({
+  totalSaved: z.number(),
+  searches: z.array(
+    z.object({
+      name: z.string(),
+      criteria: z.record(z.string(), z.unknown()),
+      createdAt: z.string(),
+      lastCheckedAt: z.string().nullable(),
+    }),
+  ),
+});
+
 const SavedSearchSchema = z.object({
   name: z
     .string()
@@ -21,8 +60,11 @@ const SavedSearchSchema = z.object({
     .max(100)
     .describe("保存検索の名前（例: 「鹿児島IT案件」）。Name for this saved search."),
   query: z.string().optional().describe("キーワード。Keyword."),
-  prefecture: z.union([PrefectureNameSchema, z.array(PrefectureNameSchema)]).optional(),
-  category: CategorySchema.optional(),
+  prefecture: z
+    .union([PrefectureNameSchema, z.array(PrefectureNameSchema)])
+    .optional()
+    .describe("都道府県名で絞り込む。配列で複数指定可。"),
+  category: CategorySchema.optional().describe("入札区分。物品、役務、工事、その他。"),
   organization_name: z.string().optional().describe("発注機関名。Organization name."),
 });
 
@@ -43,6 +85,7 @@ export function registerSavedSearchAlert(server: McpServer, client: KkjClient): 
       description:
         "入札検索条件を名前付きで保存する。保存した条件は check_saved_search で新着確認に使える。Save named bid search criteria for recurring alert checks. Simpan kriteria pencarian tender bernama untuk pemeriksaan peringatan berulang.",
       inputSchema: SavedSearchSchema.shape,
+      outputSchema: SaveSearchOutputSchema.shape,
       annotations: {
         readOnlyHint: false,
         destructiveHint: false,
@@ -64,20 +107,17 @@ export function registerSavedSearchAlert(server: McpServer, client: KkjClient): 
         createdAt: new Date().toISOString(),
         lastCheckedAt: null,
       });
+      const result = {
+        saved: true,
+        name: args.name,
+        criteria: criteria as Record<string, unknown>,
+        totalSaved: savedSearches.size,
+        nextStep:
+          "check_saved_search でこの条件の新着入札を確認できます。Use check_saved_search to check for new bids matching this criteria.",
+      };
       return {
-        content: [
-          {
-            type: "text" as const,
-            text: jsonText({
-              saved: true,
-              name: args.name,
-              criteria,
-              totalSaved: savedSearches.size,
-              nextStep:
-                "check_saved_search でこの条件の新着入札を確認できます。Use check_saved_search to check for new bids matching this criteria.",
-            }),
-          },
-        ],
+        content: [{ type: "text" as const, text: jsonText(result) }],
+        structuredContent: result,
       };
     },
   );
@@ -92,6 +132,7 @@ export function registerSavedSearchAlert(server: McpServer, client: KkjClient): 
       description:
         "保存した検索条件で新着入札を確認する。前回チェック以降の新着のみを返す。Check for new bids since last check using saved search criteria. Periksa tender baru sejak pemeriksaan terakhir menggunakan kriteria tersimpan.",
       inputSchema: CheckAlertSchema.shape,
+      outputSchema: CheckSavedSearchOutputSchema.shape,
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -118,31 +159,29 @@ export function registerSavedSearchAlert(server: McpServer, client: KkjClient): 
         const result = await client.search(params);
 
         const now = new Date().toISOString();
+        const previousCheck = saved.lastCheckedAt;
         saved.lastCheckedAt = now;
 
+        const checkResult = {
+          name: args.name,
+          newBidsCount: result.searchHits,
+          bids: result.bids.slice(0, 10).map((bid) => ({
+            projectName: bid.projectName,
+            organizationName: bid.organizationName,
+            prefectureName: bid.prefectureName,
+            cftIssueDate: bid.cftIssueDate,
+            tenderSubmissionDeadline: bid.tenderSubmissionDeadline,
+            key: bid.key,
+          })),
+          checkedAt: now,
+          previousCheck,
+          attribution: result.attribution as Record<string, unknown>,
+          webhookHint:
+            "この機能を定期実行するには、Webhook通知を設定できます。将来のバージョンでSlack/メール/Webhook通知に対応予定です。",
+        };
         return {
-          content: [
-            {
-              type: "text" as const,
-              text: jsonText({
-                name: args.name,
-                newBidsCount: result.searchHits,
-                bids: result.bids.slice(0, 10).map((bid) => ({
-                  projectName: bid.projectName,
-                  organizationName: bid.organizationName,
-                  prefectureName: bid.prefectureName,
-                  cftIssueDate: bid.cftIssueDate,
-                  tenderSubmissionDeadline: bid.tenderSubmissionDeadline,
-                  key: bid.key,
-                })),
-                checkedAt: now,
-                previousCheck: saved.lastCheckedAt,
-                attribution: result.attribution,
-                webhookHint:
-                  "この機能を定期実行するには、Webhook通知を設定できます。将来のバージョンでSlack/メール/Webhook通知に対応予定です。",
-              }),
-            },
-          ],
+          content: [{ type: "text" as const, text: jsonText(checkResult) }],
+          structuredContent: checkResult,
         };
       } catch (error) {
         return toolError(error, "保存検索の確認中にエラーが発生しました。");
@@ -160,6 +199,7 @@ export function registerSavedSearchAlert(server: McpServer, client: KkjClient): 
       description:
         "保存されている検索条件の一覧を返す。List all saved search criteria. Daftar semua kriteria pencarian yang tersimpan.",
       inputSchema: ListSavedSchema.shape,
+      outputSchema: ListSavedSearchesOutputSchema.shape,
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -167,21 +207,20 @@ export function registerSavedSearchAlert(server: McpServer, client: KkjClient): 
         openWorldHint: false,
       },
     },
-    async () => ({
-      content: [
-        {
-          type: "text" as const,
-          text: jsonText({
-            totalSaved: savedSearches.size,
-            searches: [...savedSearches.values()].map((s) => ({
-              name: s.name,
-              criteria: s.criteria,
-              createdAt: s.createdAt,
-              lastCheckedAt: s.lastCheckedAt,
-            })),
-          }),
-        },
-      ],
-    }),
+    async () => {
+      const listResult = {
+        totalSaved: savedSearches.size,
+        searches: [...savedSearches.values()].map((s) => ({
+          name: s.name,
+          criteria: s.criteria as Record<string, unknown>,
+          createdAt: s.createdAt,
+          lastCheckedAt: s.lastCheckedAt,
+        })),
+      };
+      return {
+        content: [{ type: "text" as const, text: jsonText(listResult) }],
+        structuredContent: listResult,
+      };
+    },
   );
 }

@@ -19,8 +19,20 @@ const inputSchema = {
     .array(z.string().min(1))
     .optional()
     .describe("避けたい語句。例: 工事、常駐、夜間。"),
-  due_within_days: z.number().int().min(1).max(180).default(30),
-  shortlist_limit: z.number().int().min(1).max(50).default(10),
+  due_within_days: z
+    .number()
+    .int()
+    .min(1)
+    .max(180)
+    .default(30)
+    .describe("この日数以内に提出期限が来る案件を優先。デフォルト30日。"),
+  shortlist_limit: z
+    .number()
+    .int()
+    .min(1)
+    .max(50)
+    .default(10)
+    .describe("CSV出力する最大件数。デフォルト10件。"),
   fetch_documents: z
     .boolean()
     .default(false)
