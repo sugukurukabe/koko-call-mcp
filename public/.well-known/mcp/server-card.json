@@ -14,13 +14,28 @@
       "inputSchema": {
         "type": "object",
         "properties": {
-          "query": { "type": "string", "description": "自由記述キーワード。複数キーワードはAND結合で検索されます。" },
+          "query": {
+            "type": "string",
+            "description": "自由記述キーワード。複数キーワードはAND結合で検索されます。"
+          },
           "project_name": { "type": "string", "description": "件名で絞り込む場合に指定します。" },
-          "prefecture": { "type": "string", "description": "都道府県名で絞り込む。配列で複数指定可。例: 鹿児島県、東京都。" },
+          "prefecture": {
+            "type": "string",
+            "description": "都道府県名で絞り込む。配列で複数指定可。例: 鹿児島県、東京都。"
+          },
           "category": { "type": "string", "description": "入札区分。物品、役務、工事、その他。" },
-          "procedure_type": { "type": "string", "description": "公示種別。一般競争入札、指名競争入札、随意契約など。" },
-          "certification": { "type": "array", "description": "全省庁統一資格の等級。A、B、C、D から複数指定可。" },
-          "organization_name": { "type": "string", "description": "発注機関名で絞り込む。例: 農林水産省、防衛省。" },
+          "procedure_type": {
+            "type": "string",
+            "description": "公示種別。一般競争入札、指名競争入札、随意契約など。"
+          },
+          "certification": {
+            "type": "array",
+            "description": "全省庁統一資格の等級。A、B、C、D から複数指定可。"
+          },
+          "organization_name": {
+            "type": "string",
+            "description": "発注機関名で絞り込む。例: 農林水産省、防衛省。"
+          },
           "issued_after": { "type": "string", "description": "公告日 YYYY-MM-DD 以降" },
           "issued_before": { "type": "string", "description": "公告日 YYYY-MM-DD 以前" },
           "due_after": { "type": "string", "description": "入札書提出期限 YYYY-MM-DD 以降" },
@@ -56,14 +71,35 @@
       "inputSchema": {
         "type": "object",
         "properties": {
-          "query": { "type": "string", "description": "自由記述キーワード。複数キーワードはAND結合で検索されます。" },
-          "prefecture": { "type": "string", "description": "都道府県名で絞り込む。配列で複数指定可。" },
+          "query": {
+            "type": "string",
+            "description": "自由記述キーワード。複数キーワードはAND結合で検索されます。"
+          },
+          "prefecture": {
+            "type": "string",
+            "description": "都道府県名で絞り込む。配列で複数指定可。"
+          },
           "category": { "type": "string", "description": "入札区分。物品、役務、工事、その他。" },
-          "procedure_type": { "type": "string", "description": "公示種別。一般競争入札、指名競争入札、随意契約など。" },
-          "preferred_keywords": { "type": "array", "description": "優先したい語句。例: ソフトウェア、保守、クラウド。" },
-          "avoid_keywords": { "type": "array", "description": "避けたい語句。例: 工事、常駐、夜間。" },
-          "due_within_days": { "type": "number", "description": "この日数以内に提出期限が来る案件を優先します。" },
-          "shortlist_limit": { "type": "number", "description": "ランキング結果として返す最大件数。" },
+          "procedure_type": {
+            "type": "string",
+            "description": "公示種別。一般競争入札、指名競争入札、随意契約など。"
+          },
+          "preferred_keywords": {
+            "type": "array",
+            "description": "優先したい語句。例: ソフトウェア、保守、クラウド。"
+          },
+          "avoid_keywords": {
+            "type": "array",
+            "description": "避けたい語句。例: 工事、常駐、夜間。"
+          },
+          "due_within_days": {
+            "type": "number",
+            "description": "この日数以内に提出期限が来る案件を優先します。"
+          },
+          "shortlist_limit": {
+            "type": "number",
+            "description": "ランキング結果として返す最大件数。"
+          },
           "limit": { "type": "number", "description": "取得件数の上限。デフォルト20、最大1000。" }
         }
       },
@@ -78,7 +114,10 @@
         "properties": {
           "prefecture": { "type": "string", "description": "都道府県名で絞り込む。例: 鹿児島県。" },
           "category": { "type": "string", "description": "入札区分。物品、役務、工事、その他。" },
-          "days": { "type": "number", "description": "過去何日分の公告を取得するか。デフォルト7日。" },
+          "days": {
+            "type": "number",
+            "description": "過去何日分の公告を取得するか。デフォルト7日。"
+          },
           "limit": { "type": "number", "description": "取得件数の上限。デフォルト50。" }
         }
       },
@@ -104,12 +143,30 @@
       "inputSchema": {
         "type": "object",
         "properties": {
-          "bid_key": { "type": "string", "description": "search_bids、rank_bids、またはlist_recent_bidsが返したKeyフィールド" },
-          "preferred_keywords": { "type": "array", "description": "優先したい語句。例: ソフトウェア、保守、クラウド。" },
-          "avoid_keywords": { "type": "array", "description": "避けたい語句。例: 工事、常駐、夜間。" },
-          "due_within_days": { "type": "number", "description": "この日数以内に提出期限が来る案件を優先。デフォルト30日。" },
-          "fetch_documents": { "type": "boolean", "description": "trueの場合、PDF/HTML抽出結果を追跡判断の説明に反映する。" },
-          "target_uris": { "type": "array", "description": "抽出対象URL。省略時は検索結果の公式公告ページ・添付資料URLから最大3件を使う。" }
+          "bid_key": {
+            "type": "string",
+            "description": "search_bids、rank_bids、またはlist_recent_bidsが返したKeyフィールド"
+          },
+          "preferred_keywords": {
+            "type": "array",
+            "description": "優先したい語句。例: ソフトウェア、保守、クラウド。"
+          },
+          "avoid_keywords": {
+            "type": "array",
+            "description": "避けたい語句。例: 工事、常駐、夜間。"
+          },
+          "due_within_days": {
+            "type": "number",
+            "description": "この日数以内に提出期限が来る案件を優先。デフォルト30日。"
+          },
+          "fetch_documents": {
+            "type": "boolean",
+            "description": "trueの場合、PDF/HTML抽出結果を追跡判断の説明に反映する。"
+          },
+          "target_uris": {
+            "type": "array",
+            "description": "抽出対象URL。省略時は検索結果の公式公告ページ・添付資料URLから最大3件を使う。"
+          }
         },
         "required": ["bid_key"]
       },
@@ -123,9 +180,15 @@
         "type": "object",
         "properties": {
           "bid_key": { "type": "string", "description": "対象案件のKeyフィールド" },
-          "company_certifications": { "type": "array", "description": "自社が保有する全省庁統一資格の等級" },
+          "company_certifications": {
+            "type": "array",
+            "description": "自社が保有する全省庁統一資格の等級"
+          },
           "company_prefecture": { "type": "string", "description": "自社の所在地都道府県" },
-          "fetch_documents": { "type": "boolean", "description": "trueの場合、仕様書から参加資格を抽出する。" },
+          "fetch_documents": {
+            "type": "boolean",
+            "description": "trueの場合、仕様書から参加資格を抽出する。"
+          },
           "target_uris": { "type": "array", "description": "抽出対象URL。" }
         },
         "required": ["bid_key"]
@@ -140,8 +203,14 @@
         "type": "object",
         "properties": {
           "bid_key": { "type": "string", "description": "対象案件のKeyフィールド" },
-          "fetch_documents": { "type": "boolean", "description": "trueの場合、添付PDF/HTMLから要件を自動抽出する。" },
-          "target_uris": { "type": "array", "description": "抽出対象URL。省略時は公式公告ページから最大3件。" }
+          "fetch_documents": {
+            "type": "boolean",
+            "description": "trueの場合、添付PDF/HTMLから要件を自動抽出する。"
+          },
+          "target_uris": {
+            "type": "array",
+            "description": "抽出対象URL。省略時は公式公告ページから最大3件。"
+          }
         },
         "required": ["bid_key"]
       },
@@ -154,14 +223,35 @@
       "inputSchema": {
         "type": "object",
         "properties": {
-          "query": { "type": "string", "description": "自由記述キーワード。複数キーワードはAND結合で検索されます。" },
-          "prefecture": { "type": "string", "description": "都道府県名で絞り込む。配列で複数指定可。" },
+          "query": {
+            "type": "string",
+            "description": "自由記述キーワード。複数キーワードはAND結合で検索されます。"
+          },
+          "prefecture": {
+            "type": "string",
+            "description": "都道府県名で絞り込む。配列で複数指定可。"
+          },
           "category": { "type": "string", "description": "入札区分。物品、役務、工事、その他。" },
-          "preferred_keywords": { "type": "array", "description": "優先したい語句。例: ソフトウェア、保守、クラウド。" },
-          "avoid_keywords": { "type": "array", "description": "避けたい語句。例: 工事、常駐、夜間。" },
-          "due_within_days": { "type": "number", "description": "この日数以内に提出期限が来る案件を優先。デフォルト30日。" },
-          "shortlist_limit": { "type": "number", "description": "CSV出力する最大件数。デフォルト10件。" },
-          "fetch_documents": { "type": "boolean", "description": "trueの場合、上位案件のPDF/HTML抽出結果をCSVに追加する。" },
+          "preferred_keywords": {
+            "type": "array",
+            "description": "優先したい語句。例: ソフトウェア、保守、クラウド。"
+          },
+          "avoid_keywords": {
+            "type": "array",
+            "description": "避けたい語句。例: 工事、常駐、夜間。"
+          },
+          "due_within_days": {
+            "type": "number",
+            "description": "この日数以内に提出期限が来る案件を優先。デフォルト30日。"
+          },
+          "shortlist_limit": {
+            "type": "number",
+            "description": "CSV出力する最大件数。デフォルト10件。"
+          },
+          "fetch_documents": {
+            "type": "boolean",
+            "description": "trueの場合、上位案件のPDF/HTML抽出結果をCSVに追加する。"
+          },
           "limit": { "type": "number", "description": "取得件数の上限。デフォルト20、最大1000。" }
         }
       },
@@ -174,7 +264,10 @@
       "inputSchema": {
         "type": "object",
         "properties": {
-          "bid_keys": { "type": "array", "description": "カレンダーに追加する案件のKeyフィールドの配列" }
+          "bid_keys": {
+            "type": "array",
+            "description": "カレンダーに追加する案件のKeyフィールドの配列"
+          }
         },
         "required": ["bid_keys"]
       },
@@ -187,12 +280,30 @@
       "inputSchema": {
         "type": "object",
         "properties": {
-          "bid_key": { "type": "string", "description": "search_bids、rank_bids、またはlist_recent_bidsが返したKeyフィールド" },
-          "preferred_keywords": { "type": "array", "description": "優先したい語句。例: ソフトウェア、保守、クラウド。" },
-          "avoid_keywords": { "type": "array", "description": "避けたい語句。例: 工事、常駐、夜間。" },
-          "due_within_days": { "type": "number", "description": "この日数以内に提出期限が来る案件を優先。デフォルト30日。" },
-          "fetch_documents": { "type": "boolean", "description": "trueの場合、PDF/HTML抽出結果を社内検討メモへ反映する。" },
-          "target_uris": { "type": "array", "description": "抽出対象URL。省略時は検索結果の公式公告ページ・添付資料URLから最大3件を使う。" }
+          "bid_key": {
+            "type": "string",
+            "description": "search_bids、rank_bids、またはlist_recent_bidsが返したKeyフィールド"
+          },
+          "preferred_keywords": {
+            "type": "array",
+            "description": "優先したい語句。例: ソフトウェア、保守、クラウド。"
+          },
+          "avoid_keywords": {
+            "type": "array",
+            "description": "避けたい語句。例: 工事、常駐、夜間。"
+          },
+          "due_within_days": {
+            "type": "number",
+            "description": "この日数以内に提出期限が来る案件を優先。デフォルト30日。"
+          },
+          "fetch_documents": {
+            "type": "boolean",
+            "description": "trueの場合、PDF/HTML抽出結果を社内検討メモへ反映する。"
+          },
+          "target_uris": {
+            "type": "array",
+            "description": "抽出対象URL。省略時は検索結果の公式公告ページ・添付資料URLから最大3件を使う。"
+          }
         },
         "required": ["bid_key"]
       },
@@ -206,8 +317,14 @@
         "type": "object",
         "properties": {
           "bid_key": { "type": "string", "description": "対象案件のKeyフィールド" },
-          "focus_areas": { "type": "array", "description": "質問したい重点分野。例: 納期、仕様、評価基準。" },
-          "fetch_documents": { "type": "boolean", "description": "trueの場合、仕様書から曖昧点を自動抽出して質問に反映する。" },
+          "focus_areas": {
+            "type": "array",
+            "description": "質問したい重点分野。例: 納期、仕様、評価基準。"
+          },
+          "fetch_documents": {
+            "type": "boolean",
+            "description": "trueの場合、仕様書から曖昧点を自動抽出して質問に反映する。"
+          },
           "target_uris": { "type": "array", "description": "抽出対象URL。" }
         },
         "required": ["bid_key"]
@@ -221,12 +338,27 @@
       "inputSchema": {
         "type": "object",
         "properties": {
-          "query": { "type": "string", "description": "自由記述キーワード。例: システム、保守、クラウド。" },
-          "prefecture": { "type": "string", "description": "都道府県名で絞り込む。配列で複数指定可。" },
+          "query": {
+            "type": "string",
+            "description": "自由記述キーワード。例: システム、保守、クラウド。"
+          },
+          "prefecture": {
+            "type": "string",
+            "description": "都道府県名で絞り込む。配列で複数指定可。"
+          },
           "category": { "type": "string", "description": "入札区分。物品、役務、工事、その他。" },
-          "procedure_type": { "type": "string", "description": "公示種別。一般競争入札、指名競争入札、随意契約など。" },
-          "organization_name": { "type": "string", "description": "発注機関名で絞り込む場合に指定。" },
-          "window_days": { "type": "number", "description": "過去何日分の公告を集計対象にするか。デフォルト365日。" },
+          "procedure_type": {
+            "type": "string",
+            "description": "公示種別。一般競争入札、指名競争入札、随意契約など。"
+          },
+          "organization_name": {
+            "type": "string",
+            "description": "発注機関名で絞り込む場合に指定。"
+          },
+          "window_days": {
+            "type": "number",
+            "description": "過去何日分の公告を集計対象にするか。デフォルト365日。"
+          },
           "limit": { "type": "number", "description": "KKJ API から取得する公告件数の上限。" }
         }
       },
@@ -254,9 +386,15 @@
       "inputSchema": {
         "type": "object",
         "properties": {
-          "name": { "type": "string", "description": "保存検索の名前（例: 「鹿児島IT案件」）。Name for this saved search." },
+          "name": {
+            "type": "string",
+            "description": "保存検索の名前（例: 「鹿児島IT案件」）。Name for this saved search."
+          },
           "query": { "type": "string", "description": "キーワード。Keyword." },
-          "prefecture": { "type": "string", "description": "都道府県名で絞り込む。配列で複数指定可。" },
+          "prefecture": {
+            "type": "string",
+            "description": "都道府県名で絞り込む。配列で複数指定可。"
+          },
           "category": { "type": "string", "description": "入札区分。物品、役務、工事、その他。" },
           "organization_name": { "type": "string", "description": "発注機関名。Organization name." }
         },
@@ -271,7 +409,10 @@
       "inputSchema": {
         "type": "object",
         "properties": {
-          "name": { "type": "string", "description": "確認する保存検索の名前。Name of saved search to check." }
+          "name": {
+            "type": "string",
+            "description": "確認する保存検索の名前。Name of saved search to check."
+          }
         },
         "required": ["name"]
       },

@@ -24,7 +24,9 @@ const inputSchema = {
     .optional()
     .describe("都道府県名で絞り込む。配列で複数指定可。"),
   category: CategorySchema.optional().describe("入札区分。物品、役務、工事、その他。"),
-  procedure_type: ProcedureTypeSchema.optional().describe("公示種別。一般競争入札、指名競争入札、随意契約など。"),
+  procedure_type: ProcedureTypeSchema.optional().describe(
+    "公示種別。一般競争入札、指名競争入札、随意契約など。",
+  ),
   organization_name: z.string().min(1).optional().describe("発注機関名で絞り込む場合に指定。"),
   window_days: z
     .number()

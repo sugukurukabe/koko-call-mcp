@@ -6,14 +6,6 @@ import { PrefectureNameSchema } from "../domain/prefectures.js";
 import { jsonText, toolError } from "../lib/tool-result.js";
 import { buildSearchBidsParams, type SearchBidsInput } from "./search-bids.js";
 
-// 保存検索条件のインメモリストア（セッション単位）
-// In-memory saved search store (per session)
-// Penyimpanan pencarian tersimpan di memori (per sesi)
-const savedSearches: Map<
-  string,
-  { name: string; criteria: SearchBidsInput; createdAt: string; lastCheckedAt: string | null }
-> = new Map();
-
 const SaveSearchOutputSchema = z.object({
   saved: z.boolean(),
   name: z.string(),
@@ -75,6 +67,14 @@ const CheckAlertSchema = z.object({
 const ListSavedSchema = z.object({});
 
 export function registerSavedSearchAlert(server: McpServer, client: KkjClient): void {
+  // 保存検索条件のインメモリストア（MCPサーバーインスタンス単位）
+  // In-memory saved search store (per MCP server instance)
+  // Penyimpanan pencarian tersimpan di memori (per instance server MCP)
+  const savedSearches: Map<
+    string,
+    { name: string; criteria: SearchBidsInput; createdAt: string; lastCheckedAt: string | null }
+  > = new Map();
+
   // 検索条件を保存する
   // Save search criteria for later alerts
   // Simpan kriteria pencarian untuk peringatan
@@ -89,7 +89,7 @@ export function registerSavedSearchAlert(server: McpServer, client: KkjClient): 
       annotations: {
         readOnlyHint: false,
         destructiveHint: false,
-        idempotentHint: true,
+        idempotentHint: false,
         openWorldHint: false,
       },
     },
@@ -134,9 +134,9 @@ export function registerSavedSearchAlert(server: McpServer, client: KkjClient): 
       inputSchema: CheckAlertSchema.shape,
       outputSchema: CheckSavedSearchOutputSchema.shape,
       annotations: {
-        readOnlyHint: true,
+        readOnlyHint: false,
         destructiveHint: false,
-        idempotentHint: true,
+        idempotentHint: false,
         openWorldHint: true,
       },
     },

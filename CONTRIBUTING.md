@@ -39,9 +39,9 @@ Berikut adalah issue dengan kompleksitas rendah yang ideal untuk kontributor per
 4. **[good first issue] docs: 英語版 CONTRIBUTING.md の充実**  
    このファイルの英語セクションをより詳細に（コーディング規約・コミットメッセージ規則の英語説明）。
 
-5. **[good first issue] chore: `src/server.ts` のバージョン文字列を `package.json` から動的に読み込む**  
-   現在ハードコードされている `const version = "0.7.x"` を  
-   `createRequire` で `package.json` から取得するように変更。
+5. **[good first issue] test: バージョン整合性チェックの対象追加**  
+   `scripts/registry-validate.ts` に、新しい公開メタデータファイルの version 検証を追加する。  
+   `src/lib/version.ts` の `VERSION` と `package.json` の値がずれないことを保つ。
 
 ---
 

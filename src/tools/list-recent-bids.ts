@@ -17,13 +17,7 @@ const inputSchema = {
     .max(30)
     .default(7)
     .describe("過去何日分の公告を取得するか。デフォルト7日。"),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(1000)
-    .default(50)
-    .describe("取得件数の上限。デフォルト50。"),
+  limit: z.number().int().min(1).max(1000).default(50).describe("取得件数の上限。デフォルト50。"),
 };
 
 export function registerListRecentBids(server: McpServer, client: KkjClient): void {

@@ -2,6 +2,12 @@
 
 ## 日本語
 
+### 0.7.2
+
+- **仕様適合監査の修正**: バージョン整合性、ライセンス表示、MCP capability 宣言、tool annotations、公開ドキュメントの表現を見直し。
+- **セキュリティ境界の強化**: 本番環境で `JP_BIDS_OAUTH_SECRET`、`ALLOWED_ORIGINS`、`JP_BIDS_PDF_ALLOWED_HOSTS` を必須化し、PDF fetch の予約済み IP 範囲チェックを拡張。
+- **公開資料の整理**: 外部公開に不要な内部向け文脈を削除し、Apache-2.0 表記へ統一。
+
 ### 0.7.1
 
 - **Jグランツ MCP 連携ドキュメント追加**: デジタル庁の [Jグランツ MCP](https://github.com/digital-go-jp/jgrants-mcp-server) と JP Bids MCP を組み合わせるエンドツーエンドワークフローガイドを公開（`examples/jgrants-integration/`）。日本語・英語・インドネシア語の3言語 README と Claude Desktop / Cursor 用設定ファイルを収録。
@@ -14,7 +20,7 @@
 - **品質**: biome format / optional chain 修正、typedoc 再生成、`.well-known` メタデータのバージョン統一。
 - **保存検索＋新着通知**: `save_search` / `check_saved_search` / `list_saved_searches` の3ツールを追加（14→17ツール）。Webhook拡張の起点。
 - **ホワイトラベル対応**: 環境変数6つでブランド名・URL・組織名を切替可能（`src/lib/branding.ts`）。コード変更不要でOEM提供に対応。
-- **利用統計エンドポイント**: `/stats` でリクエスト数・稼働時間を返す。買い手がトラクションを確認可能。
+- **利用統計エンドポイント**: `/stats` でリクエスト数・稼働時間を返す。運用者が疎通と負荷傾向を確認可能。
 - **プロダクトランディングページ**: `https://mcp.bid-jp.com/` にBefore/After比較・セットアップタブ・会話例・エコシステム図を表示。
 - **拡張性ガイド**: `docs/extensibility.md` にツール追加・データソース追加・ティア追加・通知拡張の手順を文書化。
 - **GitHub Release v0.7.1**: タグ・リリースノート・Discussions有効化・アナウンス投稿。
@@ -147,6 +153,12 @@
 
 ## English
 
+### 0.7.2
+
+- **Spec-alignment audit fixes**: tightened version consistency, license display, MCP capability declarations, tool annotations, and public documentation wording.
+- **Security boundary hardening**: production now requires `JP_BIDS_OAUTH_SECRET`, `ALLOWED_ORIGINS`, and `JP_BIDS_PDF_ALLOWED_HOSTS`; PDF fetch reserved-IP blocking was expanded.
+- **Public documentation cleanup**: removed internal-only positioning from public tracked docs and standardized Apache-2.0 wording.
+
 ### 0.7.1
 
 - **J-Grants MCP integration docs**: Published an end-to-end workflow guide combining JP Bids MCP with the Digital Agency's [J-Grants MCP](https://github.com/digital-go-jp/jgrants-mcp-server) (`examples/jgrants-integration/`). Includes trilingual READMEs (EN/JA/ID) and ready-to-use Claude Desktop / Cursor configuration files.
@@ -159,7 +171,7 @@
 - **Quality**: biome format fixes, optional chain lint fix, typedoc regeneration, `.well-known` metadata version alignment.
 - **Saved Search + Alerts**: Added `save_search` / `check_saved_search` / `list_saved_searches` (14→17 tools). Foundation for Webhook notifications.
 - **White-label support**: 6 environment variables to switch brand name, URL, and organization (`src/lib/branding.ts`). OEM-ready without code changes.
-- **Usage stats endpoint**: `/stats` returns request count and uptime for acquirers to verify traction.
+- **Usage stats endpoint**: `/stats` returns request count and uptime for operators to verify service health and traffic trends.
 - **Product landing page**: `https://mcp.bid-jp.com/` with Before/After comparison, setup tabs, conversation examples, ecosystem diagram.
 - **Extensibility guide**: `docs/extensibility.md` documenting tool/data source/tier/notification extension patterns.
 - **GitHub Release v0.7.1**: Tag, release notes, Discussions enabled, announcement posted.
@@ -291,6 +303,12 @@
 - Initial implementation with Tools, Prompts, Resources, Resource Templates, Completion, Logging, stdio, and Streamable HTTP.
 
 ## Bahasa Indonesia
+
+### 0.7.2
+
+- **Perbaikan audit kesesuaian spesifikasi**: memperketat konsistensi versi, tampilan lisensi, deklarasi capability MCP, anotasi tool, dan redaksi dokumen publik.
+- **Penguatan batas keamanan**: production kini mewajibkan `JP_BIDS_OAUTH_SECRET`, `ALLOWED_ORIGINS`, dan `JP_BIDS_PDF_ALLOWED_HOSTS`; pemblokiran rentang IP reserved pada PDF fetch diperluas.
+- **Pembersihan dokumentasi publik**: menghapus konteks internal dari dokumen publik dan menyeragamkan lisensi Apache-2.0.
 
 ### 0.7.1
 

@@ -3,6 +3,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { CategorySchema } from "../domain/codes.js";
 import { PrefectureNameSchema, prefectureEntries } from "../domain/prefectures.js";
+import type { Tier } from "../lib/auth.js";
 
 const prefectureCompletable = completable(PrefectureNameSchema, (value) =>
   prefectureEntries
@@ -15,7 +16,7 @@ const categoryCompletable = completable(CategorySchema, (value) =>
   (["物品", "工事", "役務"] as const).filter((category) => category.includes(String(value))),
 );
 
-export function registerPrompts(server: McpServer): void {
+export function registerPrompts(server: McpServer, tier: Tier = "pro"): void {
   server.registerPrompt(
     "morning_bid_briefing",
     {
@@ -41,29 +42,31 @@ export function registerPrompts(server: McpServer): void {
     }),
   );
 
-  server.registerPrompt(
-    "competitor_radar",
-    {
-      title: "競合・発注機関レーダー",
-      description:
-        "発注機関名を軸に過去案件の傾向を整理する。Analyze past bid trends for a specific procurement organization. Analisis tren tender masa lalu untuk instansi pengadaan tertentu.",
-      argsSchema: {
-        organization_name: z.string().min(1),
-        since: z.string().optional().describe("YYYY-MM-DD。未指定なら過去1年。"),
-      },
-    },
-    (args) => ({
-      messages: [
-        {
-          role: "user",
-          content: {
-            type: "text",
-            text: `summarize_bids_by_org を使って ${args.organization_name} の ${args.since ?? "過去1年"} 以降の発注傾向を分析してください。カテゴリ別、入札方式別、直近案件、営業仮説を分けてください。`,
-          },
+  if (tier === "pro") {
+    server.registerPrompt(
+      "competitor_radar",
+      {
+        title: "競合・発注機関レーダー",
+        description:
+          "発注機関名を軸に過去案件の傾向を整理する。Analyze past bid trends for a specific procurement organization. Analisis tren tender masa lalu untuk instansi pengadaan tertentu.",
+        argsSchema: {
+          organization_name: z.string().min(1),
+          since: z.string().optional().describe("YYYY-MM-DD。未指定なら過去1年。"),
         },
-      ],
-    }),
-  );
+      },
+      (args) => ({
+        messages: [
+          {
+            role: "user",
+            content: {
+              type: "text",
+              text: `summarize_bids_by_org を使って ${args.organization_name} の ${args.since ?? "過去1年"} 以降の発注傾向を分析してください。カテゴリ別、入札方式別、直近案件、営業仮説を分けてください。`,
+            },
+          },
+        ],
+      }),
+    );
+  }
 
   server.registerPrompt(
     "bid_due_alert",

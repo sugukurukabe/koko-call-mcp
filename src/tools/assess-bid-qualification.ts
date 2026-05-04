@@ -51,9 +51,9 @@ export function registerAssessBidQualification(server: McpServer, client: KkjCli
       inputSchema,
       outputSchema: BidQualificationAssessmentSchema.shape,
       annotations: {
-        readOnlyHint: true,
+        readOnlyHint: false,
         destructiveHint: false,
-        idempotentHint: true,
+        idempotentHint: false,
         openWorldHint: true,
       },
     },

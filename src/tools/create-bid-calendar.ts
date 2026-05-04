@@ -35,9 +35,9 @@ export function registerCreateBidCalendar(server: McpServer, client: KkjClient):
       inputSchema,
       outputSchema: BidCalendarExportSchema.shape,
       annotations: {
-        readOnlyHint: true,
+        readOnlyHint: false,
         destructiveHint: false,
-        idempotentHint: true,
+        idempotentHint: false,
         openWorldHint: true,
       },
     },

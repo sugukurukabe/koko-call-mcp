@@ -2,7 +2,11 @@ import { execFileSync } from "node:child_process";
 
 const domain = process.env.JP_BIDS_REMOTE_DOMAIN ?? "mcp.bid-jp.com";
 const region = process.env.JP_BIDS_GCP_REGION ?? "asia-northeast1";
-const project = process.env.JP_BIDS_GCP_PROJECT ?? "ssw-compass-prod-494613";
+const project = process.env.JP_BIDS_GCP_PROJECT;
+
+if (!project) {
+  throw new Error("JP_BIDS_GCP_PROJECT is required.");
+}
 
 const output = execFileSync(
   "gcloud",

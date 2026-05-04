@@ -11,6 +11,8 @@ bom.json
 reports/
 .stryker-tmp/
 .mutation-tmp/
+.smithery/shttp/module.js
+.smithery/shttp/module.js.map
 
 # cookbook-scout local candidates
 .cookbook-candidates/
@@ -18,3 +20,4 @@ reports/
 # confidential docs (pitch / acquisition materials)
 docs/pitch.md
 docs/outreach-draft.md
+docs/outreach/acquirer-targets.md

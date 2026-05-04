@@ -7,9 +7,9 @@ import { KkjClient } from "../api/kkj-client.js";
 import { parseProApiKeys, parseTier } from "../lib/auth.js";
 import { parsePortEnv, parsePositiveNumberEnv } from "../lib/env.js";
 import { parseAllowedOrigins, validateOrigin } from "../lib/http.js";
+import { VERSION } from "../lib/version.js";
 import { createJpBidsServer } from "../mcp.js";
 import { verifyJwt } from "../oauth/jwt.js";
-import { VERSION } from "../lib/version.js";
 import { createOAuthRouter } from "../oauth/router.js";
 
 const supportedProtocolVersions = new Set(["2025-11-25"]);
@@ -18,18 +18,36 @@ function resolveOAuthSecret(): string | undefined {
   const explicit = process.env.JP_BIDS_OAUTH_SECRET;
   if (explicit) return explicit;
   if (process.env.K_SERVICE) {
-    const generated = randomBytes(32).toString("hex");
-    console.error(
-      "[warning] JP_BIDS_OAUTH_SECRET is unset. Generated an ephemeral key. OAuth tokens will not survive restarts or work across instances. Set this variable in production.",
+    throw new Error(
+      "JP_BIDS_OAUTH_SECRET is required in production. Refusing to start with an ephemeral OAuth signing key.",
     );
-    return generated;
   }
-  return undefined;
+  const generated = randomBytes(32).toString("hex");
+  console.error("[info] JP_BIDS_OAUTH_SECRET is unset. Generated an ephemeral local-dev key.");
+  return generated;
+}
+
+function assertProductionOriginPolicy(allowedOrigins: ReadonlySet<string>): void {
+  if (process.env.K_SERVICE && allowedOrigins.size === 0) {
+    throw new Error(
+      "ALLOWED_ORIGINS is required in production. Refusing to expose /mcp to all browser origins.",
+    );
+  }
+}
+
+function assertProductionDocumentFetchPolicy(): void {
+  if (process.env.K_SERVICE && !process.env.JP_BIDS_PDF_ALLOWED_HOSTS) {
+    throw new Error(
+      "JP_BIDS_PDF_ALLOWED_HOSTS is required in production to avoid unrestricted document-fetch egress.",
+    );
+  }
 }
 
 export function createHttpApp(): express.Express {
   const app = express();
   const allowedOrigins = parseAllowedOrigins(process.env.ALLOWED_ORIGINS);
+  assertProductionOriginPolicy(allowedOrigins);
+  assertProductionDocumentFetchPolicy();
   const proApiKeys = parseProApiKeys(process.env.JP_BIDS_PRO_API_KEYS);
   const oauthSecret = resolveOAuthSecret();
   const sharedKkjClient = new KkjClient({
@@ -95,9 +113,9 @@ export function createHttpApp(): express.Express {
     res.status(200).json({ ok: true, service: "JP Bids MCP" });
   });
 
-  // 利用統計: 買い手がトラクションを確認できるエンドポイント
-  // Usage stats: endpoint for acquirers to verify traction
-  // Statistik penggunaan: endpoint bagi pembeli untuk memverifikasi traksi
+  // 利用統計: 運用者が疎通と負荷傾向を確認するエンドポイント
+  // Usage stats: endpoint for operators to verify service health and traffic trends
+  // Statistik penggunaan: endpoint bagi operator untuk memverifikasi kesehatan layanan dan tren trafik
   let requestCount = 0;
   const startedAt = new Date().toISOString();
   app.use("/mcp", (_req, _res, next) => {
@@ -154,6 +172,7 @@ export function createHttpApp(): express.Express {
     // JWT（OAuth）またはAPIキーのどちらでも受け付ける
     // Accept either JWT (OAuth) or API key
     // Terima JWT (OAuth) atau API key
+    let isOAuthAuthenticated = false;
     if (oauthSecret && authHeader) {
       const match = /^Bearer\s+(.+)$/i.exec(authHeader.trim());
       const token = match?.[1];
@@ -163,10 +182,11 @@ export function createHttpApp(): express.Express {
           res.status(401).json({ error: "invalid_token" });
           return;
         }
+        isOAuthAuthenticated = true;
       }
     }
 
-    const tier = parseTier(authHeader, proApiKeys);
+    const tier = isOAuthAuthenticated ? "pro" : parseTier(authHeader, proApiKeys);
     const server = createJpBidsServer({ kkjClient: sharedKkjClient, tier });
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,

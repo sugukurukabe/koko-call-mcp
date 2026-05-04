@@ -51,9 +51,9 @@ export function registerCreateBidReviewPacket(server: McpServer, client: KkjClie
       inputSchema,
       outputSchema: BidReviewPacketSchema.shape,
       annotations: {
-        readOnlyHint: true,
+        readOnlyHint: false,
         destructiveHint: false,
-        idempotentHint: true,
+        idempotentHint: false,
         openWorldHint: true,
       },
     },

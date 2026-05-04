@@ -48,7 +48,7 @@ export function createJpBidsServer(options: CreateJpBidsServerOptions = {}): Mcp
   if (tier === "pro") {
     registerSearchResultsApp(server, client);
   }
-  registerPrompts(server);
+  registerPrompts(server, tier);
   registerResources(server, client);
   return server;
 }

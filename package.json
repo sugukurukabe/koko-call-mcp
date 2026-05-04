@@ -5,8 +5,8 @@
   "type": "module",
   "license": "Apache-2.0",
   "mcpName": "io.github.sugukurukabe/jp-bids",
-  "main": "./dist/server.js",
-  "types": "./dist/server.d.ts",
+  "main": "./dist/mcp.js",
+  "types": "./dist/mcp.d.ts",
   "exports": {
     ".": {
       "types": "./dist/mcp.d.ts",
@@ -92,7 +92,7 @@
     "prepublishOnly": "npm run release:gate",
     "check": "npm run lint && npm run build && npm run test",
     "sbom": "cyclonedx-npm --output-file bom.json",
-    "publish:dry-run": "npm publish --dry-run --access public --ignore-scripts"
+    "publish:dry-run": "npm run release:gate && npm publish --dry-run --access public --ignore-scripts"
   },
   "dependencies": {
     "@google/genai": "^1.51.0",

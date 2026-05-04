@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { clearDocumentCache, fetchDocument } from "../../src/api/pdf-fetcher.js";
 import { UpstreamError, UserInputError } from "../../src/lib/errors.js";
 
-const publicResolver = async () => ["203.0.113.10"];
+const publicResolver = async () => ["93.184.216.34"];
 
 describe("fetchDocument", () => {
   beforeEach(() => {

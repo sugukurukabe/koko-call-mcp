@@ -50,9 +50,9 @@ export function registerExplainBidFit(server: McpServer, client: KkjClient): voi
       inputSchema,
       outputSchema: BidFitExplanationSchema.shape,
       annotations: {
-        readOnlyHint: true,
+        readOnlyHint: false,
         destructiveHint: false,
-        idempotentHint: true,
+        idempotentHint: false,
         openWorldHint: true,
       },
     },

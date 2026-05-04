@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { VERSION } from "../src/lib/version.js";
 
 interface PackageJson {
   name: string;
@@ -51,6 +52,14 @@ const wellKnownJson = JSON.parse(
 const agentsJson = JSON.parse(
   await readFile("public/.well-known/agents.json", "utf8"),
 ) as AgentsJson;
+const serverCardJson = JSON.parse(
+  await readFile("public/.well-known/mcp/server-card.json", "utf8"),
+) as { serverInfo?: { version?: string } };
+const smitheryManifestJson = JSON.parse(
+  await readFile(".smithery/shttp/manifest.json", "utf8"),
+) as { payload?: { serverCard?: { serverInfo?: { version?: string } } } };
+const citationText = await readFile("CITATION.cff", "utf8");
+const indexHtml = await readFile("public/index.html", "utf8");
 
 const errors: string[] = [];
 
@@ -62,12 +71,37 @@ if (packageJson.version !== serverJson.version) {
   errors.push(`version mismatch: ${packageJson.version} !== ${serverJson.version}`);
 }
 
+if (packageJson.version !== VERSION) {
+  errors.push(`src/lib/version.ts mismatch: ${packageJson.version} !== ${VERSION}`);
+}
+
 if (packageJson.version !== wellKnownJson.version) {
   errors.push(`well-known version mismatch: ${packageJson.version} !== ${wellKnownJson.version}`);
 }
 
 if (packageJson.version !== agentsJson.version) {
   errors.push(`agents.json version mismatch: ${packageJson.version} !== ${agentsJson.version}`);
+}
+
+if (packageJson.version !== serverCardJson.serverInfo?.version) {
+  errors.push(
+    `server-card version mismatch: ${packageJson.version} !== ${serverCardJson.serverInfo?.version}`,
+  );
+}
+
+const smitheryVersion = smitheryManifestJson.payload?.serverCard?.serverInfo?.version;
+if (packageJson.version !== smitheryVersion) {
+  errors.push(`smithery manifest version mismatch: ${packageJson.version} !== ${smitheryVersion}`);
+}
+
+const citationVersion = /^version:\s*(.+)$/m.exec(citationText)?.[1]?.trim();
+if (packageJson.version !== citationVersion) {
+  errors.push(`CITATION.cff version mismatch: ${packageJson.version} !== ${citationVersion}`);
+}
+
+const softwareVersion = /"softwareVersion":\s*"([^"]+)"/.exec(indexHtml)?.[1];
+if (packageJson.version !== softwareVersion) {
+  errors.push(`JSON-LD softwareVersion mismatch: ${packageJson.version} !== ${softwareVersion}`);
 }
 
 const packageRepositoryUrl = packageJson.repository?.url

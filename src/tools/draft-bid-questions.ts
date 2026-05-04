@@ -35,9 +35,9 @@ export function registerDraftBidQuestions(server: McpServer, client: KkjClient):
       inputSchema,
       outputSchema: BidQuestionDraftSchema.shape,
       annotations: {
-        readOnlyHint: true,
+        readOnlyHint: false,
         destructiveHint: false,
-        idempotentHint: true,
+        idempotentHint: false,
         openWorldHint: true,
       },
     },

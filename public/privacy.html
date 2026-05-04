@@ -39,8 +39,8 @@ footer { margin-top: 3rem; border-top: 1px solid #ddd; padding-top: 1rem; font-s
 <p>JP Bids MCP does not use cookies.</p>
 
 <h2>5. データの保存 / Data Storage</h2>
-<p>入札情報の添付ファイル（PDF等）は一時的にメモリ上で処理し、レスポンス送信後に即座に破棄します。ディスクやデータベースへの永続化は行いません。</p>
-<p>Bid attachment files (PDFs, etc.) are processed in memory only and discarded immediately after the response is sent. No data is persisted to disk or database.</p>
+<p>入札情報の添付ファイル（PDF等）は一時的にメモリ上で処理します。重複取得を避けるため、同一プロセス内の短時間キャッシュ（最大5分、最大200MiB）に保持される場合があります。ディスクやデータベースへの永続化は行いません。</p>
+<p>Bid attachment files (PDFs, etc.) are processed in memory only. To avoid duplicate upstream fetches, files may be held in a short-lived in-process cache (up to 5 minutes, max 200 MiB). No data is persisted to disk or database.</p>
 
 <h2>6. お問い合わせ / Contact</h2>
 <p>プライバシーに関するお問い合わせは <a href="https://github.com/sugukurukabe/koko-call-mcp/issues">GitHub Issues</a> までお願いします。</p>

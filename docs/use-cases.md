@@ -29,7 +29,7 @@ AI:   JP Bids MCPで検索 → 8件ヒット
 | MCP仕様準拠 | 要学習 | 2025-11-25仕様完全準拠 |
 | OAuth 2.0 | 要実装 | 実装済み（PKCE + DCR） |
 | AI分析機能 | 要設計 | 17ツール即利用 |
-| 保守コスト | エンジニア人件費 | サブスク or 買収 |
+| 保守コスト | エンジニア人件費 | サブスク or OEMライセンス |
 
 ---
 
@@ -129,5 +129,5 @@ AI:     get_bid_detail で案件情報取得
 | トランスポート | stdio + Streamable HTTP |
 | 認証 | OAuth 2.0 (PKCE + DCR) + API Key |
 | エコシステム連携 | Jグランツ MCP + freee MCP |
-| ライセンス | BSL-1.1（商用利用は要相談） |
+| ライセンス | Apache-2.0 |
 | 本番稼働 | Cloud Run (asia-northeast1) |

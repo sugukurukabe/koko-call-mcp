@@ -27,8 +27,7 @@
     "prompts": {
       "listChanged": false
     },
-    "completions": {},
-    "logging": {}
+    "completions": {}
   },
   "transports": ["stdio", "streamable-http"],
   "data_sources": [

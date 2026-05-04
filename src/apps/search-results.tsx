@@ -2,6 +2,7 @@ import { useApp } from "@modelcontextprotocol/ext-apps/react";
 import { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import type { Bid, BidSearchResult } from "../domain/bid.js";
+import { VERSION } from "../lib/version.js";
 import { toWorkspaceViewModel, type WorkspaceViewModel } from "./bid-workspace-view-model.js";
 import "./search-results.css";
 
@@ -40,7 +41,7 @@ function App() {
     appInfo: {
       name: "jp-bids-workspace",
       title: "AI Bid Workspace",
-      version: "0.7.2",
+      version: VERSION,
       description:
         "Interactive workspace for JP Bids MCP — search, rank, extract, qualify, review.",
     },
