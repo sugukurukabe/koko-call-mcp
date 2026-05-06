@@ -1,0 +1,40 @@
+{
+  "name": "@sugukuru-labs/public-mcp-jp-gateway",
+  "version": "0.1.0",
+  "description": "日本の公的データ・業務SaaS MCPサーバーを1回の接続で使えるFederation Gateway。JP Bids（入札）・Jグランツ（補助金）・GMOあおぞらネット銀行（振込）・MoneyForwardクラウド会計（仕訳・試算表）を安全に束ねます。Japan public-data MCP Federation Gateway connecting JP Bids, J-Grants, GMO Aozora Net Bank, and MoneyForward Cloud Accounting through a single secure connection.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "main": "./dist/mcp.js",
+  "types": "./dist/mcp.d.ts",
+  "engines": {
+    "node": ">=20 <25"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/server.ts",
+    "dev:http": "tsx src/server.ts --http",
+    "start": "node dist/server.js",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "npm run lint && npm run build && npm run test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "zod": "^4.4.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.13",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.6.0",
+    "@types/supertest": "^7.2.0",
+    "supertest": "^7.2.2",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
+  }
+}

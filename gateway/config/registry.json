@@ -1,0 +1,279 @@
+{
+  "$schema": "https://sugukuru-labs.github.io/schemas/mcp-registry/v1.json",
+  "version": "1",
+  "servers": [
+    {
+      "id": "jp-bids",
+      "display_name": "JP Bids MCP（官公需入札）",
+      "display_name_en": "JP Bids MCP (Government Procurement)",
+      "display_name_id": "JP Bids MCP (Pengadaan Pemerintah)",
+      "endpoint": "https://mcp.bid-jp.com/mcp",
+      "auth_type": "bearer_apikey",
+      "risk_level": "read_only",
+      "tool_allowlist": [],
+      "tool_modes": {
+        "bid_search": ["search_bids", "rank_bids", "list_recent_bids", "get_bid_detail"],
+        "subsidy_search": [],
+        "financial_check": [],
+        "full_orchestration": []
+      },
+      "cache_ttl_seconds": 60,
+      "attribution": {
+        "source": "中小企業庁 官公需情報ポータルサイト KKJ",
+        "license": "政府標準利用規約 第2.0版",
+        "url": "https://kkj.go.jp"
+      },
+      "routing_keywords": [
+        "入札",
+        "公告",
+        "落札",
+        "調達",
+        "官公需",
+        "案件",
+        "公示",
+        "入札公告",
+        "一般競争",
+        "指名競争",
+        "随意契約",
+        "bid",
+        "procurement",
+        "tender",
+        "government contract",
+        "public notice"
+      ]
+    },
+    {
+      "id": "jgrants",
+      "display_name": "Jグランツ MCP（補助金・助成金）",
+      "display_name_en": "J-Grants MCP (Subsidies and Grants)",
+      "display_name_id": "J-Grants MCP (Subsidi dan Bantuan)",
+      "endpoint": "http://localhost:8000",
+      "auth_type": "none",
+      "risk_level": "read_only",
+      "tool_allowlist": [
+        "search_subsidies",
+        "get_subsidy_detail",
+        "get_subsidy_overview",
+        "get_file_content"
+      ],
+      "tool_modes": {
+        "bid_search": [],
+        "subsidy_search": ["search_subsidies", "get_subsidy_detail", "get_subsidy_overview"],
+        "financial_check": [],
+        "full_orchestration": []
+      },
+      "cache_ttl_seconds": 300,
+      "attribution": {
+        "source": "デジタル庁 Jグランツ（電子申請システム）",
+        "license": "MIT",
+        "url": "https://www.jgrants-portal.go.jp"
+      },
+      "routing_keywords": [
+        "補助金",
+        "助成金",
+        "グラント",
+        "申請",
+        "募集",
+        "給付",
+        "IT導入補助金",
+        "事業再構築補助金",
+        "小規模事業者持続化補助金",
+        "subsidy",
+        "grant",
+        "funding",
+        "jgrants",
+        "j-grants"
+      ]
+    },
+    {
+      "id": "gmo-bank",
+      "display_name": "GMOあおぞらネット銀行 MCP（残高・振込・入出金）",
+      "display_name_en": "GMO Aozora Net Bank MCP (Balance, Transfer, Transactions)",
+      "display_name_id": "GMO Aozora Net Bank MCP (Saldo, Transfer, Transaksi)",
+      "endpoint": "http://localhost:8090",
+      "auth_type": "bearer_apikey",
+      "risk_level": "financial",
+      "tool_allowlist": [
+        "gmo_bank_get_balance",
+        "gmo_bank_get_transactions",
+        "gmo_bank_get_deposit_transactions",
+        "gmo_bank_list_accounts",
+        "gmo_bank_get_transfer_status"
+      ],
+      "tool_modes": {
+        "bid_search": [],
+        "subsidy_search": [],
+        "financial_check": [
+          "gmo_bank_get_balance",
+          "gmo_bank_get_transactions",
+          "gmo_bank_get_deposit_transactions",
+          "gmo_bank_list_accounts",
+          "gmo_bank_get_transfer_status"
+        ],
+        "full_orchestration": [
+          "gmo_bank_get_balance",
+          "gmo_bank_get_transactions",
+          "gmo_bank_get_deposit_transactions",
+          "gmo_bank_list_accounts",
+          "gmo_bank_get_transfer_status",
+          "gmo_bank_transfer"
+        ]
+      },
+      "tool_policies": {
+        "gmo_bank_transfer": {
+          "required_approval": true,
+          "compliance_check": ["tx_amount_under_limit"]
+        }
+      },
+      "cache_ttl_seconds": 30,
+      "attribution": {
+        "source": "GMOあおぞらネット銀行 API",
+        "license": "proprietary",
+        "url": "https://gmo-aozora.com"
+      },
+      "routing_keywords": [
+        "振込",
+        "残高",
+        "入出金",
+        "入金",
+        "出金",
+        "GMO",
+        "あおぞら",
+        "銀行",
+        "口座振込",
+        "資金繰り",
+        "bank",
+        "transfer",
+        "balance",
+        "deposit",
+        "withdrawal",
+        "aozora"
+      ]
+    },
+    {
+      "id": "moneyforward-ca",
+      "display_name": "マネーフォワード クラウド会計 MCP（仕訳・試算表・推移表）",
+      "display_name_en": "MoneyForward Cloud Accounting MCP (Journal, Trial Balance, Transition)",
+      "display_name_id": "MoneyForward Cloud Accounting MCP (Jurnal, Neraca Saldo, Transisi)",
+      "endpoint": "https://beta.mcp.developers.biz.moneyforward.com/mcp/ca/v3",
+      "auth_type": "bearer_oauth",
+      "risk_level": "financial",
+      "tool_allowlist": [],
+      "tool_modes": {
+        "bid_search": [],
+        "subsidy_search": [],
+        "financial_check": [],
+        "full_orchestration": []
+      },
+      "attribution": {
+        "source": "株式会社マネーフォワード（クラウド会計）",
+        "license": "proprietary",
+        "url": "https://developers.biz.moneyforward.com/mcp/"
+      },
+      "routing_keywords": [
+        "仕訳",
+        "試算表",
+        "残高試算表",
+        "推移表",
+        "勘定科目",
+        "補助科目",
+        "部門",
+        "税区分",
+        "入出金明細",
+        "会計年度",
+        "事業者情報",
+        "MF会計",
+        "マネーフォワード",
+        "MoneyForward",
+        "journal entry",
+        "trial balance",
+        "accounting period"
+      ]
+    },
+    {
+      "id": "agriops",
+      "display_name": "AgriOps MCP（農業・自治体統計）",
+      "display_name_en": "AgriOps MCP (Agriculture and Municipality Statistics)",
+      "display_name_id": "AgriOps MCP (Statistik Pertanian dan Kota)",
+      "endpoint": "http://localhost:8091",
+      "auth_type": "none",
+      "risk_level": "read_only",
+      "tool_allowlist": [],
+      "tool_modes": {
+        "agri_research": ["get_municipality_stats"],
+        "municipality_analysis": ["get_municipality_stats"],
+        "bid_search": [],
+        "subsidy_search": [],
+        "financial_check": [],
+        "full_orchestration": []
+      },
+      "cache_ttl_seconds": 300,
+      "attribution": {
+        "source": "AgriOps MCP (@sugukuru/agriops-mcp)",
+        "license": "Apache-2.0",
+        "url": "https://github.com/WIN-kagoshima/agriops-mcp"
+      },
+      "routing_keywords": [
+        "農業",
+        "自治体",
+        "作付",
+        "農地",
+        "市区町村",
+        "農産物",
+        "耕地面積",
+        "agriculture",
+        "municipality",
+        "farming",
+        "crop",
+        "pertanian",
+        "kota"
+      ]
+    },
+    {
+      "id": "freee",
+      "display_name": "freee MCP（会計・請求書）",
+      "display_name_en": "freee MCP (Accounting and Invoicing)",
+      "display_name_id": "freee MCP (Akuntansi dan Faktur)",
+      "endpoint": "https://mcp.freee.co.jp/mcp",
+      "auth_type": "bearer_oauth",
+      "risk_level": "financial",
+      "tool_allowlist": [
+        "get_account_items",
+        "get_deals",
+        "get_invoices",
+        "get_companies",
+        "get_walletables",
+        "get_partners"
+      ],
+      "tool_modes": {
+        "bid_search": [],
+        "subsidy_search": [],
+        "financial_check": ["get_walletables", "get_deals", "get_invoices"],
+        "full_orchestration": []
+      },
+      "attribution": {
+        "source": "freee株式会社",
+        "license": "Apache-2.0",
+        "url": "https://developer.freee.co.jp"
+      },
+      "routing_keywords": [
+        "会計",
+        "請求書",
+        "仕訳",
+        "残高",
+        "収支",
+        "売掛",
+        "買掛",
+        "取引先",
+        "口座",
+        "税務",
+        "決算",
+        "freee",
+        "accounting",
+        "invoice",
+        "balance",
+        "financial"
+      ]
+    }
+  ]
+}

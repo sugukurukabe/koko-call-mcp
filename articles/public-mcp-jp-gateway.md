@@ -1,0 +1,346 @@
+---
+title: "日本の公的データと業務SaaSを束ねるPublic MCP Gatewayを作った"
+emoji: "🧭"
+type: "tech"
+topics: ["mcp", "typescript", "govtech", "ai", "gateway"]
+published: true
+---
+
+## TL;DR
+
+Public MCP JP Gateway は、JP Bids MCP、J-Grants MCP、AgriOps MCP、freee MCP、MoneyForward Cloud Accounting MCP、GMO Bank wrapper MCP（sugukuru-finance）を 1 つの MCP エンドポイントに束ねる TypeScript 製 Gateway です。AgriOps は registry 追加済み、GMO Bank wrapper MCP は registry 実装済みです。
+
+- child MCP は `gateway/config/registry.json` に宣言する
+- `tool_modes` は固定 enum ではなく registry-driven な動的 mode にした（ADR-0022）
+- `tool_modes` で LLM に見せる tool surface を絞る（ADR-0017）
+- read-only な public data は TTL cache する（ADR-0018）
+- 送金系 tool は HMAC Approval Token + compliance check で二重ロックする（ADR-0019）
+- routing は rule-based を優先し、score=0 のときだけ LLM fallback する（ADR-0020）
+
+業務寄りの背景とストーリーは note 版に分けた。この記事では実装と設計判断に絞る。
+
+---
+
+## 最初の問題 — AI に渡すツールが増えすぎる
+
+MCP Gateway が必要になる最初の理由は、MCP サーバーが増えるほど AI クライアント側の責務が破裂することです。
+
+JP Bids MCP だけなら、Cursor や Claude Desktop が直接つなげばよい。J-Grants も、AgriOps も、freee も、MoneyForward も、GMO Bank wrapper MCP も、単体なら直接つなげる。しかし複数本を同じ会話で扱う設計にすると、認証、rate limit、監査ログ、tool surface、routing の問題が一気に出てくる。
+
+特に freee MCP は単体で約 270 ツールを持つ。J-Grants、JP Bids、銀行系 MCP を足すと、LLM に 300 以上の tool definition を渡す構成になりうる（出典: [ADR-0017 Dynamic Tool Surface](https://github.com/sugukurukabe/koko-call-mcp/blob/main/docs/adr/0017-dynamic-tool-surface.md)）。
+
+これは単にコンテキストが長いという話ではない。入札検索だけをしたいエージェントに、会計の請求書作成ツールや銀行振込ツールを見せる理由はない。
+
+---
+
+## 全体アーキテクチャ — 1つの MCP endpoint が複数の child MCP を代理する
+
+Public MCP JP Gateway は、MCP クライアントから 1 endpoint として呼ばれ、内部で registry に定義された child MCP へ proxy します。
+
+```mermaid
+flowchart LR
+  Agent["AI Agent / Cursor / Claude / Grok"] -->|MCP| Gateway["Public MCP JP Gateway"]
+  Gateway --> JpBids["JP Bids / 入札"]
+  Gateway --> JGrants["J-Grants / 補助金"]
+  Gateway --> AgriOps["AgriOps / 農業"]
+  Gateway --> Freee["freee / 会計"]
+  Gateway --> Mf["MoneyForward / 会計"]
+  Gateway --> Gmo["GMO Bank wrapper / 銀行"]
+  Gateway -.->|"score=0"| LlmRouter["LLM Router / opt-in"]
+  Gateway -.->|"required_approval"| Approval["HMAC Token / TTL 5min"]
+```
+
+この図の中心は Gateway です。MCP client は Gateway だけを見て、Gateway が child MCP を代理します。
+
+ADR-0016 では、Gateway を JP Bids MCP 本体とは別 package にした。
+
+```text
+Koko-call-mcp/
+├── src/                  ← JP Bids MCP 本体
+├── gateway/              ← Public MCP JP Gateway
+│   ├── config/registry.json
+│   ├── src/router/
+│   ├── src/policy/
+│   ├── src/proxy/
+│   └── src/tools/
+└── docs/adr/
+```
+
+読み取り専用の公共データ MCP と、会計・銀行を含む financial Gateway は、リスクプロファイルが違う。だから同じ `src/` に混ぜなかった。これは ADR-0016 の中心的な判断です。
+
+---
+
+## Registry-driven child MCP 管理
+
+child MCP の追加は `gateway/config/registry.json` への 1 エントリ追加で完結する設計にした。
+
+| id | risk_level | auth_type | 主な用途 |
+|---|---|---|---|
+| `jp-bids` | `read_only` | `bearer_apikey` | 官公需入札 |
+| `jgrants` | `read_only` | `none` | 補助金 |
+| `agriops` | `read_only` | `none` | 農業・自治体統計 |
+| `freee` | `financial` | `bearer_oauth` | 会計 |
+| `moneyforward-ca` | `financial` | `bearer_oauth` | 仕訳・試算表・推移表 |
+| `gmo-bank` | `financial` | `bearer_apikey` | sugukuru-finance 経由の残高・入出金・振込 |
+
+`agriops` は Phase 1 の read-only child MCP として追加した。
+
+```json
+{
+  "id": "agriops",
+  "risk_level": "read_only",
+  "tool_modes": {
+    "agri_research": ["get_municipality_stats"],
+    "municipality_analysis": ["get_municipality_stats"],
+    "financial_check": [],
+    "full_orchestration": []
+  },
+  "cache_ttl_seconds": 300
+}
+```
+
+`gmo-bank` の要点は 3 つ。
+
+```json
+{
+  "id": "gmo-bank",
+  "risk_level": "financial",
+  "tool_allowlist": [
+    "gmo_bank_get_balance",
+    "gmo_bank_get_transactions",
+    "gmo_bank_get_deposit_transactions",
+    "gmo_bank_list_accounts",
+    "gmo_bank_get_transfer_status"
+  ],
+  "tool_modes": {
+    "financial_check": ["gmo_bank_get_balance", "gmo_bank_get_transactions"],
+    "full_orchestration": ["gmo_bank_get_balance", "gmo_bank_transfer"]
+  },
+  "tool_policies": {
+    "gmo_bank_transfer": {
+      "required_approval": true,
+      "compliance_check": ["tx_amount_under_limit"]
+    }
+  }
+}
+```
+
+本番では `GATEWAY_CHILD_ENDPOINT_GMO_BANK` や `GATEWAY_CHILD_ENDPOINT_AGRIOPS` で endpoint を上書きする想定です。子 MCP 追加でコード変更が必要なら、まず registry 設計を疑う。
+
+---
+
+## Dynamic Tool Surface — mode で tool list を狭くする
+
+Dynamic Tool Surface は、Agent の目的に応じて LLM に見せる tool list を絞る仕組みです。
+
+優先順位は単純にした。
+
+```text
+tool_modes[mode] → tool_allowlist → 全ツール許可
+```
+
+| mode | 目的 | 見せるもの |
+|---|---|---|
+| `bid_search` | 入札検索 | JP Bids の検索・ランキング系 |
+| `subsidy_search` | 補助金検索 | J-Grants の検索・詳細系 |
+| `financial_check` | 財務確認 | freee / gmo-bank の read 系 |
+| `agri_research` | 農業・自治体分析 | AgriOps / e-Stat の read 系 |
+| `municipality_analysis` | 自治体データ横断 | AgriOps / e-Stat の read 系 |
+| `full_orchestration` | 統合判断 | allowlist + 明示許可 tool |
+
+`list_connected_servers(mode: "financial_check")` を呼ぶと、財務確認に必要な tool surface だけを表示する。`agri_research` を呼べば AgriOps 側の農業・自治体ツールだけを表示できる。
+
+これで freee の 270 ツール問題を Gateway 側で吸収できる。LLM に全部見せるのではなく、目的別に必要なものだけ見せる。
+
+---
+
+## Cache Strategy — 入札・補助金は cache、会計・銀行は cache しない
+
+Gateway は child MCP の前段に立つため、同じ query が複数 agent から繰り返される。
+
+ADR-0018 の方針は、read-only / idempotent な public data だけ TTL cache することです。
+
+| server_id | TTL / policy |
+|---|---|
+| `jp-bids` | 60 秒 |
+| `jgrants` | 300 秒 |
+| `freee` | cache 禁止 |
+| `gmo-bank` | `financial` のため proxy 実装では cache 禁止 |
+
+実装上も `server.risk_level !== "financial"` を cache 条件にしている。
+
+```typescript
+const isCacheable =
+  !bypassCache && ttl !== undefined && ttl > 0 && server.risk_level !== "financial";
+```
+
+入札・補助金は cache し、会計・銀行は cache しない。ここは業務上の鮮度とコストの境界としてかなり重要です。
+
+---
+
+## Smart Router — rule first, LLM fallback second
+
+Smart Router は最初から LLM に任せない。
+
+理由はコスト、レイテンシ、予測可能性。まず registry の `routing_keywords` で deterministic に選ぶ。score が 0 のときだけ、`GATEWAY_ROUTER_LLM_FALLBACK=true` なら Claude Haiku に fallback する。
+
+実装上は `explicitServerId` を最優先し、次に `registry.routing_keywords` で score を計算する。最大 score が 0 のときだけ `routeViaLlm(context.query, servers)` を呼ぶ。
+
+LLM fallback は query の SHA-256 を key に 1 時間 cache する。通常時の routing cost は 0 のまま、未知の表現だけ拾える。
+
+---
+
+## Approval Token — 送金系 tool は token なしで実行できない
+
+Approval Token は、実際の資金移動につながる tool に対する HMAC 署名付きの短命 token です。
+
+```json
+"tool_policies": {
+  "gmo_bank_transfer": {
+    "required_approval": true,
+    "compliance_check": ["tx_amount_under_limit"]
+  }
+}
+```
+
+```mermaid
+sequenceDiagram
+  participant User
+  participant Agent
+  participant Gateway
+  participant GmoBank
+  User->>Agent: 振込準備を依頼
+  Agent->>Gateway: gmo_bank_get_balance
+  Gateway->>GmoBank: 残高照会
+  Agent->>Gateway: issue_approval_token
+  Gateway-->>Agent: approval_token (TTL 5min)
+  Agent->>Gateway: gmo_bank_transfer + approval_token
+  Gateway->>Gateway: HMAC verify + compliance_check
+  Gateway->>GmoBank: transfer (本番接続後)
+```
+
+`gmo_bank_transfer` 実行前に `issue_approval_token` を挟む。token は args と tool_name に束縛され、TTL 5 分で失効する。
+
+なぜ JWT ではなく HMAC か。ADR-0019 ではこう判断した。
+
+| 選択肢 | 判断 |
+|---|---|
+| JWT | 鍵ローテーション・alg 管理が過剰 |
+| DB-backed approval | Cloud Run stateless 性と相性が悪い |
+| HMAC token | 同一 service 内の短命 token には十分 |
+
+TTL は 300 秒。短すぎると multi-agent flow 中に切れる。長すぎると replay risk が上がる。5 分は、人間の確認と実行に必要な余裕を残しつつ、リスクを抑える妥協点にした。
+
+---
+
+## Gateway tools — ユーザーに見せる表面は少なくする
+
+Gateway 自体が expose する tool は少ない。
+
+| tool | tier | 役割 |
+|---|---|---|
+| `list_connected_servers` | Free | child MCP と tool を mode 付きで表示 |
+| `search_public_opportunities` | Free | JP Bids + J-Grants を横断検索 |
+| `analyze_funding_fit` | Pro | 入札 + 補助金 + 会計の適合分析 |
+| `call_registered_mcp` | Pro | child MCP の tool を直接呼ぶ |
+| `get_audit_events` | Pro | 自分の audit log を取得 |
+| `issue_approval_token` | Pro | required_approval tool 用 token を発行 |
+
+Cursor からは Gateway だけを設定する。
+
+```json
+{
+  "mcpServers": {
+    "public-mcp-jp": {
+      "url": "https://public-mcp-jp-gateway-397249937286.asia-northeast1.run.app/mcp"
+    }
+  }
+}
+```
+
+---
+
+## セキュリティモデル — Tier × Risk × Mode × Policy
+
+Public MCP JP Gateway の security model は 4 層に分けた。
+
+| 層 | 実装 | 目的 |
+|---|---|---|
+| Tier | Free / Pro | Gateway tool の露出制御 |
+| Risk | `read_only` / `read_write` / `financial` | child MCP の危険度分類 |
+| Mode | `bid_search` / `subsidy_search` / `financial_check` / `agri_research` / `full_orchestration` | tool surface の最小化 |
+| Per-tool policy | `required_approval` / `compliance_check` | 副作用 tool の二重ロック |
+
+加えて audit log は actor hash と decision を残し、入力全文や財務データは保存しない方針にしている（出典: [feasibility.md](https://github.com/sugukurukabe/koko-call-mcp/blob/main/docs/public-mcp-hub/feasibility.md)）。
+
+---
+
+## 世界の MCP Gateway 事情と、このプロジェクトの位置
+
+MCP Gateway はすでに世界で category になり始めている。
+
+| category | examples | focus | Japan public data |
+|---|---|---|---|
+| Security Gateway | PingGateway, Permit MCP Gateway | authz, policy, audit | no |
+| Agent Gateway | agentgateway, Kuadrant/mcp-gateway | routing, L7 gateway | no |
+| Public data MCP | JP Bids MCP, J-Grants MCP | domain-specific public data | yes |
+| Federation Hub | Public MCP JP Gateway | Japan public data + SaaS federation | yes |
+
+この Gateway の狙いは、世界の gateway 実装と真正面から競うことではない。日本の public procurement、subsidy、agriculture、accounting、banking を 1 つの agent-native workflow に束ねることだ。
+
+---
+
+## テストと現在の状態
+
+実装後の local check は次の通り。
+
+```text
+Test Files  7 passed (7)
+Tests       52 passed (52)
+Connected servers include: jp-bids, jgrants, agriops, freee, moneyforward-ca, gmo-bank
+```
+
+GMO Bank wrapper はスグクル側の連携実装であり、GMOあおぞらネット銀行の公式 MCP ではない。本番では `GATEWAY_CHILD_ENDPOINT_GMO_BANK` と `GATEWAY_CHILD_TOKEN_GMO_BANK` を設定して接続する。
+
+---
+
+## 今後の展望 — Expansion Packs（ADR-0022）
+
+ADR-0022 で、child MCP の段階投入と mode の一般化を決定した。
+
+| Phase | child MCP | risk_level | 主な価値 |
+|-------|-----------|------------|----------|
+| 1 | AgriOps（`@sugukuru/agriops-mcp`） | `read_only` | 農業・自治体・地域文脈 |
+| 2 | 法人番号 MCP（国税庁 Web-API） | `read_only` | 法人実在確認・取引先照合 |
+| 3 | e-Stat / RESAS MCP | `read_only` | 人口・産業・就業・地域経済 |
+| 4 | e-Gov 法令検索 MCP | `read_only` | 法令・行政手続の一次情報参照 |
+| 5 | SSW / Visa MCP | `read_only`（初期） | 在留期限・届出・配置可否 |
+
+Phase 1 の AgriOps は registry 追加済みで、確認済み tool の `get_municipality_stats` を `agri_research` / `municipality_analysis` mode で公開する。mode の一般化により、固定 enum ではなく registry.json の `tool_modes` キーで mode を定義する形に移行した。新しい child MCP を追加するとき、`schema.ts` や `tool-filter.ts` のコード変更は不要になった。
+
+gBizID やマイナンバー/JPKI は初期 MVP に入れない。行政サービス連携申請、本人確認、委託先管理、特定個人情報の制限が絡むからだ。
+
+知っているだけでは足りない。registry に落ち、policy に落ち、test に通って初めて、AI エージェントは制度の中を歩ける。
+
+---
+
+## References
+
+- note 版: 業務読者向けに別記事として公開予定
+- ADR-0016: [Public MCP Federation Hub](https://github.com/sugukurukabe/koko-call-mcp/blob/main/docs/adr/0016-public-mcp-federation-hub.md)
+- ADR-0017: [Dynamic Tool Surface](https://github.com/sugukurukabe/koko-call-mcp/blob/main/docs/adr/0017-dynamic-tool-surface.md)
+- ADR-0018: [Cache Strategy](https://github.com/sugukurukabe/koko-call-mcp/blob/main/docs/adr/0018-cache-strategy.md)
+- ADR-0019: [Approval and Compliance Policy](https://github.com/sugukurukabe/koko-call-mcp/blob/main/docs/adr/0019-approval-and-compliance-policy.md)
+- ADR-0020: [LLM Router Fallback](https://github.com/sugukurukabe/koko-call-mcp/blob/main/docs/adr/0020-llm-router-fallback.md)
+- ADR-0022: [Gateway Expansion Packs](https://github.com/sugukurukabe/koko-call-mcp/blob/main/docs/adr/0022-gateway-expansion-packs.md)
+- child MCP 追加手順: [CONTRIBUTING-child-mcp.md](https://github.com/sugukurukabe/koko-call-mcp/blob/main/docs/public-mcp-hub/CONTRIBUTING-child-mcp.md)
+- Feasibility memo: [docs/public-mcp-hub/feasibility.md](https://github.com/sugukurukabe/koko-call-mcp/blob/main/docs/public-mcp-hub/feasibility.md)
+- Model Context Protocol: [https://modelcontextprotocol.io](https://modelcontextprotocol.io)
+- JP Bids MCP service site: [https://mcp.bid-jp.com](https://mcp.bid-jp.com)
+- KKJ: [https://kkj.go.jp](https://kkj.go.jp)
+- J-Grants: [https://www.jgrants-portal.go.jp](https://www.jgrants-portal.go.jp)
+- freee Developer: [https://developer.freee.co.jp](https://developer.freee.co.jp)
+- GMOあおぞらネット銀行: [https://gmo-aozora.com](https://gmo-aozora.com)
+- Digital Applied, MCP Adoption Statistics 2026: [https://www.digitalapplied.com/blog/mcp-adoption-statistics-2026-model-context-protocol](https://www.digitalapplied.com/blog/mcp-adoption-statistics-2026-model-context-protocol)
+
+注: `gmo-bank` はスグクル側の GMO Bank wrapper MCP（sugukuru-finance）を指す。GMOあおぞらネット銀行の公式 MCP であることを意味しない。

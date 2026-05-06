@@ -1,0 +1,247 @@
+{
+  "$comment": "候補 child MCP の registry テンプレート集。本番投入時に gateway/config/registry.json へコピーする。",
+  "$comment_en": "Registry templates for candidate child MCPs. Copy to gateway/config/registry.json when deploying.",
+  "$comment_id": "Templat registry untuk kandidat MCP anak. Salin ke gateway/config/registry.json saat deployment.",
+  "candidates": [
+    {
+      "id": "agriops",
+      "display_name": "AgriOps MCP（農業・自治体統計）",
+      "display_name_en": "AgriOps MCP (Agriculture and Municipality Statistics)",
+      "display_name_id": "AgriOps MCP (Statistik Pertanian dan Kota)",
+      "endpoint": "http://localhost:8091",
+      "auth_type": "none",
+      "risk_level": "read_only",
+      "tool_allowlist": [],
+      "tool_modes": {
+        "agri_research": [
+          "get_municipality_stats"
+        ],
+        "municipality_analysis": [
+          "get_municipality_stats"
+        ],
+        "bid_search": [],
+        "subsidy_search": [],
+        "financial_check": [],
+        "full_orchestration": []
+      },
+      "cache_ttl_seconds": 300,
+      "attribution": {
+        "source": "AgriOps MCP (@sugukuru/agriops-mcp)",
+        "license": "Apache-2.0",
+        "url": "https://github.com/WIN-kagoshima/agriops-mcp"
+      },
+      "routing_keywords": [
+        "農業",
+        "自治体",
+        "作付",
+        "農地",
+        "市区町村",
+        "農産物",
+        "耕地面積",
+        "agriculture",
+        "municipality",
+        "farming",
+        "crop",
+        "pertanian",
+        "kota"
+      ]
+    },
+    {
+      "id": "houjin-bangou",
+      "display_name": "法人番号 MCP（国税庁法人番号公表サイト）",
+      "display_name_en": "Corporate Number MCP (National Tax Agency Corporate Number Publication Site)",
+      "display_name_id": "MCP Nomor Korporasi (Situs Publikasi Nomor Korporasi Badan Pajak Nasional)",
+      "endpoint": "http://localhost:8092",
+      "auth_type": "bearer_apikey",
+      "risk_level": "read_only",
+      "tool_allowlist": [],
+      "tool_modes": {
+        "company_identity": [
+          "search_corporations",
+          "get_corporation_by_number",
+          "get_corporation_history"
+        ],
+        "counterparty_check": [
+          "search_corporations",
+          "get_corporation_by_number"
+        ],
+        "bid_search": [],
+        "subsidy_search": [],
+        "financial_check": [],
+        "full_orchestration": []
+      },
+      "cache_ttl_seconds": 3600,
+      "attribution": {
+        "source": "国税庁 法人番号公表サイト Web-API",
+        "license": "政府標準利用規約 第2.0版",
+        "url": "https://www.houjin-bangou.nta.go.jp/webapi/"
+      },
+      "routing_keywords": [
+        "法人番号",
+        "法人",
+        "会社",
+        "取引先",
+        "法人名",
+        "所在地",
+        "13桁",
+        "corporate number",
+        "company",
+        "corporation",
+        "counterparty",
+        "nomor korporasi",
+        "perusahaan"
+      ]
+    },
+    {
+      "id": "e-stat",
+      "display_name": "e-Stat MCP（政府統計の総合窓口）",
+      "display_name_en": "e-Stat MCP (Portal Site of Official Statistics of Japan)",
+      "display_name_id": "e-Stat MCP (Portal Statistik Resmi Jepang)",
+      "endpoint": "http://localhost:8093",
+      "auth_type": "bearer_apikey",
+      "risk_level": "read_only",
+      "tool_allowlist": [],
+      "tool_modes": {
+        "statistics_research": [
+          "search_statistics",
+          "get_stats_data",
+          "get_meta_info"
+        ],
+        "municipality_analysis": [
+          "get_stats_data"
+        ],
+        "agri_research": [
+          "get_stats_data"
+        ],
+        "bid_search": [],
+        "subsidy_search": [],
+        "financial_check": [],
+        "full_orchestration": []
+      },
+      "cache_ttl_seconds": 600,
+      "attribution": {
+        "source": "総務省統計局 e-Stat（政府統計の総合窓口）",
+        "license": "政府標準利用規約 第2.0版",
+        "url": "https://www.e-stat.go.jp/api/"
+      },
+      "routing_keywords": [
+        "統計",
+        "人口",
+        "産業",
+        "就業",
+        "労働",
+        "経済",
+        "地域",
+        "国勢調査",
+        "statistics",
+        "population",
+        "census",
+        "employment",
+        "statistik",
+        "penduduk"
+      ]
+    },
+    {
+      "id": "e-gov-law",
+      "display_name": "e-Gov 法令検索 MCP（法令・行政手続参照）",
+      "display_name_en": "e-Gov Law Search MCP (Laws and Administrative Procedures Reference)",
+      "display_name_id": "e-Gov Law Search MCP (Referensi Hukum dan Prosedur Administratif)",
+      "endpoint": "http://localhost:8094",
+      "auth_type": "none",
+      "risk_level": "read_only",
+      "tool_allowlist": [],
+      "tool_modes": {
+        "legal_reference": [
+          "search_laws",
+          "get_law_detail",
+          "get_law_article"
+        ],
+        "compliance_reference": [
+          "search_laws",
+          "get_law_article"
+        ],
+        "bid_search": [],
+        "subsidy_search": [],
+        "financial_check": [],
+        "full_orchestration": []
+      },
+      "cache_ttl_seconds": 3600,
+      "attribution": {
+        "source": "デジタル庁 e-Gov 法令検索 API",
+        "license": "政府標準利用規約 第2.0版",
+        "url": "https://elaws.e-gov.go.jp/apitop/"
+      },
+      "routing_keywords": [
+        "法令",
+        "法律",
+        "条文",
+        "規則",
+        "省令",
+        "告示",
+        "行政手続",
+        "特定技能",
+        "入管法",
+        "派遣法",
+        "law",
+        "regulation",
+        "statute",
+        "ordinance",
+        "hukum",
+        "peraturan"
+      ]
+    },
+    {
+      "id": "ssw-visa",
+      "display_name": "SSW / Visa MCP（特定技能・在留管理）",
+      "display_name_en": "SSW / Visa MCP (Specified Skilled Worker and Residence Management)",
+      "display_name_id": "SSW / Visa MCP (Pekerja Berketerampilan Khusus dan Manajemen Izin Tinggal)",
+      "endpoint": "http://localhost:8095",
+      "auth_type": "bearer_apikey",
+      "risk_level": "read_only",
+      "tool_allowlist": [
+        "check_visa_expiry",
+        "determine_application_type",
+        "check_notification_deadlines",
+        "check_placement_eligibility"
+      ],
+      "tool_modes": {
+        "visa_compliance": [
+          "check_visa_expiry",
+          "determine_application_type",
+          "check_notification_deadlines"
+        ],
+        "placement_check": [
+          "check_placement_eligibility",
+          "check_visa_expiry"
+        ],
+        "bid_search": [],
+        "subsidy_search": [],
+        "financial_check": [],
+        "full_orchestration": []
+      },
+      "cache_ttl_seconds": 60,
+      "attribution": {
+        "source": "スグクル株式会社 SSW/Visa MCP",
+        "license": "proprietary",
+        "url": "https://sugu-kuru.co.jp"
+      },
+      "routing_keywords": [
+        "特定技能",
+        "在留",
+        "ビザ",
+        "在留期限",
+        "届出",
+        "配置",
+        "在留資格",
+        "入管",
+        "visa",
+        "residence",
+        "SSW",
+        "specified skilled worker",
+        "placement",
+        "izin tinggal",
+        "pekerja berketerampilan"
+      ]
+    }
+  ]
+}

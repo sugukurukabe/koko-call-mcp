@@ -1,0 +1,70 @@
+# Smithery MCP Server 設定ファイル
+# Smithery MCP Server configuration
+# Konfigurasi server MCP Smithery
+# Docs: https://smithery.ai/docs/build/project-config/smithery-yaml
+
+name: public-mcp-jp-gateway
+
+display:
+  # 日本語
+  title: Public MCP JP Gateway — 日本の公的データ統合MCP
+  description: >
+    入札情報（JP Bids）・補助金（Jグランツ）・会計（freee）を1回のMCP接続で横断アクセスできる
+    日本特化型 MCP Gateway。Grok, Claude, Cursor など主要LLMと即接続可能。
+    単一エンドポイントに繋ぐだけで300以上の官公需データツールを安全に利用できます。
+  # English
+  title_en: Public MCP JP Gateway — Unified Japan Public Data MCP
+  description_en: >
+    Access Japanese government procurement bids (JP Bids), subsidies (J-Grants), and accounting
+    (freee) through a single MCP connection. Instantly compatible with Grok, Claude, Cursor,
+    and all major LLM clients. One endpoint, hundreds of public-data tools, zero configuration.
+
+tags:
+  - japan
+  - procurement
+  - government
+  - subsidies
+  - accounting
+  - mcp-gateway
+  - public-data
+  - grok
+  - multi-agent
+
+# Remote URL（Cloud Run にデプロイ後の URL に変更する）
+# Change to your Cloud Run URL after deployment
+server:
+  type: url
+  url: https://public-mcp-jp-gateway-397249937286.asia-northeast1.run.app/mcp
+  transport: streamable-http
+
+# 認証設定 / Authentication configuration / Konfigurasi autentikasi
+auth:
+  type: bearer_token
+  description: "Public MCP JP Gateway API キー。無料プランは https://public-mcp-jp.com で取得。"
+  description_en: "Public MCP JP Gateway API key. Get a free key at https://public-mcp-jp.com."
+
+# 推奨設定（Smithery がクライアント設定に自動挿入する）
+# Recommended configuration (automatically injected by Smithery into client settings)
+config_schema:
+  type: object
+  properties:
+    api_key:
+      type: string
+      description: "Public MCP JP Gateway API キー / API key"
+      required: true
+    mode:
+      type: string
+      enum:
+        - full_orchestration
+        - bid_search
+        - subsidy_search
+        - financial_check
+      default: full_orchestration
+      description: >
+        エージェントの動作モード（ADR-0017）。
+        bid_search: 入札専用, subsidy_search: 補助金専用,
+        financial_check: 財務確認専用, full_orchestration: 全ツール
+
+# Smithery Analytics / Smithery 分析
+analytics:
+  enabled: true
