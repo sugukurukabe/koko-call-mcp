@@ -300,7 +300,7 @@ Tests       52 passed (52)
 Connected servers include: jp-bids, jgrants, agriops, freee, moneyforward-ca, gmo-bank
 ```
 
-GMO Bank wrapper はスグクル側の連携実装であり、GMOあおぞらネット銀行の公式 MCP ではない。本番では `GATEWAY_CHILD_ENDPOINT_GMO_BANK` と `GATEWAY_CHILD_TOKEN_GMO_BANK` を設定して接続する。
+GMO Bank wrapper はスグクル側の連携実装であり、GMOあおぞらネット銀行の公式 MCP ではありません。本番では `GATEWAY_CHILD_ENDPOINT_GMO_BANK` と `GATEWAY_CHILD_TOKEN_GMO_BANK` を設定して接続します。
 
 ---
 
