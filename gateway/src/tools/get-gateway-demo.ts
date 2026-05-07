@@ -62,6 +62,7 @@ export function registerGetGatewayDemo(server: McpServer): void {
           "gateway_quick_tour: Gatewayの機能紹介ツアー",
         ],
         available_resources: [
+          "gateway://quickstart: ★ 初めての方はまずこれ（30秒で最高の体験）",
           "gateway://registry/summary: 子MCPレジストリの概要",
           "gateway://modes/reference: 動的モードの一覧と構成",
           "gateway://samples/queries: すぐに試せるサンプルクエリ集",

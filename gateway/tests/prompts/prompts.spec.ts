@@ -47,15 +47,16 @@ describe("registerPrompts", () => {
 });
 
 describe("registerResources", () => {
-  it("4 個の Resource が登録される / registers 4 resources", () => {
+  it("5 個の Resource が登録される / registers 5 resources", () => {
     const server = createTestServer();
     registerResources(server);
 
     const registered = (server as unknown as InternalServer)._registeredResources;
     const keys = Object.keys(registered);
-    expect(keys).toHaveLength(4);
+    expect(keys).toHaveLength(5);
     expect(keys).toEqual(
       expect.arrayContaining([
+        "gateway://quickstart",
         "gateway://registry/summary",
         "gateway://modes/reference",
         "gateway://samples/queries",

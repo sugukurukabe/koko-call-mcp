@@ -249,10 +249,10 @@ export function registerPrompts(server: McpServer): void {
               type: "text" as const,
               text:
                 `Public MCP JP Gateway のクイックツアーを実行してください。\n\n` +
-                `1. get_gateway_demo(scenario: 'connection_check') で接続状況を確認\n` +
-                `2. list_connected_servers(include_tools: true) で全子MCPとツール一覧を表示\n` +
-                `3. 各子MCPの役割を1行で説明\n` +
-                `4. 「次に試せること」を3つ提案\n\n` +
+                `1. Read resource: gateway://quickstart で「30秒で最高の体験」を読む\n` +
+                `2. get_gateway_demo(scenario: 'connection_check') で接続状況を確認\n` +
+                `3. list_connected_servers(include_tools: true) で全子MCPとツール一覧を表示\n` +
+                `4. 「次に試せること」を3つ提案（特に real_estate_assessment を推奨）\n\n` +
                 `ユーザーが初めてこのGatewayに接続した場面を想定してください。`,
             },
           },

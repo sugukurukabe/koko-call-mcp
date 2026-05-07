@@ -50,6 +50,103 @@ export function registerResources(server: McpServer): void {
   );
 
   server.registerResource(
+    "quickstart",
+    "gateway://quickstart",
+    {
+      title: "初めてのGateway — 30秒で最高の体験を",
+      description:
+        "Public MCP JP Gateway に初めて接続した方へ。30秒で価値を理解し、すぐに感動できる3つのデモを試せます。" +
+        "First-time guide for Public MCP JP Gateway. Understand the value in 30 seconds and try three impressive demos immediately. " +
+        "Panduan pertama kali untuk Public MCP JP Gateway. Pahami nilainya dalam 30 detik dan coba tiga demo yang mengesankan.",
+      mimeType: "text/markdown",
+    },
+    async () => {
+      const content = `# ようこそ、Public MCP JP Gateway へ
+
+**30秒でわかる、このGatewayの価値**
+
+日本の公的データと業務SaaSを**1つの接続で全部使える** Federation Gateway です。
+
+- 入札（JP Bids）
+- 補助金（J-Grants）
+- 農業・自治体統計（AgriOps）
+- 不動産投資分析（Real Estate Intel）← **新登場・特に推奨**
+- 法人番号（Houjin Bangou）
+- クラウド会計（MoneyForward / freee）
+
+これらを**AIが賢く振り分けて**、1回の会話で横断検索・分析できます。
+
+---
+
+## 最初に試してほしい「一撃で感動する」3つのデモ
+
+### 1. 不動産投資分析（一番おすすめ・新機能）
+**「東京都新宿区の地価トレンドと災害リスクを分析して、投資判断の材料をまとめて」**
+
+またはもっと具体的に：
+\`\`\`
+real_estate_assessment(area: "東京都新宿区", purpose: "investment")
+\`\`\`
+
+**得られるもの**: 地価推移・災害リスクスコア・人流データ・投資適性まで一気に。
+
+### 2. 入札＋補助金の一気通貫調査
+**「鹿児島県のIT関連入札を探して、同時に使えるDX補助金も教えて。出典も必ず付けて」**
+
+\`\`\`
+search_public_opportunities(keyword: "IT システム", prefecture: "鹿児島県")
+\`\`\`
+
+### 3. 資金繰り＋出店判断の複合分析
+**「今月の資金繰りを確認して、可能なら新宿区に出店した場合の収支シミュレーションも」**
+
+\`\`\`
+financial_health_check(focus: "full_review")
+\`\`\`
+その後 \`real_estate_assessment\` で出店分析へ。
+
+---
+
+## あなたに合った次のアクション
+
+- **不動産・店舗出店を考えている方** → \`real_estate_assessment\` をまず呼ぶ
+- **補助金・入札を日常的に探している方** → \`investigate_opportunity\` プロンプト
+- **経理・資金繰りを最優先したい方** → \`financial_health_check\`
+- **とにかく何ができるか知りたい方** → \`get_gateway_demo(scenario: "quick_start")\`
+
+---
+
+## すぐに使えるリソース
+
+- \`gateway://samples/queries\` — コピペして試せるサンプル集
+- \`gateway://modes/reference\` — 各モードで使えるツール一覧
+- \`gateway://attribution/all\` — 全子MCPの出典情報（必ず引用してください）
+
+---
+
+**このGatewayは「複数のMCPを繋ぐため」ではなく、「あなたの業務を1つの会話で完結させるため」に作られています。**
+
+まずは上の3つのデモのどれか1つを試してみてください。  
+きっと「これまでになかった体験」になるはずです。
+
+---
+
+*出典は各ツールの \`attribution\` フィールドから必ず明記してください。*
+`;
+
+      return {
+        contents: [
+          {
+            uri: "gateway://quickstart",
+            mimeType: "text/markdown",
+            text: content,
+          },
+        ],
+      };
+    },
+  );
+
+  server.registerResource(
     "modes_reference",
     "gateway://modes/reference",
     {
