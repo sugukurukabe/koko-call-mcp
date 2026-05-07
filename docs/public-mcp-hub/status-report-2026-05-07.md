@@ -200,6 +200,7 @@ Production verification: pass
 | GMO Banking private connector | 将来予定 | 利用許諾とAPI取得後に private connector として追加。方針書は `docs/public-mcp-hub/gmo-banking-private-connector.md` |
 | AgriOps 本番 endpoint | 完了 | `GATEWAY_CHILD_ENDPOINT_AGRIOPS` を本番に設定済み |
 | Zenn GitHub 連携反映 | GitHub push 済み | Zenn 側で同期・公開状態を確認 |
+| Zenn 第2弾記事 | GitHub push 済み | `articles/mcp-gateway-oauth-passthrough.md`（OAuth pass-through 設計の詳細） |
 | `jgrants-mcp-server/` | 未追跡 | 別作業か不要ファイルか判断 |
 
 ---
