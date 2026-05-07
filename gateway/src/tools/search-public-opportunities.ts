@@ -74,15 +74,15 @@ export function registerSearchPublicOpportunities(server: McpServer): void {
             bearerToken: apiKey,
           })
             .then((result) => {
-              results["sources"] = {
-                ...(results["sources"] as Record<string, unknown>),
+              results.sources = {
+                ...(results.sources as Record<string, unknown>),
                 jp_bids: result.structuredContent ?? { text: result.content[0]?.text ?? "" },
               };
-              (results["attribution"] as string[]).push(jpBidsServer.attribution.source);
+              (results.attribution as string[]).push(jpBidsServer.attribution.source);
             })
             .catch((e) => {
-              results["sources"] = {
-                ...(results["sources"] as Record<string, unknown>),
+              results.sources = {
+                ...(results.sources as Record<string, unknown>),
                 jp_bids: { error: e instanceof Error ? e.message : String(e) },
               };
             }),
@@ -100,15 +100,15 @@ export function registerSearchPublicOpportunities(server: McpServer): void {
             },
           })
             .then((result) => {
-              results["sources"] = {
-                ...(results["sources"] as Record<string, unknown>),
+              results.sources = {
+                ...(results.sources as Record<string, unknown>),
                 jgrants: result.structuredContent ?? JSON.parse(result.content[0]?.text ?? "{}"),
               };
-              (results["attribution"] as string[]).push(jgrantsServer.attribution.source);
+              (results.attribution as string[]).push(jgrantsServer.attribution.source);
             })
             .catch((e) => {
-              results["sources"] = {
-                ...(results["sources"] as Record<string, unknown>),
+              results.sources = {
+                ...(results.sources as Record<string, unknown>),
                 jgrants: { error: e instanceof Error ? e.message : String(e) },
               };
             }),

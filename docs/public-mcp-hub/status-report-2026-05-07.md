@@ -105,7 +105,7 @@ API perbankan GMO tidak diekspos di Gateway publik. API tersebut direncanakan se
 
 **日本語**
 
-AgriOps は、現在の 6 本構成の中の read-only child MCP として registry に追加済みです。公開 registry では、確認済み tool の `get_municipality_stats` のみを `agri_research` / `municipality_analysis` mode に公開しています。
+AgriOps は、現在の 7 本構成（real-estate-intel 含む）の read-only child MCP として registry に追加済みです。公開 registry では、確認済み tool の `get_municipality_stats` のみを `agri_research` / `municipality_analysis` mode に公開しています。
 
 **English**
 
@@ -193,7 +193,7 @@ Production verification: pass
 - AgriOps は未確認 tool を公開せず、`get_municipality_stats` のみに限定
 - GMO銀行系APIは公開 registry から除外済み
 - `gmo-bank-mcp` は internal ingress として扱う方針を文書化済み
-- 本番 `/readyz` は `production_ready: true`、公開 child MCP 6本を確認済み
+- 本番 `/readyz` は `production_ready: true`、公開 child MCP 6本（real-estate-intel は localhost のため除外）を確認済み
 - `gateway/scripts/verify-production.ts` で公開GatewayとGMO非公開状態を自動検証可能
 - Zenn 記事は GitHub raw で表示確認済み
 - `.env.example` は空値のみで、秘密情報は含まれていない

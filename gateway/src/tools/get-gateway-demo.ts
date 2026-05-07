@@ -58,6 +58,7 @@ export function registerGetGatewayDemo(server: McpServer): void {
           "financial_health_check: 会計データ中心の資金繰り確認",
           "bid_to_close_workflow: 入札→補助金→会計確認の一気通貫",
           "cross_mcp_comparison: 子MCP横断比較",
+          "real_estate_assessment: 不動産投資・出店分析（地価・災害リスク・人流）",
           "gateway_quick_tour: Gatewayの機能紹介ツアー",
         ],
         available_resources: [

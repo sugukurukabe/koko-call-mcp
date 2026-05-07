@@ -79,13 +79,13 @@ export function registerAnalyzeFundingFit(server: McpServer, context: ToolContex
             bearerToken: apiKey,
           })
             .then((result) => {
-              analysis["bid_analysis"] = result.structuredContent ?? {
+              analysis.bid_analysis = result.structuredContent ?? {
                 text: result.content[0]?.text ?? "",
               };
-              (analysis["attribution"] as string[]).push(jpBidsServer.attribution.source);
+              (analysis.attribution as string[]).push(jpBidsServer.attribution.source);
             })
             .catch((e) => {
-              analysis["bid_analysis"] = { error: e instanceof Error ? e.message : String(e) };
+              analysis.bid_analysis = { error: e instanceof Error ? e.message : String(e) };
             }),
         );
       }
@@ -103,12 +103,12 @@ export function registerAnalyzeFundingFit(server: McpServer, context: ToolContex
             },
           })
             .then((result) => {
-              analysis["subsidy_analysis"] =
+              analysis.subsidy_analysis =
                 result.structuredContent ?? JSON.parse(result.content[0]?.text ?? "{}");
-              (analysis["attribution"] as string[]).push(jgrantsServer.attribution.source);
+              (analysis.attribution as string[]).push(jgrantsServer.attribution.source);
             })
             .catch((e) => {
-              analysis["subsidy_analysis"] = { error: e instanceof Error ? e.message : String(e) };
+              analysis.subsidy_analysis = { error: e instanceof Error ? e.message : String(e) };
             }),
         );
       }
@@ -118,7 +118,7 @@ export function registerAnalyzeFundingFit(server: McpServer, context: ToolContex
       // Analisis kapasitas akuntansi (hanya jika token OAuth freee tersedia)
       const freeeServer = registry.servers.find((s) => s.id === "freee");
       const effectiveFreeeToken =
-        context.childAuthHeaders["freee"] ?? freee_token ?? process.env.GATEWAY_CHILD_TOKEN_FREEE;
+        context.childAuthHeaders.freee ?? freee_token ?? process.env.GATEWAY_CHILD_TOKEN_FREEE;
       if (freeeServer && effectiveFreeeToken) {
         const policyResult = evaluate({
           server: freeeServer,
@@ -136,24 +136,24 @@ export function registerAnalyzeFundingFit(server: McpServer, context: ToolContex
               oauthToken: effectiveFreeeToken,
             })
               .then((result) => {
-                analysis["accounting_analysis"] =
+                analysis.accounting_analysis =
                   result.structuredContent ?? JSON.parse(result.content[0]?.text ?? "{}");
-                (analysis["attribution"] as string[]).push(freeeServer.attribution.source);
+                (analysis.attribution as string[]).push(freeeServer.attribution.source);
               })
               .catch((e) => {
-                analysis["accounting_analysis"] = {
+                analysis.accounting_analysis = {
                   error: e instanceof Error ? e.message : String(e),
                 };
               }),
           );
         } else {
-          analysis["accounting_analysis"] = {
+          analysis.accounting_analysis = {
             skipped: true,
             reason: policyResult.reason,
           };
         }
       } else if (freeeServer && !effectiveFreeeToken) {
-        analysis["accounting_analysis"] = {
+        analysis.accounting_analysis = {
           skipped: true,
           reason:
             "freee OAuth token not provided. Pass freee_token parameter to enable accounting analysis.",
@@ -162,7 +162,7 @@ export function registerAnalyzeFundingFit(server: McpServer, context: ToolContex
 
       await Promise.all(tasks);
 
-      analysis["summary"] = buildSummary(analysis);
+      analysis.summary = buildSummary(analysis);
 
       return {
         content: [
@@ -178,13 +178,12 @@ export function registerAnalyzeFundingFit(server: McpServer, context: ToolContex
 
 function buildSummary(analysis: Record<string, unknown>): Record<string, unknown> {
   return {
-    has_bid_matches: analysis["bid_analysis"] !== null && !isError(analysis["bid_analysis"]),
-    has_subsidy_matches:
-      analysis["subsidy_analysis"] !== null && !isError(analysis["subsidy_analysis"]),
+    has_bid_matches: analysis.bid_analysis !== null && !isError(analysis.bid_analysis),
+    has_subsidy_matches: analysis.subsidy_analysis !== null && !isError(analysis.subsidy_analysis),
     has_accounting_data:
-      analysis["accounting_analysis"] !== null &&
-      !isError(analysis["accounting_analysis"]) &&
-      !(analysis["accounting_analysis"] as Record<string, unknown>)?.["skipped"],
+      analysis.accounting_analysis !== null &&
+      !isError(analysis.accounting_analysis) &&
+      !(analysis.accounting_analysis as Record<string, unknown>)?.skipped,
     note: "本分析は参考情報です。入札参加・補助金申請の前に必ず一次資料を確認してください。This analysis is for reference only. Always verify with primary sources before bid submission or grant application.",
   };
 }

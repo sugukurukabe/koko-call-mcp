@@ -25,7 +25,7 @@ API perbankan GMO tidak diekspos di Public MCP JP Gateway saat ini. API tersebut
 
 ## 現在の本番状態 / Current Production State / Status Produksi Saat Ini
 
-Public Gateway の registry には `gmo-bank` を登録していません。`/readyz` は公開 child MCP 6本のみを返します。
+Public Gateway の registry には `gmo-bank` を登録していません。`/readyz` は公開 child MCP 6本（real-estate-intel は localhost のため除外）のみを返します。
 
 The public Gateway registry does not include `gmo-bank`. `/readyz` returns only the six public child MCPs.
 

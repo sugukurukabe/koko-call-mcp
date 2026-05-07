@@ -219,7 +219,7 @@ Pivot時の対応: Gateway SaaSの開発は中断し、JP Bids MCP Proの
 ### Week 7（Private Beta 開始前）
 
 - [ ] Gateway を Cloud Run にデプロイ（`public-mcp-jp-gateway` サービス）
-- [ ] `cd gateway && npm run verify:production` で公開 child MCP 6本と GMO 非公開状態を確認
+- [ ] `cd gateway && npm run verify:production` で公開 child MCP 6本（real-estate-intel は localhost のため除外）と GMO 非公開状態を確認
 - [ ] Jグランツ MCP のリモートエンドポイントを設定
 - [ ] ベータ参加者 5名以上に招待メール送信
 - [ ] Slack チャンネル `#gateway-beta` を作成
@@ -259,7 +259,7 @@ cd gateway
 npm run verify:production
 ```
 
-このコマンドは、公開 Gateway の `/readyz` が6本の公開 child MCP のみを返すこと、`production_ready: true` であること、GMO Banking private connector が公開インターネットから 200 を返さないことを確認します。
+このコマンドは、公開 Gateway の `/readyz` が6本の公開 child MCP のみを返すこと（real-estate-intel は localhost のため除外）、`production_ready: true` であること、GMO Banking private connector が公開インターネットから 200 を返さないことを確認します。
 
 This command verifies that the public Gateway `/readyz` returns only the six public child MCPs, `production_ready: true`, and the GMO Banking private connector does not return HTTP 200 from the public internet.
 
