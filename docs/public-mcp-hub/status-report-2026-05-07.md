@@ -34,7 +34,7 @@ MVP Public MCP JP Gateway, perluasan AgriOps, perluasan Nomor Korporasi, dan per
 | Zenn 記事 / Zenn article / Artikel Zenn | `articles/public-mcp-jp-gateway.md` を push 済み |
 | Zenn raw 確認 / Raw check / Pemeriksaan raw | GitHub raw で表示確認済み |
 | Note 記事 / Note article / Artikel Note | `docs/marketing/note-gateway-article.md` 作成済み、未コミット |
-| 未追跡 / Untracked / Belum terlacak | `docs/marketing/note-gateway-article.md`, `docs/marketing/zenn-gateway-article.md`, `jgrants-mcp-server/` |
+| 未追跡 / Untracked / Belum terlacak | `jgrants-mcp-server/` |
 
 Zenn 記事 raw URL:
 
@@ -201,7 +201,6 @@ Production verification: pass
 | AgriOps 本番 endpoint | 完了 | `GATEWAY_CHILD_ENDPOINT_AGRIOPS` を本番に設定済み |
 | Zenn GitHub 連携反映 | GitHub push 済み | Zenn 側で同期・公開状態を確認 |
 | `jgrants-mcp-server/` | 未追跡 | 別作業か不要ファイルか判断 |
-| `docs/marketing/zenn-gateway-article.md` | 未追跡 | 作業用原稿として残すか削除/commit 判断 |
 
 ---
 
