@@ -4,11 +4,24 @@
 
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { stats as cacheStats } from "../cache/tool-cache.js";
 import { filterTools, isServerVisibleInMode } from "../filter/tool-filter.js";
 import { fetchChildToolList } from "../proxy/mcp-proxy.js";
-import { loadRegistry } from "../registry/loader.js";
+import { getRegistryDeploymentStatus, loadRegistry } from "../registry/loader.js";
+import type { ChildMcpServer, GatewayMode } from "../registry/schema.js";
 import { FULL_ORCHESTRATION_MODE, GatewayModeSchema } from "../registry/schema.js";
 import type { ToolContext } from "./register-tools.js";
+
+function configuredTools(server: ChildMcpServer, mode: GatewayMode): Array<{ name: string }> {
+  if (mode === FULL_ORCHESTRATION_MODE) {
+    const fullModeTools = server.tool_modes?.[FULL_ORCHESTRATION_MODE] ?? [];
+    const names = fullModeTools.length > 0 ? fullModeTools : server.tool_allowlist;
+    return names.map((name) => ({ name }));
+  }
+
+  const names = server.tool_modes?.[mode] ?? [];
+  return names.map((name) => ({ name }));
+}
 
 export function registerListConnectedServers(server: McpServer, context: ToolContext): void {
   server.registerTool(
@@ -40,6 +53,7 @@ export function registerListConnectedServers(server: McpServer, context: ToolCon
     async (args) => {
       const { include_tools = true, mode = FULL_ORCHESTRATION_MODE } = args;
       const registry = loadRegistry();
+      const deployment = getRegistryDeploymentStatus();
 
       const candidateServers =
         mode === FULL_ORCHESTRATION_MODE
@@ -49,6 +63,8 @@ export function registerListConnectedServers(server: McpServer, context: ToolCon
       const serverInfos = await Promise.all(
         candidateServers.map(async (s) => {
           let tools: Array<{ name: string; description?: string }> = [];
+          let status: "available" | "registry_fallback" | "unreachable" = "available";
+          let error: string | undefined;
           if (include_tools) {
             const apiKey =
               process.env[`GATEWAY_CHILD_TOKEN_${s.id.toUpperCase().replace(/-/g, "_")}`];
@@ -56,17 +72,29 @@ export function registerListConnectedServers(server: McpServer, context: ToolCon
               context.childAuthHeaders[s.id] ??
               process.env[`GATEWAY_CHILD_TOKEN_${s.id.toUpperCase().replace(/-/g, "_")}_OAUTH`] ??
               (s.id === "freee" ? process.env.GATEWAY_CHILD_TOKEN_FREEE : undefined);
-            const allTools = await fetchChildToolList(s, apiKey, oauthToken);
-            // Mode ベースのフィルタリング（ADR-0017）: allowlist も考慮した上でモードで絞り込む
-            // Mode-based filtering (ADR-0017): filter by mode on top of allowlist
-            // Pemfilteran berbasis mode (ADR-0017): filter berdasarkan mode di atas allowlist
-            tools = filterTools(allTools, s, mode);
+            try {
+              const allTools = await fetchChildToolList(s, apiKey, oauthToken);
+              // Mode ベースのフィルタリング（ADR-0017）: allowlist も考慮した上でモードで絞り込む
+              // Mode-based filtering (ADR-0017): filter by mode on top of allowlist
+              // Pemfilteran berbasis mode (ADR-0017): filter berdasarkan mode di atas allowlist
+              tools =
+                allTools.length > 0 ? filterTools(allTools, s, mode) : configuredTools(s, mode);
+              if (allTools.length === 0 && tools.length > 0) {
+                status = "registry_fallback";
+              }
+            } catch (e) {
+              status = "unreachable";
+              error = e instanceof Error ? e.message : String(e);
+              tools = configuredTools(s, mode);
+            }
           }
           return {
             id: s.id,
             display_name: s.display_name,
             display_name_en: s.display_name_en,
             display_name_id: s.display_name_id,
+            status,
+            ...(error ? { error } : {}),
             risk_level: s.risk_level,
             auth_type: s.auth_type,
             routing_keywords: s.routing_keywords.slice(0, 5),
@@ -88,8 +116,25 @@ export function registerListConnectedServers(server: McpServer, context: ToolCon
                 mode,
                 server_count: serverInfos.length,
                 servers: serverInfos,
+                deployment,
+                capabilities: {
+                  prompts: [
+                    "investigate_opportunity",
+                    "financial_health_check",
+                    "bid_to_close_workflow",
+                    "cross_mcp_comparison",
+                    "gateway_quick_tour",
+                  ],
+                  resources: [
+                    "gateway://registry/summary",
+                    "gateway://modes/reference",
+                    "gateway://samples/queries",
+                    "gateway://attribution/all",
+                  ],
+                },
+                cache: cacheStats(),
                 next_step:
-                  "For a guided first run, call get_gateway_demo. For bid+subsidy search, call search_public_opportunities. For financial tools, use call_registered_mcp with mode='financial_check'.",
+                  "For a guided first run, call get_gateway_demo or use the gateway_quick_tour prompt. For bid+subsidy search, call search_public_opportunities. For financial tools, use call_registered_mcp with mode='financial_check'. Read gateway://samples/queries for example conversations.",
                 attribution: "Public MCP JP Gateway — connecting Japan public-data MCP servers",
               },
               null,

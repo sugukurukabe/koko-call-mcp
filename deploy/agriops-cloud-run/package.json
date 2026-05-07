@@ -1,0 +1,14 @@
+{
+  "name": "@sugukuru-labs/agriops-cloud-run-wrapper",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "agriops-mcp --http"
+  },
+  "dependencies": {
+    "@sugukuru/agriops-mcp": "^1.10.3"
+  },
+  "engines": {
+    "node": ">=22 <25"
+  }
+}

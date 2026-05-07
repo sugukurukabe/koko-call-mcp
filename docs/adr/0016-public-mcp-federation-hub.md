@@ -147,19 +147,18 @@ Koko-call-mcp/           ← この JP Bids MCP リポジトリ
 **「コード変更が必要な場合は設計を疑え」**
 If you need to change code to add a new child MCP, question the design first.
 
-### 実証: gmo-bank の追加 / Proof: Adding gmo-bank / Bukti: Menambahkan gmo-bank
+### 実証: MoneyForward の追加 / Proof: Adding MoneyForward / Bukti: Menambahkan MoneyForward
 
 ```json
 // registry.json に 1 エントリ追加するだけで以下が自動的に動作する:
 // Adding 1 entry to registry.json automatically enables:
 {
-  "id": "gmo-bank",
+  "id": "moneyforward-ca",
   "risk_level": "financial",
-  "tool_allowlist": ["gmo_bank_get_balance", ...],
+  "tool_allowlist": ["get_trial_balance", "create_journal_entry", ...],
   "tool_modes": { "financial_check": [...], "full_orchestration": [...] },
-  "tool_policies": { "gmo_bank_transfer": { "required_approval": true } },
-  "cache_ttl_seconds": 30,
-  "routing_keywords": ["振込", "残高", ...]
+  "tool_policies": { "create_journal_entry": { "required_approval": true } },
+  "routing_keywords": ["仕訳", "試算表", ...]
 }
 ```
 
@@ -167,8 +166,11 @@ If you need to change code to add a new child MCP, question the design first.
 - `list_connected_servers` での表示（mode フィルタリング含む）
 - Policy Engine での risk_level / tier 判定
 - Smart Router でのキーワードスコアリング
-- Cache TTL の適用（30 秒）
+- risk_level に応じた cache 禁止または TTL 適用
 - Approval Token フロー（`required_approval: true` が設定されたツール）
+
+GMO銀行系APIは、現時点の公開 Gateway では提供しない。利用許諾とAPI取得が完了した後、社内利用または契約範囲内の private connector として追加する。
+GMO banking APIs are not exposed in the public Gateway. They are planned as a future private connector after permission and API access are obtained.
 
 ### 将来の拡張候補 / Future expansion candidates / Kandidat perluasan masa depan
 

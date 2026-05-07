@@ -86,71 +86,6 @@
       ]
     },
     {
-      "id": "gmo-bank",
-      "display_name": "GMOあおぞらネット銀行 MCP（残高・振込・入出金）",
-      "display_name_en": "GMO Aozora Net Bank MCP (Balance, Transfer, Transactions)",
-      "display_name_id": "GMO Aozora Net Bank MCP (Saldo, Transfer, Transaksi)",
-      "endpoint": "http://localhost:8090",
-      "auth_type": "bearer_apikey",
-      "risk_level": "financial",
-      "tool_allowlist": [
-        "gmo_bank_get_balance",
-        "gmo_bank_get_transactions",
-        "gmo_bank_get_deposit_transactions",
-        "gmo_bank_list_accounts",
-        "gmo_bank_get_transfer_status"
-      ],
-      "tool_modes": {
-        "bid_search": [],
-        "subsidy_search": [],
-        "financial_check": [
-          "gmo_bank_get_balance",
-          "gmo_bank_get_transactions",
-          "gmo_bank_get_deposit_transactions",
-          "gmo_bank_list_accounts",
-          "gmo_bank_get_transfer_status"
-        ],
-        "full_orchestration": [
-          "gmo_bank_get_balance",
-          "gmo_bank_get_transactions",
-          "gmo_bank_get_deposit_transactions",
-          "gmo_bank_list_accounts",
-          "gmo_bank_get_transfer_status",
-          "gmo_bank_transfer"
-        ]
-      },
-      "tool_policies": {
-        "gmo_bank_transfer": {
-          "required_approval": true,
-          "compliance_check": ["tx_amount_under_limit"]
-        }
-      },
-      "cache_ttl_seconds": 30,
-      "attribution": {
-        "source": "GMOあおぞらネット銀行 API",
-        "license": "proprietary",
-        "url": "https://gmo-aozora.com"
-      },
-      "routing_keywords": [
-        "振込",
-        "残高",
-        "入出金",
-        "入金",
-        "出金",
-        "GMO",
-        "あおぞら",
-        "銀行",
-        "口座振込",
-        "資金繰り",
-        "bank",
-        "transfer",
-        "balance",
-        "deposit",
-        "withdrawal",
-        "aozora"
-      ]
-    },
-    {
       "id": "moneyforward-ca",
       "display_name": "マネーフォワード クラウド会計 MCP（仕訳・試算表・推移表）",
       "display_name_en": "MoneyForward Cloud Accounting MCP (Journal, Trial Balance, Transition)",
@@ -158,12 +93,47 @@
       "endpoint": "https://beta.mcp.developers.biz.moneyforward.com/mcp/ca/v3",
       "auth_type": "bearer_oauth",
       "risk_level": "financial",
-      "tool_allowlist": [],
+      "tool_allowlist": [
+        "get_trial_balance",
+        "get_account_items",
+        "get_deals",
+        "get_journals",
+        "get_transition_table",
+        "get_invoices",
+        "create_journal_entry",
+        "update_journal_entry"
+      ],
       "tool_modes": {
         "bid_search": [],
         "subsidy_search": [],
-        "financial_check": [],
-        "full_orchestration": []
+        "financial_check": [
+          "get_trial_balance",
+          "get_account_items",
+          "get_deals",
+          "get_journals",
+          "get_transition_table",
+          "get_invoices"
+        ],
+        "full_orchestration": [
+          "get_trial_balance",
+          "get_account_items",
+          "get_deals",
+          "get_journals",
+          "get_transition_table",
+          "get_invoices",
+          "create_journal_entry",
+          "update_journal_entry"
+        ]
+      },
+      "tool_policies": {
+        "create_journal_entry": {
+          "required_approval": true,
+          "compliance_check": ["accounting_period_open"]
+        },
+        "update_journal_entry": {
+          "required_approval": true,
+          "compliance_check": ["accounting_period_open"]
+        }
       },
       "attribution": {
         "source": "株式会社マネーフォワード（クラウド会計）",
@@ -273,6 +243,49 @@
         "invoice",
         "balance",
         "financial"
+      ]
+    },
+    {
+      "id": "houjin-bangou",
+      "display_name": "法人番号 MCP（国税庁法人番号公表サイト）",
+      "display_name_en": "Corporate Number MCP (National Tax Agency Corporate Number Publication Site)",
+      "display_name_id": "MCP Nomor Korporasi (Situs Publikasi Nomor Korporasi Badan Pajak Nasional)",
+      "endpoint": "http://localhost:8092",
+      "auth_type": "bearer_apikey",
+      "risk_level": "read_only",
+      "tool_allowlist": [],
+      "tool_modes": {
+        "company_identity": [
+          "search_corporations",
+          "get_corporation_by_number",
+          "get_corporation_history"
+        ],
+        "counterparty_check": ["search_corporations", "get_corporation_by_number"],
+        "bid_search": [],
+        "subsidy_search": [],
+        "financial_check": [],
+        "full_orchestration": []
+      },
+      "cache_ttl_seconds": 3600,
+      "attribution": {
+        "source": "国税庁 法人番号公表サイト Web-API",
+        "license": "政府標準利用規約 第2.0版",
+        "url": "https://www.houjin-bangou.nta.go.jp/webapi/"
+      },
+      "routing_keywords": [
+        "法人番号",
+        "法人",
+        "会社",
+        "取引先",
+        "法人名",
+        "所在地",
+        "13桁",
+        "corporate number",
+        "company",
+        "corporation",
+        "counterparty",
+        "nomor korporasi",
+        "perusahaan"
       ]
     }
   ]

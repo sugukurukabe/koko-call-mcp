@@ -12,7 +12,7 @@ import { extractBearerToken, hashActor, parseProApiKeys, parseTier } from "./lib
 import { parsePortEnv } from "./lib/env.js";
 import { VERSION } from "./lib/version.js";
 import { createGatewayServer } from "./mcp.js";
-import { loadRegistry } from "./registry/loader.js";
+import { getRegistryDeploymentStatus, loadRegistry } from "./registry/loader.js";
 import { addToAuditBuffer } from "./tools/get-audit-events.js";
 
 const SUPPORTED_PROTOCOL_VERSIONS = new Set(["2025-11-25"]);
@@ -58,11 +58,20 @@ export function createHttpApp(): express.Express {
 
   app.get("/readyz", (_req, res) => {
     const registry = loadRegistry();
+    const deployment = getRegistryDeploymentStatus();
     res.status(200).json({
       ok: true,
       service: "Public MCP JP Gateway",
       version: VERSION,
       connected_servers: registry.servers.map((s) => s.id),
+      configured_server_count: deployment.configured_server_count,
+      active_server_count: deployment.active_server_ids.length,
+      omitted_local_servers: deployment.omitted_local_servers,
+      required_endpoint_env_keys: deployment.required_endpoint_env_keys,
+      production_ready:
+        !deployment.production ||
+        deployment.allow_local_child_endpoints ||
+        deployment.omitted_local_servers.length === 0,
     });
   });
 

@@ -1,10 +1,3 @@
----
-title: "日本の公的データと業務SaaSを束ねるPublic MCP Gatewayを作りました"
-emoji: "🧭"
-type: "tech"
-topics: ["mcp", "typescript", "govtech", "ai", "gateway"]
-published: true
----
 
 ## TL;DR
 

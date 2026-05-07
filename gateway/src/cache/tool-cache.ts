@@ -74,11 +74,40 @@ export function clear(): void {
   store.clear();
 }
 
+let hitCount = 0;
+let missCount = 0;
+
 /**
- * キャッシュ統計を返す（デバッグ用）
- * Return cache statistics (for debugging)
- * Kembalikan statistik cache (untuk debugging)
+ * キャッシュヒット/ミスを記録する
+ * Record a cache hit or miss
+ * Catat hit atau miss cache
  */
-export function stats(): { size: number; maxEntries: number } {
-  return { size: store.size, maxEntries: MAX_ENTRIES };
+export function recordHit(): void {
+  hitCount++;
+}
+export function recordMiss(): void {
+  missCount++;
+}
+
+/**
+ * キャッシュ統計を返す（デバッグ・可視化用）
+ * Return cache statistics (for debugging and visibility)
+ * Kembalikan statistik cache (untuk debugging dan visibilitas)
+ */
+export function stats(): {
+  size: number;
+  maxEntries: number;
+  hits: number;
+  misses: number;
+  hitRate: string;
+} {
+  const total = hitCount + missCount;
+  const rate = total > 0 ? ((hitCount / total) * 100).toFixed(1) : "0.0";
+  return {
+    size: store.size,
+    maxEntries: MAX_ENTRIES,
+    hits: hitCount,
+    misses: missCount,
+    hitRate: `${rate}%`,
+  };
 }

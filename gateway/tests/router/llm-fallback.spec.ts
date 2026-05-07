@@ -20,16 +20,20 @@ const mockServers: ChildMcpServer[] = [
     routing_keywords: ["入札", "bid", "procurement"],
   },
   {
-    id: "gmo-bank",
-    display_name: "GMO Banking",
-    display_name_en: "GMO Banking",
-    display_name_id: "GMO Banking",
-    endpoint: "http://localhost:8090",
-    auth_type: "bearer_apikey",
+    id: "moneyforward-ca",
+    display_name: "MoneyForward Cloud Accounting",
+    display_name_en: "MoneyForward Cloud Accounting",
+    display_name_id: "MoneyForward Cloud Accounting",
+    endpoint: "https://beta.mcp.developers.biz.moneyforward.com/mcp/ca/v3",
+    auth_type: "bearer_oauth",
     risk_level: "financial",
     tool_allowlist: [],
-    attribution: { source: "GMO", license: "proprietary", url: "https://gmo-aozora.com" },
-    routing_keywords: ["振込", "残高", "銀行"],
+    attribution: {
+      source: "株式会社マネーフォワード（クラウド会計）",
+      license: "proprietary",
+      url: "https://developers.biz.moneyforward.com/mcp/",
+    },
+    routing_keywords: ["仕訳", "試算表", "会計"],
   },
 ];
 
@@ -47,14 +51,14 @@ afterEach(() => {
 describe("routeViaLlm", () => {
   it("GATEWAY_ROUTER_LLM_FALLBACK が false なら null を返す / returns null when disabled", async () => {
     process.env.GATEWAY_ROUTER_LLM_FALLBACK = "false";
-    const result = await routeViaLlm("口座残高を確認したい", mockServers);
+    const result = await routeViaLlm("会計データを確認したい", mockServers);
     expect(result).toBeNull();
   });
 
   it("ANTHROPIC_API_KEY が未設定なら null を返す / returns null when API key missing", async () => {
     delete process.env.ANTHROPIC_API_KEY;
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
-    const result = await routeViaLlm("口座残高を確認したい", mockServers);
+    const result = await routeViaLlm("会計データを確認したい", mockServers);
     expect(result).toBeNull();
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("ANTHROPIC_API_KEY"));
   });
@@ -65,14 +69,14 @@ describe("routeViaLlm", () => {
       vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({
-          content: [{ type: "text", text: '"gmo-bank"' }],
+          content: [{ type: "text", text: '"moneyforward-ca"' }],
         }),
       }),
     );
 
-    const result = await routeViaLlm("今月の口座残高は？", mockServers);
+    const result = await routeViaLlm("今月の試算表を確認したい", mockServers);
     expect(result).not.toBeNull();
-    expect(result?.serverId).toBe("gmo-bank");
+    expect(result?.serverId).toBe("moneyforward-ca");
     expect(result?.reason).toContain("llm-fallback");
   });
 

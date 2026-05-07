@@ -15,14 +15,14 @@ Public MCP JP Gateway dirancang untuk menambahkan MCP anak dengan **tanpa peruba
 追加する子 MCP について以下を確認してください:
 Check the following for the child MCP you want to add:
 
-| 確認項目 | 例（gmo-bank） |
+| 確認項目 | 例（moneyforward-ca） |
 |---------|---------------|
-| MCP エンドポイント URL | `https://sugukuru-finance-xxx.run.app/mcp` |
+| MCP エンドポイント URL | `https://beta.mcp.developers.biz.moneyforward.com/mcp/ca/v3` |
 | 認証方式 | `bearer_apikey` / `bearer_oauth` / `none` |
 | リスクレベル | `read_only` / `read_write` / `financial` |
-| 利用可能なツール名 | `gmo_bank_get_balance`, `gmo_bank_transfer`, ... |
-| 書込み系ツールの有無 | `gmo_bank_transfer` は実送金のため `required_approval: true` |
-| 出典・ライセンス | `GMOあおぞらネット銀行 API`, `proprietary` |
+| 利用可能なツール名 | `get_trial_balance`, `create_journal_entry`, ... |
+| 書込み系ツールの有無 | `create_journal_entry` は会計書込みのため `required_approval: true` |
+| 出典・ライセンス | `株式会社マネーフォワード（クラウド会計）`, `proprietary` |
 
 ---
 
@@ -30,7 +30,7 @@ Check the following for the child MCP you want to add:
 ### Step 2: Add 1 entry to `gateway/config/registry.json`
 ### Langkah 2: Tambahkan 1 entri ke `gateway/config/registry.json`
 
-`servers` 配列の末尾に追加します。`gmo-bank` を実例として参照してください。
+`servers` 配列の末尾に追加します。`moneyforward-ca` を実例として参照してください。
 
 ```json
 {
@@ -223,16 +223,24 @@ curl -s -X POST http://localhost:8080/mcp \
 
 ---
 
-## 実例: gmo-bank の追加 / Example: Adding gmo-bank / Contoh: Menambahkan gmo-bank
+## 実例: MoneyForward の追加 / Example: Adding MoneyForward / Contoh: Menambahkan MoneyForward
 
-[`gateway/config/registry.json`](../../gateway/config/registry.json) の `gmo-bank` エントリが完全な実例です。
+[`gateway/config/registry.json`](../../gateway/config/registry.json) の `moneyforward-ca` エントリが実例です。
 
 ポイント:
-- `gmo_bank_transfer` は `tool_allowlist` に含まれていない（読み取り系のみを公開）
-- `tool_modes.full_orchestration` にだけ `gmo_bank_transfer` を追加（使いたいモードで明示）
-- `tool_policies.gmo_bank_transfer.required_approval: true` で二重ロック
-- `tool_policies.gmo_bank_transfer.compliance_check: ["tx_amount_under_limit"]` でコンプライアンス宣言を要求
-- `cache_ttl_seconds: 30`（残高は鮮度が重要なため短め）
+- `financial_check` では読み取り系ツールだけを公開
+- `tool_modes.full_orchestration` にだけ `create_journal_entry` / `update_journal_entry` を追加
+- `tool_policies.create_journal_entry.required_approval: true` で二重ロック
+- `tool_policies.create_journal_entry.compliance_check: ["accounting_period_open"]` でコンプライアンス宣言を要求
+- `financial` risk のため Gateway 側 cache は禁止
+
+---
+
+## GMO Banking Connector Status / GMO銀行系APIの扱い / Status Konektor Perbankan GMO
+
+GMO銀行系APIは、現時点の公開 Gateway では提供していません。利用許諾とAPI取得が完了した後、社内利用または契約範囲内の private connector として追加する予定です。
+GMO banking APIs are not exposed in the public Gateway. They are planned as a future private connector after permission and API access are obtained.
+API perbankan GMO tidak diekspos di Gateway publik. API tersebut direncanakan sebagai konektor privat di masa depan setelah izin dan akses API diperoleh.
 
 ---
 
@@ -271,7 +279,7 @@ When adding a child MCP for a new domain, define a new key in `tool_modes` — n
 |------|------|-------------------|
 | `bid_search` | 入札検索 | JP Bids |
 | `subsidy_search` | 補助金検索 | J-Grants |
-| `financial_check` | 財務確認 | freee / GMO / MoneyForward |
+| `financial_check` | 財務確認 | freee / MoneyForward |
 | `agri_research` | 農業・自治体分析 | AgriOps / e-Stat |
 | `municipality_analysis` | 自治体データ横断 | AgriOps / e-Stat |
 | `company_identity` | 法人確認 | 法人番号 MCP |

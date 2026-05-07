@@ -4,6 +4,7 @@
 
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { stats as cacheStats } from "../cache/tool-cache.js";
 import { isToolPermitted } from "../filter/tool-filter.js";
 import {
   PolicyDeniedError as FilterDeniedError,
@@ -12,12 +13,13 @@ import {
 } from "../lib/errors.js";
 import { evaluate } from "../policy/policy-engine.js";
 import { proxyToolCall } from "../proxy/mcp-proxy.js";
-import { loadRegistry } from "../registry/loader.js";
+import { getRegistryDeploymentStatus, loadRegistry } from "../registry/loader.js";
 import {
   FULL_ORCHESTRATION_MODE,
   type GatewayMode,
   GatewayModeSchema,
 } from "../registry/schema.js";
+import { route } from "../router/smart-router.js";
 import type { ToolContext } from "./register-tools.js";
 
 export function registerCallRegisteredMcp(server: McpServer, context: ToolContext): void {
@@ -26,7 +28,7 @@ export function registerCallRegisteredMcp(server: McpServer, context: ToolContex
     {
       title: "登録済み子MCPツール直接呼び出し",
       description:
-        "登録済みの子 MCP サーバーのツールを直接呼び出す（Pro tier）。USE THIS WHEN: list_connected_servers で確認したサーバーの特定ツールを直接呼びたいとき、GMO残高確認やMoneyForward試算表確認など金融系子MCPを明示的に使うとき。FLOW: 1) get_gateway_demo で流れを確認 2) list_connected_servers で tool 名を確認 3) 書き込み系は issue_approval_token で承認 4) call_registered_mcp で実行。DO NOT USE WHEN: search_public_opportunities や analyze_funding_fit で事足りるとき。Directly call any tool on a registered child MCP server. Memanggil langsung alat apa pun pada server MCP anak yang terdaftar.",
+        "登録済みの子 MCP サーバーのツールを直接呼び出す（Pro tier）。USE THIS WHEN: list_connected_servers で確認したサーバーの特定ツールを直接呼びたいとき、MoneyForward試算表確認など金融・会計系子MCPを明示的に使うとき。GMO銀行系APIは公開Gatewayでは提供せず、利用許諾・API取得後のprivate connectorとして追加予定。FLOW: 1) get_gateway_demo で流れを確認 2) list_connected_servers で tool 名を確認 3) 書き込み系は issue_approval_token で承認 4) call_registered_mcp で実行。DO NOT USE WHEN: search_public_opportunities や analyze_funding_fit で事足りるとき。Directly call any tool on a registered child MCP server. Memanggil langsung alat apa pun pada server MCP anak yang terdaftar.",
       inputSchema: {
         server_id: z
           .string()
@@ -95,14 +97,23 @@ export function registerCallRegisteredMcp(server: McpServer, context: ToolContex
 
       const childServer = registry.servers.find((s) => s.id === server_id);
       if (!childServer) {
+        const deployment = getRegistryDeploymentStatus();
+        const omitted = deployment.omitted_local_servers.find((s) => s.id === server_id);
         return {
           content: [
             {
               type: "text" as const,
               text: JSON.stringify({
-                error: `Server "${server_id}" is not registered. Available servers: ${registry.servers.map((s) => s.id).join(", ")}`,
+                error: omitted
+                  ? `Server "${server_id}" is configured but not active in production because its endpoint is still local.`
+                  : `Server "${server_id}" is not registered. Available servers: ${registry.servers.map((s) => s.id).join(", ")}`,
+                omitted_local_server: omitted ?? undefined,
+                active_servers: deployment.active_server_ids,
+                required_endpoint_env_keys: deployment.required_endpoint_env_keys,
                 next_step:
-                  "Call list_connected_servers(include_tools: false) to confirm server IDs, or get_gateway_demo for the recommended first-run flow.",
+                  omitted !== undefined
+                    ? `Set ${omitted.endpoint_env_key} to the deployed child MCP /mcp URL, then redeploy or update the Cloud Run service.`
+                    : "Call list_connected_servers(include_tools: false) to confirm server IDs, or get_gateway_demo for the recommended first-run flow.",
               }),
             },
           ],
@@ -151,6 +162,7 @@ export function registerCallRegisteredMcp(server: McpServer, context: ToolContex
         throw new RateLimitError(server_id);
       }
 
+      const startMs = Date.now();
       const result = await proxyToolCall({
         server: childServer,
         toolName: tool_name,
@@ -158,9 +170,41 @@ export function registerCallRegisteredMcp(server: McpServer, context: ToolContex
         bearerToken: apiKey,
         oauthToken: effectiveOAuthToken,
       });
+      const latencyMs = Date.now() - startMs;
+
+      const routerHint = await route(
+        { query: tool_name, explicitServerId: server_id },
+        registry.servers,
+      );
+
+      const cache = cacheStats();
+      const diagnostics = {
+        server_id,
+        tool_name,
+        mode: effectiveMode,
+        latency_ms: latencyMs,
+        routing: routerHint
+          ? { score: routerHint.score, reason: routerHint.reason }
+          : { score: 0, reason: "explicit call" },
+        cache: {
+          hits: cache.hits,
+          misses: cache.misses,
+          hit_rate: cache.hitRate,
+          entries: cache.size,
+        },
+        policy: policyResult.decision,
+      };
+
+      const enrichedContent = [
+        ...result.content,
+        {
+          type: "text" as const,
+          text: JSON.stringify({ _gateway_diagnostics: diagnostics }),
+        },
+      ];
 
       return {
-        content: result.content,
+        content: enrichedContent,
         isError: result.isError,
       };
     },

@@ -1,0 +1,16 @@
+{
+  "name": "@sugukuru-labs/gmo-bank-cloud-run-wrapper",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "express": "^5.2.1",
+    "zod": "^4.4.1"
+  },
+  "engines": {
+    "node": ">=22 <25"
+  }
+}

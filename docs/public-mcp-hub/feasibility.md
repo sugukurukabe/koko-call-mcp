@@ -10,15 +10,15 @@
 
 **日本語**
 
-JP Bids MCPを中核に、官公需・補助金・銀行・会計の公的/業務MCPサーバーを1回の接続で使えるようにするGateway SaaS「Public MCP Federation Hub」の実現可能性は高い。MCP Gatewayカテゴリはすでに成立しており、日本固有の公的データMCPは先行者が少なく参入障壁がある。ただし「gBizID統合」「マイナンバー統合」「ブロックチェーントークン経済」は初期MVPに入れると規制・審査コストで失速する。最初のMVPは JP Bids（入札） + Jグランツ（補助金） + GMOあおぞらネット銀行（銀行） + MoneyForward Cloud Accounting（会計）を束ねる軽量Gatewayとし、需要検証後にEnterprise機能を積む順序が最も安全。
+JP Bids MCPを中核に、官公需・補助金・法人番号・農業統計・会計の公的/業務MCPサーバーを1回の接続で使えるようにするGateway SaaS「Public MCP Federation Hub」の実現可能性は高い。MCP Gatewayカテゴリはすでに成立しており、日本固有の公的データMCPは先行者が少なく参入障壁がある。ただし「gBizID統合」「マイナンバー統合」「ブロックチェーントークン経済」は初期MVPに入れると規制・審査コストで失速する。最初の公開MVPは JP Bids（入札） + Jグランツ（補助金） + AgriOps（農業統計） + 法人番号 + MoneyForward Cloud Accounting（会計） + freee（会計）を束ねる軽量Gatewayとし、GMO銀行系APIは利用許諾とAPI取得が完了した後の private connector として扱う順序が最も安全。
 
 **English**
 
-The "Public MCP Federation Hub" — a Gateway SaaS connecting public procurement, subsidy, banking, and accounting MCP servers through a single connection — has high feasibility. The MCP Gateway category is already taking shape globally. Japan-specific public-data MCP servers face lower competition and higher regulatory moats. However, integrating gBizID, My Number, or blockchain tokens in the MVP phase will cause slowdown from regulatory and compliance overhead. The recommended MVP is a lightweight gateway connecting JP Bids (procurement), J-Grants (subsidies), GMO Aozora Net Bank (banking), and MoneyForward Cloud Accounting, with Enterprise features added after demand validation.
+The "Public MCP Federation Hub" — a Gateway SaaS connecting public procurement, subsidies, corporate registry, agriculture statistics, and accounting MCP servers through a single connection — has high feasibility. The MCP Gateway category is already taking shape globally. Japan-specific public-data MCP servers face lower competition and higher regulatory moats. However, integrating gBizID, My Number, or blockchain tokens in the MVP phase will cause slowdown from regulatory and compliance overhead. The recommended public MVP is a lightweight gateway connecting JP Bids, J-Grants, AgriOps, Corporate Number, MoneyForward Cloud Accounting, and freee. GMO banking APIs should be treated as a future private connector after permission and API access are obtained.
 
 **Bahasa Indonesia**
 
-"Public MCP Federation Hub" — SaaS Gateway yang menghubungkan server MCP pengadaan publik, subsidi, perbankan, dan akuntansi dalam satu koneksi — memiliki kelayakan tinggi. Kategori MCP Gateway sudah mulai terbentuk secara global. Server MCP data publik khusus Jepang memiliki pesaing yang lebih sedikit dan hambatan regulasi yang lebih tinggi. Namun, mengintegrasikan gBizID, My Number, atau token blockchain di fase MVP akan memperlambat pengembangan karena overhead regulasi dan kepatuhan. MVP yang direkomendasikan adalah gateway ringan yang menghubungkan JP Bids, J-Grants, GMO Aozora Net Bank, dan MoneyForward Cloud Accounting, dengan fitur Enterprise ditambahkan setelah validasi permintaan.
+"Public MCP Federation Hub" — SaaS Gateway yang menghubungkan server MCP pengadaan publik, subsidi, registri korporasi, statistik pertanian, dan akuntansi dalam satu koneksi — memiliki kelayakan tinggi. Kategori MCP Gateway sudah mulai terbentuk secara global. Server MCP data publik khusus Jepang memiliki pesaing yang lebih sedikit dan hambatan regulasi yang lebih tinggi. Namun, mengintegrasikan gBizID, My Number, atau token blockchain di fase MVP akan memperlambat pengembangan karena overhead regulasi dan kepatuhan. MVP publik yang direkomendasikan adalah gateway ringan yang menghubungkan JP Bids, J-Grants, AgriOps, Nomor Korporasi, MoneyForward Cloud Accounting, dan freee. API perbankan GMO diperlakukan sebagai konektor privat masa depan setelah izin dan akses API diperoleh.
 
 ---
 
@@ -45,7 +45,7 @@ The "Public MCP Federation Hub" — a Gateway SaaS connecting public procurement
 
 **需要仮説:**
 
-中小企業・行政書士・自治体DX担当者は「入札 + 補助金 + 銀行 + 会計」を別々のSaaS間で調べているため、1回の会話で横断調査できる価値は高い。現在は各MCPを自分でつなぐセットアップが必要であり、Gatewayが「設定不要の一本化接続」と `get_gateway_demo` による初回導線を提供できれば差別化になる。
+中小企業・行政書士・自治体DX担当者は「入札 + 補助金 + 法人確認 + 農業統計 + 会計」を別々のSaaSや公的サイトで調べているため、1回の会話で横断調査できる価値は高い。現在は各MCPを自分でつなぐセットアップが必要であり、Gatewayが「設定不要の一本化接続」と `get_gateway_demo` による初回導線を提供できれば差別化になる。
 
 ### 1-3. 競合カテゴリ / Competitive Categories / Kategori Kompetitif
 
@@ -57,7 +57,7 @@ The "Public MCP Federation Hub" — a Gateway SaaS connecting public procurement
 | 業務SaaS MCP | freee MCP, MoneyForward Cloud Accounting MCP | 会計のみ | あり |
 | **Federation Hub（未存在）** | **本プロジェクト** | **あり** | **あり** |
 
-日本の公的データ（入札・補助金）とビジネスSaaS（銀行・会計）を束ねるGatewayは現時点で存在しない。
+日本の公的データ（入札・補助金・法人番号・農業統計）とビジネスSaaS（会計）を束ねるGatewayは現時点で存在しない。
 
 ---
 
@@ -70,7 +70,7 @@ The "Public MCP Federation Hub" — a Gateway SaaS connecting public procurement
 | JP Bids MCPへのProxy接続 | 低 | 同一コードベース、Streamable HTTP対応済み |
 | JグランツMCPへのProxy接続 | 低 | 公式OSS、Streamable HTTP対応 |
 | freee MCPへのProxy接続 | 中 | OAuth 2.0が必要。ユーザー保有tokenを前提にすれば可 |
-| GMOあおぞらネット銀行MCPへのProxy接続 | 中 | 金融系のため approval token と監査ログが必要 |
+| GMO銀行系API private connector | 高 | 利用許諾とAPI取得が前提。公開Gatewayでは提供しない |
 | MoneyForward Cloud Accounting MCPへのProxy接続 | 中 | OAuthヘッダ pass-through と実ツール名 discovery が必要 |
 | 子MCP Registry（JSON/YAML） | 低 | 静的定義で十分 |
 | ルールベースSmart Router | 低 | tool descriptionマッチング + 語彙ルール |

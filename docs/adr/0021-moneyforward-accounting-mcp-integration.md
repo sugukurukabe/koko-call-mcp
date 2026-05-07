@@ -11,40 +11,44 @@ Accepted / Accepted / Diterima
 2026年3月26日、株式会社マネーフォワードが「マネーフォワード クラウド会計 MCP」を全プランで公開した。
 リモートMCPサーバーとして提供され、接続設定のみで利用可能（環境構築不要）。
 
-これにより Public MCP JP Gateway は Jグランツ（補助金）・GMOあおぞらネット銀行（振込）に続く第4の子MCPとして
+これにより Public MCP JP Gateway は、Jグランツ（補助金）や JP Bids（入札）に続く financial child MCP として
 クラウド会計を統合できる状況になった。
 
 派遣業の月次フローとして:
 
 1. JP Bids で受注見込み案件を取得
 2. Jグランツで使える補助金を確認
-3. GMO で残高・入金確認 → 振込実行
-4. **MoneyForward で対応仕訳を自動作成 → 残高試算表で月次反映を確認**
+3. MoneyForward で試算表・推移表を確認
+4. **MoneyForward で対応仕訳を作成 → 残高試算表で月次反映を確認**
 
-という End-to-End フローが Gateway 上で完結する。
+という End-to-End フローを Gateway 上で扱える。
+
+GMO銀行系APIは、現時点の公開 Gateway では提供しない。利用許諾とAPI取得が完了した後、社内利用または契約範囲内の private connector として別途扱う。
 
 ---
 
 On March 26, 2026, MoneyForward released the "MoneyForward Cloud Accounting MCP" for all subscription plans.
 It is provided as a remote MCP server that requires only connection configuration—no environment setup needed.
 
-This enables the Public MCP JP Gateway to integrate cloud accounting as its 4th child MCP,
-following J-Grants (subsidies) and GMO Aozora Net Bank (transfers).
+This enables the Public MCP JP Gateway to integrate cloud accounting as a financial child MCP,
+following public-data child MCPs such as J-Grants and JP Bids.
 
 The monthly dispatch business flow can now complete end-to-end on the Gateway:
 
 1. JP Bids: Find promising procurement opportunities
 2. J-Grants: Check available subsidies
-3. GMO: Confirm balance/deposits → Execute transfer
-4. **MoneyForward: Auto-create journal entries → Verify monthly close via trial balance**
+3. MoneyForward: Check trial balance and transition tables
+4. **MoneyForward: Create journal entries → Verify monthly close via trial balance**
+
+GMO banking APIs are not exposed in the public Gateway. They are planned as a future private connector after permission and API access are obtained.
 
 ---
 
 Pada 26 Maret 2026, MoneyForward merilis "MoneyForward Cloud Accounting MCP" untuk semua paket langganan.
 Disediakan sebagai server MCP remote yang hanya memerlukan konfigurasi koneksi—tanpa perlu pengaturan lingkungan.
 
-Ini memungkinkan Public MCP JP Gateway untuk mengintegrasikan akuntansi cloud sebagai MCP anak ke-4,
-mengikuti J-Grants (subsidi) dan GMO Aozora Net Bank (transfer).
+Ini memungkinkan Public MCP JP Gateway untuk mengintegrasikan akuntansi cloud sebagai MCP anak finansial,
+mengikuti MCP anak data publik seperti J-Grants dan JP Bids.
 
 Alur bisnis bulanan dispatch kini dapat diselesaikan secara end-to-end di Gateway.
 
@@ -154,7 +158,7 @@ gateway/tests/
 
 ### 良い影響 / Positive / Positif
 
-- JP Bids + Jグランツ + GMO + MoneyForward で派遣業の月次会計クローズまで貫通する
+- JP Bids + Jグランツ + MoneyForward で派遣業の月次会計確認まで貫通する
 - Gateway の `bearer_oauth` / `financial` / `required_approval` インフラを追加実装なしで利用できる
 - beta endpoint により認証切れの心配が軽減される
 - `X-Mcp-Child-Authorization-{server-id}` ヘッダパターンは他の OAuth 系子MCPにも横展開できる
@@ -166,7 +170,7 @@ The `X-Mcp-Child-Authorization-{server-id}` header pattern generalizes to other 
 ### 制約 / Constraints / Batasan
 
 - 給与計算ツールは提供されていないため、「給与計算 → 振込」フローは不可
-  （現実的なフローは「GMO振込実行 → MoneyForward で仕訳自動作成」）
+- GMO銀行系APIは公開 Gateway では提供せず、利用許諾とAPI取得後の private connector とする
 - tool_allowlist が初期空のため、Phase 4（ツール発見）完了までは全ツール露出
 - MoneyForward のトークンはユーザーが手動でアプリポータルから取得・設定する必要がある
 

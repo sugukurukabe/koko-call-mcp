@@ -11,6 +11,7 @@ import { registerGetGatewayDemo } from "./get-gateway-demo.js";
 import { registerIssueApprovalToken } from "./issue-approval-token.js";
 import { registerListConnectedServers } from "./list-connected-servers.js";
 import { registerSearchPublicOpportunities } from "./search-public-opportunities.js";
+import { registerSuggestNextActions } from "./suggest-next-actions.js";
 
 export interface ToolContext {
   tier: Tier;
@@ -27,6 +28,7 @@ export function registerTools(server: McpServer, context: ToolContext): void {
   registerGetGatewayDemo(server);
   registerListConnectedServers(server, context);
   registerSearchPublicOpportunities(server);
+  registerSuggestNextActions(server);
 
   // Pro tier ツール
   if (context.tier !== "pro") {

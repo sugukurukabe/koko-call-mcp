@@ -9,30 +9,30 @@ Accepted / Accepted / Diterima
 ## Context / 背景 / Konteks
 
 ADR-0016 で Gateway は `risk_level: financial` のサーバーを OAuth 認証 + Pro tier の組み合わせで保護することを決定した。
-しかし GMO Banking MCP の `gmo_bank_transfer` は実際の資金移動を引き起こすため、認証だけでは不十分である。
+MoneyForward の `create_journal_entry` / `update_journal_entry` のような書き込み系ツールは会計データを変更するため、認証だけでは不十分である。
 以下の要件を満たすツール単位の追加ロックが必要になった:
 
-1. LLM が誤って送金ツールを呼び出すことを防ぐ（意図しない自動実行の防止）
-2. 呼び出しパラメータ（金額・口座番号）に対して人間またはエージェントが明示的に承認したことを証明する
-3. コンプライアンスルール（取引上限・KYC 確認など）を拡張可能な形で抽象化する
+1. LLM が誤って書き込み系ツールを呼び出すことを防ぐ（意図しない自動実行の防止）
+2. 呼び出しパラメータ（金額・日付・仕訳内容）に対して人間またはエージェントが明示的に承認したことを証明する
+3. コンプライアンスルール（会計期間の有効性・二重承認など）を拡張可能な形で抽象化する
 
 ---
 
 ADR-0016 decided that the Gateway protects `risk_level: financial` servers with OAuth + Pro tier.
-However, `gmo_bank_transfer` in GMO Banking MCP causes actual fund transfers,
-making authentication alone insufficient. A per-tool additional lock is required to satisfy:
+However, write tools such as MoneyForward's `create_journal_entry` and `update_journal_entry`
+change accounting data, making authentication alone insufficient. A per-tool additional lock is required to satisfy:
 
-1. Prevent LLM from accidentally calling the transfer tool (prevent unintended automatic execution)
-2. Prove that a human or agent explicitly approved specific call parameters (amount, account number)
-3. Abstract compliance rules (transaction limits, KYC checks, etc.) in an extensible way
+1. Prevent LLM from accidentally calling write tools (prevent unintended automatic execution)
+2. Prove that a human or agent explicitly approved specific call parameters (amount, date, journal contents)
+3. Abstract compliance rules (open accounting period, dual approval, etc.) in an extensible way
 
 ---
 
 ADR-0016 memutuskan bahwa Gateway melindungi server `risk_level: financial` dengan OAuth + Pro tier.
-Namun, `gmo_bank_transfer` di GMO Banking MCP menyebabkan transfer dana aktual,
+Namun, alat tulis seperti `create_journal_entry` dan `update_journal_entry` MoneyForward mengubah data akuntansi,
 membuat autentikasi saja tidak cukup. Kunci tambahan per alat diperlukan untuk memenuhi:
 
-1. Mencegah LLM secara tidak sengaja memanggil alat transfer (mencegah eksekusi otomatis yang tidak disengaja)
+1. Mencegah LLM secara tidak sengaja memanggil alat tulis (mencegah eksekusi otomatis yang tidak disengaja)
 2. Membuktikan bahwa manusia atau agen secara eksplisit menyetujui parameter panggilan tertentu
 3. Mengabstraksi aturan kepatuhan (batas transaksi, pemeriksaan KYC, dll.) secara extensible
 
@@ -49,7 +49,7 @@ membuat autentikasi saja tidak cukup. Kunci tambahan per alat diperlukan untuk m
 ```
 エージェントフロー / Agent flow / Alur agen:
 
-1. gmo_bank_get_balance → 残高確認
+1. get_trial_balance → 試算表確認
 2. issue_approval_token → HMAC 署名付きトークン取得（引数をハッシュに含む）
 3. （任意）ユーザーに最終確認
 4. call_registered_mcp + approval_token → Policy Engine が verify() → 実行
@@ -72,7 +72,7 @@ membuat autentikasi saja tidak cukup. Kunci tambahan per alat diperlukan untuk m
 ### compliance_check の仕組み / How compliance_check works / Cara kerja compliance_check
 
 `tool_policies[toolName].compliance_check` はキー名の配列を持つ。
-呼び出し側は `compliance_context: { tx_amount_under_limit: true }` のように全キーを `true` に設定して渡す責任を負う。
+呼び出し側は `compliance_context: { accounting_period_open: true }` のように全キーを `true` に設定して渡す責任を負う。
 Policy Engine はキーが未設定または `false` であれば `denied` を返す。
 
 `tool_policies[toolName].compliance_check` holds an array of key names.
@@ -111,12 +111,12 @@ di mana HMAC-SHA256 sudah cukup. Menggunakan hanya modul `crypto` standar Node.j
 
 ### なぜ compliance_check がキー名配列か / Why compliance_check is a key-name array
 
-- 具体的なチェックロジック（残高上限計算など）は Gateway に持たせない（ドメイン知識の外部化）
-- エージェントが残高を確認し、上限以下であれば `tx_amount_under_limit: true` を宣言する責任を負う
+- 具体的なチェックロジック（会計期間・承認状態など）は Gateway に持たせない（ドメイン知識の外部化）
+- エージェントが会計期間を確認し、書き込み可能であれば `accounting_period_open: true` を宣言する責任を負う
 - 将来 `kyc_verified`, `dual_approval` などのキーを無限に追加できる
 
-- Specific check logic (balance limit calculation, etc.) is not held in the Gateway (externalization of domain knowledge)
-- The agent is responsible for checking balance and declaring `tx_amount_under_limit: true` if under the limit
+- Specific check logic (accounting period, approval state, etc.) is not held in the Gateway (externalization of domain knowledge)
+- The agent is responsible for checking the accounting period and declaring `accounting_period_open: true` if writing is allowed
 - Future keys like `kyc_verified`, `dual_approval` can be added indefinitely
 
 ## Implementation / 実装 / Implementasi
@@ -130,14 +130,14 @@ gateway/src/tools/
 └── issue-approval-token.ts  ← Pro tier 専用 MCP ツール
 
 gateway/config/registry.json
-└── gmo-bank.tool_policies.gmo_bank_transfer  ← required_approval: true, compliance_check: [...]
+└── moneyforward-ca.tool_policies.create_journal_entry  ← required_approval: true, compliance_check: [...]
 ```
 
 ## Consequences / 影響 / Konsekuensi
 
 **良い影響 / Positive / Positif:**
 
-- LLM の意図しない資金移動を二重ロックで防止できる
+- LLM の意図しない会計書き込みを二重ロックで防止できる
 - Approval Token はステートレス（DB 不要）なので Cloud Run 複数インスタンスでも動作する
 - `compliance_check` は配列追加だけで拡張でき、コード変更不要
 

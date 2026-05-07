@@ -32,19 +32,6 @@ const jgrantsServer: ChildMcpServer = {
   routing_keywords: ["補助金", "助成金", "グラント", "subsidy", "grant"],
 };
 
-const gmoServer: ChildMcpServer = {
-  id: "gmo-bank",
-  display_name: "GMO Banking",
-  display_name_en: "GMO Banking",
-  display_name_id: "GMO Banking",
-  endpoint: "http://localhost:8090",
-  auth_type: "bearer_apikey",
-  risk_level: "financial",
-  tool_allowlist: [],
-  attribution: { source: "GMO", license: "proprietary", url: "https://gmo-aozora.com" },
-  routing_keywords: ["振込", "残高", "入出金", "GMO", "銀行", "bank", "transfer", "balance"],
-};
-
 const mfcaServer: ChildMcpServer = {
   id: "moneyforward-ca",
   display_name: "マネーフォワード クラウド会計 MCP",
@@ -80,7 +67,40 @@ const mfcaServer: ChildMcpServer = {
   ],
 };
 
-const allServers: readonly ChildMcpServer[] = [jpBidsServer, jgrantsServer, gmoServer, mfcaServer];
+const houjinServer: ChildMcpServer = {
+  id: "houjin-bangou",
+  display_name: "法人番号 MCP",
+  display_name_en: "Corporate Number MCP",
+  display_name_id: "MCP Nomor Korporasi",
+  endpoint: "http://localhost:8092",
+  auth_type: "bearer_apikey",
+  risk_level: "read_only",
+  tool_allowlist: [],
+  attribution: {
+    source: "国税庁 法人番号公表サイト Web-API",
+    license: "政府標準利用規約 第2.0版",
+    url: "https://www.houjin-bangou.nta.go.jp/webapi/",
+  },
+  routing_keywords: [
+    "法人番号",
+    "法人",
+    "会社",
+    "取引先",
+    "法人名",
+    "所在地",
+    "13桁",
+    "corporate number",
+    "company",
+    "corporation",
+  ],
+};
+
+const allServers: readonly ChildMcpServer[] = [
+  jpBidsServer,
+  jgrantsServer,
+  mfcaServer,
+  houjinServer,
+];
 
 describe("smart-router: MoneyForward routing", () => {
   it("仕訳を取得して → moneyforward-ca にルーティング / routes '仕訳を取得して' to moneyforward-ca", async () => {
@@ -113,12 +133,6 @@ describe("smart-router: MoneyForward routing", () => {
     expect(result?.serverId).toBe("moneyforward-ca");
   });
 
-  it("振込を確認 → gmo-bank にルーティング（MF に向かわない）/ does not route transfer to moneyforward-ca", async () => {
-    const result = await route({ query: "振込を確認したい" }, allServers);
-    expect(result).not.toBeNull();
-    expect(result?.serverId).toBe("gmo-bank");
-  });
-
   it("入札案件 → jp-bids にルーティング（MF に向かわない）/ does not route bid to moneyforward-ca", async () => {
     const result = await route({ query: "入札案件を探して" }, allServers);
     expect(result).not.toBeNull();
@@ -142,15 +156,32 @@ describe("smart-router: MoneyForward routing", () => {
   });
 
   it("スコア同点で risk_level が低い方を優先する / tie-breaking prefers lower risk_level", async () => {
-    // 仕訳と残高が同スコアになるように人工的なケース
-    // 試算表 は MF のみにマッチするため、この test は tie-breaking を確認するために専用サーバーを用意
     const tiedServers: readonly ChildMcpServer[] = [
       { ...mfcaServer, routing_keywords: ["keyword"] },
       { ...jpBidsServer, routing_keywords: ["keyword"] },
     ];
     const result = await route({ query: "keyword" }, tiedServers);
     expect(result).not.toBeNull();
-    // jp-bids は read_only (0), moneyforward-ca は financial (2) → jp-bids が優先
     expect(result?.serverId).toBe("jp-bids");
+  });
+});
+
+describe("smart-router: 法人番号 MCP routing", () => {
+  it("法人番号を検索して → houjin-bangou にルーティング / routes corporate number query", async () => {
+    const result = await route({ query: "法人番号を検索して" }, allServers);
+    expect(result).not.toBeNull();
+    expect(result?.serverId).toBe("houjin-bangou");
+  });
+
+  it("取引先の会社情報を確認 → houjin-bangou にルーティング / routes company check query", async () => {
+    const result = await route({ query: "取引先の会社情報を確認したい" }, allServers);
+    expect(result).not.toBeNull();
+    expect(result?.serverId).toBe("houjin-bangou");
+  });
+
+  it("corporate number lookup → houjin-bangou / routes English query", async () => {
+    const result = await route({ query: "corporate number lookup" }, allServers);
+    expect(result).not.toBeNull();
+    expect(result?.serverId).toBe("houjin-bangou");
   });
 });

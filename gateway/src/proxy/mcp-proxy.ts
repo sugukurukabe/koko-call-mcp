@@ -46,8 +46,10 @@ export async function proxyToolCall(params: ProxyCallParams): Promise<ProxyCallR
     const cacheKey = toolCache.buildCacheKey(server.id, toolName, toolArguments);
     const cached = toolCache.get(cacheKey);
     if (cached !== null) {
+      toolCache.recordHit();
       return cached as ProxyCallResult;
     }
+    toolCache.recordMiss();
 
     const result = await fetchFromChild({
       server,

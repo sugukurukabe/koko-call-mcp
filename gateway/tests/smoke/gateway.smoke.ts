@@ -23,8 +23,9 @@ describe("Gateway smoke test", () => {
     expect(res.body.connected_servers).toContain("jgrants");
     expect(res.body.connected_servers).toContain("agriops");
     expect(res.body.connected_servers).toContain("freee");
-    expect(res.body.connected_servers).toContain("gmo-bank");
     expect(res.body.connected_servers).toContain("moneyforward-ca");
+    expect(res.body.connected_servers).toContain("houjin-bangou");
+    expect(res.body.connected_servers).not.toContain("gmo-bank");
   });
 
   it("GET /mcp returns 405", async () => {
@@ -74,6 +75,7 @@ describe("Gateway smoke test", () => {
     expect(toolNames).toContain("get_gateway_demo");
     expect(toolNames).toContain("list_connected_servers");
     expect(toolNames).toContain("search_public_opportunities");
+    expect(toolNames).toContain("suggest_next_actions");
     expect(toolNames).not.toContain("analyze_funding_fit");
     expect(toolNames).not.toContain("call_registered_mcp");
     expect(toolNames).not.toContain("get_audit_events");

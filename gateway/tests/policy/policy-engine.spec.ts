@@ -10,24 +10,24 @@ import type { ChildMcpServer } from "../../src/registry/schema.js";
 const TEST_SECRET = "test-hmac-secret-policy-engine";
 
 const baseServer: ChildMcpServer = {
-  id: "gmo-bank",
-  display_name: "GMOあおぞらネット銀行 MCP",
-  display_name_en: "GMO Aozora Net Bank MCP",
-  display_name_id: "GMO Aozora Net Bank MCP",
-  endpoint: "http://localhost:8090",
-  auth_type: "bearer_apikey",
+  id: "moneyforward-ca",
+  display_name: "マネーフォワード クラウド会計 MCP",
+  display_name_en: "MoneyForward Cloud Accounting MCP",
+  display_name_id: "MoneyForward Cloud Accounting MCP",
+  endpoint: "https://beta.mcp.developers.biz.moneyforward.com/mcp/ca/v3",
+  auth_type: "bearer_oauth",
   risk_level: "financial",
-  tool_allowlist: ["gmo_bank_get_balance", "gmo_bank_transfer"],
+  tool_allowlist: ["get_trial_balance", "create_journal_entry"],
   attribution: {
-    source: "GMOあおぞらネット銀行 API",
+    source: "株式会社マネーフォワード（クラウド会計）",
     license: "proprietary",
-    url: "https://gmo-aozora.com",
+    url: "https://developers.biz.moneyforward.com/mcp/",
   },
-  routing_keywords: ["振込", "残高"],
+  routing_keywords: ["仕訳", "試算表"],
   tool_policies: {
-    gmo_bank_transfer: {
+    create_journal_entry: {
       required_approval: true,
-      compliance_check: ["tx_amount_under_limit"],
+      compliance_check: ["accounting_period_open"],
     },
   },
 };
@@ -49,7 +49,7 @@ describe("policy-engine: required_approval", () => {
   it("approval_token なしだと denied になる / denied without approval_token", () => {
     const result = evaluate({
       server: baseServer,
-      toolName: "gmo_bank_transfer",
+      toolName: "create_journal_entry",
       tier: "pro",
       isOAuthAuthenticated: true,
       rateLimitPerSecond: HIGH_RATE,
@@ -59,31 +59,31 @@ describe("policy-engine: required_approval", () => {
   });
 
   it("有効な approval_token があれば通過する / passes with valid approval_token", () => {
-    const args = { amount: 5000, account_id: "acc1" };
-    const token = issue("gmo-bank", "gmo_bank_transfer", args);
+    const args = { amount: 5000, journal_date: "2026-05-01" };
+    const token = issue("moneyforward-ca", "create_journal_entry", args);
     const result = evaluate({
       server: baseServer,
-      toolName: "gmo_bank_transfer",
+      toolName: "create_journal_entry",
       tier: "pro",
       isOAuthAuthenticated: true,
       approvalToken: token,
       toolArguments: args,
-      complianceContext: { tx_amount_under_limit: true },
+      complianceContext: { accounting_period_open: true },
       rateLimitPerSecond: HIGH_RATE,
     });
     expect(result.decision).toBe("allowed");
   });
 
   it("改ざんされた token は denied になる / tampered token results in denied", () => {
-    const token = issue("gmo-bank", "gmo_bank_transfer", {});
+    const token = issue("moneyforward-ca", "create_journal_entry", {});
     const result = evaluate({
       server: baseServer,
-      toolName: "gmo_bank_transfer",
+      toolName: "create_journal_entry",
       tier: "pro",
       isOAuthAuthenticated: true,
       approvalToken: `${token}XYZ`,
       toolArguments: {},
-      complianceContext: { tx_amount_under_limit: true },
+      complianceContext: { accounting_period_open: true },
       rateLimitPerSecond: HIGH_RATE,
     });
     expect(result.decision).toBe("denied");
@@ -93,10 +93,10 @@ describe("policy-engine: required_approval", () => {
 describe("policy-engine: compliance_check", () => {
   it("compliance_context が欠けていると denied になる / denied when compliance_context is missing keys", () => {
     const args = { amount: 5000 };
-    const token = issue("gmo-bank", "gmo_bank_transfer", args);
+    const token = issue("moneyforward-ca", "create_journal_entry", args);
     const result = evaluate({
       server: baseServer,
-      toolName: "gmo_bank_transfer",
+      toolName: "create_journal_entry",
       tier: "pro",
       isOAuthAuthenticated: true,
       approvalToken: token,
@@ -105,20 +105,20 @@ describe("policy-engine: compliance_check", () => {
       rateLimitPerSecond: HIGH_RATE,
     });
     expect(result.decision).toBe("denied");
-    expect(result.reason).toContain("tx_amount_under_limit");
+    expect(result.reason).toContain("accounting_period_open");
   });
 
   it("全ての compliance_check が true なら通過する / passes when all compliance checks are true", () => {
     const args = {};
-    const token = issue("gmo-bank", "gmo_bank_transfer", args);
+    const token = issue("moneyforward-ca", "create_journal_entry", args);
     const result = evaluate({
       server: baseServer,
-      toolName: "gmo_bank_transfer",
+      toolName: "create_journal_entry",
       tier: "pro",
       isOAuthAuthenticated: true,
       approvalToken: token,
       toolArguments: args,
-      complianceContext: { tx_amount_under_limit: true },
+      complianceContext: { accounting_period_open: true },
       rateLimitPerSecond: HIGH_RATE,
     });
     expect(result.decision).toBe("allowed");
@@ -129,7 +129,7 @@ describe("policy-engine: read-only tools without policy", () => {
   it("tool_policies のないツールはそのまま通過する / tools without policy pass normally", () => {
     const result = evaluate({
       server: baseServer,
-      toolName: "gmo_bank_get_balance",
+      toolName: "get_trial_balance",
       tier: "pro",
       isOAuthAuthenticated: true,
       rateLimitPerSecond: HIGH_RATE,
@@ -140,7 +140,7 @@ describe("policy-engine: read-only tools without policy", () => {
   it("free tier は financial サーバーにアクセスできない / free tier denied for financial server", () => {
     const result = evaluate({
       server: baseServer,
-      toolName: "gmo_bank_get_balance",
+      toolName: "get_trial_balance",
       tier: "free",
       isOAuthAuthenticated: false,
       rateLimitPerSecond: HIGH_RATE,
