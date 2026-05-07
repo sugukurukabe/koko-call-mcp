@@ -1,0 +1,15 @@
+{
+  "name": "@sugukuru-labs/real-estate-intel-cloud-run",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "scripts": {
+    "start": "real-estate-intel-mcp --http"
+  },
+  "dependencies": {
+    "@sugukuru/real-estate-intel-mcp": "latest"
+  },
+  "engines": {
+    "node": ">=22 <25"
+  }
+}

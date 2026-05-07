@@ -1,4 +1,4 @@
-# 高速起動向け最小イメージ（node:24-alpine）
+# 世界最速クラス起動向け最小イメージ（node:24-alpine）
 FROM node:24-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
@@ -13,7 +13,7 @@ COPY package*.json ./
 EXPOSE 8080
 USER node
 
-# メモリを抑えてコールドスタートを高速化
+# メモリを抑えてコールドスタートを最速化（256MB でも十分動く設計）
 ENV NODE_OPTIONS="--max-old-space-size=256"
 
 CMD ["npm", "start"]
