@@ -28,12 +28,13 @@ MVP Public MCP JP Gateway, perluasan AgriOps, perluasan Nomor Korporasi, dan per
 | 項目 / Item / Item | 状態 / Status / Status |
 |---|---|
 | 現在ブランチ / Current branch / Branch saat ini | `main` |
-| 最新ローカル HEAD / Latest local HEAD / HEAD lokal terbaru | `f0e74914` |
-| origin/main / Remote main / Main remote | `f0e74914bd2c` |
-| 最新コミット / Latest commit / Commit terbaru | `docs: Public MCP GatewayのZenn記事を追加` |
-| Zenn 記事 / Zenn article / Artikel Zenn | `articles/public-mcp-jp-gateway.md` を push 済み |
-| Zenn raw 確認 / Raw check / Pemeriksaan raw | GitHub raw で表示確認済み |
-| Note 記事 / Note article / Artikel Note | `docs/marketing/note-gateway-article.md` 作成済み、未コミット |
+| 最新ローカル HEAD / Latest local HEAD / HEAD lokal terbaru | `07179167` |
+| origin/main / Remote main / Main remote | `07179167` |
+| 最新コミット / Latest commit / Commit terbaru | `docs: Zenn記事の見出しを敬体に修正` |
+| Zenn 記事（全景） / Zenn article / Artikel Zenn | `articles/public-mcp-jp-gateway.md` push 済み・公開済み |
+| Zenn 記事（OAuth） / Zenn OAuth article / Artikel OAuth | `articles/mcp-gateway-oauth-passthrough.md` push 済み・公開済み |
+| Zenn raw 確認 / Raw check / Pemeriksaan raw | GitHub raw で 2 本とも表示確認済み |
+| Note 記事 / Note article / Artikel Note | `docs/marketing/note-gateway-article.md` commit 済み。Note への貼り付け・公開は手動 |
 | 未追跡 / Untracked / Belum terlacak | `jgrants-mcp-server/` |
 
 Zenn 記事 raw URL:
@@ -153,7 +154,15 @@ AgriOps telah ditambahkan sebagai MCP anak read-only dalam registry 6 server saa
 | frontmatter | 設定済み / Configured / Sudah dikonfigurasi |
 | `published` | `true` |
 | push | 完了 / Done / Selesai |
-| commit | `f0e74914` |
+
+### Zenn（第2弾: OAuth pass-through 設計）
+
+| 項目 / Item / Item | 状態 / Status / Status |
+|---|---|
+| ファイル / File / File | `articles/mcp-gateway-oauth-passthrough.md` |
+| frontmatter | 設定済み / Configured / Sudah dikonfigurasi |
+| `published` | `true` |
+| push | 完了 / Done / Selesai |
 
 ### Note
 
@@ -161,8 +170,8 @@ AgriOps telah ditambahkan sebagai MCP anak read-only dalam registry 6 server saa
 |---|---|
 | ファイル / File / File | `docs/marketing/note-gateway-article.md` |
 | 公開原稿 / Publication draft / Draf publikasi | 完成 / Ready / Siap |
-| commit | 未実施 / Not committed / Belum di-commit |
-| 公開 / Publish / Publikasi | 未実施 / Not published / Belum dipublikasikan |
+| commit | 完了 / Done / Selesai |
+| 公開 / Publish / Publikasi | Note への貼り付けと公開は手動 / Manual paste and publish on Note |
 
 ---
 
@@ -195,23 +204,23 @@ Production verification: pass
 
 | 項目 / Item / Item | 状態 / Status / Status | 次アクション / Next action / Tindakan berikutnya |
 |---|---|---|---|
-| Note 公開 | 未完了 | `docs/marketing/note-gateway-article.md` を note に貼り付けて公開 |
-| Note/Zenn 相互リンク | 未完了 | 両方の公開 URL 確定後に追記 |
+| Note 公開 | 手動待ち | `docs/marketing/note-gateway-article.md` を Note に貼り付けて公開 |
+| Note/Zenn 相互リンク | Note 公開後 | 両方の公開 URL 確定後に追記 |
 | GMO Banking private connector | 将来予定 | 利用許諾とAPI取得後に private connector として追加。方針書は `docs/public-mcp-hub/gmo-banking-private-connector.md` |
 | AgriOps 本番 endpoint | 完了 | `GATEWAY_CHILD_ENDPOINT_AGRIOPS` を本番に設定済み |
-| Zenn GitHub 連携反映 | GitHub push 済み | Zenn 側で同期・公開状態を確認 |
-| Zenn 第2弾記事 | GitHub push 済み | `articles/mcp-gateway-oauth-passthrough.md`（OAuth pass-through 設計の詳細） |
+| Zenn 全景記事 | 完了 | `articles/public-mcp-jp-gateway.md` push 済み |
+| Zenn OAuth 記事 | 完了 | `articles/mcp-gateway-oauth-passthrough.md` push 済み |
+| 本番検証コマンド | 完了 | `npm run verify:production` で公開6本とGMO非公開を自動検証 |
 | `jgrants-mcp-server/` | 未追跡 | 別作業か不要ファイルか判断 |
 
 ---
 
 ## 10. 次に実施すること / Next Steps / Langkah Berikutnya
 
-1. Zenn 管理画面で `articles/public-mcp-jp-gateway.md` が同期・公開されているか確認します。
-2. Note 記事を公開します。
-3. 公開済み URL を双方の記事末尾に追記します。
-4. `cd gateway && npm run verify:production` を公開前・設定変更後に実行します。
-5. GMO Banking private connector は、利用許諾とAPI取得後に別途設計・追加します。
+1. Note に `docs/marketing/note-gateway-article.md` を貼り付けて公開します。
+2. 公開済み URL を Zenn 2 本と Note に相互リンクとして追記します。
+3. 設定変更後は `cd gateway && npm run verify:production` で確認します。
+4. GMO Banking private connector は、利用許諾とAPI取得後に別途設計・追加します。
 
 ---
 
@@ -219,12 +228,12 @@ Production verification: pass
 
 **日本語**
 
-技術実装、設計資料、Zenn 公開準備、GMO銀行系APIの公開除外は完了です。残りは「Note 公開」と、公開後の相互リンク更新です。
+技術実装、設計資料、Zenn 記事 2 本の公開、本番検証コマンド、GMO 銀行系 API の公開除外は完了です。残りは「Note への貼り付け・公開」と、公開後の相互リンク更新のみです。
 
 **English**
 
-The technical implementation, design documentation, Zenn publication setup, and GMO banking API public-surface removal are complete. Remaining work is Note publication and cross-link updates after publication.
+The technical implementation, design documentation, two Zenn articles, production verification command, and GMO banking API public-surface removal are complete. The only remaining work is pasting and publishing on Note, followed by cross-link updates.
 
 **Bahasa Indonesia**
 
-Implementasi teknis, dokumentasi desain, persiapan publikasi Zenn, dan penghapusan API perbankan GMO dari permukaan publik sudah selesai. Sisa pekerjaan adalah publikasi Note dan pembaruan tautan silang setelah publikasi.
+Implementasi teknis, dokumentasi desain, dua artikel Zenn, perintah verifikasi produksi, dan penghapusan API perbankan GMO dari permukaan publik sudah selesai. Sisa pekerjaan hanya menempelkan dan mempublikasikan di Note, diikuti pembaruan tautan silang.
