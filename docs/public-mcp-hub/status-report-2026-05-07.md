@@ -138,6 +138,7 @@ AgriOps telah ditambahkan sebagai MCP anak read-only dalam registry 6 server saa
 | `docs/adr/0021-moneyforward-accounting-mcp-integration.md` | MoneyForward Cloud Accounting MCP 連携 |
 | `docs/adr/0022-gateway-expansion-packs.md` | AgriOps・法人番号・e-Stat・e-Gov・SSW/Visa 拡張方針 |
 | `docs/public-mcp-hub/CONTRIBUTING-child-mcp.md` | child MCP 追加手順 |
+| `docs/public-mcp-hub/gmo-banking-private-connector.md` | GMO銀行系APIのprivate connector方針 |
 | `docs/public-mcp-hub/expansion-registry-templates.json` | 将来 child MCP 候補テンプレート |
 
 ---
@@ -171,8 +172,8 @@ AgriOps telah ditambahkan sebagai MCP anak read-only dalam registry 6 server saa
 
 ```text
 TypeScript: pass
-Test Files: 7 passed
-Tests: 52 passed
+Test Files: 8 passed
+Tests: 56 passed
 ```
 
 確認済み事項:
@@ -180,6 +181,8 @@ Tests: 52 passed
 - `gateway/config/registry.json` に 6 本の公開 child MCP を登録済み
 - AgriOps は未確認 tool を公開せず、`get_municipality_stats` のみに限定
 - GMO銀行系APIは公開 registry から除外済み
+- `gmo-bank-mcp` は internal ingress として扱う方針を文書化済み
+- 本番 `/readyz` は `production_ready: true`、公開 child MCP 6本を確認済み
 - Zenn 記事は GitHub raw で表示確認済み
 - `.env.example` は空値のみで、秘密情報は含まれていない
 - `docs/marketing/*gateway-article.md` のドラフト注記・相対リンク・画像プレースホルダーは除去済み
@@ -192,7 +195,7 @@ Tests: 52 passed
 |---|---|---|---|
 | Note 公開 | 未完了 | `docs/marketing/note-gateway-article.md` を note に貼り付けて公開 |
 | Note/Zenn 相互リンク | 未完了 | 両方の公開 URL 確定後に追記 |
-| GMO Banking private connector | 将来予定 | 利用許諾とAPI取得後に private connector として追加 |
+| GMO Banking private connector | 将来予定 | 利用許諾とAPI取得後に private connector として追加。方針書は `docs/public-mcp-hub/gmo-banking-private-connector.md` |
 | AgriOps 本番 endpoint | 完了 | `GATEWAY_CHILD_ENDPOINT_AGRIOPS` を本番に設定済み |
 | Zenn GitHub 連携反映 | GitHub push 済み | Zenn 側で同期・公開状態を確認 |
 | `jgrants-mcp-server/` | 未追跡 | 別作業か不要ファイルか判断 |

@@ -90,6 +90,29 @@ GMOあおぞらネット銀行 API は、公開 Gateway では提供していま
 GMO Aozora Net Bank APIs are not exposed in the public Gateway. They are planned as a future private connector after permission and API access are obtained.
 API GMO Aozora Net Bank tidak diekspos di Gateway publik. API tersebut direncanakan sebagai konektor privat di masa depan setelah izin dan akses API diperoleh.
 
+運用方針は [`docs/public-mcp-hub/gmo-banking-private-connector.md`](../docs/public-mcp-hub/gmo-banking-private-connector.md) を参照してください。
+See [`docs/public-mcp-hub/gmo-banking-private-connector.md`](../docs/public-mcp-hub/gmo-banking-private-connector.md) for the operating policy.
+
+## Production Readiness
+
+本番では `/readyz` が公開 child MCP のみを返し、`production_ready: true` になることを確認します。
+In production, `/readyz` must return only public child MCPs and `production_ready: true`.
+
+```bash
+curl -sS https://public-mcp-jp-gateway-397249937286.asia-northeast1.run.app/readyz | python3 -m json.tool
+```
+
+期待する公開 child MCP:
+
+```text
+jp-bids
+jgrants
+moneyforward-ca
+agriops
+freee
+houjin-bangou
+```
+
 ## Safety Model
 
 - `risk_level: financial` の子 MCP は Pro tier + OAuth/API key を要求します。
