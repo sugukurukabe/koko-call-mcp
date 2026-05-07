@@ -2,7 +2,7 @@
 FROM node:24-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --omit=dev --ignore-scripts --no-optional --no-audit --no-fund --prefer-offline
+RUN npm install --omit=dev --omit=optional --ignore-scripts --no-audit --no-fund --package-lock=false --prefer-offline
 
 FROM node:24-alpine
 ENV NODE_ENV=production

@@ -47,7 +47,7 @@
       "display_name": "Jグランツ MCP（補助金・助成金）",
       "display_name_en": "J-Grants MCP (Subsidies and Grants)",
       "display_name_id": "J-Grants MCP (Subsidi dan Bantuan)",
-      "endpoint": "https://jgrants-mcp-397249937286.asia-northeast1.run.app",
+      "endpoint": "https://jgrants-mcp-494613.asia-northeast1.run.app",
       "auth_type": "none",
       "risk_level": "read_only",
       "tool_allowlist": [
