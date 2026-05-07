@@ -13,7 +13,7 @@ const EXPECTED_PUBLIC_SERVERS = [
   "agriops",
   "freee",
   "houjin-bangou",
-  // "real-estate-intel" は Cloud Run デプロイ完了後に追加（現在は localhost のため omitted）
+  "real-estate-intel",
 ] as const;
 
 interface ReadyzResponse {
