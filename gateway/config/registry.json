@@ -287,6 +287,70 @@
         "nomor korporasi",
         "perusahaan"
       ]
+    },
+    {
+      "id": "real-estate-intel",
+      "display_name": "不動産インテル MCP（地価・取引・災害・人流・投資分析）",
+      "display_name_en": "Japan Real Estate Intel MCP (Land Price, Transactions, Disaster, Human Flow, Investment Analysis)",
+      "display_name_id": "MCP Intelijen Real Estat Jepang (Harga Tanah, Transaksi, Bencana, Arus Manusia, Analisis Investasi)",
+      "endpoint": "http://localhost:8093",
+      "auth_type": "none",
+      "risk_level": "read_only",
+      "tool_allowlist": [],
+      "tool_modes": {
+        "real_estate_analysis": [
+          "cross_analyze_real_estate_market",
+          "assess_property_risk",
+          "forecast_land_price_trend",
+          "scenario_what_if",
+          "compare_prefectures",
+          "drill_down_local_analysis",
+          "generate_area_report",
+          "portfolio_optimizer"
+        ],
+        "store_location": [
+          "evaluate_store_location",
+          "cross_analyze_real_estate_market",
+          "drill_down_local_analysis",
+          "compare_prefectures"
+        ],
+        "bid_search": [],
+        "subsidy_search": [],
+        "financial_check": [],
+        "full_orchestration": []
+      },
+      "cache_ttl_seconds": 300,
+      "attribution": {
+        "source": "国土交通省 不動産情報ライブラリ / e-Stat 国勢調査 / PLATEAU 3D都市モデル",
+        "license": "MIT",
+        "url": "https://github.com/sugukurukabe/japan-real-estate-intel-mcp"
+      },
+      "routing_keywords": [
+        "不動産",
+        "地価",
+        "取引価格",
+        "災害リスク",
+        "人流",
+        "教育",
+        "投資",
+        "ポートフォリオ",
+        "出店",
+        "店舗",
+        "商業施設",
+        "医療",
+        "交通",
+        "日照",
+        "3D",
+        "PLATEAU",
+        "real estate",
+        "land price",
+        "property",
+        "investment",
+        "store location",
+        "hazard",
+        "properti",
+        "harga tanah"
+      ]
     }
   ]
 }

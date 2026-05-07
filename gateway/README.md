@@ -1,8 +1,8 @@
 # Public MCP JP Gateway
 
-Public MCP JP Gateway は、入札・補助金・法人番号・農業統計・会計の MCP サーバーを 1 つの接続先に束ねる Federation Gateway です。
-Public MCP JP Gateway is a federation gateway that connects procurement, subsidies, corporate registry, agriculture statistics, and accounting MCP servers through one endpoint.
-Public MCP JP Gateway adalah gateway federasi yang menghubungkan server MCP pengadaan, subsidi, registri korporasi, statistik pertanian, dan akuntansi melalui satu endpoint.
+Public MCP JP Gateway は、入札・補助金・法人番号・農業統計・不動産投資分析・会計の MCP サーバーを 1 つの接続先に束ねる Federation Gateway です。
+Public MCP JP Gateway is a federation gateway that connects procurement, subsidies, corporate registry, agriculture statistics, real estate investment analysis, and accounting MCP servers through one endpoint.
+Public MCP JP Gateway adalah gateway federasi yang menghubungkan server MCP pengadaan, subsidi, registri korporasi, statistik pertanian, analisis investasi real estat, dan akuntansi melalui satu endpoint.
 
 最初の体験は、4つのタブを開くことではありません。Gateway に一度つなぎ、`get_gateway_demo` を呼ぶことです。
 The first experience should not be opening four browser tabs. Connect once to the Gateway and call `get_gateway_demo`.
@@ -17,6 +17,7 @@ Pengalaman pertama seharusnya bukan membuka empat tab browser. Hubungkan sekali 
 | AgriOps MCP | 農業・自治体統計 | なし |
 | 法人番号 MCP | 法人番号・法人基本情報 | Gateway 側 API key |
 | MoneyForward Cloud Accounting MCP | 仕訳・試算表・推移表 | OAuth header pass-through |
+| Real Estate Intel MCP | 不動産投資分析（地価・取引・災害・人流・10都道府県） | なし |
 | freee MCP | 会計・請求書確認 | OAuth header / env fallback |
 
 ## 1分で試す / Quick Start / Mulai Cepat

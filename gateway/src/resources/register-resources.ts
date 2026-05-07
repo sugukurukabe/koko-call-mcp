@@ -133,6 +133,13 @@ export function registerResources(server: McpServer): void {
           ],
         },
         {
+          category: "不動産分析 / Real Estate Analysis",
+          queries: [
+            "東京都新宿区の地価トレンドと災害リスクを分析して、投資判断の材料をまとめて。",
+            "Compare land prices and investment scores across Tokyo, Osaka, and Fukuoka.",
+          ],
+        },
+        {
           category: "横断比較 / Cross-MCP",
           queries: [
             "接続されている全子MCPの一覧と、それぞれで何ができるか教えて。",

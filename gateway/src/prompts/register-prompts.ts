@@ -180,6 +180,58 @@ export function registerPrompts(server: McpServer): void {
   );
 
   server.registerPrompt(
+    "real_estate_assessment",
+    {
+      title: "不動産投資分析",
+      description:
+        "指定エリアの地価トレンド・災害リスク・人流を分析し、投資判断の材料を揃える。" +
+        "Analyze land price trends, disaster risk, and human flow for a specified area to support investment decisions. " +
+        "Menganalisis tren harga tanah, risiko bencana, dan arus manusia untuk area tertentu guna mendukung keputusan investasi.",
+      argsSchema: {
+        area: z
+          .string()
+          .describe(
+            "分析対象エリア（例: 東京都新宿区, 鹿児島県鹿児島市）。Target area. Area target.",
+          ),
+        purpose: z
+          .enum(["investment", "store_location", "general"])
+          .optional()
+          .default("general")
+          .describe(
+            "分析目的: investment（投資判断）/ store_location（出店判断）/ general（総合分析）。" +
+              "Purpose. Tujuan.",
+          ),
+      },
+    },
+    async (args) => {
+      const area = args.area;
+      const purpose = args.purpose ?? "general";
+      const modeHint = purpose === "store_location" ? "store_location" : "real_estate_analysis";
+      return {
+        messages: [
+          {
+            role: "user" as const,
+            content: {
+              type: "text" as const,
+              text:
+                `「${area}」の不動産データを分析してください（目的: ${purpose}）。\n\n` +
+                `手順:\n` +
+                `1. call_registered_mcp(server_id: 'real-estate-intel', tool_name: 'cross_analyze_real_estate_market', mode: '${modeHint}') でエリア概要を取得\n` +
+                `2. call_registered_mcp(server_id: 'real-estate-intel', tool_name: 'assess_property_risk') で災害リスクを評価\n` +
+                `3. call_registered_mcp(server_id: 'real-estate-intel', tool_name: 'forecast_land_price_trend') で地価トレンドを予測\n` +
+                (purpose === "store_location"
+                  ? `4. call_registered_mcp(server_id: 'real-estate-intel', tool_name: 'evaluate_store_location') で出店適地スコアを取得\n`
+                  : `4. call_registered_mcp(server_id: 'real-estate-intel', tool_name: 'generate_area_report') でエリアレポートを生成\n`) +
+                `5. 投資判断・出店判断の材料をテーブル形式でまとめる\n\n` +
+                `出典は Real Estate Intel MCP の attribution を引用してください。`,
+            },
+          },
+        ],
+      };
+    },
+  );
+
+  server.registerPrompt(
     "gateway_quick_tour",
     {
       title: "Gateway クイックツアー",

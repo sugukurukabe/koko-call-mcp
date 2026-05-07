@@ -95,11 +95,41 @@ const houjinServer: ChildMcpServer = {
   ],
 };
 
+const realEstateServer: ChildMcpServer = {
+  id: "real-estate-intel",
+  display_name: "不動産インテル MCP",
+  display_name_en: "Japan Real Estate Intel MCP",
+  display_name_id: "MCP Intelijen Real Estat Jepang",
+  endpoint: "http://localhost:8093",
+  auth_type: "none",
+  risk_level: "read_only",
+  tool_allowlist: [],
+  attribution: {
+    source: "国土交通省 不動産情報ライブラリ",
+    license: "MIT",
+    url: "https://github.com/sugukurukabe/japan-real-estate-intel-mcp",
+  },
+  routing_keywords: [
+    "不動産",
+    "地価",
+    "取引価格",
+    "災害リスク",
+    "人流",
+    "投資",
+    "出店",
+    "store location",
+    "real estate",
+    "land price",
+    "property",
+  ],
+};
+
 const allServers: readonly ChildMcpServer[] = [
   jpBidsServer,
   jgrantsServer,
   mfcaServer,
   houjinServer,
+  realEstateServer,
 ];
 
 describe("smart-router: MoneyForward routing", () => {
@@ -183,5 +213,31 @@ describe("smart-router: 法人番号 MCP routing", () => {
     const result = await route({ query: "corporate number lookup" }, allServers);
     expect(result).not.toBeNull();
     expect(result?.serverId).toBe("houjin-bangou");
+  });
+});
+
+describe("smart-router: 不動産インテル MCP routing", () => {
+  it("地価を調べて → real-estate-intel にルーティング / routes land price query", async () => {
+    const result = await route({ query: "新宿区の地価を調べて" }, allServers);
+    expect(result).not.toBeNull();
+    expect(result?.serverId).toBe("real-estate-intel");
+  });
+
+  it("不動産投資の分析 → real-estate-intel / routes investment analysis query", async () => {
+    const result = await route({ query: "不動産投資の分析をしたい" }, allServers);
+    expect(result).not.toBeNull();
+    expect(result?.serverId).toBe("real-estate-intel");
+  });
+
+  it("出店候補地の災害リスク → real-estate-intel / routes store location query", async () => {
+    const result = await route({ query: "出店候補地の災害リスクを確認" }, allServers);
+    expect(result).not.toBeNull();
+    expect(result?.serverId).toBe("real-estate-intel");
+  });
+
+  it("real estate analysis → real-estate-intel / routes English query", async () => {
+    const result = await route({ query: "real estate land price trend" }, allServers);
+    expect(result).not.toBeNull();
+    expect(result?.serverId).toBe("real-estate-intel");
   });
 });

@@ -25,6 +25,7 @@ describe("Gateway smoke test", () => {
     expect(res.body.connected_servers).toContain("freee");
     expect(res.body.connected_servers).toContain("moneyforward-ca");
     expect(res.body.connected_servers).toContain("houjin-bangou");
+    expect(res.body.connected_servers).toContain("real-estate-intel");
     expect(res.body.connected_servers).not.toContain("gmo-bank");
   });
 

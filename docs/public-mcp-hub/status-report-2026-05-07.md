@@ -89,6 +89,7 @@ Gateway telah ditambahkan sebagai paket TypeScript terpisah di bawah `gateway/`.
 | `freee` | 会計・請求書 / Accounting and invoices / Akuntansi dan faktur | `financial` | registry 登録済み |
 | `moneyforward-ca` | 会計 / Accounting / Akuntansi | `financial` | registry 登録済み |
 | `houjin-bangou` | 法人番号 / Corporate Number / Nomor Korporasi | `read_only` | registry 登録済み |
+| `real-estate-intel` | 不動産投資分析 / Real Estate Intel / Intelijen Real Estat | `read_only` | registry 登録済み |
 
 注意 / Note / Catatan:
 
@@ -188,7 +189,7 @@ Production verification: pass
 
 確認済み事項:
 
-- `gateway/config/registry.json` に 6 本の公開 child MCP を登録済み
+- `gateway/config/registry.json` に 7 本の child MCP を登録済み（うち real-estate-intel は localhost、本番デプロイ待ち）
 - AgriOps は未確認 tool を公開せず、`get_municipality_stats` のみに限定
 - GMO銀行系APIは公開 registry から除外済み
 - `gmo-bank-mcp` は internal ingress として扱う方針を文書化済み
@@ -228,12 +229,12 @@ Production verification: pass
 
 **日本語**
 
-技術実装、設計資料、Zenn 記事 2 本の公開、本番検証コマンド、GMO 銀行系 API の公開除外は完了です。残りは「Note への貼り付け・公開」と、公開後の相互リンク更新のみです。
+技術実装、設計資料、Zenn 記事 2 本の公開、本番検証コマンド、GMO 銀行系 API の公開除外は完了です。不動産インテル MCP（10 都道府県、地価・投資分析）を 7 本目の child MCP として registry に追加しました。残りは「Note 公開」「不動産 MCP の本番デプロイ」「相互リンク更新」です。
 
 **English**
 
-The technical implementation, design documentation, two Zenn articles, production verification command, and GMO banking API public-surface removal are complete. The only remaining work is pasting and publishing on Note, followed by cross-link updates.
+The technical implementation, design documentation, two Zenn articles, production verification command, and GMO banking API public-surface removal are complete. Real Estate Intel MCP (10 prefectures, land price and investment analysis) has been added as the 7th child MCP. Remaining work: Note publication, Real Estate Intel production deployment, and cross-link updates.
 
 **Bahasa Indonesia**
 
-Implementasi teknis, dokumentasi desain, dua artikel Zenn, perintah verifikasi produksi, dan penghapusan API perbankan GMO dari permukaan publik sudah selesai. Sisa pekerjaan hanya menempelkan dan mempublikasikan di Note, diikuti pembaruan tautan silang.
+Implementasi teknis, dokumentasi desain, dua artikel Zenn, perintah verifikasi produksi, dan penghapusan API perbankan GMO dari permukaan publik sudah selesai. MCP Intelijen Real Estat (10 prefektur, harga tanah dan analisis investasi) telah ditambahkan sebagai MCP anak ke-7. Sisa pekerjaan: publikasi Note, deployment produksi Real Estate Intel, dan pembaruan tautan silang.

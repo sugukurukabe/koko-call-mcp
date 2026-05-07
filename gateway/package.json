@@ -1,7 +1,7 @@
 {
   "name": "@sugukuru-labs/public-mcp-jp-gateway",
   "version": "0.1.0",
-  "description": "日本の公的データ・業務SaaS MCPサーバーを1回の接続で使えるFederation Gateway。JP Bids（入札）・Jグランツ（補助金）・法人番号・AgriOps・MoneyForwardクラウド会計・freeeを安全に束ねます。GMO銀行系APIは利用許諾・API取得後のprivate connectorとして追加予定です。Japan public-data MCP Federation Gateway connecting JP Bids, J-Grants, Corporate Number, AgriOps, MoneyForward Cloud Accounting, and freee through a single secure connection.",
+  "description": "日本の公的データ・業務SaaS MCPサーバーを1回の接続で使えるFederation Gateway。JP Bids（入札）・Jグランツ（補助金）・法人番号・AgriOps・不動産インテル（地価・投資分析）・MoneyForwardクラウド会計・freeeを安全に束ねます。Japan public-data MCP Federation Gateway connecting JP Bids, J-Grants, Corporate Number, AgriOps, Real Estate Intel, MoneyForward Cloud Accounting, and freee through a single secure connection.",
   "type": "module",
   "license": "Apache-2.0",
   "main": "./dist/mcp.js",

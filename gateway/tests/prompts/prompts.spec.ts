@@ -26,19 +26,20 @@ type InternalServer = {
 };
 
 describe("registerPrompts", () => {
-  it("5 個の Prompt が登録される / registers 5 prompts", () => {
+  it("6 個の Prompt が登録される / registers 6 prompts", () => {
     const server = createTestServer();
     registerPrompts(server);
 
     const registered = (server as unknown as InternalServer)._registeredPrompts;
     const keys = Object.keys(registered);
-    expect(keys).toHaveLength(5);
+    expect(keys).toHaveLength(6);
     expect(keys).toEqual(
       expect.arrayContaining([
         "investigate_opportunity",
         "financial_health_check",
         "bid_to_close_workflow",
         "cross_mcp_comparison",
+        "real_estate_assessment",
         "gateway_quick_tour",
       ]),
     );

@@ -94,6 +94,24 @@ export function registerSuggestNextActions(server: McpServer): void {
           tool: "call_registered_mcp(server_id: 'agriops', tool_name: 'get_municipality_stats', mode: 'agri_research')",
           when: "地域の農業データが必要なとき",
         },
+        {
+          id: "real_estate_analysis",
+          label: "不動産投資分析",
+          trigger: [
+            "不動産",
+            "地価",
+            "投資",
+            "出店",
+            "店舗",
+            "災害リスク",
+            "real estate",
+            "land price",
+            "property",
+            "store location",
+          ],
+          tool: "call_registered_mcp(server_id: 'real-estate-intel', tool_name: 'cross_analyze_real_estate_market', mode: 'real_estate_analysis')",
+          when: "不動産市場データ・地価トレンド・災害リスクの分析が必要なとき",
+        },
       ];
 
       const contextLower = context.toLowerCase();

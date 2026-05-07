@@ -49,6 +49,7 @@ export function registerGetGatewayDemo(server: McpServer): void {
           "JP Bids: 官公需入札 / government procurement",
           "J-Grants: 補助金・助成金 / subsidies and grants",
           "AgriOps: 農業・自治体統計 / agriculture and municipality stats",
+          "Real Estate Intel: 不動産投資分析（地価・取引・災害・人流・10都道府県） / real estate investment analysis",
           "MoneyForward Cloud Accounting: 仕訳・試算表 / journal entries and trial balance",
           "freee: 会計・請求書 / accounting and invoicing",
         ],
@@ -175,7 +176,7 @@ export function registerGetGatewayDemo(server: McpServer): void {
                 safety:
                   "振込・仕訳作成などの書き込み系操作は、必ず内容確認後に approval token を発行して実行してください。",
                 attribution:
-                  "Use tool results' attribution fields for JP Bids, J-Grants, AgriOps, MoneyForward, Corporate Number, and freee outputs.",
+                  "Use tool results' attribution fields for JP Bids, J-Grants, AgriOps, Real Estate Intel, MoneyForward, Corporate Number, and freee outputs.",
               },
               null,
               2,
