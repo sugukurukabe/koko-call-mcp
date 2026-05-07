@@ -98,6 +98,14 @@ See [`docs/public-mcp-hub/gmo-banking-private-connector.md`](../docs/public-mcp-
 本番では `/readyz` が公開 child MCP のみを返し、`production_ready: true` になることを確認します。
 In production, `/readyz` must return only public child MCPs and `production_ready: true`.
 
+自動確認:
+
+```bash
+npm run verify:production
+```
+
+手動確認:
+
 ```bash
 curl -sS https://public-mcp-jp-gateway-397249937286.asia-northeast1.run.app/readyz | python3 -m json.tool
 ```

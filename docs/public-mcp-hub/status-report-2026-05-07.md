@@ -174,6 +174,7 @@ AgriOps telah ditambahkan sebagai MCP anak read-only dalam registry 6 server saa
 TypeScript: pass
 Test Files: 8 passed
 Tests: 56 passed
+Production verification: pass
 ```
 
 確認済み事項:
@@ -183,6 +184,7 @@ Tests: 56 passed
 - GMO銀行系APIは公開 registry から除外済み
 - `gmo-bank-mcp` は internal ingress として扱う方針を文書化済み
 - 本番 `/readyz` は `production_ready: true`、公開 child MCP 6本を確認済み
+- `gateway/scripts/verify-production.ts` で公開GatewayとGMO非公開状態を自動検証可能
 - Zenn 記事は GitHub raw で表示確認済み
 - `.env.example` は空値のみで、秘密情報は含まれていない
 - `docs/marketing/*gateway-article.md` のドラフト注記・相対リンク・画像プレースホルダーは除去済み
@@ -208,7 +210,7 @@ Tests: 56 passed
 1. Zenn 管理画面で `articles/public-mcp-jp-gateway.md` が同期・公開されているか確認します。
 2. Note 記事を公開します。
 3. 公開済み URL を双方の記事末尾に追記します。
-4. 本番 Gateway で `list_connected_servers(mode: "agri_research")` と `list_connected_servers(mode: "financial_check")` を確認します。
+4. `cd gateway && npm run verify:production` を公開前・設定変更後に実行します。
 5. GMO Banking private connector は、利用許諾とAPI取得後に別途設計・追加します。
 
 ---
