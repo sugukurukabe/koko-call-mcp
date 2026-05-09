@@ -1,14 +1,29 @@
 #!/bin/bash
 # ============================================================
 # Public MCP JP Gateway — 全7本 Cloud Run 一括デプロイスクリプト
-# プロジェクトIDベース（gcloud config の現在値を使用）
+# プロジェクトIDベース（デフォルト: ssw-compass-prod-494613）
 # ============================================================
 set -e
 
-PROJECT_ID=$(gcloud config get-value project)
+EXPECTED_PROJECT_ID=${PROJECT_ID:-ssw-compass-prod-494613}
+CURRENT_PROJECT_ID=$(gcloud config get-value project)
+PROJECT_ID="$EXPECTED_PROJECT_ID"
 if [ -z "$PROJECT_ID" ]; then
   echo "ERROR: gcloud config にプロジェクトが設定されていません"
   echo "  gcloud config set project <PROJECT_ID>"
+  exit 1
+fi
+
+if [ "$CURRENT_PROJECT_ID" != "$PROJECT_ID" ]; then
+  echo "ERROR: gcloud の現在プロジェクトが想定と違います"
+  echo "  Current : $CURRENT_PROJECT_ID"
+  echo "  Expected: $PROJECT_ID"
+  echo ""
+  echo "以下を実行してから再実行してください:"
+  echo "  gcloud config set project $PROJECT_ID"
+  echo ""
+  echo "別プロジェクトにデプロイする場合は明示的に PROJECT_ID を指定してください:"
+  echo "  PROJECT_ID=$CURRENT_PROJECT_ID ./deploy/deploy-all-production.sh"
   exit 1
 fi
 
