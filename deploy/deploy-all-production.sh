@@ -103,9 +103,17 @@ gcloud run deploy houjin-bangou-mcp \
 # 4. Real Estate Intel MCP (Node.js) — 最重要
 # ============================================================
 echo "=== [4/4] 不動産インテル MCP をデプロイ（最優先） ==="
-cd deploy/real-estate-intel-cloud-run
-gcloud builds submit --tag "gcr.io/$PROJECT_ID/real-estate-intel-mcp" --quiet
-cd ../..
+if [ ! -d "japan-real-estate-intel-mcp" ]; then
+  echo "ERROR: japan-real-estate-intel-mcp が見つかりません"
+  echo "以下を実行してから再実行してください:"
+  echo "  git clone https://github.com/sugukurukabe/japan-real-estate-intel-mcp.git"
+  exit 1
+fi
+cp deploy/real-estate-intel-cloud-run/Dockerfile japan-real-estate-intel-mcp/Dockerfile.cloudrun
+cd japan-real-estate-intel-mcp
+gcloud builds submit --tag "gcr.io/$PROJECT_ID/real-estate-intel-mcp" --quiet --file Dockerfile.cloudrun
+rm -f Dockerfile.cloudrun
+cd ..
 gcloud run deploy real-estate-intel-mcp \
   --image="gcr.io/$PROJECT_ID/real-estate-intel-mcp" \
   --region="$REGION" \
