@@ -109,10 +109,10 @@ if [ ! -d "japan-real-estate-intel-mcp" ]; then
   echo "  git clone https://github.com/sugukurukabe/japan-real-estate-intel-mcp.git"
   exit 1
 fi
-cp deploy/real-estate-intel-cloud-run/Dockerfile japan-real-estate-intel-mcp/Dockerfile.cloudrun
+cp deploy/real-estate-intel-cloud-run/Dockerfile japan-real-estate-intel-mcp/Dockerfile
 cd japan-real-estate-intel-mcp
-gcloud builds submit --tag "gcr.io/$PROJECT_ID/real-estate-intel-mcp" --quiet --file Dockerfile.cloudrun
-rm -f Dockerfile.cloudrun
+gcloud builds submit --tag "gcr.io/$PROJECT_ID/real-estate-intel-mcp" --quiet
+rm -f Dockerfile
 cd ..
 gcloud run deploy real-estate-intel-mcp \
   --image="gcr.io/$PROJECT_ID/real-estate-intel-mcp" \
