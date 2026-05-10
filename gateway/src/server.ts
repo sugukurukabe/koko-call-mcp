@@ -75,6 +75,41 @@ export function createHttpApp(): express.Express {
     });
   });
 
+  // MCP Server Card discovery endpoint（SEP-2127 Draft / server.json 互換）
+  // MCP Server Card discovery endpoint (SEP-2127 Draft / server.json compatible)
+  // Endpoint penemuan MCP Server Card (SEP-2127 Draft / kompatibel server.json)
+  const serverCard = {
+    $schema: "https://static.modelcontextprotocol.io/schemas/v1/server-card.schema.json",
+    name: "jp.mcp-gateway/public-mcp-jp-gateway",
+    version: VERSION,
+    title: "Public MCP JP Gateway",
+    description:
+      "日本の公的データMCP（入札・補助金・法人番号・農業統計・不動産・会計）を1回の接続で使えるFederation Gateway。7子MCPを統合。Japan public-data MCP federation gateway — JP Bids, J-Grants, Corporate Number, AgriOps, Real Estate Intel, MoneyForward Cloud Accounting, freee.",
+    websiteUrl: "https://mcp-gateway.jp",
+    repository: {
+      url: "https://github.com/sugukurukabe/koko-call-mcp",
+      source: "github",
+      subfolder: "gateway",
+    },
+    remotes: [
+      {
+        transportType: "streamable-http",
+        url: "https://mcp-gateway.jp/mcp",
+        headers: {
+          Authorization: "Bearer {api_key}",
+        },
+      },
+    ],
+  };
+
+  app.get("/.well-known/mcp-server-card", (_req, res) => {
+    res.status(200).json(serverCard);
+  });
+
+  app.get("/.well-known/mcp.json", (_req, res) => {
+    res.status(200).json(serverCard);
+  });
+
   app.get("/mcp", (_req, res) => {
     res.status(405).json({ error: "SSE GET is not supported. Use POST /mcp." });
   });

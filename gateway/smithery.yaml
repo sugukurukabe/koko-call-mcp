@@ -9,15 +9,22 @@ display:
   # 日本語
   title: Public MCP JP Gateway — 日本の公的データ統合MCP
   description: >
-    入札情報（JP Bids）・補助金（Jグランツ）・会計（freee）を1回のMCP接続で横断アクセスできる
-    日本特化型 MCP Gateway。Grok, Claude, Cursor など主要LLMと即接続可能。
-    単一エンドポイントに繋ぐだけで300以上の官公需データツールを安全に利用できます。
+    入札（JP Bids）・補助金（Jグランツ）・法人番号（国税庁）・農業統計（AgriOps）・
+    不動産投資分析（Real Estate Intel）・クラウド会計（MoneyForward / freee）の7子MCPを
+    1回のMCP接続で横断アクセスできる日本特化型 Federation Gateway。
+    Claude, Cursor, Grok など主要LLMクライアントと即接続可能。
+    単一エンドポイントに繋ぐだけで、入札調査から補助金確認・会計・不動産分析まで一気通貫で利用できます。
+    GMO銀行APIは利用許諾取得後に private connector として追加予定です。
   # English
   title_en: Public MCP JP Gateway — Unified Japan Public Data MCP
   description_en: >
-    Access Japanese government procurement bids (JP Bids), subsidies (J-Grants), and accounting
-    (freee) through a single MCP connection. Instantly compatible with Grok, Claude, Cursor,
-    and all major LLM clients. One endpoint, hundreds of public-data tools, zero configuration.
+    Access Japan's public-data and business SaaS MCPs through a single connection:
+    JP Bids (procurement), J-Grants (subsidies), Corporate Number (NTA),
+    AgriOps (agriculture stats), Real Estate Intel (land price / disaster risk / investment),
+    MoneyForward Cloud Accounting, and freee (7 child MCPs total).
+    Instantly compatible with Claude, Cursor, Grok, and all MCP clients.
+    One endpoint — bid search, subsidy lookup, financial review, and real estate analysis in one conversation.
+    GMO Banking APIs are planned as a future private connector after permission and API access are obtained.
 
 tags:
   - japan
@@ -25,13 +32,15 @@ tags:
   - government
   - subsidies
   - accounting
+  - real-estate
   - mcp-gateway
   - public-data
-  - grok
+  - federation
   - multi-agent
 
-# Remote URL（Cloud Run にデプロイ後の URL に変更する）
-# Change to your Cloud Run URL after deployment
+# 本番エンドポイント（Streamable HTTP）
+# Production endpoint (Streamable HTTP)
+# Endpoint produksi (Streamable HTTP)
 server:
   type: url
   url: https://mcp-gateway.jp/mcp
@@ -40,11 +49,12 @@ server:
 # 認証設定 / Authentication configuration / Konfigurasi autentikasi
 auth:
   type: bearer_token
-  description: "Public MCP JP Gateway API キー。無料プランは https://public-mcp-jp.com で取得。"
-  description_en: "Public MCP JP Gateway API key. Get a free key at https://public-mcp-jp.com."
+  description: "Public MCP JP Gateway API キー。Pro tier の機能（call_registered_mcp など）に必要です。"
+  description_en: "Public MCP JP Gateway API key. Required for Pro tier tools such as call_registered_mcp."
 
 # 推奨設定（Smithery がクライアント設定に自動挿入する）
 # Recommended configuration (automatically injected by Smithery into client settings)
+# Konfigurasi yang direkomendasikan (diinjeksi otomatis oleh Smithery ke pengaturan klien)
 config_schema:
   type: object
   properties:
@@ -59,12 +69,18 @@ config_schema:
         - bid_search
         - subsidy_search
         - financial_check
+        - agri_research
+        - company_identity
+        - real_estate_analysis
+        - store_location
       default: full_orchestration
       description: >
-        エージェントの動作モード（ADR-0017）。
+        エージェントの動作モード（ADR-0017, ADR-0022）。
         bid_search: 入札専用, subsidy_search: 補助金専用,
-        financial_check: 財務確認専用, full_orchestration: 全ツール
+        financial_check: 財務確認専用, agri_research: 農業統計専用,
+        company_identity: 法人番号・法人情報専用, real_estate_analysis: 不動産投資分析専用,
+        store_location: 出店判断専用, full_orchestration: 全ツール開放
 
-# Smithery Analytics / Smithery 分析
+# Smithery Analytics / Smithery 分析 / Analitik Smithery
 analytics:
   enabled: true

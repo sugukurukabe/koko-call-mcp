@@ -20,7 +20,33 @@ Pengalaman pertama seharusnya bukan membuka empat tab browser. Hubungkan sekali 
 | Real Estate Intel MCP | 不動産投資分析（地価・取引・災害・人流・10都道府県） | なし |
 | freee MCP | 会計・請求書確認 | OAuth header / env fallback |
 
-## 1分で試す / Quick Start / Mulai Cepat
+## 本番への接続 / Connect to Production / Hubungkan ke Produksi
+
+Cursor の MCP 設定（本番）/ Cursor MCP config (production) / Konfigurasi Cursor untuk produksi:
+
+```json
+{
+  "mcpServers": {
+    "public-mcp-jp-gateway": {
+      "url": "https://mcp-gateway.jp/mcp"
+    }
+  }
+}
+```
+
+最初に聞くこと / First question to ask / Pertanyaan pertama:
+
+```text
+Read resource: gateway://quickstart
+```
+
+または / or / atau:
+
+```text
+Gatewayで最初に試すべきデモを教えて。get_gateway_demo を使って。
+```
+
+## 1分で試す（ローカル） / Quick Start (Local) / Mulai Cepat (Lokal)
 
 ```bash
 cd gateway
@@ -29,7 +55,7 @@ npm install
 npm run dev:http
 ```
 
-Cursor の MCP 設定:
+ローカル接続 / Local connection / Koneksi lokal:
 
 ```json
 {
@@ -39,12 +65,6 @@ Cursor の MCP 設定:
     }
   }
 }
-```
-
-最初に聞くこと:
-
-```text
-Gatewayで最初に試すべきデモを教えて。get_gateway_demo を使って。
 ```
 
 ## 勝ち筋デモ / Best Demo / Demo Terbaik
@@ -120,6 +140,7 @@ moneyforward-ca
 agriops
 freee
 houjin-bangou
+real-estate-intel
 ```
 
 ## Safety Model
@@ -128,6 +149,17 @@ houjin-bangou
 - `required_approval` が設定された書き込み系ツールは `issue_approval_token` が必要です。
 - Gateway の監査ログは request id / actor hash / tool name / decision などのメタデータのみ保存します。
 - 入札参加、補助金申請、会計処理、振込操作は必ず一次情報と公式画面で最終確認してください。
+
+## MCP Discovery / MCP 発見性 / Penemuan MCP
+
+Gateway は MCP Server Card（SEP-2127 Draft）互換の discovery endpoint を公開しています。
+The Gateway exposes a discovery endpoint compatible with MCP Server Card (SEP-2127 Draft).
+Gateway mengekspos endpoint penemuan yang kompatibel dengan MCP Server Card (SEP-2127 Draft).
+
+```bash
+curl -sS https://mcp-gateway.jp/.well-known/mcp-server-card | python3 -m json.tool
+curl -sS https://mcp-gateway.jp/.well-known/mcp.json | python3 -m json.tool
+```
 
 ## Development
 

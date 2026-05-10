@@ -100,6 +100,67 @@ async function verifyGateway(gatewayBaseUrl: string): Promise<ReadyzResponse> {
   return readyz;
 }
 
+async function verifyDiscovery(gatewayBaseUrl: string): Promise<void> {
+  // MCP Server Card discovery endpoint（SEP-2127 Draft）の検証
+  // Verify MCP Server Card discovery endpoint (SEP-2127 Draft)
+  // Verifikasi endpoint penemuan MCP Server Card (SEP-2127 Draft)
+  const cardUrl = new URL("/.well-known/mcp-server-card", gatewayBaseUrl).toString();
+  const card = (await fetchJson(cardUrl)) as Record<string, unknown>;
+
+  if (typeof card.name !== "string" || !card.name.includes("public-mcp-jp-gateway")) {
+    fail(`/.well-known/mcp-server-card missing expected name: ${JSON.stringify(card.name)}`);
+  }
+  if (!Array.isArray(card.remotes) || card.remotes.length === 0) {
+    fail(`/.well-known/mcp-server-card remotes must be a non-empty array`);
+  }
+  const remote = card.remotes[0] as Record<string, unknown>;
+  if (remote.transportType !== "streamable-http") {
+    fail(
+      `mcp-server-card remotes[0].transportType expected "streamable-http", got ${remote.transportType}`,
+    );
+  }
+
+  pass(`/.well-known/mcp-server-card returns valid server card (name: ${card.name})`);
+}
+
+async function verifyMcpInitialize(gatewayBaseUrl: string): Promise<void> {
+  // POST /mcp initialize が正常に通ることを確認
+  // Verify that POST /mcp initialize succeeds
+  // Verifikasi bahwa POST /mcp initialize berhasil
+  const mcpUrl = new URL("/mcp", gatewayBaseUrl).toString();
+  const response = await fetch(mcpUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json, text/event-stream",
+      "MCP-Protocol-Version": "2025-11-25",
+    },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "initialize",
+      params: {
+        protocolVersion: "2025-11-25",
+        capabilities: {},
+        clientInfo: { name: "verify-production", version: "0.1.0" },
+      },
+    }),
+    signal: AbortSignal.timeout(10_000),
+  });
+
+  if (!response.ok) {
+    fail(`POST /mcp initialize returned HTTP ${response.status}`);
+  }
+  const body = (await response.json()) as Record<string, unknown>;
+  const result = body.result as Record<string, unknown> | undefined;
+  if (!result?.serverInfo) {
+    fail(`POST /mcp initialize missing result.serverInfo: ${JSON.stringify(body)}`);
+  }
+  pass(
+    `POST /mcp initialize succeeded (server: ${(result.serverInfo as Record<string, unknown>).name})`,
+  );
+}
+
 async function verifyGmoIsNotPublic(gmoBaseUrl: string): Promise<number> {
   const healthUrl = new URL("/health", gmoBaseUrl).toString();
   const response = await fetch(healthUrl, { signal: AbortSignal.timeout(10_000) });
@@ -120,6 +181,8 @@ async function main(): Promise<void> {
   const gmoBaseUrl = process.env.GMO_BANK_MCP_URL ?? DEFAULT_GMO_URL;
 
   const readyz = await verifyGateway(gatewayBaseUrl);
+  await verifyDiscovery(gatewayBaseUrl);
+  await verifyMcpInitialize(gatewayBaseUrl);
   const gmoHealthStatus = await verifyGmoIsNotPublic(gmoBaseUrl);
 
   const summary = {
@@ -128,6 +191,8 @@ async function main(): Promise<void> {
     gmo_url: gmoBaseUrl,
     production_ready: readyz.production_ready,
     connected_servers: readyz.connected_servers,
+    discovery_endpoint: `${gatewayBaseUrl}/.well-known/mcp-server-card`,
+    mcp_endpoint: `${gatewayBaseUrl}/mcp`,
     gmo_health_http_status: gmoHealthStatus,
   };
 

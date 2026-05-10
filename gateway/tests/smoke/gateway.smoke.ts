@@ -137,6 +137,24 @@ describe("Gateway smoke test", () => {
     expect(toolNames).not.toContain("gmo_bank_transfer");
   });
 
+  it("GET /.well-known/mcp-server-card returns server card metadata", async () => {
+    const app = createHttpApp();
+    const res = await request(app).get("/.well-known/mcp-server-card");
+    expect(res.status).toBe(200);
+    expect(res.body.name).toBe("jp.mcp-gateway/public-mcp-jp-gateway");
+    expect(res.body.title).toBe("Public MCP JP Gateway");
+    expect(Array.isArray(res.body.remotes)).toBe(true);
+    expect(res.body.remotes[0].transportType).toBe("streamable-http");
+    expect(res.body.remotes[0].url).toContain("/mcp");
+  });
+
+  it("GET /.well-known/mcp.json returns same server card metadata", async () => {
+    const app = createHttpApp();
+    const res = await request(app).get("/.well-known/mcp.json");
+    expect(res.status).toBe(200);
+    expect(res.body.name).toBe("jp.mcp-gateway/public-mcp-jp-gateway");
+  });
+
   it("POST /mcp get_gateway_demo returns guided monthly close flow", async () => {
     const app = createHttpApp();
 

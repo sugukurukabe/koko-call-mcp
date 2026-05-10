@@ -124,8 +124,10 @@ export function registerListConnectedServers(server: McpServer, context: ToolCon
                     "bid_to_close_workflow",
                     "cross_mcp_comparison",
                     "gateway_quick_tour",
+                    "real_estate_assessment",
                   ],
                   resources: [
+                    "gateway://quickstart",
                     "gateway://registry/summary",
                     "gateway://modes/reference",
                     "gateway://samples/queries",
@@ -134,7 +136,7 @@ export function registerListConnectedServers(server: McpServer, context: ToolCon
                 },
                 cache: cacheStats(),
                 next_step:
-                  "For a guided first run, call get_gateway_demo or use the gateway_quick_tour prompt. For bid+subsidy search, call search_public_opportunities. For financial tools, use call_registered_mcp with mode='financial_check'. Read gateway://samples/queries for example conversations.",
+                  "Start by reading gateway://quickstart for a 30-second intro and copy-paste demos. Or call get_gateway_demo for a guided first run. For bid+subsidy search, call search_public_opportunities. For financial tools, use call_registered_mcp with mode='financial_check'. For real estate analysis, use the real_estate_assessment prompt.",
                 attribution: "Public MCP JP Gateway — connecting Japan public-data MCP servers",
               },
               null,
