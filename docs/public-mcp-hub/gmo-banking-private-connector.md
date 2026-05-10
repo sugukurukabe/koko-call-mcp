@@ -100,7 +100,7 @@ internal
 
 ```bash
 curl -sS -m 10 \
-  https://public-mcp-jp-gateway-397249937286.asia-northeast1.run.app/readyz \
+  https://mcp-gateway.jp/readyz \
   | python3 -m json.tool
 ```
 

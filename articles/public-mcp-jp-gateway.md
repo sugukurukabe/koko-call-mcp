@@ -230,7 +230,7 @@ Cursor からは Gateway だけを設定します。
 {
   "mcpServers": {
     "public-mcp-jp": {
-      "url": "https://public-mcp-jp-gateway-397249937286.asia-northeast1.run.app/mcp"
+      "url": "https://mcp-gateway.jp/mcp"
     }
   }
 }

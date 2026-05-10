@@ -108,7 +108,7 @@ npm run verify:production
 手動確認:
 
 ```bash
-curl -sS https://public-mcp-jp-gateway-397249937286.asia-northeast1.run.app/readyz | python3 -m json.tool
+curl -sS https://mcp-gateway.jp/readyz | python3 -m json.tool
 ```
 
 期待する公開 child MCP:

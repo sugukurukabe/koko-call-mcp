@@ -34,7 +34,7 @@ tags:
 # Change to your Cloud Run URL after deployment
 server:
   type: url
-  url: https://public-mcp-jp-gateway-397249937286.asia-northeast1.run.app/mcp
+  url: https://mcp-gateway.jp/mcp
   transport: streamable-http
 
 # 認証設定 / Authentication configuration / Konfigurasi autentikasi

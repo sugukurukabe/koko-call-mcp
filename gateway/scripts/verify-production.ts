@@ -3,7 +3,7 @@
 // Verify the production exposure state of Public MCP JP Gateway
 // Memverifikasi status paparan produksi Public MCP JP Gateway
 
-const DEFAULT_GATEWAY_URL = "https://public-mcp-jp-gateway-397249937286.asia-northeast1.run.app";
+const DEFAULT_GATEWAY_URL = "https://mcp-gateway.jp";
 const DEFAULT_GMO_URL = "https://gmo-bank-mcp-397249937286.asia-northeast1.run.app";
 
 const EXPECTED_PUBLIC_SERVERS = [
