@@ -1,5 +1,5 @@
 ---
-title: "他人のOAuthを預からないMCP Gatewayを設計する — X-Mcp-Child-Authorization-{server-id} という選択"
+title: "他人のOAuthを預からないMCP Gateway設計 — X-Mcp-Child-Authorization方式"
 emoji: "🔑"
 type: "tech"
 topics: ["mcp", "typescript", "oauth", "security", "gateway"]
