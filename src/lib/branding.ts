@@ -8,11 +8,11 @@ export interface Branding {
 }
 
 const DEFAULT_BRANDING: Branding = {
-  serviceName: "JP Bids MCP",
+  serviceName: "JP Bids",
   serviceShortName: "JP Bids",
   organizationName: "Sugukuru Inc.",
   serviceUrl: "https://mcp.bid-jp.com",
-  contactUrl: "https://sugukuru.co.jp",
+  contactUrl: "https://sugu-kuru.co.jp",
   dataAttribution: "中小企業庁 官公需情報ポータルサイト（政府標準利用規約 第2.0版）",
 };
 

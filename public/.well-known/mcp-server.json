@@ -1,5 +1,5 @@
 {
-  "name": "JP Bids MCP",
+  "name": "JP Bids",
   "version": "0.7.2",
   "description": "日本の官公需入札情報をMCPで検索・AI分析。Japan government procurement bid search and AI analysis through MCP.",
   "homepage": "https://mcp.bid-jp.com",

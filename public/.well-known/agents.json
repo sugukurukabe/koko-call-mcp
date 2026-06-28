@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1.0",
-  "name": "JP Bids MCP",
+  "name": "JP Bids",
   "version": "0.7.2",
   "type": "mcp_server",
   "homepage": "https://mcp.bid-jp.com",

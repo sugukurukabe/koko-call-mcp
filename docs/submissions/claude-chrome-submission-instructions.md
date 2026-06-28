@@ -8,7 +8,7 @@
 
 ## 0. あなた（Claude for Chrome）への指示 / Role
 
-あなたは私の代理で、Anthropic の Connectors Directory に MCP コネクタ「**JP Bids MCP**」を申請するフォームを記入します。
+あなたは私の代理で、Anthropic の Connectors Directory に MCP コネクタ「**JP Bids**」を申請するフォームを記入します。
 
 厳守ルール:
 1. 下記の「フィールド値」を**一字一句そのまま**入力する。勝手に要約・翻訳・脚色しない。
@@ -37,14 +37,14 @@
 - **Protocol version**: `2025-11-25`
 
 ### Listing
-- **Server name**: `JP Bids MCP`
+- **Server name**: `JP Bids`
 - **Tagline (≤55 chars)**: `Japan government procurement bid search & AI analysis`
 - **Categories**: `Government & Public Sector`, `Data & Analytics`, `Productivity`
 - **Documentation URL**: `https://github.com/sugukurukabe/koko-call-mcp`
 - **Privacy Policy URL**: `https://mcp.bid-jp.com/privacy`
 - **Support contact**: `mcp@bid-jp.com`（または GitHub Issues）
 - **Icon URL**: `https://mcp.bid-jp.com/favicon.png`
-- **URL slug**: `jp-bids-mcp`
+- **URL slug**: `jp-bids`
 
 > 注（命名について）: GitHubリポジトリ名は `koko-call-mcp` だが、製品名は **JP Bids MCP**、ドメインは `mcp.bid-jp.com`、npm/registry名は `jp-bids-mcp`。リポジトリREADME冒頭が `# JP Bids MCP` で製品・URL・npm名を明示しているため不一致は説明済み。フォームに「repo名と製品名が違う理由」を書く欄があれば次を入れる:
 > `The product is "JP Bids MCP" (domain mcp.bid-jp.com, npm jp-bids-mcp). "koko-call-mcp" is only the GitHub repository slug; the repository README is titled "JP Bids MCP" and documents the same product.`
@@ -92,8 +92,8 @@ PDF/HTML attachments are fetched only when requested, processed ephemerally, and
 
 ### Company
 - **Company name**: `スグクル株式会社 / Sugukuru Inc.`
-- **Company website**: `https://sugukuru.com`
-- **Primary contact**: `kabe@sugukuru.com`
+- **Company website**: `https://sugu-kuru.co.jp`
+- **Primary contact**: `info@sugu-kuru.co.jp`
 
 ### Authentication
 - **Auth type**: `OAuth 2.0 (Dynamic Client Registration, RFC 7591)`

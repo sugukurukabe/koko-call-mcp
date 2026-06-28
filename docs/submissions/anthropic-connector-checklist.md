@@ -88,7 +88,7 @@ Tasks capabilityは現時点では広告しません。現在の検索・分析�
 
 | フィールド | 値 |
 |---|---|
-| Server name (100 chars max) | `JP Bids MCP` |
+| Server name (100 chars max) | `JP Bids` |
 | Tagline (55 chars max) | `Japan government procurement bid search & AI analysis` |
 | Description (2000 chars max) | 下記参照 |
 | Categories (1–5) | `Government & Public Sector`, `Data & Analytics`, `Productivity` |
@@ -96,7 +96,7 @@ Tasks capabilityは現時点では広告しません。現在の検索・分析�
 | Privacy Policy URL | `https://mcp.bid-jp.com/privacy` |
 | Support contact | mcp@bid-jp.com (or GitHub Issues) |
 | Icon | `https://mcp.bid-jp.com/favicon.png` |
-| URL slug | `jp-bids-mcp` |
+| URL slug | `jp-bids` |
 
 ### Description (2000文字以内)
 
@@ -158,8 +158,8 @@ PDF/HTML attachments are fetched only when requested, processed ephemerally, and
 | フィールド | 値 |
 |---|---|
 | Company name | スグクル株式会社 / Sugukuru Inc. |
-| Company website | https://sugukuru.com |
-| Primary contact | kabe@sugukuru.com |
+| Company website | https://sugu-kuru.co.jp |
+| Primary contact | info@sugu-kuru.co.jp |
 
 ---
 

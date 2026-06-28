@@ -92,6 +92,12 @@ try {
   await client.connect(transport);
   log("✅ connect: MCP session established");
 
+  // コネクタ表示名が "JP Bids"（"MCP" を含まない）であることを確認する
+  // Confirm the connector display name is "JP Bids" (no "MCP" in the directory name)
+  // Pastikan nama tampilan konektor adalah "JP Bids" (tanpa "MCP" pada nama direktori)
+  const serverInfo = client.getServerVersion();
+  check(serverInfo?.name === "JP Bids", `serverInfo.name === "JP Bids" (got ${serverInfo?.name})`);
+
   // --- 1. tools/list ---
   log("\n[1/6] tools/list + annotation parity");
   const { tools } = await client.listTools();

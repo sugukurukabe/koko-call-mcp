@@ -40,7 +40,7 @@ function consentHtml(p: {
   return `<!DOCTYPE html>
 <html lang="ja">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Authorize — JP Bids MCP</title>
+<title>Authorize — JP Bids</title>
 <style>
 body{font-family:system-ui,sans-serif;max-width:400px;margin:4rem auto;padding:0 1rem;color:#1a1a1a}
 h1{font-size:1.3rem;margin-bottom:.3rem}.sub{color:#666;font-size:.85rem;margin-bottom:1.5rem}
@@ -52,10 +52,10 @@ button{padding:.6rem 1.4rem;border-radius:6px;border:1px solid #d1d5db;cursor:po
 .deny{background:#fff}.deny:hover{background:#f3f4f6}
 </style></head>
 <body>
-<h1>JP Bids MCP</h1>
+<h1>JP Bids</h1>
 <p class="sub">日本の官公需入札検索 MCP サーバー</p>
 <div class="card">
-<p><strong>${esc(p.clientName)}</strong> が JP Bids MCP へのアクセスを求めています。</p>
+<p><strong>${esc(p.clientName)}</strong> が JP Bids へのアクセスを求めています。</p>
 <p style="margin:.8rem 0 0"><span class="scope">${esc(p.scope)}</span></p>
 <p style="color:#666;font-size:.85rem;margin-top:.8rem">入札情報への読み取り専用アクセスを許可します。個人情報は収集しません。<br>
 Read-only access to Japanese government procurement bid data. No personal data is collected.</p>

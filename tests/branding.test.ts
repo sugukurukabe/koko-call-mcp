@@ -11,7 +11,7 @@ describe("branding", () => {
 
   it("returns default branding when no env vars set", () => {
     const b = getBranding();
-    expect(b.serviceName).toBe("JP Bids MCP");
+    expect(b.serviceName).toBe("JP Bids");
     expect(b.organizationName).toBe("Sugukuru Inc.");
   });
 
@@ -30,7 +30,7 @@ describe("branding", () => {
     process.env.JP_BIDS_BRAND_NAME = "Changed";
     const b2 = getBranding();
     expect(b1).toBe(b2);
-    expect(b2.serviceName).toBe("JP Bids MCP");
+    expect(b2.serviceName).toBe("JP Bids");
   });
 
   it("resetBrandingCache clears cache", () => {

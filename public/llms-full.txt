@@ -155,7 +155,7 @@ npx jp-bids-mcp
 - 名称: スグクル株式会社 / Sugukuru Inc.
 - 所在: 鹿児島県霧島市
 - 代表: 壁 / Kabe（経営歴 6 年）
-- 公式サイト: https://sugukuru.co.jp
+- 公式サイト: https://sugu-kuru.co.jp
 - OSS 活動: スグクル株式会社が公開する公共データ向け MCP サーバー群
 
 ## 10. よくある質問 / FAQ

@@ -39,8 +39,8 @@ export function createJpBidsServer(options: CreateJpBidsServerOptions = {}): Mcp
       },
       instructions:
         tier === "pro"
-          ? "Use JP Bids MCP to search public Japanese government procurement bid information. Always show the KKJ attribution included in tool results."
-          : "Use JP Bids MCP (Free tier) to search public Japanese government procurement bid information. Available tools: search_bids, rank_bids, list_recent_bids, get_bid_detail. Upgrade to Pro (990 JPY/month) for AI analysis and PDF extraction tools. Always show the KKJ attribution included in tool results.",
+          ? "Use JP Bids to search public Japanese government procurement bid information. Always show the KKJ attribution included in tool results."
+          : "Use JP Bids (Free tier) to search public Japanese government procurement bid information. Available tools: search_bids, rank_bids, list_recent_bids, get_bid_detail. Upgrade to Pro (990 JPY/month) for AI analysis and PDF extraction tools. Always show the KKJ attribution included in tool results.",
     },
   );
   const client = options.kkjClient ?? new KkjClient(options.kkjClientOptions);
