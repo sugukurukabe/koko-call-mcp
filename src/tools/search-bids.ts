@@ -76,9 +76,10 @@ export function registerSearchBids(server: McpServer, client: KkjClient): void {
       try {
         const params = buildSearchBidsParams(args);
         const result = await client.search(params);
+        const capped = capSearchResult(result);
         return {
-          content: [{ type: "text" as const, text: formatSearchSummary(result) }],
-          structuredContent: result,
+          content: [{ type: "text" as const, text: formatSearchSummary(capped) }],
+          structuredContent: capped,
         };
       } catch (error) {
         return toolError(
@@ -156,4 +157,27 @@ export function formatSearchSummary(result: z.infer<typeof BidSearchResultSchema
   }
   lines.push(jsonText({ attribution: result.attribution }));
   return lines.join("\n");
+}
+
+// structuredContentが大きくなりすぎないよう100件でキャップする
+// Cap structuredContent at 100 bids to prevent oversized responses
+// Batasi structuredContent pada 100 tender agar respons tidak terlalu besar
+const STRUCTURED_CONTENT_BID_CAP = 100;
+
+export function capSearchResult(
+  result: z.infer<typeof BidSearchResultSchema>,
+): z.infer<typeof BidSearchResultSchema> {
+  if (result.bids.length <= STRUCTURED_CONTENT_BID_CAP) {
+    return result;
+  }
+  return {
+    ...result,
+    bids: result.bids.slice(0, STRUCTURED_CONTENT_BID_CAP),
+    returnedCount: STRUCTURED_CONTENT_BID_CAP,
+    query: {
+      ...result.query,
+      _truncatedAt: STRUCTURED_CONTENT_BID_CAP,
+      _totalReturned: result.bids.length,
+    },
+  };
 }

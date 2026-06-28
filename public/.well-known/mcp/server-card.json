@@ -10,6 +10,7 @@
   "tools": [
     {
       "name": "search_bids",
+      "title": "官公需入札検索",
       "description": "日本全国の官公需入札情報を検索する。全文検索は query、件名は project_name、発注機関は organization_name を使う。Search Japanese public procurement bids by keyword, project name, or organization.",
       "inputSchema": {
         "type": "object",
@@ -48,10 +49,11 @@
         }
       },
       "outputSchema": true,
-      "annotations": { "readOnlyHint": true, "idempotentHint": true }
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true }
     },
     {
       "name": "search_bids_app",
+      "title": "官公需入札検索テーブル",
       "description": "官公需入札検索テーブル。MCP Apps対応クライアントで検索結果を表で表示。Search bids with interactive table UI for MCP Apps-compatible clients.",
       "inputSchema": {
         "type": "object",
@@ -63,10 +65,11 @@
         }
       },
       "outputSchema": true,
-      "annotations": { "readOnlyHint": true, "idempotentHint": true }
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true }
     },
     {
       "name": "rank_bids",
+      "title": "追うべき入札ランキング",
       "description": "官公需入札を検索し、追うべき順にスコアリングする。候補整理用であり参加可否の最終判断ではない。Search and score bids by follow-up priority using AI Bid Radar.",
       "inputSchema": {
         "type": "object",
@@ -104,10 +107,11 @@
         }
       },
       "outputSchema": true,
-      "annotations": { "readOnlyHint": true, "idempotentHint": true }
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true }
     },
     {
       "name": "list_recent_bids",
+      "title": "直近の官公需入札一覧",
       "description": "過去1〜30日間に公告された新着官公需入札を一覧する。毎朝の営業チェックに使う。List recently published bid notices for daily morning sales checks.",
       "inputSchema": {
         "type": "object",
@@ -122,10 +126,11 @@
         }
       },
       "outputSchema": true,
-      "annotations": { "readOnlyHint": true, "idempotentHint": true }
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true }
     },
     {
       "name": "get_bid_detail",
+      "title": "官公需入札詳細",
       "description": "入札案件の詳細情報を取得する。Keyフィールドを指定。Get detailed bid information by key.",
       "inputSchema": {
         "type": "object",
@@ -135,10 +140,11 @@
         "required": ["bid_key"]
       },
       "outputSchema": true,
-      "annotations": { "readOnlyHint": true, "idempotentHint": true }
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true }
     },
     {
       "name": "explain_bid_fit",
+      "title": "入札追跡判断の説明",
       "description": "1件の入札について追うべきか・要確認か・見送るべきかを理由・リスク・次アクション付きで説明する。Explain bid fit with rationale, risks, and next actions.",
       "inputSchema": {
         "type": "object",
@@ -171,10 +177,11 @@
         "required": ["bid_key"]
       },
       "outputSchema": true,
-      "annotations": { "readOnlyHint": true, "idempotentHint": true }
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true }
     },
     {
       "name": "assess_bid_qualification",
+      "title": "入札資格適合MVP判定",
       "description": "入札参加資格を自動確認する。Auto-check bid participation qualification.",
       "inputSchema": {
         "type": "object",
@@ -194,10 +201,11 @@
         "required": ["bid_key"]
       },
       "outputSchema": true,
-      "annotations": { "readOnlyHint": true, "idempotentHint": true }
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true }
     },
     {
       "name": "extract_bid_requirements",
+      "title": "入札要件抽出MVP",
       "description": "PDF/HTML仕様書から要件を構造化抽出する。Extract and structure requirements from bid specification documents.",
       "inputSchema": {
         "type": "object",
@@ -215,10 +223,11 @@
         "required": ["bid_key"]
       },
       "outputSchema": true,
-      "annotations": { "readOnlyHint": true, "idempotentHint": true }
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true }
     },
     {
       "name": "export_bid_shortlist",
+      "title": "入札検討shortlist CSV",
       "description": "入札を検索・ランキングしてGoogle Sheets/Excel用のCSVを返す。スコア・判断・リスク・次アクション付き。Search, rank, and export CSV shortlist.",
       "inputSchema": {
         "type": "object",
@@ -256,10 +265,11 @@
         }
       },
       "outputSchema": true,
-      "annotations": { "readOnlyHint": true, "idempotentHint": true }
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true }
     },
     {
       "name": "create_bid_calendar",
+      "title": "入札締切カレンダーICS",
       "description": "締切日のICSカレンダーを生成する。Generate ICS calendar events for bid deadlines.",
       "inputSchema": {
         "type": "object",
@@ -272,10 +282,11 @@
         "required": ["bid_keys"]
       },
       "outputSchema": true,
-      "annotations": { "readOnlyHint": true, "idempotentHint": true }
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true }
     },
     {
       "name": "create_bid_review_packet",
+      "title": "入札社内検討パック",
       "description": "入札1件の判断サマリー・理由・リスク・要件・締切・次アクションをMarkdown社内メモとして返す。Generate a Markdown review packet for one bid.",
       "inputSchema": {
         "type": "object",
@@ -308,10 +319,11 @@
         "required": ["bid_key"]
       },
       "outputSchema": true,
-      "annotations": { "readOnlyHint": true, "idempotentHint": true }
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true }
     },
     {
       "name": "draft_bid_questions",
+      "title": "入札質問書ドラフト",
       "description": "質問書のドラフトを生成する。Draft clarification questions for a bid.",
       "inputSchema": {
         "type": "object",
@@ -330,10 +342,11 @@
         "required": ["bid_key"]
       },
       "outputSchema": true,
-      "annotations": { "readOnlyHint": true, "idempotentHint": true }
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true }
     },
     {
       "name": "analyze_past_awards",
+      "title": "過去公告・競合レーダー",
       "description": "過去公告を集計し発注機関の頻度・カテゴリ偏り・月次トレンドを返す。Analyze past bid announcements to surface procurement patterns.",
       "inputSchema": {
         "type": "object",
@@ -363,10 +376,11 @@
         }
       },
       "outputSchema": true,
-      "annotations": { "readOnlyHint": true, "idempotentHint": true }
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true }
     },
     {
       "name": "summarize_bids_by_org",
+      "title": "発注機関別の入札傾向分析",
       "description": "発注機関名を指定してカテゴリ別・公示種別別の入札傾向と直近案件を集計する。Summarize bid trends for a specific procurement organization.",
       "inputSchema": {
         "type": "object",
@@ -378,11 +392,12 @@
         "required": ["organization_name"]
       },
       "outputSchema": true,
-      "annotations": { "readOnlyHint": true, "idempotentHint": true }
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true }
     },
     {
       "name": "save_search",
-      "description": "入札検索条件を名前付きで保存する。保存した条件は check_saved_search で新着確認に使える。Save named bid search criteria for recurring alert checks.",
+      "title": "検索条件を保存",
+      "description": "入札検索条件を名前付きでセッション内に保存する。状態はサーバーインスタンス内のみで保持されHTTPステートレスモードでは持続しない。Save named bid search criteria in the current session for recurring alert checks. State is per-instance and does not persist across HTTP stateless connections.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -401,10 +416,16 @@
         "required": ["name"]
       },
       "outputSchema": true,
-      "annotations": { "idempotentHint": true }
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
     },
     {
       "name": "check_saved_search",
+      "title": "保存検索の新着確認",
       "description": "保存した検索条件で新着入札を確認する。前回チェック以降の新着のみを返す。Check for new bids since last check using saved search criteria.",
       "inputSchema": {
         "type": "object",
@@ -417,14 +438,20 @@
         "required": ["name"]
       },
       "outputSchema": true,
-      "annotations": { "readOnlyHint": true, "idempotentHint": true }
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
     },
     {
       "name": "list_saved_searches",
+      "title": "保存検索の一覧",
       "description": "保存されている検索条件の一覧を返す。List all saved search criteria.",
       "inputSchema": { "type": "object", "properties": {} },
       "outputSchema": true,
-      "annotations": { "readOnlyHint": true, "idempotentHint": true }
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true }
     }
   ],
   "resources": [
@@ -437,7 +464,16 @@
   ],
   "prompts": [
     { "name": "morning_bid_briefing", "description": "今日の入札ブリーフィング" },
+    { "name": "bid_discovery_workspace", "description": "MCP Apps UIで入札探索を開始する" },
     { "name": "competitor_radar", "description": "競合動向レーダー" },
+    {
+      "name": "bid_review_packet_workflow",
+      "description": "入札詳細から社内検討パックまで作成する"
+    },
+    {
+      "name": "qualification_and_question_draft",
+      "description": "資格適合の仮判定と質問書ドラフトを作成する"
+    },
     { "name": "bid_due_alert", "description": "締切アラート" }
   ]
 }

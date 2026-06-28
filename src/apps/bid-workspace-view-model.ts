@@ -57,9 +57,9 @@ export function toBidCardViewModel(bid: Bid, now: Date = new Date()): BidCardVie
     organizationName: bid.organizationName ?? "-",
     prefectureName: bid.prefectureName ?? "-",
     category: bid.category ?? "-",
-    cftIssueDate: bid.cftIssueDate ?? "-",
-    submissionDeadline: bid.tenderSubmissionDeadline ?? "-",
-    openingDate: bid.openingTendersEvent ?? "-",
+    cftIssueDate: formatDisplayDate(bid.cftIssueDate),
+    submissionDeadline: formatDisplayDate(bid.tenderSubmissionDeadline),
+    openingDate: formatDisplayDate(bid.openingTendersEvent),
     officialUrl: bid.externalDocumentUri ?? "",
     hasPdf,
     daysUntilDeadline,
@@ -68,6 +68,20 @@ export function toBidCardViewModel(bid: Bid, now: Date = new Date()): BidCardVie
     priorityLabel,
     actionState: "unread",
   };
+}
+
+// 表示用に日付を整形する（ISO日時は日付部分のみ、和暦/和文はそのまま）
+// Format dates for display (ISO datetime → date only; wareki/JP text kept as-is)
+// Format tanggal untuk tampilan (datetime ISO → tanggal saja; teks wareki/Jepang apa adanya)
+function formatDisplayDate(value: string | undefined): string {
+  if (!value) {
+    return "-";
+  }
+  const isoMatch = /^(\d{4})-(\d{2})-(\d{2})(?:[T\s].*)?$/.exec(value.trim());
+  if (isoMatch) {
+    return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
+  }
+  return value;
 }
 
 function computeDaysUntilDeadline(deadline: string | undefined, now: Date): number | null {

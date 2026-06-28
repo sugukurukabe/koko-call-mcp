@@ -37,7 +37,14 @@ describe("MCP contract", () => {
 
     const prompts = await client.listPrompts();
     expect(prompts.prompts.map((prompt) => prompt.name)).toEqual(
-      expect.arrayContaining(["morning_bid_briefing", "competitor_radar", "bid_due_alert"]),
+      expect.arrayContaining([
+        "morning_bid_briefing",
+        "bid_discovery_workspace",
+        "competitor_radar",
+        "bid_review_packet_workflow",
+        "qualification_and_question_draft",
+        "bid_due_alert",
+      ]),
     );
 
     const resources = await client.listResources();

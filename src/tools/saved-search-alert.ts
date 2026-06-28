@@ -83,7 +83,7 @@ export function registerSavedSearchAlert(server: McpServer, client: KkjClient): 
     {
       title: "検索条件を保存",
       description:
-        "入札検索条件を名前付きで保存する。保存した条件は check_saved_search で新着確認に使える。Save named bid search criteria for recurring alert checks. Simpan kriteria pencarian tender bernama untuk pemeriksaan peringatan berulang.",
+        "入札検索条件を名前付きでセッション内に保存する。保存した条件は check_saved_search で新着確認に使える。状態はサーバーインスタンス内のみで保持されHTTPステートレスモードでは持続しない。Save named bid search criteria in the current session for recurring alert checks. State is held per-instance and does not persist across HTTP stateless connections. Simpan kriteria pencarian tender bernama dalam sesi ini untuk pemeriksaan peringatan berulang.",
       inputSchema: SavedSearchSchema.shape,
       outputSchema: SaveSearchOutputSchema.shape,
       annotations: {

@@ -16,34 +16,41 @@ footer { margin-top: 3rem; border-top: 1px solid #ddd; padding-top: 1rem; font-s
 </head>
 <body>
 <h1>Privacy Policy / プライバシーポリシー</h1>
-<p class="lang">Last updated: 2026-05-04</p>
+<p class="lang">Last updated: 2026-06-28</p>
 
-<h2>1. 収集する情報 / Information We Collect</h2>
-<p>JP Bids MCP は、ユーザーの個人情報を収集・保存しません。MCPリクエストに含まれるクエリパラメータ（検索キーワード、都道府県、カテゴリ等）はリクエスト処理にのみ使用し、処理完了後に破棄します。</p>
-<p>JP Bids MCP does not collect or store personal information. Query parameters included in MCP requests (search keywords, prefecture, category, etc.) are used only for request processing and discarded after completion.</p>
+<h2>1. 収集する情報 / Information We Collect / Informasi yang Kami Kumpulkan</h2>
+<p>JP Bids MCP は、MCPリクエストに含まれるクエリパラメータ（検索キーワード、都道府県、カテゴリ等）をリクエスト処理にのみ使用し、処理完了後に破棄します。OAuthログインやPro tier課金を利用する場合、認証・課金・不正利用防止に必要な最小限のアカウント識別子（メールアドレス、OAuth subject、Stripe Customer ID等）を保持する場合があります。会話本文や検索内容は永続保存しません。</p>
+<p>JP Bids MCP uses query parameters included in MCP requests (search keywords, prefecture, category, etc.) only for request processing and discards them after completion. When OAuth login or Pro tier billing is used, we may retain the minimum account identifiers needed for authentication, billing, and abuse prevention (such as email address, OAuth subject, and Stripe Customer ID). Conversation content and search content are not persisted.</p>
+<p>JP Bids MCP menggunakan parameter kueri dalam permintaan MCP (kata kunci pencarian, prefektur, kategori, dll.) hanya untuk memproses permintaan dan membuangnya setelah selesai. Jika login OAuth atau penagihan Pro tier digunakan, kami dapat menyimpan pengenal akun minimum yang diperlukan untuk autentikasi, penagihan, dan pencegahan penyalahgunaan (seperti alamat email, OAuth subject, dan Stripe Customer ID). Isi percakapan dan isi pencarian tidak disimpan secara permanen.</p>
 
-<h2>2. サードパーティへのデータ送信 / Third-Party Data Sharing</h2>
+<h2>2. サードパーティへのデータ送信 / Third-Party Data Sharing / Berbagi Data dengan Pihak Ketiga</h2>
 <ul>
 <li><strong>中小企業庁 官公需情報ポータルサイト (KKJ)</strong>: 検索クエリを中小企業庁APIに転送します。中小企業庁のプライバシーポリシーが適用されます。</li>
 <li><strong>Google Vertex AI</strong>: PDF抽出機能使用時、添付資料の内容をVertex AI Geminiに送信します。Google Cloud のデータ処理規約が適用されます。ドキュメントはサーバー側に保存されません。</li>
-<li><strong>Stripe</strong>: Pro tierの従量課金に使用します。Stripe Customer IDのみを送信し、検索内容は送信しません。</li>
+<li><strong>Stripe</strong>: Pro tierのサブスクリプション・課金管理に使用します。Stripe Customer ID等の課金識別子のみを連携し、検索内容は送信しません。</li>
 </ul>
-<p>Search queries are forwarded to the SME Agency (KKJ) API. When PDF extraction is used, attachment content is sent to Google Vertex AI Gemini for processing. Documents are never stored on our servers. Stripe is used for Pro tier usage billing; only the Stripe Customer ID is transmitted.</p>
+<p>Search queries are forwarded to the SME Agency (KKJ) API. When PDF extraction is used, attachment content is sent to Google Vertex AI Gemini for processing. Documents are never persisted on our servers. Stripe is used for Pro tier subscription and billing management; only billing identifiers such as the Stripe Customer ID are transmitted.</p>
+<p>Kueri pencarian diteruskan ke API SME Agency (KKJ). Saat ekstraksi PDF digunakan, isi lampiran dikirim ke Google Vertex AI Gemini untuk diproses. Dokumen tidak disimpan secara permanen di server kami. Stripe digunakan untuk langganan dan pengelolaan penagihan Pro tier; hanya pengenal penagihan seperti Stripe Customer ID yang dikirim.</p>
 
-<h2>3. ログ / Logging</h2>
+<h2>3. ログ / Logging / Log</h2>
 <p>Cloud Run のインフラログ（HTTPステータスコード、レスポンスタイム等）は Google Cloud の標準ログ保持ポリシーに従い保持されます。検索クエリの内容はログに記録しません。</p>
 <p>Infrastructure logs (HTTP status codes, response times) are retained per Google Cloud's standard log retention policy. Search query content is not logged.</p>
+<p>Log infrastruktur (kode status HTTP, waktu respons, dll.) disimpan sesuai kebijakan retensi standar Google Cloud. Isi kueri pencarian tidak dicatat dalam log.</p>
 
-<h2>4. Cookie / Cookies</h2>
-<p>JP Bids MCP は Cookie を使用しません。</p>
-<p>JP Bids MCP does not use cookies.</p>
+<h2>4. Cookie / Cookies / Cookie</h2>
+<p>JP Bids MCP の MCP endpoint 自体は Cookie を使用しません。OAuthログイン・課金画面を提供する関連Webページでは、認証状態維持や決済処理に必要なCookieまたは同等の技術を使用する場合があります。</p>
+<p>The JP Bids MCP endpoint itself does not use cookies. Related web pages for OAuth login or billing may use cookies or equivalent technologies required for authentication state and payment processing.</p>
+<p>Endpoint JP Bids MCP sendiri tidak menggunakan cookie. Halaman web terkait untuk login OAuth atau penagihan dapat menggunakan cookie atau teknologi setara yang diperlukan untuk status autentikasi dan pemrosesan pembayaran.</p>
 
-<h2>5. データの保存 / Data Storage</h2>
-<p>入札情報の添付ファイル（PDF等）は一時的にメモリ上で処理します。重複取得を避けるため、同一プロセス内の短時間キャッシュ（最大5分、最大200MiB）に保持される場合があります。ディスクやデータベースへの永続化は行いません。</p>
-<p>Bid attachment files (PDFs, etc.) are processed in memory only. To avoid duplicate upstream fetches, files may be held in a short-lived in-process cache (up to 5 minutes, max 200 MiB). No data is persisted to disk or database.</p>
+<h2>5. データの保存 / Data Storage / Penyimpanan Data</h2>
+<p>入札情報の添付ファイル（PDF等）は一時的にメモリ上で処理します。重複取得を避けるため、同一プロセス内の短時間キャッシュ（最大5分、最大200MiB）に保持される場合があります。添付ファイル、検索内容、会話内容をディスクやデータベースへ永続化することはありません。保存検索機能はサーバーインスタンス内の一時メモリ状態としてのみ保持され、HTTPステートレス接続では永続化されません。</p>
+<p>Bid attachment files (PDFs, etc.) are processed in memory only. To avoid duplicate upstream fetches, files may be held in a short-lived in-process cache (up to 5 minutes, max 200 MiB). Attachments, search content, and conversation content are not persisted to disk or database. Saved-search functionality is held only as temporary in-memory state within a server instance and is not durable across HTTP stateless connections.</p>
+<p>Berkas lampiran tender (PDF, dll.) hanya diproses di memori. Untuk menghindari pengambilan ulang dari sumber upstream, berkas dapat disimpan dalam cache proses jangka pendek (hingga 5 menit, maksimum 200 MiB). Lampiran, isi pencarian, dan isi percakapan tidak disimpan secara permanen ke disk atau database. Fitur pencarian tersimpan hanya disimpan sebagai state sementara di memori dalam satu instance server dan tidak tahan lama pada koneksi HTTP stateless.</p>
 
-<h2>6. お問い合わせ / Contact</h2>
+<h2>6. お問い合わせ / Contact / Kontak</h2>
 <p>プライバシーに関するお問い合わせは <a href="https://github.com/sugukurukabe/koko-call-mcp/issues">GitHub Issues</a> までお願いします。</p>
+<p>For privacy questions, please contact us through <a href="https://github.com/sugukurukabe/koko-call-mcp/issues">GitHub Issues</a>.</p>
+<p>Untuk pertanyaan privasi, silakan hubungi kami melalui <a href="https://github.com/sugukurukabe/koko-call-mcp/issues">GitHub Issues</a>.</p>
 
 <footer>
 <p>Sugukuru Inc. / スグクル株式会社 — <a href="https://mcp.bid-jp.com">mcp.bid-jp.com</a></p>

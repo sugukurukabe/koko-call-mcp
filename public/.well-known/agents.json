@@ -40,7 +40,14 @@
       "check_saved_search",
       "list_saved_searches"
     ],
-    "prompts": ["morning_bid_briefing", "competitor_radar", "bid_due_alert"],
+    "prompts": [
+      "morning_bid_briefing",
+      "bid_discovery_workspace",
+      "competitor_radar",
+      "bid_review_packet_workflow",
+      "qualification_and_question_draft",
+      "bid_due_alert"
+    ],
     "resources": [
       "attribution://kkj",
       "docs://api-reference",
@@ -55,7 +62,7 @@
     "human_review_required": "Official procurement documents must be verified by a human before bidding decisions.",
     "legal_disclaimer": "Results are reference information, not legal or bidding advice.",
     "sampling": "The optional MCP Apps view may invoke host-side sampling/createMessage. `extract_bid_requirements` may also use host-side sampling for HTML/text extraction when `fetch_documents=true`; native PDF extraction requires opt-in Vertex AI direct mode.",
-    "tasks": "Not implemented. Current searches are short-running and synchronous.",
+    "tasks": "Not implemented or advertised. Current searches and review workflows are short-running and synchronous; multi-step workflows are exposed as MCP Prompts instead.",
     "authentication": "Remote endpoint supports OAuth 2.0 with Dynamic Client Registration (RFC 7591) and PKCE S256, per MCP authorization spec 2025-11-25. Stdio package is local and unauthenticated."
   },
   "security": {

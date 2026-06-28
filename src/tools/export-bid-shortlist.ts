@@ -49,7 +49,7 @@ export function registerExportBidShortlist(server: McpServer, client: KkjClient)
       inputSchema,
       outputSchema: BidShortlistExportSchema.shape,
       annotations: {
-        readOnlyHint: false,
+        readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: false,
         openWorldHint: true,

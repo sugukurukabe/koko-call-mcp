@@ -6,6 +6,7 @@ import { CategorySchema, categoryCodes } from "../domain/codes.js";
 import { daysAgoDate, formatKkjDateRange, todayDate } from "../domain/date-range.js";
 import { PrefectureNameSchema, prefectureEntries, toLgCode } from "../domain/prefectures.js";
 import { toolError } from "../lib/tool-result.js";
+import { capSearchResult } from "./search-bids.js";
 
 const inputSchema = {
   prefecture: PrefectureNameSchema.optional().describe("都道府県名で絞り込む。例: 鹿児島県。"),
@@ -56,6 +57,7 @@ export function registerListRecentBids(server: McpServer, client: KkjClient): vo
           params.Category = categoryCodes[args.category];
         }
         const result = await client.search(params);
+        const capped = capSearchResult(result);
         return {
           content: [
             {
@@ -63,7 +65,7 @@ export function registerListRecentBids(server: McpServer, client: KkjClient): vo
               text: `${since} から ${until} までの新着入札: ${result.searchHits}件\n出典: ${result.attribution.dataSource}`,
             },
           ],
-          structuredContent: result,
+          structuredContent: capped,
         };
       } catch (error) {
         return toolError(error, "直近入札一覧の取得で一時的なエラーが発生しました。");

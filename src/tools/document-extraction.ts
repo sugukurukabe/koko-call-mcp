@@ -1,5 +1,5 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { fetchDocument } from "../api/pdf-fetcher.js";
+import { type FetchedDocument, fetchDocument } from "../api/pdf-fetcher.js";
 import {
   extractRequirementsWithSampling,
   type SamplingCreateMessage,
@@ -45,7 +45,32 @@ export async function enrichWithDocumentExtraction(
     };
   }
 
-  const documents = await Promise.all(uniqueUris.map((uri) => fetchDocument(uri)));
+  // 書類取得は1件ずつ独立して扱い、失敗しても例外を投げず警告に縮退する
+  // Fetch documents independently; failures degrade to warnings instead of throwing
+  // Ambil dokumen secara independen; kegagalan menjadi peringatan, bukan melempar error
+  const settled = await Promise.allSettled(uniqueUris.map((uri) => fetchDocument(uri)));
+  const documents: FetchedDocument[] = [];
+  const fetchWarnings: string[] = [];
+  settled.forEach((outcome, index) => {
+    if (outcome.status === "fulfilled") {
+      documents.push(outcome.value);
+      return;
+    }
+    const reason =
+      outcome.reason instanceof Error ? outcome.reason.message : String(outcome.reason);
+    fetchWarnings.push(`書類を取得できませんでした (${uniqueUris[index]}): ${reason}`);
+  });
+
+  if (documents.length === 0) {
+    return {
+      ...extraction,
+      extractionWarnings: [
+        ...extraction.extractionWarnings,
+        ...fetchWarnings,
+        "fetch_documents=true でしたが、対象書類を取得できなかったため、公告メタデータのみで生成しました。",
+      ],
+    };
+  }
 
   // PDF取得成功時にStripe Meterイベントを送信（fire-and-forget、課金失敗はツール実行を止めない）
   // Send Stripe Meter event on successful PDF fetch (fire-and-forget, billing failure must not block tool)
@@ -80,7 +105,7 @@ export async function enrichWithDocumentExtraction(
         ? { extractedRequirements: vertex.extractedRequirements }
         : {}),
       rawExtractionText: vertex.rawText,
-      extractionWarnings: [...extraction.extractionWarnings, ...vertex.warnings],
+      extractionWarnings: [...extraction.extractionWarnings, ...fetchWarnings, ...vertex.warnings],
     };
   }
 
@@ -90,6 +115,7 @@ export async function enrichWithDocumentExtraction(
       extractedFromDocuments,
       extractionWarnings: [
         ...extraction.extractionWarnings,
+        ...fetchWarnings,
         "MCP client が sampling capability を宣言していないため、PDF/HTML本文のAI抽出は実行しませんでした。",
       ],
     };
@@ -111,6 +137,6 @@ export async function enrichWithDocumentExtraction(
       ? { extractedRequirements: sampling.extractedRequirements }
       : {}),
     rawExtractionText: sampling.rawText,
-    extractionWarnings: [...extraction.extractionWarnings, ...sampling.warnings],
+    extractionWarnings: [...extraction.extractionWarnings, ...fetchWarnings, ...sampling.warnings],
   };
 }

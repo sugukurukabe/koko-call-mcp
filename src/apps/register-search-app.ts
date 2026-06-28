@@ -10,6 +10,7 @@ import { BidSearchResultSchema } from "../domain/bid.js";
 import { toolError } from "../lib/tool-result.js";
 import {
   buildSearchBidsParams,
+  capSearchResult,
   formatSearchSummary,
   searchBidsInputSchema,
 } from "../tools/search-bids.js";
@@ -40,7 +41,8 @@ export function registerSearchResultsApp(server: McpServer, client: KkjClient): 
     },
     async (args) => {
       try {
-        const result = await client.search(buildSearchBidsParams(args));
+        const raw = await client.search(buildSearchBidsParams(args));
+        const result = capSearchResult(raw);
         return {
           content: [{ type: "text" as const, text: formatSearchSummary(result) }],
           structuredContent: result,

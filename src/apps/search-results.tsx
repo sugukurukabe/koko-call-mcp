@@ -10,6 +10,41 @@ interface ToolResultLike {
   structuredContent?: unknown;
 }
 
+const EXAMPLE_PROMPTS = [
+  "鹿児島県のIT系入札を探して、うちに合う順にランク付けして",
+  "農林水産省の過去1年の発注傾向を分析して",
+  "防衛省のシステム保守案件の参加要件を抽出して",
+  "東京都の役務入札を締切が近い順に一覧して",
+];
+
+function WelcomeScreen() {
+  return (
+    <div className="welcome-screen">
+      <div className="welcome-card">
+        <div className="welcome-icon" aria-hidden="true">
+          🔍
+        </div>
+        <h2 className="welcome-title">AI Bid Workspace</h2>
+        <p className="welcome-desc">
+          官公需入札を検索して追跡判断・参加資格確認・社内メモ作成まで一気に進められるワークスペースです。
+        </p>
+        <div className="welcome-examples">
+          <p className="welcome-examples-label">入力例 / Example prompts</p>
+          {EXAMPLE_PROMPTS.map((prompt) => (
+            <div key={prompt} className="example-chip">
+              {prompt}
+            </div>
+          ))}
+        </div>
+        <p className="welcome-hint">
+          上の検索バーでキーワード検索するか、チャットで <code>search_bids_app</code>{" "}
+          を指示してください。
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [result, setResult] = useState<BidSearchResult | null>(null);
   const [workspace, setWorkspace] = useState<WorkspaceViewModel | null>(null);
@@ -144,11 +179,7 @@ function App() {
       {isSearching && !workspace && <div className="notice">検索中…</div>}
 
       {!workspace ? (
-        !isSearching && (
-          <div className="notice">
-            <code>search_bids_app</code> を実行するか、上の検索バーからキーワード検索してください。
-          </div>
-        )
+        !isSearching && <WelcomeScreen />
       ) : (
         <div className={`ws-body${isSearching ? " ws-body--loading" : ""}`}>
           {/* Priority Lane */}
@@ -328,6 +359,23 @@ function App() {
                 )}
               </div>
 
+              {/* Official link — prominently shown above the evidence accordion */}
+              {selectedCard.officialUrl && (
+                <div className="official-link-bar">
+                  <span className="official-link-label">公式公告ページ</span>
+                  <button
+                    type="button"
+                    className="official-link-btn"
+                    onClick={() =>
+                      void handleOpenOfficialLink(app, selectedCard.officialUrl, setActionMessage)
+                    }
+                    title={selectedCard.officialUrl}
+                  >
+                    官公需ポータルで開く →
+                  </button>
+                </div>
+              )}
+
               {/* Evidence & Safety */}
               <div className="evidence-panel">
                 <details>
@@ -341,14 +389,6 @@ function App() {
                       <dd>
                         <code>{selectedBid.key}</code>
                       </dd>
-                      {selectedCard.officialUrl && (
-                        <>
-                          <dt>公式URL</dt>
-                          <dd>
-                            <code>{selectedCard.officialUrl}</code>
-                          </dd>
-                        </>
-                      )}
                       {selectedBid.fileType && (
                         <>
                           <dt>ファイル種別</dt>
@@ -421,37 +461,53 @@ async function handleToolAction(
   instruction: string,
   setActionMessage: (message: string) => void,
 ): Promise<void> {
-  if (!app) {
-    setActionMessage("Host接続なし。");
-    return;
+  const promptText = [
+    instruction,
+    "",
+    `ツール: ${toolName}`,
+    `引数: { "bid_key": "${bid.key}", "fetch_documents": true }`,
+    "",
+    `件名: ${bid.projectName}`,
+    `機関: ${bid.organizationName ?? "不明"}`,
+    `地域: ${bid.prefectureName ?? "不明"}`,
+    `Key: ${bid.key}`,
+  ].join("\n");
+
+  // ホストが ui/message を受け付ける場合のみ直接送信する
+  // Only send directly when the host accepts ui/message
+  // Hanya kirim langsung jika host menerima ui/message
+  if (app?.getHostCapabilities()?.message) {
+    try {
+      const result = await app.sendMessage({
+        role: "user",
+        content: [{ type: "text", text: promptText }],
+      });
+      if (!result.isError) {
+        setActionMessage(`${actionLabel}リクエストをchatへ送信しました。`);
+        return;
+      }
+    } catch {
+      // フォールバックへ / fall through to clipboard fallback
+    }
   }
+  await copyActionPrompt(promptText, actionLabel, setActionMessage);
+}
+
+// ui/message 非対応ホストでも使えるフォールバック：プロンプトをコピーする
+// Fallback for hosts without ui/message: copy the ready-to-send prompt
+// Fallback untuk host tanpa ui/message: salin prompt yang siap dikirim
+async function copyActionPrompt(
+  text: string,
+  actionLabel: string,
+  setActionMessage: (message: string) => void,
+): Promise<void> {
   try {
-    const result = await app.sendMessage({
-      role: "user",
-      content: [
-        {
-          type: "text",
-          text: [
-            instruction,
-            "",
-            `ツール: ${toolName}`,
-            `引数: { "bid_key": "${bid.key}", "fetch_documents": true }`,
-            "",
-            `件名: ${bid.projectName}`,
-            `機関: ${bid.organizationName ?? "不明"}`,
-            `地域: ${bid.prefectureName ?? "不明"}`,
-            `Key: ${bid.key}`,
-          ].join("\n"),
-        },
-      ],
-    });
+    await navigator.clipboard.writeText(text);
     setActionMessage(
-      result.isError
-        ? `${actionLabel}リクエストがHost側で拒否されました。`
-        : `${actionLabel}リクエストをchatへ送信しました。`,
+      `「${actionLabel}」のプロンプトをコピーしました。チャットに貼り付けて送信してください。`,
     );
   } catch {
-    setActionMessage(`${actionLabel}リクエストが失敗しました。`);
+    setActionMessage(`チャットで「この案件を${actionLabel}」と入力してください。`);
   }
 }
 
@@ -460,6 +516,12 @@ async function handleOpenOfficialLink(
   url: string,
   setActionMessage: (message: string) => void,
 ): Promise<void> {
+  if (!isAllowedOfficialLink(url)) {
+    setActionMessage(
+      "このリンクはアプリ内で直接開けません。公式URLはtool resultのresource_linkで確認してください。",
+    );
+    return;
+  }
   if (!app) {
     window.open(url, "_blank", "noopener,noreferrer");
     return;
@@ -469,6 +531,15 @@ async function handleOpenOfficialLink(
     if (result.isError) setActionMessage("Host が公式リンクを拒否しました。");
   } catch {
     setActionMessage("公式リンクのリクエストに失敗しました。");
+  }
+}
+
+function isAllowedOfficialLink(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.origin === "https://www.kkj.go.jp" || parsed.origin === "https://mcp.bid-jp.com";
+  } catch {
+    return false;
   }
 }
 
@@ -540,7 +611,7 @@ async function handleSyncModelContext(
     });
     setActionMessage("検索結果をHostの文脈へ同期しました。");
   } catch {
-    setActionMessage("文脈同期がHost側で拒否されました。");
+    setActionMessage("この環境では文脈同期に対応していません。");
   }
 }
 
@@ -556,7 +627,7 @@ async function handleToggleDisplayMode(
     const result = await app.requestDisplayMode({ mode: nextMode });
     setDisplayMode(result.mode);
   } catch {
-    setActionMessage("表示モード変更がHost側で拒否されました。");
+    setActionMessage("この環境では表示モード変更に対応していません。");
   }
 }
 

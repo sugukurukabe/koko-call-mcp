@@ -6,7 +6,12 @@
       "!dist",
       "!node_modules",
       "!coverage",
+      "!deploy",
       "!docs/api",
+      "!docs/public-mcp-hub",
+      "!gateway",
+      "!japan-real-estate-intel-mcp",
+      "!jgrants-mcp-server",
       "!bom.json",
       "!.smithery"
     ]

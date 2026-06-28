@@ -2,9 +2,9 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { KkjClient } from "../api/kkj-client.js";
 import { createAttribution } from "../domain/attribution.js";
-import { BidSearchResultSchema } from "../domain/bid.js";
+import { type Bid, BidSearchResultSchema } from "../domain/bid.js";
 import { UserInputError } from "../lib/errors.js";
-import { toolError } from "../lib/tool-result.js";
+import { resourceLink, toolError } from "../lib/tool-result.js";
 
 const inputSchema = {
   bid_key: z
@@ -53,12 +53,14 @@ export function registerGetBidDetail(server: McpServer, client: KkjClient): void
           returnedCount: 1,
           bids: [exact],
         };
+        const officialLinks = buildOfficialLinks(exact);
         return {
           content: [
             {
               type: "text" as const,
               text: `■ ${exact.projectName}\n機関: ${exact.organizationName ?? "不明"}\nKey: ${exact.key}\n出典: ${detail.attribution.dataSource}`,
             },
+            ...officialLinks,
           ],
           structuredContent: detail,
         };
@@ -67,4 +69,27 @@ export function registerGetBidDetail(server: McpServer, client: KkjClient): void
       }
     },
   );
+}
+
+// 公式公告ページと添付資料のresource_linkを構築する
+// Build resource_link blocks for the official announcement page and attachments
+// Bangun blok resource_link untuk halaman pengumuman resmi dan lampiran
+function buildOfficialLinks(bid: Bid) {
+  const links: ReturnType<typeof resourceLink>[] = [];
+  if (bid.externalDocumentUri) {
+    links.push(
+      resourceLink(bid.externalDocumentUri, "公式公告ページ / Official Announcement", "text/html"),
+    );
+  }
+  for (const attachment of bid.attachments ?? []) {
+    if (attachment.uri) {
+      const isPdf =
+        attachment.name.toLowerCase().endsWith(".pdf") ||
+        attachment.uri.toLowerCase().includes(".pdf");
+      links.push(
+        resourceLink(attachment.uri, attachment.name, isPdf ? "application/pdf" : undefined),
+      );
+    }
+  }
+  return links;
 }

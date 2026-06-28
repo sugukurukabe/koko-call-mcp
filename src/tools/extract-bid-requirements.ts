@@ -34,7 +34,7 @@ export function registerExtractBidRequirements(server: McpServer, client: KkjCli
       inputSchema,
       outputSchema: BidRequirementExtractionSchema.shape,
       annotations: {
-        readOnlyHint: false,
+        readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: false,
         openWorldHint: true,
