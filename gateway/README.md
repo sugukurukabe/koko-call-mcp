@@ -8,6 +8,9 @@ Public MCP JP Gateway adalah gateway federasi yang menghubungkan server MCP peng
 The first experience should not be opening four browser tabs. Connect once to the Gateway and call `get_gateway_demo`.
 Pengalaman pertama seharusnya bukan membuka empat tab browser. Hubungkan sekali ke Gateway dan panggil `get_gateway_demo`.
 
+<!-- Demo GIF placeholder: 30秒デモを埋め込む (作成方法は docs/demo-gif-guide.md を参照) -->
+<!-- Demo GIF placeholder: Embed 30s demo here (see docs/demo-gif-guide.md for creation steps) -->
+
 ## 接続される子 MCP / Child MCPs / MCP Anak
 
 | 子 MCP | 役割 | 認証 |

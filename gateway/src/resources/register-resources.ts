@@ -2,10 +2,81 @@
 // Gateway MCP Resources — Static and dynamic resource publication
 // Sumber Daya MCP Gateway — Publikasi sumber daya statis dan dinamis
 
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { type McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { loadRegistry } from "../registry/loader.js";
 
 export function registerResources(server: McpServer): void {
+  // Resource Template: gateway://server/{server_id}
+  // 特定の子MCPサーバーの詳細情報を動的に取得
+  // Resource Template: gateway://server/{server_id}
+  // Dynamically retrieve details of a specific child MCP server
+  const serverDetailTemplate = new ResourceTemplate("gateway://server/{server_id}", {
+    list: undefined,
+  });
+
+  server.resource(
+    "server_detail",
+    serverDetailTemplate,
+    {
+      title: "子MCPサーバー詳細",
+      description:
+        "指定した子MCPサーバーの詳細情報（ツール一覧、モード、認証方式など）を返します。" +
+        "Returns details of the specified child MCP server (tools, modes, auth type, etc.). " +
+        "Mengembalikan detail server MCP anak yang ditentukan.",
+      mimeType: "application/json",
+    },
+    async (_uri, variables) => {
+      const server_id = variables.server_id as string;
+      const registry = loadRegistry();
+      const serverInfo = registry.servers.find((s) => s.id === server_id);
+
+      if (!serverInfo) {
+        return {
+          contents: [
+            {
+              uri: `gateway://server/${server_id}`,
+              mimeType: "application/json",
+              text: JSON.stringify(
+                {
+                  error: `Server "${server_id}" not found`,
+                  available_servers: registry.servers.map((s) => s.id),
+                },
+                null,
+                2,
+              ),
+            },
+          ],
+        };
+      }
+
+      return {
+        contents: [
+          {
+            uri: `gateway://server/${server_id}`,
+            mimeType: "application/json",
+            text: JSON.stringify(
+              {
+                id: serverInfo.id,
+                display_name: serverInfo.display_name,
+                display_name_en: serverInfo.display_name_en,
+                display_name_id: serverInfo.display_name_id,
+                endpoint: serverInfo.endpoint,
+                auth_type: serverInfo.auth_type,
+                risk_level: serverInfo.risk_level,
+                tool_allowlist: serverInfo.tool_allowlist,
+                tool_modes: serverInfo.tool_modes,
+                cache_ttl_seconds: serverInfo.cache_ttl_seconds,
+                routing_keywords: serverInfo.routing_keywords,
+                attribution: serverInfo.attribution,
+              },
+              null,
+              2,
+            ),
+          },
+        ],
+      };
+    },
+  );
   server.registerResource(
     "registry_summary",
     "gateway://registry/summary",

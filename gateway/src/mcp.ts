@@ -37,5 +37,9 @@ export function createGatewayServer(options: CreateGatewayServerOptions): McpSer
   registerPrompts(server);
   registerResources(server);
 
+  // Completion primitive: SDK API 制限により未実装（将来の拡張予定）
+  // Completion primitive: Not implemented due to SDK API limitations (planned for future)
+  // Completion primitive: Belum diimplementasikan karena keterbatasan API SDK (direncanakan untuk masa depan)
+
   return server;
 }

@@ -99,17 +99,30 @@ export function registerCallRegisteredMcp(server: McpServer, context: ToolContex
       if (!childServer) {
         const deployment = getRegistryDeploymentStatus();
         const omitted = deployment.omitted_local_servers.find((s) => s.id === server_id);
+
+        // 提案: 部分一致するサーバーIDを提案
+        // Suggestion: Propose server IDs with partial match
+        const suggestions = registry.servers
+          .map((s) => s.id)
+          .filter((id) => id.includes(server_id) || server_id.includes(id))
+          .slice(0, 3);
+
+        const errorMessage = omitted
+          ? `Server "${server_id}" is configured but not active in production because its endpoint is still local.`
+          : suggestions.length > 0
+            ? `Server "${server_id}" is not registered. Did you mean ${suggestions.map((s) => `"${s}"`).join(" or ")}? Available: ${registry.servers.map((s) => s.id).join(", ")}`
+            : `Server "${server_id}" is not registered. Available servers: ${registry.servers.map((s) => s.id).join(", ")}`;
+
         return {
           content: [
             {
               type: "text" as const,
               text: JSON.stringify({
-                error: omitted
-                  ? `Server "${server_id}" is configured but not active in production because its endpoint is still local.`
-                  : `Server "${server_id}" is not registered. Available servers: ${registry.servers.map((s) => s.id).join(", ")}`,
+                error: errorMessage,
                 omitted_local_server: omitted ?? undefined,
                 active_servers: deployment.active_server_ids,
                 required_endpoint_env_keys: deployment.required_endpoint_env_keys,
+                suggestions: suggestions.length > 0 ? suggestions : undefined,
                 next_step:
                   omitted !== undefined
                     ? `Set ${omitted.endpoint_env_key} to the deployed child MCP /mcp URL, then redeploy or update the Cloud Run service.`

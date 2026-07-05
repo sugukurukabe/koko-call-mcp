@@ -8,6 +8,7 @@ import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import cors from "cors";
 import express from "express";
 import { createRequestId, recordAuditEvent } from "./audit/audit-logger.js";
+import { stats as cacheStats } from "./cache/tool-cache.js";
 import { extractBearerToken, hashActor, parseProApiKeys, parseTier } from "./lib/auth.js";
 import { parsePortEnv } from "./lib/env.js";
 import { VERSION } from "./lib/version.js";
@@ -72,6 +73,36 @@ export function createHttpApp(): express.Express {
         !deployment.production ||
         deployment.allow_local_child_endpoints ||
         deployment.omitted_local_servers.length === 0,
+    });
+  });
+
+  // Performance metrics endpoint（キャッシュヒット率・レイテンシ・子MCP到達性）
+  // Performance metrics endpoint (cache hit rate, latency, child MCP reachability)
+  // Endpoint metrik performa (tingkat hit cache, latensi, jangkauan MCP anak)
+  app.get("/metrics", (_req, res) => {
+    const registry = loadRegistry();
+    const deployment = getRegistryDeploymentStatus();
+    const cache = cacheStats();
+
+    res.status(200).json({
+      timestamp: new Date().toISOString(),
+      cache: {
+        hits: cache.hits,
+        misses: cache.misses,
+        hit_rate: cache.hitRate,
+        entries: cache.size,
+      },
+      servers: {
+        configured: deployment.configured_server_count,
+        active: deployment.active_server_ids.length,
+        omitted_local: deployment.omitted_local_servers.length,
+        list: registry.servers.map((s) => ({
+          id: s.id,
+          risk_level: s.risk_level,
+          auth_type: s.auth_type,
+        })),
+      },
+      production_ready: deployment.omitted_local_servers.length === 0,
     });
   });
 
@@ -194,9 +225,38 @@ export function createHttpApp(): express.Express {
           decision: event.decision,
           latency_ms: event.latency_ms,
         });
+
+        // MCP Logging primitive: ツール呼び出し成功をクライアントに通知
+        // MCP Logging primitive: Notify client of successful tool call
+        try {
+          gatewayServer.sendLoggingMessage({
+            level: "info",
+            data: {
+              message: "Tool call completed",
+              tool: toolName,
+              latency_ms: Date.now() - startedAt,
+            },
+          });
+        } catch {
+          // クライアント切断時などは無視
+        }
       }
     } catch (error) {
       console.error("[gateway] MCP request error:", error);
+      // MCP Logging primitive: エラー発生時にクライアントに通知
+      // MCP Logging primitive: Notify client on error occurrence
+      try {
+        gatewayServer.sendLoggingMessage({
+          level: "error",
+          data: {
+            message: "MCP request failed",
+            method: (req.body as Record<string, unknown>)?.method,
+            error: error instanceof Error ? error.message : String(error),
+          },
+        });
+      } catch {
+        // クライアント切断時などは無視
+      }
       if (!res.headersSent) {
         res.status(500).json({ error: "Gateway MCP request failed" });
       }
