@@ -2,8 +2,50 @@
 // Gateway MCP Prompts — Guided workflow starters
 // Prompt MCP Gateway — Pemula alur kerja terpandu
 
+import { completable } from "@modelcontextprotocol/sdk/server/completable.js";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { loadRegistry } from "../registry/loader.js";
+import { FULL_ORCHESTRATION_MODE } from "../registry/schema.js";
+
+const prefectureSuggestions = [
+  "東京都",
+  "神奈川県",
+  "大阪府",
+  "福岡県",
+  "鹿児島県",
+  "北海道",
+  "宮城県",
+  "愛知県",
+  "広島県",
+  "沖縄県",
+];
+
+const prefectureCompletable = completable(z.string().min(1), (value) =>
+  prefectureSuggestions.filter((prefecture) => prefecture.includes(String(value))).slice(0, 20),
+);
+
+const focusCompletable = completable(z.enum(["balance_only", "full_review"]), (value) =>
+  (["balance_only", "full_review"] as const).filter((focus) => focus.includes(String(value))),
+);
+
+const purposeCompletable = completable(
+  z.enum(["investment", "store_location", "general"]),
+  (value) =>
+    (["investment", "store_location", "general"] as const).filter((purpose) =>
+      purpose.includes(String(value)),
+    ),
+);
+
+const modeCompletable = completable(z.string().min(1), (value) => {
+  const modes = new Set<string>([FULL_ORCHESTRATION_MODE]);
+  for (const childServer of loadRegistry().servers) {
+    for (const mode of Object.keys(childServer.tool_modes ?? {})) {
+      modes.add(mode);
+    }
+  }
+  return [...modes].filter((mode) => mode.includes(String(value))).slice(0, 30);
+});
 
 export function registerPrompts(server: McpServer): void {
   server.registerPrompt(
@@ -20,8 +62,7 @@ export function registerPrompts(server: McpServer): void {
           .describe(
             "検索キーワード（例: IT システム, DX 推進）。Search keyword. Kata kunci pencarian.",
           ),
-        prefecture: z
-          .string()
+        prefecture: prefectureCompletable
           .optional()
           .describe("都道府県（例: 東京都, 鹿児島県）。Prefecture filter. Filter prefektur."),
       },
@@ -58,8 +99,7 @@ export function registerPrompts(server: McpServer): void {
         "Check accounting data for a financial health overview. " +
         "Memeriksa data akuntansi untuk gambaran kesehatan keuangan.",
       argsSchema: {
-        focus: z
-          .enum(["balance_only", "full_review"])
+        focus: focusCompletable
           .optional()
           .default("full_review")
           .describe(
@@ -109,7 +149,7 @@ export function registerPrompts(server: McpServer): void {
         "Alur kerja penuh dari pencarian tender hingga subsidi dan tinjauan akuntansi.",
       argsSchema: {
         keyword: z.string().describe("案件キーワード。Bid keyword. Kata kunci tender."),
-        prefecture: z.string().optional().describe("都道府県。Prefecture. Prefektur."),
+        prefecture: prefectureCompletable.optional().describe("都道府県。Prefecture. Prefektur."),
         industry: z.string().optional().describe("業種（例: IT, 建設, 農業）。Industry. Industri."),
       },
     },
@@ -193,8 +233,7 @@ export function registerPrompts(server: McpServer): void {
           .describe(
             "分析対象エリア（例: 東京都新宿区, 鹿児島県鹿児島市）。Target area. Area target.",
           ),
-        purpose: z
-          .enum(["investment", "store_location", "general"])
+        purpose: purposeCompletable
           .optional()
           .default("general")
           .describe(
@@ -239,8 +278,16 @@ export function registerPrompts(server: McpServer): void {
         "このGatewayで何ができるかを即座に把握するガイド付きツアー。" +
         "Quick guided tour of what this Gateway can do. " +
         "Tur panduan cepat tentang apa yang bisa dilakukan Gateway ini.",
+      argsSchema: {
+        mode: modeCompletable
+          .optional()
+          .describe(
+            "確認したいGateway mode（例: full_orchestration, bid_search, real_estate_analysis）。Gateway mode to preview. Mode Gateway yang akan ditinjau.",
+          ),
+      },
     },
-    async () => {
+    async (args) => {
+      const modeLine = args.mode ? `対象 mode: ${args.mode}\n` : "";
       return {
         messages: [
           {
@@ -248,7 +295,7 @@ export function registerPrompts(server: McpServer): void {
             content: {
               type: "text" as const,
               text:
-                `Public MCP JP Gateway のクイックツアーを実行してください。\n\n` +
+                `Public MCP JP Gateway のクイックツアーを実行してください。\n${modeLine}\n` +
                 `1. Read resource: gateway://quickstart で「30秒で最高の体験」を読む\n` +
                 `2. get_gateway_demo(scenario: 'connection_check') で接続状況を確認\n` +
                 `3. list_connected_servers(include_tools: true) で全子MCPとツール一覧を表示\n` +

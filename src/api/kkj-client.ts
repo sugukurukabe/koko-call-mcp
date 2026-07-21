@@ -28,6 +28,8 @@ export interface KkjClientOptions {
   timeoutMs?: number;
   cacheTtlMs?: number;
   rateLimitPerSecond?: number;
+  maxRetries?: number;
+  retryBaseDelayMs?: number;
 }
 
 type XmlRecord = Record<string, unknown>;
@@ -40,11 +42,33 @@ const xmlParser = new XMLParser({
   trimValues: true,
 });
 
+// 5xx・タイムアウト・ネットワーク断は上流の一時的な問題として再試行対象にする
+// 5xx, timeouts, and network drops are treated as transient upstream issues eligible for retry
+// 5xx, timeout, dan putus jaringan diperlakukan sebagai masalah upstream sementara yang layak dicoba ulang
+const defaultMaxRetries = 2;
+const defaultRetryBaseDelayMs = 500;
+
+function isRetryableError(error: unknown): boolean {
+  if (error instanceof UpstreamError) {
+    return error.status === undefined || error.status >= 500;
+  }
+  if (error instanceof UserInputError) {
+    return false;
+  }
+  if (error instanceof Error && error.name === "TimeoutError") {
+    return true;
+  }
+  // fetch throws TypeError for network-level failures (DNS, connection reset, etc.)
+  return error instanceof TypeError;
+}
+
 export class KkjClient {
   private readonly fetchImpl: typeof fetch;
   private readonly endpoint: string;
   private readonly userAgent: string;
   private readonly timeoutMs: number;
+  private readonly maxRetries: number;
+  private readonly retryBaseDelayMs: number;
   private readonly cache: LRUCache<string, BidSearchResult>;
   private readonly limiter: TokenBucketRateLimiter;
   private recentBidKeys: string[] = [];
@@ -55,7 +79,9 @@ export class KkjClient {
     this.fetchImpl = options.fetchImpl ?? fetch;
     this.endpoint = options.endpoint ?? defaultEndpoint;
     this.userAgent = options.userAgent ?? `JP Bids MCP/${VERSION}`;
-    this.timeoutMs = options.timeoutMs ?? 10_000;
+    this.timeoutMs = options.timeoutMs ?? 15_000;
+    this.maxRetries = options.maxRetries ?? defaultMaxRetries;
+    this.retryBaseDelayMs = options.retryBaseDelayMs ?? defaultRetryBaseDelayMs;
     this.cache = new LRUCache<string, BidSearchResult>({
       max: 500,
       ttl: options.cacheTtlMs ?? 10 * 60 * 1000,
@@ -73,7 +99,37 @@ export class KkjClient {
       return cached;
     }
 
-    await this.limiter.wait();
+    const result = await this.fetchWithRetry(normalizedParams);
+    this.rememberBidKeys(result.bids);
+    this.cache.set(cacheKey, result);
+    return result;
+  }
+
+  private async fetchWithRetry(
+    normalizedParams: Record<string, string | number>,
+  ): Promise<BidSearchResult> {
+    let attempt = 0;
+    for (;;) {
+      // レートリミッタは再試行ごとに通す（KKJへの短時間大量アクセスを避ける）
+      // Pass through the rate limiter on every attempt, including retries
+      // Lewati rate limiter pada setiap percobaan, termasuk percobaan ulang
+      await this.limiter.wait();
+      try {
+        return await this.fetchOnce(normalizedParams);
+      } catch (error) {
+        if (attempt >= this.maxRetries || !isRetryableError(error)) {
+          throw error;
+        }
+        attempt += 1;
+        const delayMs = this.retryBaseDelayMs * 2 ** (attempt - 1);
+        await sleep(delayMs);
+      }
+    }
+  }
+
+  private async fetchOnce(
+    normalizedParams: Record<string, string | number>,
+  ): Promise<BidSearchResult> {
     const url = new URL(this.endpoint);
     for (const [key, value] of Object.entries(normalizedParams)) {
       url.searchParams.set(key, String(value));
@@ -89,10 +145,7 @@ export class KkjClient {
     }
 
     const xml = await response.text();
-    const result = parseKkjXml(xml, normalizedParams);
-    this.rememberBidKeys(result.bids);
-    this.cache.set(cacheKey, result);
-    return result;
+    return parseKkjXml(xml, normalizedParams);
   }
 
   completeBidKeys(value: string): string[] {
@@ -247,4 +300,8 @@ function setOptional<T extends object, K extends keyof T>(
   if (value !== undefined) {
     target[key] = value;
   }
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

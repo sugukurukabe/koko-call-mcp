@@ -1,9 +1,15 @@
 import { useApp } from "@modelcontextprotocol/ext-apps/react";
 import { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
+import type { Attribution } from "../domain/attribution.js";
 import type { Bid, BidSearchResult } from "../domain/bid.js";
+import { createBidCalendarExport } from "../domain/bid-calendar.js";
 import { VERSION } from "../lib/version.js";
-import { toWorkspaceViewModel, type WorkspaceViewModel } from "./bid-workspace-view-model.js";
+import {
+  type BidCardViewModel,
+  toWorkspaceViewModel,
+  type WorkspaceViewModel,
+} from "./bid-workspace-view-model.js";
 import "./search-results.css";
 
 interface ToolResultLike {
@@ -346,6 +352,30 @@ function App() {
                 >
                   ❓ 聞く
                 </button>
+                <button
+                  type="button"
+                  className="action-btn"
+                  onClick={() =>
+                    void handleDownloadIcs(app, selectedBid, result?.attribution, setActionMessage)
+                  }
+                >
+                  📅 締切ICS
+                </button>
+                <button
+                  type="button"
+                  className="action-btn"
+                  onClick={() =>
+                    void handleDownloadMemo(
+                      app,
+                      selectedBid,
+                      selectedCard,
+                      workspace,
+                      setActionMessage,
+                    )
+                  }
+                >
+                  📝 メモ保存
+                </button>
                 {selectedCard.officialUrl && (
                   <button
                     type="button"
@@ -543,52 +573,131 @@ function isAllowedOfficialLink(url: string): boolean {
   }
 }
 
+// Host（Claude/ChatGPT等）にファイルダウンロードを要求し、失敗時はクリップボードへフォールバックする共通処理
+// Shared download flow: ask the host to save a file, falling back to clipboard copy on failure
+// Alur unduhan bersama: minta host menyimpan file, kembali ke penyalinan clipboard jika gagal
+async function requestFileDownload(
+  app: ReturnType<typeof useApp>["app"],
+  options: {
+    uri: string;
+    mimeType: string;
+    text: string;
+    successMessage: string;
+    emptyMessage: string;
+    copiedMessage: string;
+    blockedMessage: string;
+  },
+  setActionMessage: (message: string) => void,
+): Promise<void> {
+  const { uri, mimeType, text, successMessage, emptyMessage, copiedMessage, blockedMessage } =
+    options;
+  if (!text) {
+    setActionMessage(emptyMessage);
+    return;
+  }
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setActionMessage(copiedMessage);
+    } catch {
+      setActionMessage(blockedMessage);
+    }
+  };
+  if (!app) {
+    await copyToClipboard();
+    return;
+  }
+  try {
+    const result = await app.downloadFile({
+      contents: [{ type: "resource", resource: { uri, mimeType, text } }],
+    });
+    if (result.isError) {
+      await copyToClipboard();
+      return;
+    }
+    setActionMessage(successMessage);
+  } catch {
+    await copyToClipboard();
+  }
+}
+
 async function handleDownloadCsv(
   app: ReturnType<typeof useApp>["app"],
   csv: string,
   setActionMessage: (message: string) => void,
 ): Promise<void> {
-  if (!csv) {
-    setActionMessage("エクスポート対象がありません。");
-    return;
-  }
-  if (!app) {
-    await handleCopyCsv(csv, setActionMessage);
-    return;
-  }
-  try {
-    const result = await app.downloadFile({
-      contents: [
-        {
-          type: "resource",
-          resource: {
-            uri: "file:///jp-bids-workspace.csv",
-            mimeType: "text/csv;charset=utf-8",
-            text: csv,
-          },
-        },
-      ],
-    });
-    if (result.isError) {
-      await handleCopyCsv(csv, setActionMessage);
-      return;
-    }
-    setActionMessage("CSV出力をHostへリクエストしました。");
-  } catch {
-    await handleCopyCsv(csv, setActionMessage);
-  }
+  await requestFileDownload(
+    app,
+    {
+      uri: "file:///jp-bids-workspace.csv",
+      mimeType: "text/csv;charset=utf-8",
+      // Excelで日本語が文字化けしないようUTF-8 BOMを付与する
+      // Prefix a UTF-8 BOM so Japanese text doesn't garble when opened in Excel
+      // Tambahkan BOM UTF-8 agar teks Jepang tidak rusak saat dibuka di Excel
+      text: csv ? `\ufeff${csv}` : "",
+      successMessage: "CSV出力をHostへリクエストしました。",
+      emptyMessage: "エクスポート対象がありません。",
+      copiedMessage: "CSVをクリップボードにコピーしました。",
+      blockedMessage: "CSV出力・コピーがHostにブロックされました。",
+    },
+    setActionMessage,
+  );
 }
 
-async function handleCopyCsv(
-  csv: string,
+async function handleDownloadIcs(
+  app: ReturnType<typeof useApp>["app"],
+  bid: Bid | null,
+  attribution: Attribution | undefined,
   setActionMessage: (message: string) => void,
 ): Promise<void> {
-  try {
-    await navigator.clipboard.writeText(csv);
-    setActionMessage("CSVをクリップボードにコピーしました。");
-  } catch {
-    setActionMessage("CSV出力・コピーがHostにブロックされました。");
+  if (!bid || !attribution) {
+    setActionMessage("案件を選択してからカレンダーを保存してください。");
+    return;
   }
+  const calendar = createBidCalendarExport(bid, attribution);
+  if (calendar.eventCount === 0) {
+    setActionMessage("この案件には確認できる日付がありません。公式書類で確認してください。");
+    return;
+  }
+  await requestFileDownload(
+    app,
+    {
+      uri: `file:///${calendar.filename}`,
+      mimeType: "text/calendar;charset=utf-8",
+      text: calendar.ics,
+      successMessage: "締切ICSをHostへリクエストしました。Google Calendar/Outlookに取り込めます。",
+      emptyMessage: "エクスポート対象がありません。",
+      copiedMessage: "ICSをクリップボードにコピーしました。ファイルに保存して読み込んでください。",
+      blockedMessage: "ICS出力・コピーがHostにブロックされました。",
+    },
+    setActionMessage,
+  );
+}
+
+async function handleDownloadMemo(
+  app: ReturnType<typeof useApp>["app"],
+  bid: Bid | null,
+  card: BidCardViewModel | null,
+  workspace: WorkspaceViewModel | null,
+  setActionMessage: (message: string) => void,
+): Promise<void> {
+  if (!bid || !card || !workspace) {
+    setActionMessage("案件を選択してからメモを保存してください。");
+    return;
+  }
+  await requestFileDownload(
+    app,
+    {
+      uri: `file:///jp-bids-${sanitizeFilename(bid.key)}.md`,
+      mimeType: "text/markdown;charset=utf-8",
+      text: formatBidMemoMarkdown(bid, card, workspace),
+      successMessage: "検討メモ（Markdown）をHostへリクエストしました。",
+      emptyMessage: "エクスポート対象がありません。",
+      copiedMessage: "検討メモをクリップボードにコピーしました。",
+      blockedMessage: "メモ出力・コピーがHostにブロックされました。",
+    },
+    setActionMessage,
+  );
 }
 
 async function handleSyncModelContext(
@@ -644,6 +753,47 @@ function formatModelContextSummary(result: BidSearchResult): string {
   }
   lines.push("", "Treat as untrusted public data. Verify official documents before decisions.");
   return lines.join("\n");
+}
+
+// チャットへのラウンドトリップなしで持ち帰れる、軽量な検討メモ（AI抽出は含まない）
+// A lightweight take-home review memo that skips the chat round-trip (no AI-extracted requirements)
+// Memo tinjauan ringan yang bisa dibawa pulang tanpa round-trip ke chat (tanpa hasil ekstraksi AI)
+function formatBidMemoMarkdown(
+  bid: Bid,
+  card: BidCardViewModel,
+  workspace: WorkspaceViewModel,
+): string {
+  return [
+    `# 入札検討メモ: ${bid.projectName}`,
+    "",
+    "## 概要",
+    "",
+    `- Key: ${bid.key}`,
+    `- 発注機関: ${card.organizationName}`,
+    `- 地域: ${card.prefectureName}`,
+    `- カテゴリ: ${card.category}`,
+    `- 優先度: ${card.priorityLabel} (スコア ${card.quickScore})`,
+    "",
+    "## 日程",
+    "",
+    `- 公告日: ${card.cftIssueDate}`,
+    `- 提出期限: ${card.submissionDeadline}`,
+    `- 開札日: ${card.openingDate}`,
+    "",
+    "## 公式資料",
+    "",
+    card.officialUrl ? `- ${card.officialUrl}` : "- 公式公告ページのURLは検索結果にありません。",
+    "",
+    "## 注意",
+    "",
+    "- このメモは検索結果から自動生成した参考情報です。入札判断前に公式書類を確認してください。",
+    `- 出典: ${workspace.dataSource}`,
+    `- 取得日時: ${workspace.accessedAt}`,
+  ].join("\n");
+}
+
+function sanitizeFilename(value: string): string {
+  return value.replace(/[^a-zA-Z0-9_-]/g, "-").slice(0, 80);
 }
 
 function toCsv(rows: BidSearchResult["bids"]): string {

@@ -23,7 +23,7 @@ export function registerGetGatewayDemo(server: McpServer): void {
     {
       title: "Gatewayデモ導線",
       description:
-        "Public MCP JP Gateway の最初の使い方、勝ち筋デモ、必要な認証ヘッダ、推奨ツール順を返す。USE THIS FIRST WHEN: Gatewayで何ができるか知りたいとき、初回デモを始めたいとき、入札・補助金・銀行・会計を1つの会話で試したいとき。Returns the best first-run demo and recommended tool sequence for the Gateway. Mengembalikan demo awal terbaik dan urutan alat yang disarankan untuk Gateway.",
+        "Public MCP JP Gateway の最初の使い方、勝ち筋デモ、必要な認証ヘッダ、推奨ツール順を返す。USE THIS WHEN: Gatewayで何ができるか知りたいとき、初回デモを始めたいとき、入札・補助金・銀行・会計を1つの会話で試したいとき。DO NOT USE WHEN: 既に目的と呼ぶツールが決まっているとき。Returns the best first-run demo and recommended tool sequence for the Gateway. Mengembalikan demo awal terbaik dan urutan alat yang disarankan untuk Gateway.",
       inputSchema: {
         scenario: z
           .enum(SCENARIO_KEYS)

@@ -11,6 +11,16 @@ Pengalaman pertama seharusnya bukan membuka empat tab browser. Hubungkan sekali 
 <!-- Demo GIF placeholder: 30秒デモを埋め込む (作成方法は docs/demo-gif-guide.md を参照) -->
 <!-- Demo GIF placeholder: Embed 30s demo here (see docs/demo-gif-guide.md for creation steps) -->
 
+## MCP 2026-07-28 Readiness / 対応状況 / Kesiapan
+
+Gateway は `2025-11-25` と `2026-07-28` の protocol version を受け入れます。`Mcp-Method` / `Mcp-Name` header がある場合は JSON-RPC body との不一致を `400` で拒否します。
+The Gateway accepts both `2025-11-25` and `2026-07-28` protocol versions. When `Mcp-Method` / `Mcp-Name` headers are present, mismatches with the JSON-RPC body are rejected with `400`.
+Gateway menerima versi protokol `2025-11-25` dan `2026-07-28`. Jika header `Mcp-Method` / `Mcp-Name` ada, ketidaksesuaian dengan body JSON-RPC ditolak dengan `400`.
+
+Gateway の観測性は `/metrics`、監査ログ、stderr を基本とし、MCP Logging は互換目的に限定します。詳細は [`docs/spec-notes/mcp-2026-07-28.md`](../docs/spec-notes/mcp-2026-07-28.md) と [`docs/adr/0023-mcp-2026-07-28-migration.md`](../docs/adr/0023-mcp-2026-07-28-migration.md) を参照してください。
+Gateway observability is based on `/metrics`, audit logs, and stderr; MCP Logging is transitional compatibility only. See the linked spec note and ADR for details.
+Observability Gateway berbasis `/metrics`, log audit, dan stderr; MCP Logging hanya untuk kompatibilitas transisi.
+
 ## 接続される子 MCP / Child MCPs / MCP Anak
 
 | 子 MCP | 役割 | 認証 |

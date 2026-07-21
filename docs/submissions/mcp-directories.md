@@ -2,6 +2,9 @@
 
 > 詳細な Anthropic 申請チェックリスト: [`anthropic-connector-checklist.md`](./anthropic-connector-checklist.md)  
 > Full Anthropic submission checklist: [`anthropic-connector-checklist.md`](./anthropic-connector-checklist.md)
+>
+> 詳細な OpenAI ChatGPT Apps 申請チェックリスト: [`chatgpt-apps-submission-checklist.md`](./chatgpt-apps-submission-checklist.md)（実施手順は [`chatgpt-app-submission-instructions.md`](./chatgpt-app-submission-instructions.md)）  
+> Full OpenAI ChatGPT Apps submission checklist: [`chatgpt-apps-submission-checklist.md`](./chatgpt-apps-submission-checklist.md) (walkthrough: [`chatgpt-app-submission-instructions.md`](./chatgpt-app-submission-instructions.md))
 
 ---
 
@@ -23,6 +26,7 @@ JP Bids MCP を掲載依頼する候補です。送る内容は薄く、実装�
 | ディレクトリ | 状態 | 申請日 |
 |---|---|---|
 | **Anthropic Connectors Directory** | 申請準備完了（未提出） | - |
+| **OpenAI ChatGPT Apps Directory** | 申請準備完了（Freeティア4ツールのみ・未提出）。組織確認と認証方式の決定待ち | - |
 | MCP Registry (`io.github.sugukurukabe/jp-bids`) | metadata 準備済み | - |
 | GitHub topics | 完了 | - |
 | awesome-mcp-servers 系リスト | - | - |
@@ -57,6 +61,7 @@ Directory submission candidates for JP Bids MCP. Keep the submission thin: imple
 | Directory | Status | Submitted |
 |---|---|---|
 | **Anthropic Connectors Directory** | Ready to submit | - |
+| **OpenAI ChatGPT Apps Directory** | Ready to submit (Free-tier 4 tools only; not submitted yet). Pending org verification and auth method decision | - |
 | MCP Registry | metadata prepared | - |
 | GitHub topics | completed | - |
 | awesome-mcp-servers lists | - | - |
@@ -91,6 +96,7 @@ Kandidat direktori untuk JP Bids MCP. Jaga isi submission tetap tipis: fakta imp
 | Direktori | Status | Tanggal |
 |---|---|---|
 | **Anthropic Connectors Directory** | Siap diajukan | - |
+| **OpenAI ChatGPT Apps Directory** | Siap diajukan (hanya 4 tool tier Free; belum diajukan). Menunggu verifikasi organisasi dan keputusan metode autentikasi | - |
 | MCP Registry | metadata siap | - |
 | GitHub topics | selesai | - |
 | daftar awesome-mcp-servers | - | - |

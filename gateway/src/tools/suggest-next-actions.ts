@@ -14,6 +14,7 @@ export function registerSuggestNextActions(server: McpServer): void {
       description:
         "直前に取得したデータの要約（context）を渡すと、Gateway 上で次に実行すべきアクションとツール呼び出し例を提案する。" +
         "USE THIS WHEN: 複数のツール結果を見たあとで次に何をすべきか迷ったとき。ワークフローの中間ステップで、残りの手順を整理したいとき。" +
+        "DO NOT USE WHEN: 具体的に呼ぶ子MCP・ツール・引数が既に決まっているとき（call_registered_mcp を使う）。" +
         "Suggest next actions and tool calls based on the context of preceding results. " +
         "Menyarankan tindakan berikutnya berdasarkan konteks hasil sebelumnya.",
       inputSchema: {

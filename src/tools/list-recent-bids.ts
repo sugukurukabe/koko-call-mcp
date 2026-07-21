@@ -27,7 +27,7 @@ export function registerListRecentBids(server: McpServer, client: KkjClient): vo
     {
       title: "直近の官公需入札一覧",
       description:
-        "過去1〜30日間に公告された新着官公需入札を一覧する。毎朝の営業チェックに使う。List recently published bid notices from the past 1–30 days for daily morning sales checks. Daftar pengumuman tender baru dalam 1–30 hari terakhir untuk cek pagi harian.",
+        "過去1〜30日間に公告された新着官公需入札を一覧する。USE THIS WHEN: 毎朝の営業チェック、都道府県別の新着確認、直近公告の漏れ確認をしたいとき。DO NOT USE WHEN: 古い公告や細かい条件検索が必要なとき（search_bids を使う）。List recently published bid notices from the past 1–30 days for daily morning sales checks. Daftar pengumuman tender baru dalam 1–30 hari terakhir untuk cek pagi harian.",
       inputSchema,
       outputSchema: BidSearchResultSchema.shape,
       annotations: {

@@ -83,7 +83,7 @@ export function registerSavedSearchAlert(server: McpServer, client: KkjClient): 
     {
       title: "検索条件を保存",
       description:
-        "入札検索条件を名前付きでセッション内に保存する。保存した条件は check_saved_search で新着確認に使える。状態はサーバーインスタンス内のみで保持されHTTPステートレスモードでは持続しない。Save named bid search criteria in the current session for recurring alert checks. State is held per-instance and does not persist across HTTP stateless connections. Simpan kriteria pencarian tender bernama dalam sesi ini untuk pemeriksaan peringatan berulang.",
+        "入札検索条件を名前付きでセッション内に保存する。USE THIS WHEN: stdio や同一インスタンス内で同じ検索条件を後で再確認したいとき。DO NOT USE WHEN: HTTP ステートレス環境で永続保存したいとき（状態はサーバーインスタンス内のみで保持される）。Save named bid search criteria in the current session for recurring alert checks. State is held per-instance and does not persist across HTTP stateless connections. Simpan kriteria pencarian tender bernama dalam sesi ini untuk pemeriksaan peringatan berulang.",
       inputSchema: SavedSearchSchema.shape,
       outputSchema: SaveSearchOutputSchema.shape,
       annotations: {
@@ -130,7 +130,7 @@ export function registerSavedSearchAlert(server: McpServer, client: KkjClient): 
     {
       title: "保存検索の新着確認",
       description:
-        "保存した検索条件で新着入札を確認する。前回チェック以降の新着のみを返す。Check for new bids since last check using saved search criteria. Periksa tender baru sejak pemeriksaan terakhir menggunakan kriteria tersimpan.",
+        "保存した検索条件で新着入札を確認する。USE THIS WHEN: save_search で保存済みの条件について、前回チェック以降の新着だけを確認したいとき。DO NOT USE WHEN: 保存条件が無いとき、または HTTP ステートレスで永続アラートが必要なとき。Check for new bids since last check using saved search criteria. Periksa tender baru sejak pemeriksaan terakhir menggunakan kriteria tersimpan.",
       inputSchema: CheckAlertSchema.shape,
       outputSchema: CheckSavedSearchOutputSchema.shape,
       annotations: {
@@ -197,7 +197,7 @@ export function registerSavedSearchAlert(server: McpServer, client: KkjClient): 
     {
       title: "保存検索の一覧",
       description:
-        "保存されている検索条件の一覧を返す。List all saved search criteria. Daftar semua kriteria pencarian yang tersimpan.",
+        "保存されている検索条件の一覧を返す。USE THIS WHEN: 現在のサーバーインスタンスに保存された検索名と条件を確認したいとき。DO NOT USE WHEN: 永続DBに保存されたアラート一覧を期待しているとき（このツールはインメモリ）。List all saved search criteria. Daftar semua kriteria pencarian yang tersimpan.",
       inputSchema: ListSavedSchema.shape,
       outputSchema: ListSavedSearchesOutputSchema.shape,
       annotations: {

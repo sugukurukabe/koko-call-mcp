@@ -6,17 +6,58 @@ import { randomBytes } from "node:crypto";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import cors from "cors";
-import express from "express";
+import express, { type Request, type Response } from "express";
 import { createRequestId, recordAuditEvent } from "./audit/audit-logger.js";
 import { stats as cacheStats } from "./cache/tool-cache.js";
 import { extractBearerToken, hashActor, parseProApiKeys, parseTier } from "./lib/auth.js";
 import { parsePortEnv } from "./lib/env.js";
+import { verifyJwt } from "./lib/jwt.js";
 import { VERSION } from "./lib/version.js";
 import { createGatewayServer } from "./mcp.js";
 import { getRegistryDeploymentStatus, loadRegistry } from "./registry/loader.js";
 import { addToAuditBuffer } from "./tools/get-audit-events.js";
 
-const SUPPORTED_PROTOCOL_VERSIONS = new Set(["2025-11-25"]);
+const SUPPORTED_PROTOCOL_VERSIONS = new Set(["2025-11-25", "2026-07-28"]);
+
+function readJsonRpcMethod(body: unknown): string | undefined {
+  if (typeof body !== "object" || body === null || Array.isArray(body)) return undefined;
+  const method = (body as { method?: unknown }).method;
+  return typeof method === "string" ? method : undefined;
+}
+
+function readJsonRpcName(body: unknown): string | undefined {
+  if (typeof body !== "object" || body === null || Array.isArray(body)) return undefined;
+  const params = (body as { params?: unknown }).params;
+  if (typeof params !== "object" || params === null || Array.isArray(params)) return undefined;
+  const name = (params as { name?: unknown }).name;
+  return typeof name === "string" ? name : undefined;
+}
+
+function validateRoutableMcpHeaders(req: Request, res: Response): boolean {
+  const headerMethod = req.header("Mcp-Method");
+  const headerName = req.header("Mcp-Name");
+  if (!headerMethod && !headerName) return true;
+
+  const bodyMethod = readJsonRpcMethod(req.body);
+  const bodyName = readJsonRpcName(req.body);
+  if (headerMethod && bodyMethod && headerMethod !== bodyMethod) {
+    res.status(400).json({
+      error: "Mcp-Method header does not match JSON-RPC method",
+      header_method: headerMethod,
+      body_method: bodyMethod,
+    });
+    return false;
+  }
+  if (headerName && bodyName && headerName !== bodyName) {
+    res.status(400).json({
+      error: "Mcp-Name header does not match JSON-RPC params.name",
+      header_name: headerName,
+      body_name: bodyName,
+    });
+    return false;
+  }
+  return true;
+}
 
 function resolveGatewaySecret(): string {
   const explicit = process.env.GATEWAY_JWT_SECRET;
@@ -33,7 +74,7 @@ function resolveGatewaySecret(): string {
 
 export function createHttpApp(): express.Express {
   const app = express();
-  resolveGatewaySecret();
+  const gatewaySecret = resolveGatewaySecret();
   const proApiKeys = parseProApiKeys(process.env.GATEWAY_PRO_API_KEYS);
   if (process.env.K_SERVICE && proApiKeys.size === 0) {
     throw new Error("GATEWAY_PRO_API_KEYS is required in production.");
@@ -157,12 +198,19 @@ export function createHttpApp(): express.Express {
       });
       return;
     }
+    if (!validateRoutableMcpHeaders(req, res)) return;
 
     const authHeader = req.header("Authorization");
     const token = extractBearerToken(authHeader);
-    const isOAuthAuthenticated = false; // JWT 検証は次フェーズで実装
-    const tier = parseTier(authHeader, proApiKeys);
-    const actorHash = token ? hashActor(token) : hashActor("anonymous");
+    const jwtPayload = token?.includes(".") ? verifyJwt(token, gatewaySecret) : null;
+    const isOAuthAuthenticated = jwtPayload?.type === "access_token";
+    const tier = isOAuthAuthenticated ? "pro" : parseTier(authHeader, proApiKeys);
+    const actorHash =
+      typeof jwtPayload?.sub === "string"
+        ? hashActor(jwtPayload.sub)
+        : token
+          ? hashActor(token)
+          : hashActor("anonymous");
 
     // X-Mcp-Child-Authorization-{server-id} ヘッダを抽出して子MCPのOAuthトークンを取得する
     // Extract X-Mcp-Child-Authorization-{server-id} headers for child MCP OAuth tokens

@@ -136,20 +136,15 @@ Option B — Pro tier (full 17 tools + MCP App):
 
 ## 4. スクリーンショット添付 / Screenshots
 
-以下5枚を順番にアップロードする。すべて `docs/submissions/assets/` にある（PNG, 幅≥1000px, アプリ応答のみ）。
+以下5枚を順番にアップロードする。すべて `docs/submissions/assets/` にある（PNG, 幅≥1000px, アプリ応答のみ）。GitHub raw URL でも配信中で、フォームがURL入力型ならそちらを貼る。
 
-1. `screenshot-01-welcome.png` — Welcome画面（入力例プロンプト）
-2. `screenshot-02-search-results.png` — 検索結果ワークスペース（カード＋詳細）
-3. `screenshot-03-evidence.png` — 出典・安全性パネル（データ出典明記）
-4. `screenshot-04-dark.png` — ダークモード
-5. `screenshot-05-mobile.png` — モバイル幅レスポンシブ
-
-各キャプションが必要なら:
-- 01: "Welcome workspace with example prompts"
-- 02: "Search results: bid cards with priority/score/deadline + detail workbench"
-- 03: "Source & safety panel citing 中小企業庁 官公需情報ポータルサイト"
-- 04: "Dark mode"
-- 05: "Responsive mobile layout"
+| 順 | ローカルファイル / Local file | GitHub raw URL (HTTP/2 200 確認済) | キャプション |
+|---|---|---|---|
+| 1 | `docs/submissions/assets/screenshot-01-welcome.png` | `https://raw.githubusercontent.com/sugukurukabe/koko-call-mcp/main/docs/submissions/assets/screenshot-01-welcome.png` | Welcome workspace with example prompts |
+| 2 | `docs/submissions/assets/screenshot-02-search-results.png` | `https://raw.githubusercontent.com/sugukurukabe/koko-call-mcp/main/docs/submissions/assets/screenshot-02-search-results.png` | Search results: bid cards with priority/score/deadline + detail workbench |
+| 3 | `docs/submissions/assets/screenshot-03-evidence.png` | `https://raw.githubusercontent.com/sugukurukabe/koko-call-mcp/main/docs/submissions/assets/screenshot-03-evidence.png` | Source & safety panel citing 中小企業庁 官公需情報ポータルサイト |
+| 4 | `docs/submissions/assets/screenshot-04-dark.png` | `https://raw.githubusercontent.com/sugukurukabe/koko-call-mcp/main/docs/submissions/assets/screenshot-04-dark.png` | Dark mode |
+| 5 | `docs/submissions/assets/screenshot-05-mobile.png` | `https://raw.githubusercontent.com/sugukurukabe/koko-call-mcp/main/docs/submissions/assets/screenshot-05-mobile.png` | Responsive mobile layout |
 
 ---
 

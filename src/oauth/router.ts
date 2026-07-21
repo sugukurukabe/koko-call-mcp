@@ -218,15 +218,19 @@ export function createOAuthRouter(secret: string): Router {
     }
 
     if (action === "deny") {
+      const base = getBaseUrl(req);
       const url = new URL(redirect_uri);
       url.searchParams.set("error", "access_denied");
+      url.searchParams.set("iss", base);
       if (state) url.searchParams.set("state", state);
       res.redirect(url.toString());
       return;
     }
 
+    const base = getBaseUrl(req);
     const code = signJwt(
       {
+        iss: base,
         type: "authorization_code",
         client_id: client_id || "",
         redirect_uri: redirect_uri || "",
@@ -241,6 +245,7 @@ export function createOAuthRouter(secret: string): Router {
 
     const url = new URL(redirect_uri);
     url.searchParams.set("code", code);
+    url.searchParams.set("iss", base);
     if (state) url.searchParams.set("state", state);
     res.redirect(url.toString());
   });
@@ -300,12 +305,12 @@ function handleAuthCodeGrant(
   const scope = (payload.scope as string) || "mcp:read";
 
   const accessToken = signJwt(
-    { sub, aud: `${base}/mcp`, scope, type: "access_token" },
+    { iss: base, sub, aud: `${base}/mcp`, scope, type: "access_token" },
     secret,
     3600,
   );
   const refreshToken = signJwt(
-    { sub, aud: `${base}/mcp`, scope, type: "refresh_token" },
+    { iss: base, sub, aud: `${base}/mcp`, scope, type: "refresh_token" },
     secret,
     30 * 24 * 3600,
   );
@@ -347,12 +352,12 @@ function handleRefreshGrant(
   const scope = (payload.scope as string) || "mcp:read";
 
   const accessToken = signJwt(
-    { sub, aud: `${base}/mcp`, scope, type: "access_token" },
+    { iss: base, sub, aud: `${base}/mcp`, scope, type: "access_token" },
     secret,
     3600,
   );
   const newRefresh = signJwt(
-    { sub, aud: `${base}/mcp`, scope, type: "refresh_token" },
+    { iss: base, sub, aud: `${base}/mcp`, scope, type: "refresh_token" },
     secret,
     30 * 24 * 3600,
   );

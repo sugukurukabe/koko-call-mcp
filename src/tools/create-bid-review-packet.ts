@@ -47,7 +47,7 @@ export function registerCreateBidReviewPacket(server: McpServer, client: KkjClie
     {
       title: "入札社内検討パック",
       description:
-        "入札1件の判断サマリー・理由・リスク・要件・締切・次アクションをMarkdown社内メモとして返す。Generate a Markdown review packet with decision summary, risks, and next actions for one bid. Buat ringkasan tinjauan Markdown dengan keputusan, risiko, dan langkah selanjutnya untuk satu tender.",
+        "入札1件の判断サマリー・理由・リスク・要件・締切・次アクションをMarkdown社内メモとして返す。USE THIS WHEN: Key がある案件を社内で検討するため、判断材料を1つのレビュー資料にまとめたいとき。DO NOT USE WHEN: CSV一覧やカレンダーだけが欲しいとき（export_bid_shortlist / create_bid_calendar を使う）。Generate a Markdown review packet with decision summary, risks, and next actions for one bid. Buat ringkasan tinjauan Markdown dengan keputusan, risiko, dan langkah selanjutnya untuk satu tender.",
       inputSchema,
       outputSchema: BidReviewPacketSchema.shape,
       annotations: {

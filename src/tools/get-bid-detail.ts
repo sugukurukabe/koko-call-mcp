@@ -19,7 +19,7 @@ export function registerGetBidDetail(server: McpServer, client: KkjClient): void
     {
       title: "官公需入札詳細",
       description:
-        "入札Keyから1件の詳細を取得する。添付資料は保存せず公式サイトのURIのみ返す。Fetch full details for one bid by key without storing attachments. Ambil detail lengkap satu tender berdasarkan kunci tanpa menyimpan lampiran.",
+        "入札Keyから1件の詳細を取得する。添付資料は保存せず公式サイトのURIのみ返す。USE THIS WHEN: search_bids/list_recent_bids が返した Key から公式公告ページ・添付URI・機関情報を確認したいとき。DO NOT USE WHEN: Key がまだ無いとき（search_bids を先に使う）。Fetch full details for one bid by key without storing attachments. Ambil detail lengkap satu tender berdasarkan kunci tanpa menyimpan lampiran.",
       inputSchema,
       outputSchema: BidSearchResultSchema.shape,
       annotations: {

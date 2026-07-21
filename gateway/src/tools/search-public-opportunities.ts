@@ -7,6 +7,38 @@ import { z } from "zod";
 import { proxyToolCall } from "../proxy/mcp-proxy.js";
 import { loadRegistry } from "../registry/loader.js";
 
+function readNumberField(record: Record<string, unknown>, field: string): number | undefined {
+  const value = record[field];
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function summarizeSourcePagination(source: unknown): { totalCount: number; hasMore: boolean } {
+  if (typeof source !== "object" || source === null || Array.isArray(source)) {
+    return { totalCount: 0, hasMore: false };
+  }
+  const record = source as Record<string, unknown>;
+  const pagination = record.pagination;
+  if (typeof pagination === "object" && pagination !== null && !Array.isArray(pagination)) {
+    const paginationRecord = pagination as Record<string, unknown>;
+    return {
+      totalCount: readNumberField(paginationRecord, "total_count") ?? 0,
+      hasMore: paginationRecord.has_more === true,
+    };
+  }
+
+  const totalCount =
+    readNumberField(record, "searchHits") ??
+    readNumberField(record, "total_count") ??
+    readNumberField(record, "totalCount") ??
+    0;
+  const returnedCount =
+    readNumberField(record, "returnedCount") ??
+    readNumberField(record, "returned_count") ??
+    readNumberField(record, "count") ??
+    totalCount;
+  return { totalCount, hasMore: totalCount > returnedCount };
+}
+
 export function registerSearchPublicOpportunities(server: McpServer): void {
   server.registerTool(
     "search_public_opportunities",
@@ -116,6 +148,15 @@ export function registerSearchPublicOpportunities(server: McpServer): void {
       }
 
       await Promise.all(tasks);
+      const sourcePaginations = Object.values(results.sources as Record<string, unknown>).map(
+        summarizeSourcePagination,
+      );
+      const totalCount = sourcePaginations.reduce((sum, item) => sum + item.totalCount, 0);
+      results.pagination = {
+        has_more: sourcePaginations.some((item) => item.hasMore),
+        next_cursor: null,
+        total_count: totalCount,
+      };
 
       return {
         content: [

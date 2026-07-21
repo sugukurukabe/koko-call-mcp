@@ -41,6 +41,14 @@ const EXPECTED_TOOLS: { name: string; readOnlyHint: boolean; title: string }[] =
 ];
 
 const FREE_TOOLS = ["search_bids", "rank_bids", "list_recent_bids", "get_bid_detail"];
+// bid_discovery_workspace / competitor_radar / bid_review_packet_workflow /
+// qualification_and_question_draft は tier === "pro" のときのみ registerPrompt される
+// (src/prompts/register-prompts.ts)。Free tierでは登録されないため、期待値も分ける。
+// bid_discovery_workspace / competitor_radar / bid_review_packet_workflow /
+// qualification_and_question_draft are only registered when tier === "pro"
+// (src/prompts/register-prompts.ts). They are absent on Free tier, so the
+// expected prompt list must be split the same way EXPECTED_TOOLS/FREE_TOOLS is.
+const FREE_PROMPTS = ["morning_bid_briefing", "bid_due_alert"];
 const EXPECTED_PROMPTS = [
   "morning_bid_briefing",
   "bid_discovery_workspace",
@@ -135,8 +143,18 @@ try {
   log("\n[2/6] prompts/list");
   const { prompts } = await client.listPrompts();
   const promptNames = prompts.map((p) => p.name);
-  for (const name of EXPECTED_PROMPTS) {
+  const expectedPromptNames = expectsProSurface ? EXPECTED_PROMPTS : FREE_PROMPTS;
+  for (const name of expectedPromptNames) {
     check(promptNames.includes(name), `prompt present: ${name}`);
+  }
+
+  // Check for unexpected Pro-only prompts on free tier
+  if (!expectsProSurface) {
+    for (const name of promptNames) {
+      if (!FREE_PROMPTS.includes(name)) {
+        check(false, `Free tier should NOT expose prompt: ${name}`);
+      }
+    }
   }
 
   // --- 3. resources/list ---

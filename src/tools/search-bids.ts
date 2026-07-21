@@ -62,7 +62,7 @@ export function registerSearchBids(server: McpServer, client: KkjClient): void {
     {
       title: "官公需入札検索",
       description:
-        "日本全国の官公需入札情報を検索する。全文検索は query、件名は project_name、発注機関は organization_name を使う。Search Japanese public procurement bids by keyword, project name, or organization. Cari tender pengadaan pemerintah Jepang berdasarkan kata kunci, nama proyek, atau instansi.",
+        "日本全国の官公需入札情報を検索する。USE THIS WHEN: キーワード・件名・発注機関・都道府県・期間で入札候補を探したいとき。DO NOT USE WHEN: 既に Key があり1件の詳細が欲しいとき（get_bid_detail を使う）、追うべき順に並べたいとき（rank_bids を使う）。Search Japanese public procurement bids by keyword, project name, organization, prefecture, or date range. Cari tender pengadaan pemerintah Jepang berdasarkan kata kunci, nama proyek, instansi, prefektur, atau rentang tanggal.",
       inputSchema: searchBidsInputSchema,
       outputSchema: BidSearchResultSchema.shape,
       annotations: {
@@ -155,6 +155,11 @@ export function formatSearchSummary(result: z.infer<typeof BidSearchResultSchema
   if (result.bids.length > 10) {
     lines.push(`他 ${result.bids.length - 10}件は structuredContent を参照してください。`);
   }
+  if (result.pagination?.has_more) {
+    lines.push(
+      "さらに結果があります。KKJ API は cursor 非対応のため、limit を増やすか、都道府県・期間・発注機関で条件を絞ってください。",
+    );
+  }
   lines.push(jsonText({ attribution: result.attribution }));
   return lines.join("\n");
 }
@@ -168,9 +173,9 @@ export function capSearchResult(
   result: z.infer<typeof BidSearchResultSchema>,
 ): z.infer<typeof BidSearchResultSchema> {
   if (result.bids.length <= STRUCTURED_CONTENT_BID_CAP) {
-    return result;
+    return addPaginationMetadata(result);
   }
-  return {
+  return addPaginationMetadata({
     ...result,
     bids: result.bids.slice(0, STRUCTURED_CONTENT_BID_CAP),
     returnedCount: STRUCTURED_CONTENT_BID_CAP,
@@ -178,6 +183,20 @@ export function capSearchResult(
       ...result.query,
       _truncatedAt: STRUCTURED_CONTENT_BID_CAP,
       _totalReturned: result.bids.length,
+    },
+  });
+}
+
+function addPaginationMetadata(
+  result: z.infer<typeof BidSearchResultSchema>,
+): z.infer<typeof BidSearchResultSchema> {
+  const hasMore = result.searchHits > result.returnedCount;
+  return {
+    ...result,
+    pagination: {
+      has_more: hasMore,
+      next_cursor: null,
+      total_count: result.searchHits,
     },
   };
 }

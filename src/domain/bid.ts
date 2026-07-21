@@ -35,12 +35,19 @@ export const BidSchema = z.object({
 
 export type Bid = z.infer<typeof BidSchema>;
 
+export const PaginationMetadataSchema = z.object({
+  has_more: z.boolean(),
+  next_cursor: z.string().nullable().optional(),
+  total_count: z.number().int().nonnegative(),
+});
+
 export const BidSearchResultSchema = z.object({
   searchHits: z.number().int().nonnegative(),
   returnedCount: z.number().int().nonnegative(),
   bids: z.array(BidSchema),
   query: z.record(z.string(), z.union([z.string(), z.number()])),
   attribution: AttributionSchema,
+  pagination: PaginationMetadataSchema.optional(),
 });
 
 export type BidSearchResult = z.infer<typeof BidSearchResultSchema>;

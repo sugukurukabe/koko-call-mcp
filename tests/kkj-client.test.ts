@@ -88,6 +88,88 @@ describe("KkjClient", () => {
     expect(result.returnedCount).toBe(1);
     expect(requests[0]?.headers.get("User-Agent")).toMatch(/^JP Bids MCP\/\d+\.\d+\.\d+$/);
   });
+
+  it("retries a transient 502 and succeeds on the next attempt", async () => {
+    const xml = await readFile("tests/fixtures/kkj-search.xml", "utf8");
+    let callCount = 0;
+    const client = new KkjClient({
+      rateLimitPerSecond: 1000,
+      retryBaseDelayMs: 0,
+      fetchImpl: async () => {
+        callCount += 1;
+        if (callCount === 1) {
+          return new Response("bad gateway", { status: 502 });
+        }
+        return new Response(xml, { status: 200 });
+      },
+    });
+    const result = await client.search({ Query: "システム", Count: 1 });
+    expect(callCount).toBe(2);
+    expect(result.returnedCount).toBe(1);
+  });
+
+  it("gives up after exhausting retries on repeated 503s", async () => {
+    let callCount = 0;
+    const client = new KkjClient({
+      rateLimitPerSecond: 1000,
+      retryBaseDelayMs: 0,
+      maxRetries: 2,
+      fetchImpl: async () => {
+        callCount += 1;
+        return new Response("service unavailable", { status: 503 });
+      },
+    });
+    await expect(client.search({ Query: "システム", Count: 1 })).rejects.toThrow(/503/);
+    expect(callCount).toBe(3); // initial attempt + 2 retries
+  });
+
+  it("does not retry a 4xx client error", async () => {
+    let callCount = 0;
+    const client = new KkjClient({
+      rateLimitPerSecond: 1000,
+      retryBaseDelayMs: 0,
+      fetchImpl: async () => {
+        callCount += 1;
+        return new Response("not found", { status: 404 });
+      },
+    });
+    await expect(client.search({ Query: "システム", Count: 1 })).rejects.toThrow(/404/);
+    expect(callCount).toBe(1);
+  });
+
+  it("does not retry a KKJ <Error> response (user input error)", async () => {
+    const xml = await readFile("tests/fixtures/kkj-error.xml", "utf8");
+    let callCount = 0;
+    const client = new KkjClient({
+      rateLimitPerSecond: 1000,
+      retryBaseDelayMs: 0,
+      fetchImpl: async () => {
+        callCount += 1;
+        return new Response(xml, { status: 200 });
+      },
+    });
+    await expect(client.search({ Query: "システム", Count: 1 })).rejects.toThrow(/KKJ API error/);
+    expect(callCount).toBe(1);
+  });
+
+  it("retries a network-level failure (TypeError)", async () => {
+    const xml = await readFile("tests/fixtures/kkj-search.xml", "utf8");
+    let callCount = 0;
+    const client = new KkjClient({
+      rateLimitPerSecond: 1000,
+      retryBaseDelayMs: 0,
+      fetchImpl: async () => {
+        callCount += 1;
+        if (callCount === 1) {
+          throw new TypeError("fetch failed");
+        }
+        return new Response(xml, { status: 200 });
+      },
+    });
+    const result = await client.search({ Query: "システム", Count: 1 });
+    expect(callCount).toBe(2);
+    expect(result.returnedCount).toBe(1);
+  });
 });
 
 function escapeXml(value: string): string {

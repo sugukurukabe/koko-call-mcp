@@ -46,7 +46,7 @@ export function registerExplainBidFit(server: McpServer, client: KkjClient): voi
     {
       title: "入札追跡判断の説明",
       description:
-        "1件の入札について追うべきか・要確認か・見送るべきかを理由・リスク・次アクション付きで説明する。Explain bid fit with rationale, risks, and next actions for one bid. Jelaskan kesesuaian tender dengan alasan, risiko, dan langkah selanjutnya.",
+        "1件の入札について追うべきか・要確認か・見送るべきかを理由・リスク・次アクション付きで説明する。USE THIS WHEN: Key がある案件について営業会議向けに判断理由を説明したいとき。DO NOT USE WHEN: 複数案件を並べ替えたいとき（rank_bids を使う）、公式要件だけを抽出したいとき（extract_bid_requirements を使う）。Explain bid fit with rationale, risks, and next actions for one bid. Jelaskan kesesuaian tender dengan alasan, risiko, dan langkah selanjutnya.",
       inputSchema,
       outputSchema: BidFitExplanationSchema.shape,
       annotations: {

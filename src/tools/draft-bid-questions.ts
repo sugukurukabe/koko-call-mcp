@@ -31,7 +31,7 @@ export function registerDraftBidQuestions(server: McpServer, client: KkjClient):
     {
       title: "入札質問書ドラフト",
       description:
-        "入札1件の発注者への質問案をMarkdownで返す。提出前に公式書類と照合すること。Draft clarification questions for a bid in Markdown format. Buat draf pertanyaan klarifikasi untuk satu tender dalam format Markdown.",
+        "入札1件の発注者への質問案をMarkdownで返す。提出前に公式書類と照合すること。USE THIS WHEN: Key がある案件について不明点・リスク・提出前確認事項を質問案にしたいとき。DO NOT USE WHEN: 質問提出そのものを自動化したいとき（このツールはドラフトのみ）。Draft clarification questions for a bid in Markdown format. Buat draf pertanyaan klarifikasi untuk satu tender dalam format Markdown.",
       inputSchema,
       outputSchema: BidQuestionDraftSchema.shape,
       annotations: {

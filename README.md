@@ -18,6 +18,14 @@ npm:        jp-bids-mcp
 Registry metadata name: io.github.sugukurukabe/jp-bids
 ```
 
+## MCP 2026-07-28 Readiness / 対応状況 / Kesiapan
+
+JP Bids MCP は `2025-11-25` と `2026-07-28` の protocol version を受け入れます。`Mcp-Method` / `Mcp-Name` header がある場合は JSON-RPC body との不一致を拒否し、OAuth authorization response と JWT には RFC 9207 の `iss` を含めます。
+JP Bids MCP accepts both `2025-11-25` and `2026-07-28` protocol versions. When `Mcp-Method` / `Mcp-Name` headers are present, mismatches with the JSON-RPC body are rejected, and OAuth authorization responses/JWTs include RFC 9207 `iss`.
+JP Bids MCP menerima versi protokol `2025-11-25` dan `2026-07-28`. Jika header `Mcp-Method` / `Mcp-Name` ada, ketidaksesuaian dengan body JSON-RPC ditolak, dan response/JWT OAuth menyertakan `iss` RFC 9207.
+
+`server/discover`, `ttlMs` / `cacheScope`, and MRTR are tracked in [`docs/spec-notes/mcp-2026-07-28.md`](docs/spec-notes/mcp-2026-07-28.md) and will be enabled after SDK support stabilizes.
+
 ## AIに話しかけるだけ / Just Ask Your AI
 
 ```text

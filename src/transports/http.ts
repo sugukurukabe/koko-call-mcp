@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import cors from "cors";
-import express from "express";
+import express, { type Request, type Response } from "express";
 import { KkjClient } from "../api/kkj-client.js";
 import { parseProApiKeys, parseTier } from "../lib/auth.js";
 import { parsePortEnv, parsePositiveNumberEnv } from "../lib/env.js";
@@ -12,7 +12,47 @@ import { createJpBidsServer } from "../mcp.js";
 import { verifyJwt } from "../oauth/jwt.js";
 import { createOAuthRouter } from "../oauth/router.js";
 
-const supportedProtocolVersions = new Set(["2025-11-25"]);
+const supportedProtocolVersions = new Set(["2025-11-25", "2026-07-28"]);
+
+function readJsonRpcMethod(body: unknown): string | undefined {
+  if (typeof body !== "object" || body === null || Array.isArray(body)) return undefined;
+  const method = (body as { method?: unknown }).method;
+  return typeof method === "string" ? method : undefined;
+}
+
+function readJsonRpcName(body: unknown): string | undefined {
+  if (typeof body !== "object" || body === null || Array.isArray(body)) return undefined;
+  const params = (body as { params?: unknown }).params;
+  if (typeof params !== "object" || params === null || Array.isArray(params)) return undefined;
+  const name = (params as { name?: unknown }).name;
+  return typeof name === "string" ? name : undefined;
+}
+
+function validateRoutableMcpHeaders(req: Request, res: Response): boolean {
+  const headerMethod = req.header("Mcp-Method");
+  const headerName = req.header("Mcp-Name");
+  if (!headerMethod && !headerName) return true;
+
+  const bodyMethod = readJsonRpcMethod(req.body);
+  const bodyName = readJsonRpcName(req.body);
+  if (headerMethod && bodyMethod && headerMethod !== bodyMethod) {
+    res.status(400).json({
+      error: "Mcp-Method header does not match JSON-RPC method",
+      header_method: headerMethod,
+      body_method: bodyMethod,
+    });
+    return false;
+  }
+  if (headerName && bodyName && headerName !== bodyName) {
+    res.status(400).json({
+      error: "Mcp-Name header does not match JSON-RPC params.name",
+      header_name: headerName,
+      body_name: bodyName,
+    });
+    return false;
+  }
+  return true;
+}
 
 function resolveOAuthSecret(): string | undefined {
   const explicit = process.env.JP_BIDS_OAUTH_SECRET;
@@ -55,6 +95,7 @@ export function createHttpApp(): express.Express {
       process.env.JP_BIDS_RATE_LIMIT_PER_SECOND ?? process.env.KOKO_CALL_RATE_LIMIT_PER_SECOND,
       1,
     ),
+    timeoutMs: parsePositiveNumberEnv(process.env.JP_BIDS_KKJ_TIMEOUT_MS, 15_000),
   });
 
   if (proApiKeys.size === 0 && process.env.K_SERVICE) {
@@ -72,6 +113,18 @@ export function createHttpApp(): express.Express {
   }
 
   app.use("/.well-known", express.static("public/.well-known"));
+
+  // OpenAI ChatGPT Apps ドメイン所有確認用（提出フォームがトークンを発行した時だけ設定する）
+  // OpenAI ChatGPT Apps domain ownership challenge (only set when the submission form issues a token)
+  // Tantangan verifikasi domain OpenAI ChatGPT Apps (hanya diatur saat formulir submission menerbitkan token)
+  app.get("/.well-known/openai-apps-challenge", (_req, res) => {
+    const token = process.env.OPENAI_APPS_CHALLENGE_TOKEN;
+    if (!token) {
+      res.status(404).type("text/plain").send("not configured");
+      return;
+    }
+    res.status(200).type("text/plain").send(token);
+  });
 
   app.get("/ogp.png", (_req, res) => {
     res.sendFile("ogp.png", { root: "public" });
@@ -150,6 +203,7 @@ export function createHttpApp(): express.Express {
       });
       return;
     }
+    if (!validateRoutableMcpHeaders(req, res)) return;
 
     // OAuth有効時: Bearerトークンがなければ401を返してOAuthフローを起動する
     // When OAuth is enabled: return 401 without Bearer token to trigger OAuth flow

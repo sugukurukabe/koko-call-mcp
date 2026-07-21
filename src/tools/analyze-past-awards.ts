@@ -50,7 +50,7 @@ export function registerAnalyzePastAwards(server: McpServer, client: KkjClient):
     {
       title: "過去公告・競合レーダー",
       description:
-        "過去公告を集計し発注機関の頻度・カテゴリ偏り・月次トレンドを返す。公告履歴から競合パターンを推定する。Analyze past bid announcements to surface procurement patterns, category trends, and notable organizations. Analisis pengumuman tender masa lalu untuk menemukan pola pengadaan dan tren kategori.",
+        "過去公告を集計し発注機関の頻度・カテゴリ偏り・月次トレンドを返す。公告履歴から競合パターンを推定する。USE THIS WHEN: 地域・キーワード・カテゴリごとの過去傾向を見て、営業戦略や競合仮説を作りたいとき。DO NOT USE WHEN: 現在募集中の案件だけを探したいとき（search_bids/list_recent_bids を使う）。Analyze past bid announcements to surface procurement patterns, category trends, and notable organizations. Analisis pengumuman tender masa lalu untuk menemukan pola pengadaan dan tren kategori.",
       inputSchema,
       outputSchema: PastAwardSummarySchema.shape,
       annotations: {

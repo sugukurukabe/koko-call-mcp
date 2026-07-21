@@ -23,7 +23,7 @@ export function registerSummarizeBidsByOrg(server: McpServer, client: KkjClient)
     {
       title: "発注機関別の入札傾向分析",
       description:
-        "発注機関名を指定してカテゴリ別・公示種別別の入札傾向と直近案件を集計する。Summarize bid trends and recent notices for a specific procurement organization by category and procedure type. Ringkas tren tender dan pengumuman terbaru untuk instansi tertentu berdasarkan kategori.",
+        "発注機関名を指定してカテゴリ別・公示種別別の入札傾向と直近案件を集計する。USE THIS WHEN: 特定の発注機関がどのカテゴリ・公示種別を多く出すか、営業仮説を立てたいとき。DO NOT USE WHEN: 個別案件の参加可否を判断したいとき（assess_bid_qualification を使う）。Summarize bid trends and recent notices for a specific procurement organization by category and procedure type. Ringkas tren tender dan pengumuman terbaru untuk instansi tertentu berdasarkan kategori.",
       inputSchema,
       outputSchema: OrganizationSummarySchema.shape,
       annotations: {

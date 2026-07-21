@@ -26,7 +26,7 @@ describe("HTTP transport app", () => {
       .expect(400);
     expect(response.body).toMatchObject({
       error: "Unsupported MCP protocol version",
-      supported: ["2025-11-25"],
+      supported: ["2025-11-25", "2026-07-28"],
     });
   });
 
@@ -44,5 +44,30 @@ describe("HTTP transport app", () => {
   it("serves landing page on /", async () => {
     const response = await request(createHttpApp()).get("/").expect(200);
     expect(response.headers["content-type"]).toMatch(/html/);
+  });
+
+  it("returns 404 for the OpenAI Apps domain challenge when no token is configured", async () => {
+    const response = await request(createHttpApp())
+      .get("/.well-known/openai-apps-challenge")
+      .expect(404);
+    expect(response.text).toBe("not configured");
+  });
+
+  it("serves the OpenAI Apps domain challenge token as plain text when configured", async () => {
+    const original = process.env.OPENAI_APPS_CHALLENGE_TOKEN;
+    process.env.OPENAI_APPS_CHALLENGE_TOKEN = "test-challenge-token";
+    try {
+      const response = await request(createHttpApp())
+        .get("/.well-known/openai-apps-challenge")
+        .expect(200);
+      expect(response.text).toBe("test-challenge-token");
+      expect(response.headers["content-type"]).toMatch(/text\/plain/);
+    } finally {
+      if (original === undefined) {
+        delete process.env.OPENAI_APPS_CHALLENGE_TOKEN;
+      } else {
+        process.env.OPENAI_APPS_CHALLENGE_TOKEN = original;
+      }
+    }
   });
 });

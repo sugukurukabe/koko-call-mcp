@@ -1,0 +1,128 @@
+{
+  "$schema": "https://developers.openai.com/apps-sdk/schemas/chatgpt-app-submission.v1.json",
+  "schema_version": 1,
+  "app_info": {
+    "display_name": "JP Bids",
+    "subtitle": "Japan government bid search",
+    "description": "JP Bids helps users search and monitor Japanese public-sector procurement notices (government tenders) published on the official Small and Medium Enterprise Agency KKJ portal. Users can search by keyword, project name, organization, prefecture, category, or date range; get a scored, prioritized shortlist of bids worth pursuing; and check a daily digest of newly published notices for a region or category. All data is read-only public government information; the app never submits bids, applications, or any data on the user's behalf.",
+    "category": "BUSINESS"
+  },
+  "tools": {
+    "search_bids": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only queries the public KKJ procurement search API and returns matching notices; it never creates, updates, or deletes anything.",
+        "open_world_justification": "Queries an unpredictable, continuously-updated public data set (like a web search) but does not write, publish, or otherwise change any public-facing state; results are returned only to the requesting user.",
+        "destructive_justification": "Read-only search with no delete, overwrite, or irreversible side effects of any kind."
+      }
+    },
+    "rank_bids": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Runs the same read-only KKJ search as search_bids and scores the results locally in memory; no data is created, updated, or deleted anywhere.",
+        "open_world_justification": "Reads from the same unpredictable public procurement data set as search_bids but does not write or publish anything.",
+        "destructive_justification": "Read-only scoring with no delete, overwrite, or irreversible side effects."
+      }
+    },
+    "list_recent_bids": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Lists recently published KKJ notices for a date window; it only retrieves data and never modifies anything.",
+        "open_world_justification": "Reads from the public, continuously-updated KKJ notice feed but does not write or publish anything.",
+        "destructive_justification": "Read-only listing with no delete, overwrite, or irreversible side effects."
+      }
+    },
+    "get_bid_detail": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Fetches full detail for a single bid by key and returns official links; it never modifies data and never stores attachments server-side.",
+        "open_world_justification": "Returns links to official public KKJ pages and attachments (external resources) but does not write, publish, or change any public-facing state itself.",
+        "destructive_justification": "Read-only detail lookup with no delete, overwrite, or irreversible side effects."
+      }
+    }
+  },
+  "test_cases": [
+    {
+      "description": "Search for bids by keyword and prefecture.",
+      "user_prompt": "鹿児島県でIT関連の官公需入札を探して。",
+      "file_attachment_urls": null,
+      "tools_triggered": "search_bids",
+      "expected_output": "Returns a list of matching Kagoshima IT-related procurement notices with organization, prefecture, submission deadline, and a Key for each, plus the official KKJ attribution.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Search for bids from a specific organization and category.",
+      "user_prompt": "農林水産省が発注した役務の入札を検索して。",
+      "file_attachment_urls": null,
+      "tools_triggered": "search_bids",
+      "expected_output": "Returns notices filtered to the Ministry of Agriculture, Forestry and Fisheries in the services (役務) category, with the same KKJ attribution shown.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Rank search results by follow-up priority using preferred keywords.",
+      "user_prompt": "クラウドや保守に関わる入札を、追うべき順にランク付けして。",
+      "file_attachment_urls": null,
+      "tools_triggered": "rank_bids",
+      "expected_output": "Returns a scored, prioritized shortlist (pursue/review/skip) with a short reason for each ranked bid, based on the preferred keywords.",
+      "expected_output_url": null
+    },
+    {
+      "description": "List recently published notices for a region as a daily check.",
+      "user_prompt": "東京都で直近7日間に公告された新着の入札を教えて。",
+      "file_attachment_urls": null,
+      "tools_triggered": "list_recent_bids",
+      "expected_output": "Returns notices published in Tokyo over the last 7 days with a count and the KKJ attribution.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Get full detail for one bid using the key returned by an earlier search.",
+      "user_prompt": "さっき出てきた最初の案件の詳細と公式ページのリンクを教えて。",
+      "file_attachment_urls": null,
+      "tools_triggered": "get_bid_detail",
+      "expected_output": "Returns the project name, organization, and Key for the specified bid, plus a link to the official KKJ announcement page (and any attachment links, without storing the files).",
+      "expected_output_url": null
+    }
+  ],
+  "negative_test_cases": [
+    {
+      "description": "Do not trigger for unrelated private-sector job listings.",
+      "user_prompt": "民間企業のエンジニア求人を探して。",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The app should not be invoked because private-sector job listings are outside its scope, which is limited to public Japanese government procurement notices.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Do not attempt to submit or apply for a bid on the user's behalf.",
+      "user_prompt": "この入札に代わりに応募しておいて。",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The app has no write or submission capability; it should explain that it can only search and analyze public bid information, and direct the user to the official KKJ announcement page to apply themselves.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Do not guess a bid detail without a valid key or prior search context.",
+      "user_prompt": "この入札の詳細をもっとください。",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "Without a prior search result or an explicit bid key in the conversation, the app should ask the user to search first (or provide a key) rather than calling get_bid_detail with a guessed or empty key.",
+      "expected_output_url": null
+    }
+  ]
+}

@@ -35,3 +35,19 @@ jobs:
           npm install --prefix "$TMPDIR" "./$TARBALL" >/dev/null
           test -x "$TMPDIR/node_modules/.bin/jp-bids-mcp"
           "$TMPDIR/node_modules/.bin/jp-bids-mcp" --version
+
+  gateway-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: gateway
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: gateway/package-lock.json
+      - run: npm ci
+      - run: npm run check

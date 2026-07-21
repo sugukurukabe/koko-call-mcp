@@ -24,7 +24,7 @@ export function registerSearchResultsApp(server: McpServer, client: KkjClient): 
     {
       title: "官公需入札検索テーブル",
       description:
-        "日本全国の官公需入札情報を検索し、MCP Apps対応クライアントでは検索結果を表で表示する。非対応クライアントでも通常のテキスト要約とstructuredContentを返す。",
+        "日本全国の官公需入札情報を検索し、MCP Apps対応クライアントでは検索結果を表で表示する。USE THIS WHEN: 対応クライアントで入札検索結果をカード/テーブルUIとして確認したいとき。DO NOT USE WHEN: テキストと structuredContent だけで十分なとき（search_bids を使う）。非対応クライアントでも通常のテキスト要約と structuredContent を返す。",
       inputSchema: searchBidsInputSchema,
       outputSchema: BidSearchResultSchema.shape,
       annotations: {
@@ -69,6 +69,12 @@ export function registerSearchResultsApp(server: McpServer, client: KkjClient): 
             connectDomains: [],
             resourceDomains: [],
           },
+          // CSV/ICS/Markdownをダウンロード不可の場合にクリップボードへコピーするために必要
+          // Required so CSV/ICS/Markdown can fall back to clipboard copy when downloadFile is unsupported
+          // Diperlukan agar CSV/ICS/Markdown bisa disalin ke clipboard saat downloadFile tidak didukung
+          permissions: {
+            clipboardWrite: {},
+          },
         },
       },
     },
@@ -83,6 +89,9 @@ export function registerSearchResultsApp(server: McpServer, client: KkjClient): 
               csp: {
                 connectDomains: [],
                 resourceDomains: [],
+              },
+              permissions: {
+                clipboardWrite: {},
               },
             },
           },

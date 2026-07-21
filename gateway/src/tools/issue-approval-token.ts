@@ -39,7 +39,8 @@ export function registerIssueApprovalToken(server: McpServer, context: { tier: T
       description:
         "required_approval が設定されたツール（MoneyForwardの仕訳作成/更新 等）を呼び出す前に、" +
         "HMAC 署名付き Approval Token を発行する（Pro tier 専用）。" +
-        "トークンは 5 分間有効。call_registered_mcp に approval_token として渡すこと。" +
+        "USE THIS WHEN: call_registered_mcp で required_approval の金融・会計書き込みツールを呼ぶ直前に、引数固定の短命承認トークンが必要なとき。" +
+        "DO NOT USE WHEN: 読み取り専用ツール、検索、分析だけを実行するとき。トークンは 5 分間有効。call_registered_mcp に approval_token として渡すこと。" +
         "Issue a HMAC-signed Approval Token before calling tools that require approval " +
         "(e.g. MoneyForward write tools). Token is valid for 5 minutes. Pass it as approval_token " +
         "to call_registered_mcp. " +
@@ -110,12 +111,23 @@ export function registerIssueApprovalToken(server: McpServer, context: { tier: T
       const registry = loadRegistry();
       const childServer = registry.servers.find((s) => s.id === server_id);
       if (!childServer) {
+        const suggestions = registry.servers
+          .map((s) => s.id)
+          .filter((id) => id.includes(server_id) || server_id.includes(id))
+          .slice(0, 3);
         return {
           content: [
             {
               type: "text" as const,
               text: JSON.stringify({
-                error: `Server "${server_id}" is not registered. Available: ${registry.servers.map((s) => s.id).join(", ")}`,
+                error:
+                  suggestions.length > 0
+                    ? `Server "${server_id}" is not registered. Did you mean ${suggestions.map((s) => `"${s}"`).join(" or ")}?`
+                    : `Server "${server_id}" is not registered.`,
+                available_servers: registry.servers.map((s) => s.id),
+                suggestions: suggestions.length > 0 ? suggestions : undefined,
+                next_step:
+                  "Call list_connected_servers(include_tools: true) to confirm server IDs.",
               }),
             },
           ],
@@ -125,6 +137,12 @@ export function registerIssueApprovalToken(server: McpServer, context: { tier: T
 
       const toolPolicy = childServer.tool_policies?.[tool_name];
       if (!toolPolicy?.required_approval) {
+        const approvalTools = Object.entries(childServer.tool_policies ?? {})
+          .filter(([, policy]) => policy.required_approval === true)
+          .map(([name]) => name);
+        const suggestions = approvalTools
+          .filter((name) => name.includes(tool_name) || tool_name.includes(name))
+          .slice(0, 3);
         return {
           content: [
             {
@@ -133,6 +151,12 @@ export function registerIssueApprovalToken(server: McpServer, context: { tier: T
                 error:
                   `Tool "${tool_name}" on server "${server_id}" does not require approval. ` +
                   `Call it directly via call_registered_mcp.`,
+                approval_required_tools: approvalTools,
+                suggestions: suggestions.length > 0 ? suggestions : undefined,
+                next_step:
+                  approvalTools.length > 0
+                    ? "Use one of approval_required_tools, or call the read-only tool directly via call_registered_mcp."
+                    : "This server has no registry tools marked required_approval; call the tool directly via call_registered_mcp.",
               }),
             },
           ],
