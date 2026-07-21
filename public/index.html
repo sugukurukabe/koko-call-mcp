@@ -213,9 +213,21 @@ pre .key{color:#c4b5fd}
 .workflow-card h3{font-size:.95rem;font-weight:700;margin-bottom:.3rem}
 .workflow-card p{font-size:.85rem;color:var(--muted);line-height:1.5}
 
-.ecosystem{max-width:700px;margin:0 auto 3rem;padding:0 1.5rem;text-align:center}
-.ecosystem h2{font-size:1.3rem;font-weight:700;margin-bottom:1rem}
-.eco-diagram{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;font-family:ui-monospace,monospace;font-size:.9rem;line-height:2}
+.usecases{max-width:960px;margin:0 auto 3rem;padding:0 1.5rem}
+.usecases h2{font-size:1.3rem;font-weight:700;text-align:center;margin-bottom:.5rem}
+.usecases .sub{text-align:center;color:var(--muted);font-size:.9rem;margin-bottom:1.5rem}
+.usecase-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem}
+.usecase-card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:1.3rem;display:flex;flex-direction:column;gap:.8rem}
+.usecase-flow{display:flex;align-items:center;justify-content:center;gap:.25rem;flex-wrap:wrap;padding:.6rem .3rem;background:var(--accent-light);border-radius:8px}
+.usecase-node{display:flex;flex-direction:column;align-items:center;gap:.15rem;min-width:52px}
+.usecase-node .icon{font-size:1.4rem;line-height:1}
+.usecase-node .label{font-size:.64rem;font-weight:700;color:var(--fg);text-align:center;white-space:nowrap}
+.usecase-arrow{color:var(--accent);font-size:1rem;font-weight:700;flex-shrink:0}
+.usecase-card h3{font-size:1rem;font-weight:700}
+.usecase-card p{font-size:.85rem;color:var(--muted);line-height:1.55}
+.usecase-target{display:inline-flex;align-self:flex-start;font-size:.72rem;font-weight:600;color:var(--accent);background:var(--accent-light);padding:.2rem .6rem;border-radius:999px}
+.usecase-more{text-align:center;margin-top:1.5rem}
+.usecase-more a{font-size:.88rem;font-weight:600}
 
 .cta{text-align:center;padding:3rem 1.5rem;background:linear-gradient(180deg,var(--bg) 0%,#eff6ff 100%)}
 .cta h2{font-size:1.5rem;font-weight:800;margin-bottom:.5rem}
@@ -396,14 +408,46 @@ footer a{color:var(--muted)}
   </div>
 </section>
 
-<section class="ecosystem">
-  <h2>エコシステム連携</h2>
-  <div class="eco-diagram">
-    <strong>JP Bids MCP</strong>（入札）<br>
-    &nbsp;&nbsp;&#x2194;&nbsp;&nbsp;<a href="https://github.com/digital-go-jp/jgrants-mcp-server">J-Grants MCP</a>（補助金・デジタル庁）<br>
-    &nbsp;&nbsp;&#x2194;&nbsp;&nbsp;<a href="https://www.npmjs.com/package/freee-mcp">freee MCP</a>（会計・請求書）
+<section class="usecases" id="usecases">
+  <h2>ユースケース — 入札検索から一歩先へ</h2>
+  <p class="sub">JP Bids MCP を他のMCPコネクタと組み合わせると、こんなことができる</p>
+  <div class="usecase-grid">
+    <div class="usecase-card">
+      <span class="usecase-target">地方の受託開発会社</span>
+      <div class="usecase-flow">
+        <div class="usecase-node"><span class="icon">&#x1F50D;</span><span class="label">JP Bids</span></div>
+        <span class="usecase-arrow">&#x2192;</span>
+        <div class="usecase-node"><span class="icon">&#x1F4B0;</span><span class="label">J-Grants</span></div>
+        <span class="usecase-arrow">&#x2192;</span>
+        <div class="usecase-node"><span class="icon">&#x1F4D2;</span><span class="label">freee</span></div>
+      </div>
+      <h3>原資を確保して入札する</h3>
+      <p>IT導入補助金で原資を確保した上で、対応するシステム調達案件を絞り込む。補助金の申請期限と入札の提出期限が重ならない組み合わせをAIが提案。</p>
+    </div>
+    <div class="usecase-card">
+      <span class="usecase-target">建設・役務系の中小企業</span>
+      <div class="usecase-flow">
+        <div class="usecase-node"><span class="icon">&#x1F50D;</span><span class="label">JP Bids</span></div>
+        <span class="usecase-arrow">&#x2192;</span>
+        <div class="usecase-node"><span class="icon">&#x1F3E2;</span><span class="label">法人番号</span></div>
+      </div>
+      <h3>常連落札者を取引先候補として照合する</h3>
+      <p>過去公告・競合レーダーで常連落札企業を特定し、法人番号レジストリで実在性・所在地を確認。競合が共同入札（JV）のパートナー候補になることもある。</p>
+    </div>
+    <div class="usecase-card">
+      <span class="usecase-target">営業3〜5名規模の中小企業</span>
+      <div class="usecase-flow">
+        <div class="usecase-node"><span class="icon">&#x1F514;</span><span class="label">保存検索</span></div>
+        <span class="usecase-arrow">&#x2192;</span>
+        <div class="usecase-node"><span class="icon">&#x1F4C5;</span><span class="label">ICS</span></div>
+        <span class="usecase-arrow">&#x2192;</span>
+        <div class="usecase-node"><span class="icon">&#x1F4AC;</span><span class="label">Slack</span></div>
+      </div>
+      <h3>保存検索・ICS・Slackメモでチームに配る</h3>
+      <p>保存検索アラートで新着案件を検知し、締切をICSでチームのカレンダーへ。検討メモはMarkdownでダウンロードしてSlackに共有。担当者一人の頭の中で止まらない。</p>
+    </div>
   </div>
-  <p style="font-size:.88rem;color:var(--muted);margin-top:.8rem">3つの独立MCPサーバーを組み合わせて、入札→補助金→会計をひとつのAI会話でカバー。</p>
+  <p class="usecase-more"><a href="https://github.com/sugukurukabe/koko-call-mcp/blob/main/docs/use-cases.md">職種別ユースケース（入札情報サービス事業者・行政書士・GovTech企業など）を見る →</a></p>
 </section>
 
 <section class="cta">
@@ -411,7 +455,7 @@ footer a{color:var(--muted)}
   <p>インストール不要。30秒でAIアシスタントに入札検索を追加。</p>
   <div class="hero-actions">
     <a href="#setup" class="btn btn-primary">セットアップへ</a>
-    <a href="https://github.com/sugukurukabe/koko-call-mcp/blob/main/docs/use-cases.md" class="btn btn-outline">ユースケース</a>
+    <a href="#usecases" class="btn btn-outline">ユースケース</a>
   </div>
 </section>
 
