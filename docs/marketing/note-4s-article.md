@@ -265,4 +265,4 @@ A. 結果として私が運営する [JP Bids MCP](https://mcp.bid-jp.com) を�
 
 ---
 
-*筆者: 壁（Kabe）。スグクル株式会社代表。鹿児島県霧島市で、公共データを AI で扱える MCP サーバーを Apache-2.0 で公開しています。第一弾は JP Bids MCP（中小企業庁の官公需入札・年間 180 万件超）。実装は GitHub @sugukurukabe、短い思考は X @mcp_kabe。*
+*筆者: 壁（Kabe）。スグクル株式会社代表。鹿児島県霧島市で、公共データを AI で扱える MCP サーバーを Apache-2.0 で公開しています。第一弾は JP Bids MCP（中小企業庁 官公需情報ポータルサイトの公開入札公示データ）。実装は GitHub @sugukurukabe、短い思考は X @mcp_kabe。*

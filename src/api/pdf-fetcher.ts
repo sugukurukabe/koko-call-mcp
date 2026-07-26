@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto";
 import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
-import { LRUCache } from "lru-cache";
 import { parsePositiveNumberEnv } from "../lib/env.js";
 import { UpstreamError, UserInputError } from "../lib/errors.js";
 import { VERSION } from "../lib/version.js";
@@ -36,13 +35,6 @@ const defaultMaxBytes = 20 * 1024 * 1024;
 const defaultTimeoutMs = 15_000;
 const defaultMaxRedirects = 5;
 const allowedMimeTypes = new Set(["application/pdf", "text/html"]);
-const documentCache = new LRUCache<string, CachedDocument>({
-  max: 10,
-  maxSize: 200 * 1024 * 1024,
-  sizeCalculation: (value) => value.sizeBytes,
-  ttl: 5 * 60 * 1000,
-});
-
 export async function fetchDocument(
   uri: string,
   options: PdfFetcherOptions = {},
@@ -51,11 +43,6 @@ export async function fetchDocument(
   const allowedHosts =
     options.allowedHosts ?? parseAllowedHosts(process.env.JP_BIDS_PDF_ALLOWED_HOSTS);
   assertAllowedHost(sourceUrl, allowedHosts);
-
-  const cached = documentCache.get(sourceUrl.toString());
-  if (cached) {
-    return { sourceUri: sourceUrl.toString(), ...cached };
-  }
 
   const fetchImpl = options.fetchImpl ?? fetch;
   const resolveHostname = options.resolveHostname ?? defaultResolveHostname;
@@ -76,8 +63,6 @@ export async function fetchDocument(
   });
   const sha256 = createHash("sha256").update(fetched.bytes).digest("hex");
   const cachedDocument = { ...fetched, sha256 };
-  documentCache.set(sourceUrl.toString(), cachedDocument);
-  documentCache.set(sha256, cachedDocument);
   return {
     sourceUri: sourceUrl.toString(),
     ...cachedDocument,
@@ -85,7 +70,9 @@ export async function fetchDocument(
 }
 
 export function clearDocumentCache(): void {
-  documentCache.clear();
+  // v0.8.0以降はPDF/HTML本文をプロセス横断で保持しない。既存テスト互換のno-op。
+  // Since v0.8.0, document bytes are not retained across process requests. Kept as a no-op for tests.
+  // Sejak v0.8.0, byte dokumen tidak disimpan lintas request proses. Dipertahankan sebagai no-op untuk tes.
 }
 
 async function fetchWithRedirects(

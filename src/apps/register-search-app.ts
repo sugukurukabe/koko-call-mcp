@@ -22,9 +22,9 @@ export function registerSearchResultsApp(server: McpServer, client: KkjClient): 
     server,
     "search_bids_app",
     {
-      title: "官公需入札検索テーブル",
+      title: "AI Bid Workspace",
       description:
-        "日本全国の官公需入札情報を検索し、MCP Apps対応クライアントでは検索結果を表で表示する。USE THIS WHEN: 対応クライアントで入札検索結果をカード/テーブルUIとして確認したいとき。DO NOT USE WHEN: テキストと structuredContent だけで十分なとき（search_bids を使う）。非対応クライアントでも通常のテキスト要約と structuredContent を返す。",
+        "日本全国の官公需入札情報を検索し、MCP Apps対応クライアントではAI Bid Workspaceとして検索結果を表示する。USE THIS WHEN: 対応クライアントで入札検索結果をカード/ワークスペースUIとして確認したいとき。DO NOT USE WHEN: テキストと structuredContent だけで十分なとき（search_bids を使う）。非対応クライアントでも通常のテキスト要約と structuredContent を返す。",
       inputSchema: searchBidsInputSchema,
       outputSchema: BidSearchResultSchema.shape,
       annotations: {

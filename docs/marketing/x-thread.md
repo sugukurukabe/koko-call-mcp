@@ -29,7 +29,7 @@
 
 ```
 中小企業庁の官公需情報ポータルサイトには、
-年間180万件を超える入札公告が公開されている。
+中小企業庁 官公需情報ポータルサイトでは、官公需の公開入札公示データを横断検索できる。
 
 公開されてはいるが、人が一件ずつ読める量ではない。
 
@@ -55,7 +55,7 @@ https://github.com/sugukurukabe/koko-call-mcp
 
 ```
 JP Bids MCP — an MCP server for Japan's SME Agency procurement portal.
-1.8M+ public bids per year, exposed through MCP 2025-11-25.
+Public procurement notice search from the SME Agency KKJ portal, exposed through MCP 2025-11-25.
 
 One tool renders results as a table inside the conversation,
 using MCP Apps. Not JSON. Not a link out.

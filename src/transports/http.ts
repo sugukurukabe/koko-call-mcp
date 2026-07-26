@@ -9,8 +9,9 @@ import { parsePortEnv, parsePositiveNumberEnv } from "../lib/env.js";
 import { parseAllowedOrigins, validateOrigin } from "../lib/http.js";
 import { VERSION } from "../lib/version.js";
 import { createJpBidsServer } from "../mcp.js";
-import { verifyJwt } from "../oauth/jwt.js";
-import { createOAuthRouter } from "../oauth/router.js";
+import { validateMcpAccessTokenClaims, verifyJwt } from "../oauth/jwt.js";
+import { createOAuthRouterWithStore } from "../oauth/router.js";
+import { createOAuthStoreFromEnv } from "../oauth/store.js";
 
 const supportedProtocolVersions = new Set(["2025-11-25", "2026-07-28"]);
 
@@ -83,19 +84,29 @@ function assertProductionDocumentFetchPolicy(): void {
   }
 }
 
+function getBaseUrl(req: Request): string {
+  if (process.env.JP_BIDS_BASE_URL) return process.env.JP_BIDS_BASE_URL;
+  const proto = req.header("x-forwarded-proto") || req.protocol;
+  const host = req.header("x-forwarded-host") || req.header("host") || "localhost:8080";
+  return `${proto}://${host}`;
+}
+
 export function createHttpApp(): express.Express {
   const app = express();
+  app.set("trust proxy", 1);
   const allowedOrigins = parseAllowedOrigins(process.env.ALLOWED_ORIGINS);
   assertProductionOriginPolicy(allowedOrigins);
   assertProductionDocumentFetchPolicy();
   const proApiKeys = parseProApiKeys(process.env.JP_BIDS_PRO_API_KEYS);
   const oauthSecret = resolveOAuthSecret();
+  const oauthStore = oauthSecret ? createOAuthStoreFromEnv() : undefined;
   const sharedKkjClient = new KkjClient({
     rateLimitPerSecond: parsePositiveNumberEnv(
       process.env.JP_BIDS_RATE_LIMIT_PER_SECOND ?? process.env.KOKO_CALL_RATE_LIMIT_PER_SECOND,
       1,
     ),
     timeoutMs: parsePositiveNumberEnv(process.env.JP_BIDS_KKJ_TIMEOUT_MS, 15_000),
+    rememberRecentBids: false,
   });
 
   if (proApiKeys.size === 0 && process.env.K_SERVICE) {
@@ -109,7 +120,7 @@ export function createHttpApp(): express.Express {
   app.use(validateOrigin(allowedOrigins));
 
   if (oauthSecret) {
-    app.use(createOAuthRouter(oauthSecret));
+    app.use(createOAuthRouterWithStore(oauthSecret, oauthStore ?? createOAuthStoreFromEnv()));
   }
 
   app.use("/.well-known", express.static("public/.well-known"));
@@ -210,9 +221,7 @@ export function createHttpApp(): express.Express {
     // Saat OAuth aktif: kembalikan 401 tanpa Bearer token untuk memulai alur OAuth
     const authHeader = req.header("Authorization");
     if (oauthSecret && !authHeader) {
-      const proto = req.header("x-forwarded-proto") || req.protocol;
-      const host = req.header("x-forwarded-host") || req.header("host") || "localhost:8080";
-      const base = `${proto}://${host}`;
+      const base = getBaseUrl(req);
       res
         .status(401)
         .set(
@@ -231,16 +240,34 @@ export function createHttpApp(): express.Express {
       const match = /^Bearer\s+(.+)$/i.exec(authHeader.trim());
       const token = match?.[1];
       if (token?.includes(".")) {
+        const apiKeyTier = parseTier(authHeader, proApiKeys);
         const jwt = verifyJwt(token, oauthSecret);
         if (!jwt) {
-          res.status(401).json({ error: "invalid_token" });
-          return;
+          if (apiKeyTier === "pro") {
+            isOAuthAuthenticated = false;
+          } else {
+            res.status(401).json({ error: "invalid_token" });
+            return;
+          }
+        } else {
+          const base = getBaseUrl(req);
+          const accessClaims = validateMcpAccessTokenClaims(jwt, {
+            issuer: base,
+            audience: `${base}/mcp`,
+            requiredScope: "mcp:read",
+          });
+          if (!accessClaims) {
+            res.status(401).json({ error: "invalid_token" });
+            return;
+          }
+          isOAuthAuthenticated = true;
         }
-        isOAuthAuthenticated = true;
       }
     }
 
-    const tier = isOAuthAuthenticated ? "pro" : parseTier(authHeader, proApiKeys);
+    const tier = isOAuthAuthenticated
+      ? parseOAuthTier(proApiKeys)
+      : parseTier(authHeader, proApiKeys);
     const server = createJpBidsServer({ kkjClient: sharedKkjClient, tier });
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
@@ -262,6 +289,13 @@ export function createHttpApp(): express.Express {
   });
 
   return app;
+}
+
+function parseOAuthTier(proApiKeys: ReadonlySet<string>): "free" | "pro" {
+  // ベータ期間中はOAuth利用者にもPro相当の公開ベータ体験を提供する
+  // During beta, OAuth users receive the public Pro-equivalent beta experience
+  // Selama beta, pengguna OAuth mendapat pengalaman beta setara Pro
+  return parseTier(undefined, proApiKeys);
 }
 
 export async function startHttpServer(): Promise<void> {

@@ -30,6 +30,21 @@ describe("HTTP transport app", () => {
     });
   });
 
+  it("rejects routable MCP headers that disagree with the JSON-RPC body", async () => {
+    await request(createHttpApp())
+      .post("/mcp")
+      .set("Mcp-Method", "tools/call")
+      .send({ jsonrpc: "2.0", id: 1, method: "tools/list", params: {} })
+      .expect(400);
+
+    await request(createHttpApp())
+      .post("/mcp")
+      .set("Mcp-Method", "tools/call")
+      .set("Mcp-Name", "search_bids")
+      .send({ jsonrpc: "2.0", id: 2, method: "tools/call", params: { name: "rank_bids" } })
+      .expect(400);
+  });
+
   it("serves usage stats on /stats", async () => {
     const response = await request(createHttpApp()).get("/stats").expect(200);
     expect(response.body).toMatchObject({

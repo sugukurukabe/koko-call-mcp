@@ -6,7 +6,7 @@
 
 **タイトル**
 ```
-Show HN: JP Bids MCP – MCP server for Japan's 1.8M/yr government procurement bids
+Show HN: JP Bids MCP – MCP server for Japan's public procurement notices
 ```
 
 **本文（HNコメント欄）**
@@ -14,7 +14,7 @@ Show HN: JP Bids MCP – MCP server for Japan's 1.8M/yr government procurement b
 I built an MCP server (Model Context Protocol) that exposes Japan's government procurement portal (KKJ) as 17 AI tools.
 
 **What it does:**
-- Search 1.8M+/yr public bids from Japan's SME Agency
+- Search public procurement notices from Japan's SME Agency KKJ portal
 - AI-score bids against company profile (keywords, qualifications, deadlines)
 - Extract requirements from PDF spec sheets via Vertex AI Gemini
 - Generate ICS calendar events for bid deadlines
@@ -62,7 +62,7 @@ mcp, typescript, govtech, opensource
 ```markdown
 ## Why Government Procurement Data?
 
-Japan's SME Agency publishes 1.8M+ public procurement notices per year via a public API. The data is there. The API is documented. But public, agent-native MCP examples for this domain are still rare.
+Japan's SME Agency exposes public procurement notice search through the KKJ portal and public API. The data is there. The API is documented. But public, agent-native MCP examples for this domain are still rare.
 
 That's a gap worth filling — not just for utility, but as a demonstration of what reference-quality MCP looks like on public data.
 

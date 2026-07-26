@@ -12,6 +12,8 @@ export interface JwtPayload {
   exp?: number;
   iat?: number;
   jti?: string;
+  scope?: string;
+  type?: string;
 }
 
 /**
@@ -57,6 +59,39 @@ export function verifyJwt(token: string, secret: string): JwtPayload | null {
   } catch {
     return null;
   }
+}
+
+export interface AccessTokenClaims {
+  iss: string;
+  sub: string;
+  aud: string;
+  scope: string;
+  type: "access_token";
+}
+
+/**
+ * MCP access tokenとして使えるJWT claimか検証する
+ * Validate whether JWT claims are usable as an MCP access token
+ * Memvalidasi apakah claim JWT dapat dipakai sebagai access token MCP
+ */
+export function validateMcpAccessTokenClaims(
+  payload: JwtPayload,
+  expected: { issuer: string; audience: string; requiredScope: string },
+): AccessTokenClaims | null {
+  if (payload.type !== "access_token") return null;
+  if (payload.iss !== expected.issuer) return null;
+  if (payload.aud !== expected.audience) return null;
+  if (typeof payload.sub !== "string" || payload.sub.length === 0) return null;
+  if (typeof payload.scope !== "string") return null;
+  const scopes = new Set(payload.scope.split(/\s+/).filter((scope) => scope.length > 0));
+  if (!scopes.has(expected.requiredScope)) return null;
+  return {
+    iss: payload.iss,
+    sub: payload.sub,
+    aud: payload.aud,
+    scope: payload.scope,
+    type: "access_token",
+  };
 }
 
 /**

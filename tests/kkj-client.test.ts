@@ -170,6 +170,28 @@ describe("KkjClient", () => {
     expect(callCount).toBe(2);
     expect(result.returnedCount).toBe(1);
   });
+
+  it("can cache public search responses without retaining recent completion state", async () => {
+    const xml = await readFile("tests/fixtures/kkj-search.xml", "utf8");
+    let callCount = 0;
+    const client = new KkjClient({
+      rateLimitPerSecond: 1000,
+      rememberRecentBids: false,
+      fetchImpl: async () => {
+        callCount += 1;
+        return new Response(xml, { status: 200 });
+      },
+    });
+
+    const first = await client.search({ Query: "システム", Count: 1 });
+    const second = await client.search({ Query: "システム", Count: 1 });
+
+    expect(first.bids[0]?.key).toBe("KKJ-TEST-001");
+    expect(second.bids[0]?.key).toBe("KKJ-TEST-001");
+    expect(callCount).toBe(1);
+    expect(client.getCachedBid("KKJ-TEST-001")?.projectName).toBe("鹿児島市システム保守業務委託");
+    expect(client.completeBidKeys("KKJ")).toEqual([]);
+  });
 });
 
 function escapeXml(value: string): string {

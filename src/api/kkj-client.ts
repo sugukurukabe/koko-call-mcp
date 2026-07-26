@@ -30,6 +30,7 @@ export interface KkjClientOptions {
   rateLimitPerSecond?: number;
   maxRetries?: number;
   retryBaseDelayMs?: number;
+  rememberRecentBids?: boolean;
 }
 
 type XmlRecord = Record<string, unknown>;
@@ -69,6 +70,7 @@ export class KkjClient {
   private readonly timeoutMs: number;
   private readonly maxRetries: number;
   private readonly retryBaseDelayMs: number;
+  private readonly rememberRecentBidsEnabled: boolean;
   private readonly cache: LRUCache<string, BidSearchResult>;
   private readonly limiter: TokenBucketRateLimiter;
   private recentBidKeys: string[] = [];
@@ -82,6 +84,7 @@ export class KkjClient {
     this.timeoutMs = options.timeoutMs ?? 15_000;
     this.maxRetries = options.maxRetries ?? defaultMaxRetries;
     this.retryBaseDelayMs = options.retryBaseDelayMs ?? defaultRetryBaseDelayMs;
+    this.rememberRecentBidsEnabled = options.rememberRecentBids ?? true;
     this.cache = new LRUCache<string, BidSearchResult>({
       max: 500,
       ttl: options.cacheTtlMs ?? 10 * 60 * 1000,
@@ -100,7 +103,9 @@ export class KkjClient {
     }
 
     const result = await this.fetchWithRetry(normalizedParams);
-    this.rememberBidKeys(result.bids);
+    if (this.rememberRecentBidsEnabled) {
+      this.rememberBidKeys(result.bids);
+    }
     this.cache.set(cacheKey, result);
     return result;
   }
@@ -153,7 +158,17 @@ export class KkjClient {
   }
 
   getCachedBid(key: string): Bid | undefined {
-    return this.recentBids.get(key);
+    const recent = this.recentBids.get(key);
+    if (recent) {
+      return recent;
+    }
+    for (const result of this.cache.values()) {
+      const exact = result.bids.find((bid) => bid.key === key);
+      if (exact) {
+        return exact;
+      }
+    }
+    return undefined;
   }
 
   completeOrganizationNames(value: string): string[] {

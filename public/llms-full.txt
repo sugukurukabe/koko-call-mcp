@@ -1,6 +1,6 @@
 # JP Bids MCP — 完全版コンテキスト / Full context for AI ingestion
 
-> 中小企業庁の官公需入札情報（年間180万件超）を、AI アシスタントから検索・分析できる読み取り専用 MCP サーバー
+> 中小企業庁の官公需情報ポータルサイト（KKJ）が公開する入札公示データを、AI アシスタントから検索・分析できる読み取り専用 MCP サーバー
 > A read-only Model Context Protocol server exposing Japan's SME Agency procurement portal as 17 AI tools
 
 このファイルは、AI 検索クローラー（GPTBot, ClaudeBot, PerplexityBot, Google-Extended など）が JP Bids MCP を理解するための主要情報を一つにまとめたものです。リンクを辿らないクローラーでも、この一枚で全体像を把握できます。
@@ -9,7 +9,7 @@
 
 ## 1. 定義 / Definition
 
-JP Bids MCP は、日本の官公需入札情報を Model Context Protocol (MCP) 2025-11-25 仕様で AI に提供する読み取り専用サーバーです。Claude Desktop / Cursor / ChatGPT などの MCP 対応クライアントから、自然言語で 1.8M 件以上の入札公告を検索・分析・要件抽出できます。
+JP Bids MCP は、中小企業庁の官公需情報ポータルサイト（KKJ）が公開する入札公示データを Model Context Protocol (MCP) 2025-11-25 仕様で AI に提供する読み取り専用サーバーです。Claude Desktop / Cursor / ChatGPT などの MCP 対応クライアントから、自然言語で入札公告を検索・分析・要件抽出できます。
 
 - 公式エンドポイント: `https://mcp.bid-jp.com/mcp`
 - トランスポート: Streamable HTTP（MCP 2025-11-25 仕様）

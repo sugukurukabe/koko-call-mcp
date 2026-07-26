@@ -9,7 +9,7 @@ describe("fetchDocument", () => {
     clearDocumentCache();
   });
 
-  it("fetches a PDF, hashes it, and caches by URI", async () => {
+  it("fetches a PDF, hashes it, and does not retain bytes across calls", async () => {
     let fetchCount = 0;
     const result = await fetchDocument("https://example.com/spec.pdf", {
       resolveHostname: publicResolver,
@@ -20,14 +20,17 @@ describe("fetchDocument", () => {
         });
       },
     });
-    const cached = await fetchDocument("https://example.com/spec.pdf", {
+    const refetched = await fetchDocument("https://example.com/spec.pdf", {
       resolveHostname: publicResolver,
       fetchImpl: async () => {
-        throw new Error("cache miss");
+        fetchCount += 1;
+        return new Response(new Uint8Array([1, 2, 3]), {
+          headers: { "content-type": "application/pdf" },
+        });
       },
     });
 
-    expect(fetchCount).toBe(1);
+    expect(fetchCount).toBe(2);
     expect(result).toMatchObject({
       sourceUri: "https://example.com/spec.pdf",
       finalUri: "https://example.com/spec.pdf",
@@ -35,7 +38,7 @@ describe("fetchDocument", () => {
       sizeBytes: 3,
     });
     expect(result.sha256).toHaveLength(64);
-    expect(cached.sha256).toBe(result.sha256);
+    expect(refetched.sha256).toBe(result.sha256);
   });
 
   it("follows redirects up to the configured limit", async () => {

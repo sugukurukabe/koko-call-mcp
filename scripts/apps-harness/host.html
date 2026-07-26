@@ -10,7 +10,13 @@
 </style>
 </head>
 <body>
-<iframe id="frame" src="./search-results.html" title="AI Bid Workspace"></iframe>
+<iframe
+  id="frame"
+  src="./search-results.html"
+  title="AI Bid Workspace"
+  sandbox="allow-scripts allow-same-origin allow-downloads"
+  allow="clipboard-write"
+></iframe>
 <script>
 // MCP Apps ホストの最小実装。ui/initialize に応答し、tool result を1回流す。
 // 本番UI（dist/apps/search-results.html）に一切手を入れずに決定的なキャプチャを得るために使う。
@@ -143,8 +149,8 @@ const hostCapabilities = {
   serverTools: { listChanged: false },
   serverResources: { listChanged: false },
   logging: {},
-  updateModelContext: {},
-  ...(denyMessage ? {} : { message: {} }),
+  updateModelContext: { text: {} },
+  ...(denyMessage ? {} : { message: { text: {} } }),
   ...(denyDownload ? {} : { downloadFile: {} }),
 };
 
@@ -181,14 +187,12 @@ window.addEventListener("message", (event) => {
         send({
           jsonrpc: "2.0",
           method: "ui/notifications/tool-input",
-          params: { toolName: "search_bids_app", arguments: { query: "システム", limit: 20 } },
+          params: { arguments: { query: "システム", limit: 20 } },
         });
         send({
           jsonrpc: "2.0",
           method: "ui/notifications/tool-result",
           params: {
-            toolName: "search_bids_app",
-            result: { content: [{ type: "text", text: "14件見つかりました。" }], structuredContent: searchResult },
             structuredContent: searchResult,
             content: [{ type: "text", text: "14件見つかりました。" }],
           },
@@ -221,7 +225,7 @@ window.addEventListener("message", (event) => {
       return;
     case "ui/request-display-mode":
       hostContext.displayMode = message.params?.mode ?? hostContext.displayMode;
-      result(message.id, { displayMode: hostContext.displayMode });
+      result(message.id, { mode: hostContext.displayMode });
       send({
         jsonrpc: "2.0",
         method: "ui/notifications/host-context-changed",

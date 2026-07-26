@@ -25,7 +25,7 @@ const EXPECTED_TOOLS: { name: string; readOnlyHint: boolean; title: string }[] =
   { name: "rank_bids", readOnlyHint: true, title: "入札AI Bid Radar" },
   { name: "list_recent_bids", readOnlyHint: true, title: "直近の官公需入札一覧" },
   { name: "get_bid_detail", readOnlyHint: true, title: "官公需入札詳細" },
-  { name: "search_bids_app", readOnlyHint: true, title: "官公需入札検索テーブル" },
+  { name: "search_bids_app", readOnlyHint: true, title: "AI Bid Workspace" },
   { name: "explain_bid_fit", readOnlyHint: true, title: "入札追跡判断の説明" },
   { name: "assess_bid_qualification", readOnlyHint: true, title: "入札資格適合MVP判定" },
   { name: "extract_bid_requirements", readOnlyHint: true, title: "入札要件抽出MVP" },

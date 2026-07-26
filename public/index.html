@@ -7,7 +7,7 @@
 <meta name="description" content="日本の官公需入札情報をAIアシスタントで検索・分析。Claude / Cursor / ChatGPT で即利用可能。">
 <link rel="icon" href="/favicon.png" type="image/png">
 <meta property="og:title" content="JP Bids MCP — 入札情報をAIで">
-<meta property="og:description" content="年間180万件の官公需入札情報をAIアシスタントから直接検索・分析。30秒で利用開始。">
+<meta property="og:description" content="中小企業庁 官公需情報ポータルサイトの公開入札公示データをAIアシスタントから直接検索・分析。30秒で利用開始。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://mcp.bid-jp.com">
 <meta property="og:image" content="https://mcp.bid-jp.com/ogp.png">
@@ -15,7 +15,7 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="JP Bids MCP — 入札情報をAIで">
-<meta name="twitter:description" content="年間180万件の官公需入札情報をAIアシスタントから直接検索・分析。30秒で利用開始。">
+<meta name="twitter:description" content="中小企業庁 官公需情報ポータルサイトの公開入札公示データをAIアシスタントから直接検索・分析。30秒で利用開始。">
 <meta name="twitter:image" content="https://mcp.bid-jp.com/ogp.png">
 <link rel="canonical" href="https://mcp.bid-jp.com/">
 <link rel="alternate" type="text/markdown" href="https://mcp.bid-jp.com/llms.txt" title="LLM-friendly summary (Markdown)">
@@ -46,7 +46,7 @@
       "downloadUrl": "https://www.npmjs.com/package/jp-bids-mcp",
       "softwareVersion": "0.8.0",
       "license": "https://www.apache.org/licenses/LICENSE-2.0",
-      "description": "Read-only Model Context Protocol server that exposes Japan's SME Agency procurement portal (KKJ, 1.8M+ bids/yr) as 17 AI tools for search, ranking, PDF requirement extraction, and calendar export.",
+      "description": "Read-only Model Context Protocol server that exposes public procurement notice data from Japan's SME Agency KKJ portal as 17 AI tools for search, ranking, PDF requirement extraction, and calendar export.",
       "inLanguage": ["ja", "en", "id"],
       "offers": {
         "@type": "Offer",
@@ -54,13 +54,13 @@
         "priceCurrency": "JPY",
         "availability": "https://schema.org/InStock",
         "validFrom": "2026-04-01",
-        "validThrough": "2026-06-30",
-        "description": "Beta period — all features free until 2026-06-30"
+        "validThrough": "2026-09-30",
+        "description": "Beta period — all features free until 2026-09-30"
       },
       "publisher": { "@id": "https://sugu-kuru.co.jp/#organization" },
       "softwareRequirements": "Any MCP 2025-11-25 compliant client (Claude Desktop, Cursor, ChatGPT, etc.)",
       "featureList": [
-        "Search 1.8M+/yr Japan government procurement bids",
+        "Search public procurement notices from Japan's SME Agency KKJ portal",
         "AI ranking by company profile",
         "PDF requirement extraction via Vertex AI Gemini",
         "ICS calendar export",
@@ -103,7 +103,7 @@
           "name": "JP Bids MCP は何のためのサーバーですか？",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "日本の官公需入札情報（中小企業庁 官公需情報ポータルサイト KKJ の公開データ、年間 180 万件以上）を、Model Context Protocol 2025-11-25 仕様で AI に提供する読み取り専用のサーバーです。Claude Desktop / Cursor / ChatGPT などの MCP 対応クライアントから、自然言語で入札を検索・分析・要件抽出・カレンダー出力できます。"
+            "text": "中小企業庁 官公需情報ポータルサイト KKJ の公開入札公示データを、Model Context Protocol 2025-11-25 仕様で AI に提供する読み取り専用のサーバーです。Claude Desktop / Cursor / ChatGPT などの MCP 対応クライアントから、自然言語で入札を検索・分析・要件抽出・カレンダー出力できます。"
           }
         },
         {
@@ -242,7 +242,7 @@ footer a{color:var(--muted)}
 <section class="hero">
   <div class="hero-badge">Beta — 2026年9月末まで全機能無料</div>
   <h1>入札情報を<span>AIで</span></h1>
-  <p>年間180万件超の官公需入札を、AIアシスタントから直接検索・分析。<br>Claude / Cursor / ChatGPT で30秒で利用開始。</p>
+  <p>中小企業庁 官公需情報ポータルサイトの公開入札公示データを、AIアシスタントから直接検索・分析。<br>Claude / Cursor / ChatGPT で30秒で利用開始。</p>
   <div class="hero-actions">
     <a href="#setup" class="btn btn-primary">今すぐ使う</a>
     <a href="https://github.com/sugukurukabe/koko-call-mcp" class="btn btn-outline">GitHub</a>
@@ -255,8 +255,8 @@ footer a{color:var(--muted)}
     <div class="stat-label">AIツール</div>
   </div>
   <div class="stat-card">
-    <div class="stat-num">180万+</div>
-    <div class="stat-label">年間入札件数</div>
+    <div class="stat-num">KKJ</div>
+    <div class="stat-label">公式公開API</div>
   </div>
   <div class="stat-card">
     <div class="stat-num">30秒</div>

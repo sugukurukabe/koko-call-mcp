@@ -104,7 +104,6 @@ export async function enrichWithDocumentExtraction(
       ...(vertex.extractedRequirements
         ? { extractedRequirements: vertex.extractedRequirements }
         : {}),
-      rawExtractionText: vertex.rawText,
       extractionWarnings: [...extraction.extractionWarnings, ...fetchWarnings, ...vertex.warnings],
     };
   }
@@ -136,7 +135,6 @@ export async function enrichWithDocumentExtraction(
     ...(sampling.extractedRequirements
       ? { extractedRequirements: sampling.extractedRequirements }
       : {}),
-    rawExtractionText: sampling.rawText,
     extractionWarnings: [...extraction.extractionWarnings, ...fetchWarnings, ...sampling.warnings],
   };
 }

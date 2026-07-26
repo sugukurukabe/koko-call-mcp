@@ -88,6 +88,8 @@
     "export:bids": "tsx src/export-bids.ts",
     "slack:briefing": "tsx scripts/slack-briefing.ts",
     "registry:validate": "tsx scripts/registry-validate.ts",
+    "server-card:generate": "tsx scripts/generate-server-card.ts",
+    "release:parity": "tsx scripts/release-parity-check.ts",
     "build:repro": "tsx scripts/reproducible-build.ts",
     "docs:check": "npm run docs:api && git diff --exit-code docs/api",
     "release:gate": "tsx scripts/release-gate.ts",
@@ -97,6 +99,7 @@
     "publish:dry-run": "npm run release:gate && npm publish --dry-run --access public --ignore-scripts"
   },
   "dependencies": {
+    "@google-cloud/firestore": "^8.7.0",
     "@google/genai": "^1.51.0",
     "@modelcontextprotocol/ext-apps": "^1.7.4",
     "@modelcontextprotocol/sdk": "^1.29.0",

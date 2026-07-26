@@ -283,10 +283,62 @@ describe("MCP tool execution", () => {
         "PDF/HTML本文は必要時のみ一時取得し、サーバーに保存しない",
       ]),
     });
+    expect(result.structuredContent).not.toHaveProperty("rawExtractionText");
     expect(fetchCount).toBe(1);
 
     await client.close();
     await server.close();
+  });
+
+  it("checks saved searches across stateless server instances with a signed state token", async () => {
+    const xml = await readFile("tests/fixtures/kkj-search.xml", "utf8");
+    const kkjClient = new KkjClient({
+      rateLimitPerSecond: 1000,
+      fetchImpl: async () => new Response(xml, { status: 200 }),
+    });
+
+    const [saveClientTransport, saveServerTransport] = InMemoryTransport.createLinkedPair();
+    const saveServer = createJpBidsServer({ kkjClient });
+    const saveClient = new Client({ name: "saved-search-save-test", version: "0.1.0" });
+    await Promise.all([
+      saveServer.connect(saveServerTransport),
+      saveClient.connect(saveClientTransport),
+    ]);
+    const saved = await saveClient.callTool({
+      name: "save_search",
+      arguments: { name: "鹿児島IT", query: "システム" },
+    });
+    const stateToken = String(
+      (saved.structuredContent as { stateToken?: unknown }).stateToken ?? "",
+    );
+    expect(stateToken).toContain(".");
+    await saveClient.close();
+    await saveServer.close();
+
+    const [checkClientTransport, checkServerTransport] = InMemoryTransport.createLinkedPair();
+    const checkServer = createJpBidsServer({ kkjClient });
+    const checkClient = new Client({ name: "saved-search-check-test", version: "0.1.0" });
+    await Promise.all([
+      checkServer.connect(checkServerTransport),
+      checkClient.connect(checkClientTransport),
+    ]);
+    const checked = await checkClient.callTool({
+      name: "check_saved_search",
+      arguments: { name: "鹿児島IT", state_token: stateToken },
+    });
+
+    expect(checked.isError).not.toBe(true);
+    expect(checked.structuredContent).toMatchObject({
+      name: "鹿児島IT",
+      newBidsCount: 1,
+      bids: [expect.objectContaining({ key: "KKJ-TEST-001" })],
+    });
+    expect((checked.structuredContent as { nextStateToken?: unknown }).nextStateToken).toEqual(
+      expect.any(String),
+    );
+
+    await checkClient.close();
+    await checkServer.close();
   });
 
   it("creates bid calendar ICS from cached bid metadata", async () => {

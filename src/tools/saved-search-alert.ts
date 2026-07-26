@@ -3,7 +3,9 @@ import { z } from "zod";
 import type { KkjClient } from "../api/kkj-client.js";
 import { CategorySchema } from "../domain/codes.js";
 import { PrefectureNameSchema } from "../domain/prefectures.js";
+import { UserInputError } from "../lib/errors.js";
 import { jsonText, toolError } from "../lib/tool-result.js";
+import { signJwt, verifyJwt } from "../oauth/jwt.js";
 import { buildSearchBidsParams, type SearchBidsInput } from "./search-bids.js";
 
 const SaveSearchOutputSchema = z.object({
@@ -11,6 +13,7 @@ const SaveSearchOutputSchema = z.object({
   name: z.string(),
   criteria: z.record(z.string(), z.unknown()),
   totalSaved: z.number(),
+  stateToken: z.string(),
   nextStep: z.string(),
 });
 
@@ -29,6 +32,7 @@ const CheckSavedSearchOutputSchema = z.object({
   ),
   checkedAt: z.string(),
   previousCheck: z.string().nullable(),
+  nextStateToken: z.string(),
   attribution: z.record(z.string(), z.unknown()),
   webhookHint: z.string(),
 });
@@ -43,7 +47,15 @@ const ListSavedSearchesOutputSchema = z.object({
       lastCheckedAt: z.string().nullable(),
     }),
   ),
+  stateToken: z.string().nullable(),
 });
+
+type SavedSearchEntry = {
+  name: string;
+  criteria: SearchBidsInput;
+  createdAt: string;
+  lastCheckedAt: string | null;
+};
 
 const SavedSearchSchema = z.object({
   name: z
@@ -58,22 +70,32 @@ const SavedSearchSchema = z.object({
     .describe("都道府県名で絞り込む。配列で複数指定可。"),
   category: CategorySchema.optional().describe("入札区分。物品、役務、工事、その他。"),
   organization_name: z.string().optional().describe("発注機関名。Organization name."),
+  state_token: z
+    .string()
+    .optional()
+    .describe("既存の保存検索state token。Existing saved-search state token."),
 });
 
 const CheckAlertSchema = z.object({
   name: z.string().min(1).describe("確認する保存検索の名前。Name of saved search to check."),
+  state_token: z
+    .string()
+    .optional()
+    .describe("save_search が返した保存検索state token。State token returned by save_search."),
 });
 
-const ListSavedSchema = z.object({});
+const ListSavedSchema = z.object({
+  state_tokens: z
+    .array(z.string())
+    .optional()
+    .describe("保存検索state tokenの配列。Array of saved-search state tokens."),
+});
 
 export function registerSavedSearchAlert(server: McpServer, client: KkjClient): void {
   // 保存検索条件のインメモリストア（MCPサーバーインスタンス単位）
   // In-memory saved search store (per MCP server instance)
   // Penyimpanan pencarian tersimpan di memori (per instance server MCP)
-  const savedSearches: Map<
-    string,
-    { name: string; criteria: SearchBidsInput; createdAt: string; lastCheckedAt: string | null }
-  > = new Map();
+  const savedSearches: Map<string, SavedSearchEntry> = new Map();
 
   // 検索条件を保存する
   // Save search criteria for later alerts
@@ -94,6 +116,7 @@ export function registerSavedSearchAlert(server: McpServer, client: KkjClient): 
       },
     },
     async (args) => {
+      const tokenEntries = decodeSavedSearchToken(args.state_token);
       const criteria: SearchBidsInput = {
         query: args.query,
         prefecture: args.prefecture,
@@ -101,19 +124,22 @@ export function registerSavedSearchAlert(server: McpServer, client: KkjClient): 
         organization_name: args.organization_name,
         limit: 20,
       };
-      savedSearches.set(args.name, {
+      const savedEntry = {
         name: args.name,
         criteria,
         createdAt: new Date().toISOString(),
         lastCheckedAt: null,
-      });
+      };
+      savedSearches.set(args.name, savedEntry);
+      const mergedEntries = upsertSavedSearch(tokenEntries, savedEntry);
       const result = {
         saved: true,
         name: args.name,
         criteria: criteria as Record<string, unknown>,
-        totalSaved: savedSearches.size,
+        totalSaved: mergedEntries.length,
+        stateToken: encodeSavedSearchToken(mergedEntries),
         nextStep:
-          "check_saved_search でこの条件の新着入札を確認できます。Use check_saved_search to check for new bids matching this criteria.",
+          "check_saved_search に name と state_token を渡すと、HTTPステートレス環境でもこの条件の新着入札を確認できます。Pass name and state_token to check_saved_search to check this criteria in stateless HTTP.",
       };
       return {
         content: [{ type: "text" as const, text: jsonText(result) }],
@@ -141,11 +167,15 @@ export function registerSavedSearchAlert(server: McpServer, client: KkjClient): 
       },
     },
     async (args) => {
-      const saved = savedSearches.get(args.name);
+      const tokenEntries = decodeSavedSearchToken(args.state_token);
+      const saved =
+        tokenEntries.find((entry) => entry.name === args.name) ?? savedSearches.get(args.name);
       if (!saved) {
         return toolError(
-          null,
-          `「${args.name}」という保存検索が見つかりません。save_search で先に条件を保存してください。`,
+          new UserInputError(
+            `「${args.name}」という保存検索が見つかりません。save_search で先に条件を保存し、HTTPでは state_token も渡してください。`,
+          ),
+          "保存検索が見つかりません。",
         );
       }
 
@@ -160,12 +190,15 @@ export function registerSavedSearchAlert(server: McpServer, client: KkjClient): 
 
         const now = new Date().toISOString();
         const previousCheck = saved.lastCheckedAt;
-        saved.lastCheckedAt = now;
+        const updatedSaved = { ...saved, lastCheckedAt: now };
+        savedSearches.set(args.name, updatedSaved);
+        const mergedEntries = upsertSavedSearch(tokenEntries, updatedSaved);
+        const returnedBids = result.bids.slice(0, 10);
 
         const checkResult = {
           name: args.name,
-          newBidsCount: result.searchHits,
-          bids: result.bids.slice(0, 10).map((bid) => ({
+          newBidsCount: returnedBids.length,
+          bids: returnedBids.map((bid) => ({
             projectName: bid.projectName,
             organizationName: bid.organizationName,
             prefectureName: bid.prefectureName,
@@ -175,6 +208,7 @@ export function registerSavedSearchAlert(server: McpServer, client: KkjClient): 
           })),
           checkedAt: now,
           previousCheck,
+          nextStateToken: encodeSavedSearchToken(mergedEntries),
           attribution: result.attribution as Record<string, unknown>,
           webhookHint:
             "この機能を定期実行するには、Webhook通知を設定できます。将来のバージョンでSlack/メール/Webhook通知に対応予定です。",
@@ -207,15 +241,20 @@ export function registerSavedSearchAlert(server: McpServer, client: KkjClient): 
         openWorldHint: false,
       },
     },
-    async () => {
+    async (args) => {
+      const tokenEntries =
+        args.state_tokens?.flatMap((token) => decodeSavedSearchToken(token)) ?? [];
+      const entries = tokenEntries.length > 0 ? tokenEntries : [...savedSearches.values()];
+      const dedupedEntries = dedupeSavedSearches(entries);
       const listResult = {
-        totalSaved: savedSearches.size,
-        searches: [...savedSearches.values()].map((s) => ({
+        totalSaved: dedupedEntries.length,
+        searches: dedupedEntries.map((s) => ({
           name: s.name,
           criteria: s.criteria as Record<string, unknown>,
           createdAt: s.createdAt,
           lastCheckedAt: s.lastCheckedAt,
         })),
+        stateToken: dedupedEntries.length > 0 ? encodeSavedSearchToken(dedupedEntries) : null,
       };
       return {
         content: [{ type: "text" as const, text: jsonText(listResult) }],
@@ -223,4 +262,72 @@ export function registerSavedSearchAlert(server: McpServer, client: KkjClient): 
       };
     },
   );
+}
+
+function encodeSavedSearchToken(searches: SavedSearchEntry[]): string {
+  return signJwt(
+    {
+      type: "saved_search_state",
+      searches: searches.map((entry) => ({
+        name: entry.name,
+        criteria: entry.criteria,
+        createdAt: entry.createdAt,
+        lastCheckedAt: entry.lastCheckedAt,
+      })),
+    },
+    resolveStateTokenSecret(),
+    30 * 24 * 3600,
+  );
+}
+
+function decodeSavedSearchToken(token: string | undefined): SavedSearchEntry[] {
+  if (!token) return [];
+  const payload = verifyJwt(token, resolveStateTokenSecret());
+  if (!payload || payload.type !== "saved_search_state" || !Array.isArray(payload.searches)) {
+    throw new UserInputError("保存検索state tokenが無効です。save_search を再実行してください。");
+  }
+  return payload.searches.map((entry) => parseSavedSearchEntry(entry));
+}
+
+function parseSavedSearchEntry(value: unknown): SavedSearchEntry {
+  const parsed = z
+    .object({
+      name: z.string().min(1).max(100),
+      criteria: z.object({
+        query: z.string().optional(),
+        prefecture: z.union([PrefectureNameSchema, z.array(PrefectureNameSchema)]).optional(),
+        category: CategorySchema.optional(),
+        organization_name: z.string().optional(),
+        limit: z.number().default(20),
+        issued_after: z.string().optional(),
+      }),
+      createdAt: z.string(),
+      lastCheckedAt: z.string().nullable(),
+    })
+    .parse(value);
+  return parsed;
+}
+
+function upsertSavedSearch(
+  entries: SavedSearchEntry[],
+  next: SavedSearchEntry,
+): SavedSearchEntry[] {
+  return dedupeSavedSearches([next, ...entries]);
+}
+
+function dedupeSavedSearches(entries: SavedSearchEntry[]): SavedSearchEntry[] {
+  const byName = new Map<string, SavedSearchEntry>();
+  for (const entry of entries) {
+    byName.set(entry.name, entry);
+  }
+  return [...byName.values()];
+}
+
+function resolveStateTokenSecret(): string {
+  const secret = process.env.JP_BIDS_STATE_TOKEN_SECRET ?? process.env.JP_BIDS_OAUTH_SECRET;
+  if (secret) return secret;
+  if (process.env.K_SERVICE) {
+    throw new Error("JP_BIDS_STATE_TOKEN_SECRET is required in production.");
+  }
+  return "local-dev-saved-search-state-secret";
 }
