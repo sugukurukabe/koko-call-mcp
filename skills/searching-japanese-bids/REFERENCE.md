@@ -53,7 +53,7 @@ Scores a list of bids against a company profile and returns sorted results with 
 
 If `profile` is missing, ask the user for: industry/specialty, employee count, geographic focus, government contractor grade (if known).
 
-## Pro tier tools (free during beta, paid after June 2026)
+## Pro tier tools (free during beta, paid after September 2026)
 
 ### `search_bids_app`
 

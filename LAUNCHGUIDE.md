@@ -4,7 +4,7 @@
 Search and AI-analyze Japanese government procurement bids via MCP.
 
 ## Description
-JP Bids MCP connects LLM-powered clients to Japan's official government procurement portal (官公需情報ポータルサイト, operated by the SME Agency). It provides real-time bid search, AI-driven scoring and ranking, PDF/HTML requirement extraction via Vertex AI Gemini, calendar export, review packet generation, and an interactive MCP Apps UI panel. Designed for procurement officers, sales teams, and bid consultants who need to discover, evaluate, and act on public tender opportunities across all 47 prefectures of Japan. All features are free during beta (until end of June 2026).
+JP Bids MCP connects LLM-powered clients to Japan's official government procurement portal (官公需情報ポータルサイト, operated by the SME Agency). It provides real-time bid search, AI-driven scoring and ranking, PDF/HTML requirement extraction via Vertex AI Gemini, calendar export, review packet generation, and an interactive MCP Apps UI panel. Designed for procurement officers, sales teams, and bid consultants who need to discover, evaluate, and act on public tender opportunities across all 47 prefectures of Japan. All features are free during beta (until end of September 2026).
 
 ## Setup Requirements
 - No API key required for the remote endpoint. Connect directly via Streamable HTTP.

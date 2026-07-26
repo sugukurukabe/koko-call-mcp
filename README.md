@@ -9,8 +9,8 @@
 Search and AI-analyze Japanese public procurement notices through MCP.  
 Server MCP untuk mencari dan menganalisis pengadaan pemerintah Jepang dengan AI.
 
-> **ベータ期間中（〜2026年6月末）は全機能を無料で利用できます。**  
-> During beta (until end of June 2026), all features are available for free.
+> **ベータ期間中（〜2026年9月末）は全機能を無料で利用できます。**  
+> During beta (until end of September 2026), all features are available for free.
 
 ```text
 Remote MCP: https://mcp.bid-jp.com/mcp
@@ -54,6 +54,12 @@ Use the remote endpoint from any Streamable HTTP compatible MCP client:
 https://mcp.bid-jp.com/mcp
 ```
 
+The remote endpoint requires OAuth 2.0. A request without `Authorization` receives `401` with `WWW-Authenticate: Bearer resource_metadata="https://mcp.bid-jp.com/.well-known/oauth-protected-resource/mcp"`. Claude.ai, ChatGPT, and MCP Inspector run the flow for you (Dynamic Client Registration + PKCE S256), so you only click approve. Plain `curl` will not work without a token — use local stdio below to try it without authentication.
+
+リモートエンドポイントは OAuth 2.0 必須です。`Authorization` なしのリクエストは `401` と `WWW-Authenticate` ヘッダーを返します。Claude.ai / ChatGPT / MCP Inspector は認可フローを自動で処理するため、承認ボタンを押すだけです。認証なしで試したい場合は下記のローカル stdio を使ってください。
+
+Endpoint jarak jauh memerlukan OAuth 2.0. Permintaan tanpa `Authorization` mendapat `401` beserta header `WWW-Authenticate`. Klien seperti Claude.ai, ChatGPT, dan MCP Inspector menjalankan alur otorisasi secara otomatis. Untuk mencoba tanpa autentikasi, gunakan stdio lokal di bawah.
+
 With MCP Inspector:
 
 ```bash
@@ -73,7 +79,7 @@ Sample `search_bids` arguments:
 }
 ```
 
-Local stdio:
+Local stdio (no authentication required):
 
 ```bash
 npx --yes jp-bids-mcp
@@ -97,7 +103,7 @@ npx --yes jp-bids-mcp --version
 - AI Bid Radar: 案件を実務優先度でスコアリング・ランキング。Ranking bid candidates by practical follow-up priority.
 - PDF/HTML要件抽出: 一時取得・SSRF防御・Vertex AI Gemini対応。PDF/HTML requirement extraction with SSRF guard and Vertex AI Gemini.
 - MCP Apps UI: Claude.aiのサイドパネルで入札案件を一覧・操作。Interactive workspace in MCP Apps-compatible clients.
-- Free/Proティア: ベータ期間（〜2026年6月末）は全機能無料。Free beta through June 2026, Pro ¥990/month thereafter.
+- Free/Proティア: ベータ期間（〜2026年9月末）は全機能無料。Free beta through September 2026, Pro ¥990/month thereafter.
 - Resources・Resource Templatesでコンテキストを精密に渡せる。Resources and Resource Templates for targeted context.
 - リモートStreamable HTTPとローカルstdioの両対応。Remote Streamable HTTP and local stdio transports.
 
@@ -164,9 +170,7 @@ Slack briefing job: `docs/slack-briefing.md`.
 - `docs/remote-release-checklist.md`
 - `docs/submissions/mcp-directories.md`
 - `docs/integrations/jgrants.md`
-- `docs/articles/zenn-jp-bids-mcp.md`
-- `docs/articles/zenn-jp-bids-jgrants.md`
-- `docs/articles/note-public-data-mcp.md`
+- `articles/` (Zenn articles deployed from this repository; `docs/articles/` holds non-Zenn drafts)
 - `docs/adr/`
 - `public/.well-known/agents.json`
 

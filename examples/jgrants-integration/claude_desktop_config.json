@@ -6,7 +6,7 @@
     "jp-bids": {
       "command": "npx",
       "args": ["--yes", "mcp-remote", "https://mcp.bid-jp.com/mcp"],
-      "_comment": "Remote JP Bids MCP. During beta (until June 2026) no API key required."
+      "_comment": "Remote JP Bids MCP. During beta (until September 2026) no API key required."
     },
     "jgrants": {
       "command": "npx",

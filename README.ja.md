@@ -10,9 +10,9 @@ JP Bids MCP is an MCP server for searching and AI-analyzing Japanese government 
 
 JP Bids MCP adalah server MCP untuk mencari dan menganalisis pengumuman pengadaan pemerintah Jepang dari portal KKJ.
 
-> **ベータ期間（〜2026年6月末）は全機能を無料で利用できます。**  
-> During beta (until end of June 2026), all features are free.  
-> Selama beta (sampai akhir Juni 2026), semua fitur gratis.
+> **ベータ期間（〜2026年9月末）は全機能を無料で利用できます。**  
+> During beta (until end of September 2026), all features are free.  
+> Selama beta (sampai akhir September 2026), semua fitur gratis.
 
 ## AIに話しかけるだけ
 
@@ -48,7 +48,13 @@ Registry metadata name: io.github.sugukurukabe/jp-bids
 https://mcp.bid-jp.com/mcp
 ```
 
-### ローカル stdio
+リモートエンドポイントは OAuth 2.0 必須です。`Authorization` ヘッダーなしのリクエストには `401` と `WWW-Authenticate: Bearer resource_metadata="https://mcp.bid-jp.com/.well-known/oauth-protected-resource/mcp"` が返ります。Claude.ai / ChatGPT / MCP Inspector は Dynamic Client Registration と PKCE(S256) で認可フローを自動的に処理するため、承認ボタンを押すだけで接続できます。`curl` で直接叩く場合はトークンが必要です。認証なしで試したいときは下のローカル stdio を使ってください。
+
+The remote endpoint requires OAuth 2.0; MCP clients run the flow automatically. Use local stdio below to try without authentication.
+
+Endpoint jarak jauh memerlukan OAuth 2.0; klien MCP menjalankan alurnya secara otomatis. Gunakan stdio lokal di bawah untuk mencoba tanpa autentikasi.
+
+### ローカル stdio（認証不要）
 
 ```bash
 npx --yes jp-bids-mcp
@@ -89,7 +95,7 @@ npx --yes jp-bids-export --prefecture 鹿児島県 --category 役務 --query シ
 | **Free** | 無料 | 検索・ランキング・詳細取得 |
 | **Pro** | ¥990/月 | 全17ツール＋MCP Apps UI＋PDF抽出＋保存検索 |
 
-ベータ期間（〜2026年6月末）はProも無料。APIキー不要。
+ベータ期間（〜2026年9月末）はProも無料。APIキー不要。
 
 ## データ出典
 

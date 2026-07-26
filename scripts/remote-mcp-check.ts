@@ -11,11 +11,11 @@
 
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { isInBetaPeriod } from "../src/lib/auth.js";
 
 const remoteMcpUrl = process.env.JP_BIDS_REMOTE_MCP_URL ?? "https://mcp.bid-jp.com/mcp";
 const apiKey = process.env.JP_BIDS_REMOTE_API_KEY ?? "free";
 const verifiedAt = new Date().toISOString();
-const betaUntil = new Date("2026-07-01T00:00:00+09:00");
 
 // 全17ツールの期待する annotations
 // Expected annotations for all 17 tools
@@ -75,7 +75,7 @@ function check(condition: boolean, label: string): void {
 }
 
 const isProTier = apiKey !== "free";
-const expectsProSurface = isProTier || new Date() < betaUntil;
+const expectsProSurface = isProTier || isInBetaPeriod();
 
 log(`\n================================================`);
 log(`JP Bids MCP 申請前検証 / Pre-submission Verification`);

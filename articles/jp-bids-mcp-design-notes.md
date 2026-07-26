@@ -1,4 +1,10 @@
-# 日本の官公需入札APIをMCP化した
+---
+title: "日本の官公需入札APIをMCP化したときに、何を入れて何を入れなかったか"
+emoji: "🗂️"
+type: "tech"
+topics: ["mcp", "typescript", "govtech", "公共調達", "ai"]
+published: false
+---
 
 小さなJSONファイルが、入口になる時代になった。
 

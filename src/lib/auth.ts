@@ -5,9 +5,13 @@
 export type Tier = "free" | "pro";
 
 // ベータ期間: この日付まで全ユーザーをProとして扱う（無料開放キャンペーン）
+// この定数が唯一の期日定義。README・landing page・検証スクリプトはこの値に合わせる。
 // Beta period: treat all users as Pro until this date (free promotion)
+// This constant is the single source of truth. README, landing page, and
+// verification scripts must follow it.
 // Periode beta: perlakukan semua pengguna sebagai Pro hingga tanggal ini (promosi gratis)
-const BETA_UNTIL = new Date("2026-07-01T00:00:00+09:00");
+// Konstanta ini adalah satu-satunya sumber kebenaran untuk tanggal tersebut.
+export const BETA_UNTIL = new Date("2026-10-01T00:00:00+09:00");
 
 /**
  * 現在ベータ期間中かどうかを返す

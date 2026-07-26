@@ -2,6 +2,22 @@
 
 ## 日本語
 
+### 0.8.0
+
+- **KKJ APIのリトライ耐性**: 5xx・タイムアウト・ネットワーク断を一時障害として指数バックオフで最大2回再試行（`src/api/kkj-client.ts`）。再試行のたびにレートリミッタを通すため、KKJへの短時間大量アクセスにはならない。`JP_BIDS_KKJ_TIMEOUT_MS` でタイムアウトを調整できる。
+- **上流障害を行動に翻訳するエラー文**: タイムアウトとHTTPステータスを見分け、「30秒待って同じ条件で再実行」まで含めた日英のメッセージを返す（`src/lib/tool-result.ts`）。
+- **MCP 2026-07-28 対応**: protocol version `2025-11-25` と `2026-07-28` の両方を受理。`Mcp-Method` / `Mcp-Name` header がある場合は JSON-RPC body との不一致を400で拒否し、OAuth authorization response と JWT に RFC 9207 の `iss` を含める（`src/transports/http.ts`、ADR-0023）。
+- **MCP Apps UIの持ち帰り機能**: ICSカレンダー・検討メモMarkdown・CSVを `downloadFile` で書き出し、ホストが拒否した場合は clipboard へ退避する（`src/apps/search-results.tsx`）。ダークモードとモバイル幅のレイアウトも追加。
+- **prompts 6本に拡充**: `bid_discovery_workspace` / `competitor_radar` / `bid_review_packet_workflow` / `qualification_and_question_draft` を追加（`src/prompts/register-prompts.ts`）。Free ティアでは `morning_bid_briefing` と `bid_due_alert` のみ登録される。
+- **ページネーションメタデータ**: `search_bids` / `list_recent_bids` の出力に `has_more` / `next_cursor` / `total_count` を追加（`PaginationMetadataSchema`）。
+- **コネクタ表示名を "JP Bids" に統一**: ディレクトリ表示名から "MCP" を除去し、`server.json` / `.well-known` / landing page / branding を揃えた。
+- **審査・申請用資料**: Anthropic connector・Claude in Chrome・ChatGPT Apps の各チェックリストと、本番UIをモックホストで撮影する手順（`docs/submissions/screenshot-howto.md`）を追加。`tests/review-grade.test.ts` で公開面の退行を検出する。
+- **ランディングページ**: ユースケースをグラフィカルに表示し、セットアップをタブ切替に変更。
+- **ベータ期間を2026年9月末まで延長**: 期日は `src/lib/auth.ts` の `BETA_UNTIL` が単一の定義元となり、検証スクリプトとテストはこの値から導出する。README・landing page・利用規約の表記も揃えた。
+- **リモートがOAuth必須であることをREADMEに明記**: `Authorization` なしのリクエストは `401` と `WWW-Authenticate` を返す。認証なしで試す場合は `npx --yes jp-bids-mcp`（stdio）を使う。
+- **記事ファイルの二重管理を解消**: Zenn連携が読む `articles/` を唯一の配置先とし、`docs/articles/` と重複していた原稿を統合。`docs/articles/` はZenn以外の草稿のみを置く。
+- **ADR-0014と`docs/mcp-apps.md`をEvidence & Safety panelの実装に合わせて訂正**: sourceUri・SHA-256・抽出modeをUIに表示すると書いていたが、これらは文書抽出結果側の値で検索結果のworkspaceには存在しない。実装が表示しているもの（未信頼データ警告・入札key・ファイル種別・サイズ・出典・取得日時）と、なぜ表示していないかを明記した。
+
 ### 0.7.2
 
 - **仕様適合監査の修正**: バージョン整合性、ライセンス表示、MCP capability 宣言、tool annotations、公開ドキュメントの表現を見直し。
@@ -153,6 +169,22 @@
 
 ## English
 
+### 0.8.0
+
+- **KKJ API retry resilience**: 5xx responses, timeouts, and network drops are treated as transient and retried up to twice with exponential backoff (`src/api/kkj-client.ts`). Every attempt passes through the rate limiter, so retries never turn into a burst against KKJ. `JP_BIDS_KKJ_TIMEOUT_MS` configures the per-request timeout.
+- **Upstream failures translated into next actions**: timeouts and HTTP statuses are distinguished, and the returned message tells the user to wait about 30 seconds and retry the same query (`src/lib/tool-result.ts`).
+- **MCP 2026-07-28 support**: both `2025-11-25` and `2026-07-28` protocol versions are accepted. When `Mcp-Method` / `Mcp-Name` headers are present, a mismatch with the JSON-RPC body is rejected with 400, and OAuth authorization responses and JWTs carry the RFC 9207 `iss` claim (`src/transports/http.ts`, ADR-0023).
+- **Take-home exports in the MCP Apps UI**: ICS calendars, review-memo Markdown, and CSV are written out through `downloadFile`, falling back to the clipboard when the host declines (`src/apps/search-results.tsx`). Dark mode and mobile-width layouts were added.
+- **Six prompts**: added `bid_discovery_workspace`, `competitor_radar`, `bid_review_packet_workflow`, and `qualification_and_question_draft` (`src/prompts/register-prompts.ts`). Free tier registers only `morning_bid_briefing` and `bid_due_alert`.
+- **Pagination metadata**: `search_bids` and `list_recent_bids` now return `has_more`, `next_cursor`, and `total_count` (`PaginationMetadataSchema`).
+- **Connector display name unified as "JP Bids"**: dropped "MCP" from the directory display name and aligned `server.json`, `.well-known`, the landing page, and branding.
+- **Submission material**: added Anthropic connector, Claude in Chrome, and ChatGPT Apps checklists, plus a procedure for photographing the production UI against a mock host (`docs/submissions/screenshot-howto.md`). `tests/review-grade.test.ts` guards the public surface against regressions.
+- **Landing page**: use cases are now shown graphically and setup moved to tabbed panels.
+- **Beta extended through end of September 2026**: `BETA_UNTIL` in `src/lib/auth.ts` is the single source of truth; verification scripts and tests derive from it. README, landing page, and terms of service wording were aligned.
+- **README states that the remote endpoint requires OAuth**: requests without `Authorization` receive `401` plus `WWW-Authenticate`. Use `npx --yes jp-bids-mcp` (stdio) to try without authentication.
+- **Article files de-duplicated**: `articles/`, which the Zenn integration reads, is now the single location; drafts that were duplicated in `docs/articles/` were consolidated. `docs/articles/` keeps non-Zenn drafts only.
+- **ADR-0014 and `docs/mcp-apps.md` corrected to match the Evidence & Safety panel implementation**: they claimed the UI shows source URI, SHA-256, and extraction mode, but those belong to document extraction results and do not exist in a search workspace. The docs now state what is actually rendered (untrusted-data warning, bid key, file type, file size, attribution, accessed-at) and why the rest is deferred.
+
 ### 0.7.2
 
 - **Spec-alignment audit fixes**: tightened version consistency, license display, MCP capability declarations, tool annotations, and public documentation wording.
@@ -303,6 +335,22 @@
 - Initial implementation with Tools, Prompts, Resources, Resource Templates, Completion, Logging, stdio, and Streamable HTTP.
 
 ## Bahasa Indonesia
+
+### 0.8.0
+
+- **Ketahanan retry API KKJ**: respons 5xx, timeout, dan putus jaringan diperlakukan sebagai gangguan sementara dan dicoba ulang hingga dua kali dengan exponential backoff (`src/api/kkj-client.ts`). Setiap percobaan melewati rate limiter, jadi retry tidak pernah menjadi lonjakan permintaan ke KKJ. `JP_BIDS_KKJ_TIMEOUT_MS` mengatur batas waktu per permintaan.
+- **Kegagalan upstream diterjemahkan menjadi tindakan**: timeout dan status HTTP dibedakan, dan pesan yang dikembalikan meminta pengguna menunggu sekitar 30 detik lalu mengulang kueri yang sama (`src/lib/tool-result.ts`).
+- **Dukungan MCP 2026-07-28**: versi protokol `2025-11-25` dan `2026-07-28` keduanya diterima. Jika header `Mcp-Method` / `Mcp-Name` ada, ketidaksesuaian dengan body JSON-RPC ditolak dengan 400, dan response OAuth serta JWT menyertakan klaim `iss` RFC 9207 (`src/transports/http.ts`, ADR-0023).
+- **Ekspor bawa-pulang di UI MCP Apps**: kalender ICS, memo review Markdown, dan CSV ditulis melalui `downloadFile`, dengan fallback ke clipboard jika host menolak (`src/apps/search-results.tsx`). Mode gelap dan tata letak lebar mobile ditambahkan.
+- **Enam prompt**: menambahkan `bid_discovery_workspace`, `competitor_radar`, `bid_review_packet_workflow`, dan `qualification_and_question_draft` (`src/prompts/register-prompts.ts`). Tier Free hanya mendaftarkan `morning_bid_briefing` dan `bid_due_alert`.
+- **Metadata paginasi**: `search_bids` dan `list_recent_bids` kini mengembalikan `has_more`, `next_cursor`, dan `total_count` (`PaginationMetadataSchema`).
+- **Nama tampilan konektor diseragamkan menjadi "JP Bids"**: menghapus "MCP" dari nama direktori dan menyelaraskan `server.json`, `.well-known`, landing page, serta branding.
+- **Materi pengajuan**: menambahkan checklist konektor Anthropic, Claude in Chrome, dan ChatGPT Apps, serta prosedur memotret UI production dengan host tiruan (`docs/submissions/screenshot-howto.md`). `tests/review-grade.test.ts` menjaga permukaan publik dari regresi.
+- **Landing page**: kasus penggunaan kini ditampilkan secara grafis dan pengaturan dipindah ke panel bertab.
+- **Beta diperpanjang sampai akhir September 2026**: `BETA_UNTIL` di `src/lib/auth.ts` menjadi satu-satunya sumber kebenaran; skrip verifikasi dan tes diturunkan darinya. Redaksi README, landing page, dan syarat layanan diselaraskan.
+- **README menyatakan endpoint jarak jauh memerlukan OAuth**: permintaan tanpa `Authorization` menerima `401` beserta `WWW-Authenticate`. Gunakan `npx --yes jp-bids-mcp` (stdio) untuk mencoba tanpa autentikasi.
+- **Duplikasi berkas artikel dihilangkan**: `articles/`, yang dibaca integrasi Zenn, kini menjadi satu-satunya lokasi; draf yang terduplikasi di `docs/articles/` telah digabungkan. `docs/articles/` hanya menyimpan draf non-Zenn.
+- **ADR-0014 dan `docs/mcp-apps.md` dikoreksi agar sesuai implementasi panel Evidence & Safety**: sebelumnya disebut UI menampilkan source URI, SHA-256, dan mode ekstraksi, padahal nilai-nilai itu milik hasil ekstraksi dokumen dan tidak ada di workspace pencarian. Dokumen kini menyatakan apa yang benar-benar dirender dan alasan sisanya ditunda.
 
 ### 0.7.2
 

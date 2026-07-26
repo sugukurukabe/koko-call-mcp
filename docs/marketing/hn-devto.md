@@ -36,7 +36,7 @@ I built an MCP server (Model Context Protocol) that exposes Japan's government p
 **Ecosystem:**
 J-Grants + freee MCP workflow demos are published in the repo, showing how procurement, subsidies, and accounting can be combined in one conversation across three independent MCP servers.
 
-**Free during beta (until June 2026)**
+**Free during beta (until September 2026)**
 Remote: https://mcp.bid-jp.com/mcp
 GitHub: https://github.com/sugukurukabe/koko-call-mcp
 

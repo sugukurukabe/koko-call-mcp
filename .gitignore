@@ -21,3 +21,9 @@ reports/
 docs/pitch.md
 docs/outreach-draft.md
 docs/outreach/
+
+# sibling MCP repositories cloned locally for deploy/deploy-all-production.sh.
+# They are independent repositories, not submodules of this one; the deploy
+# script prints the git clone command when they are missing.
+jgrants-mcp-server/
+japan-real-estate-intel-mcp/

@@ -22,7 +22,7 @@
    - Dynamic Client Registration + PKCE(S256) で自動登録される。
 5. 接続成功すると、コネクタが「Connected」になる。
 
-> beta期間（〜2026-07-01）は、OAuth接続で**全17ツール**が見える想定。
+> beta期間（〜2026-10-01）は、OAuth接続で**全17ツール**が見える想定。
 > beta後はFree鍵だと4ツール（search_bids / rank_bids / list_recent_bids / get_bid_detail）になる。
 
 ---

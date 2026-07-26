@@ -117,7 +117,7 @@ JP Bids MCP は、中小企業庁 官公需情報ポータルサイト (KKJ) の
 
 **対象ユーザー**: 日本の中小企業・スタートアップ・行政書士・入札支援担当者。
 
-**認証**: Remote endpoint は OAuth 2.0 または reviewer API key で接続します。Free ティアは4ツール、Pro/審査アカウントは全17ツール利用可。2026-07-01 までのbeta期間中は審査・初期ユーザー向けにPro表面を開放しています。
+**認証**: Remote endpoint は OAuth 2.0 または reviewer API key で接続します。Free ティアは4ツール、Pro/審査アカウントは全17ツール利用可。2026-10-01 までのbeta期間中は審査・初期ユーザー向けにPro表面を開放しています。
 
 The server does not write to KKJ or external systems. It keeps only ephemeral session state for saved searches and may keep short-lived in-memory document cache for duplicate fetch prevention.
 ```
@@ -196,7 +196,7 @@ PDF/HTML attachments are fetched only when requested, processed ephemerally, and
 Option A — Free tier / beta note:
 1. In Claude.ai Settings → Connectors, add custom connector: https://mcp.bid-jp.com/mcp
 2. Complete OAuth or use Authorization: Bearer free in MCP Inspector/remote checks.
-3. During beta (until 2026-07-01), authenticated connections may expose the full Pro tool surface. After beta, a non-Pro key exposes only search_bids, rank_bids, list_recent_bids, get_bid_detail.
+3. During beta (until 2026-10-01), authenticated connections may expose the full Pro tool surface. After beta, a non-Pro key exposes only search_bids, rank_bids, list_recent_bids, get_bid_detail.
 
 Option B — Pro tier (full 17 tools + MCP App):
 1. Visit https://mcp.bid-jp.com and click "Pro トライアル" to create a review account

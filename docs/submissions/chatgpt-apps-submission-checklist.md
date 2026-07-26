@@ -76,7 +76,7 @@ OpenAIはAPIやブラウザ自動操作からの本人確認を許可してい�
 Free4ツールにはPro向け課金・OAuth誘導を一切見せない設計にしたいが、本サーバーは本番で常時 `JP_BIDS_OAUTH_SECRET` を要求するため、認証ヘッダーなしのリクエストは401を返す。ChatGPT側に伝えるべき接続方法は以下のいずれか。ダッシュボードのUIを見てから選ぶこと。
 
 ### オプションA（推奨）: OAuthを選ばず、固定のBearerトークンで接続
-本サーバーの `parseTier()` は、ベータ期間（〜2026-07-01、**すでに終了**）後は「`JP_BIDS_PRO_API_KEYS` に含まれないBearerトークン = Free tier」として扱う。したがって：
+本サーバーの `parseTier()` は、ベータ期間（`src/lib/auth.ts` の `BETA_UNTIL`、現在は 2026-10-01）後は「`JP_BIDS_PRO_API_KEYS` に含まれないBearerトークン = Free tier」として扱う。したがって：
 - OpenAIの提出フォームで「API key / custom header」認証方式が選べる場合、ヘッダー `Authorization: Bearer <任意の非公開文字列、例: chatgpt-reviewer-demo>` を設定する。
 - このトークンは `JP_BIDS_PRO_API_KEYS` に**登録しない**（登録するとPro扱いになってしまう）。
 - ログイン・パスワード不要、アカウント作成不要で即座に動作するため、OpenAIの「デモアカウントは追加ステップなしで即利用可能」要件を満たす。
