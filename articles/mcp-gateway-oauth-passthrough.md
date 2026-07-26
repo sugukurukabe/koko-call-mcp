@@ -247,6 +247,7 @@ Gateway はトークンを復号しません。保存しません。ログに書
 ## References
 
 - 全景記事（Zenn）: [日本の公的データと業務SaaSを束ねるPublic MCP Gatewayを作りました](https://zenn.dev/sugukuru_labs/articles/public-mcp-jp-gateway)
+- MCP Apps UI 実装の詳細記事（Zenn）: [会話の中に画面を置く — MCP Apps で入札ワークスペースを実装する](https://zenn.dev/sugukuru_labs/articles/mcp-apps-bid-workspace)
 - ADR-0021: [MoneyForward Cloud Accounting MCP Integration](https://github.com/sugukurukabe/koko-call-mcp/blob/main/docs/adr/0021-moneyforward-accounting-mcp-integration.md)
 - ADR-0019: [Approval and Compliance Policy](https://github.com/sugukurukabe/koko-call-mcp/blob/main/docs/adr/0019-approval-and-compliance-policy.md)
 - GMO Banking private connector policy: [docs/public-mcp-hub/gmo-banking-private-connector.md](https://github.com/sugukurukabe/koko-call-mcp/blob/main/docs/public-mcp-hub/gmo-banking-private-connector.md)

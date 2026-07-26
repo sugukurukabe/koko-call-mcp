@@ -77,6 +77,8 @@
     "test:contract": "vitest run tests/contract.test.ts",
     "bench": "tsx benchmarks/kkj.bench.ts",
     "mutation": "stryker run",
+    "apps:harness": "tsx scripts/apps-harness/serve.ts",
+    "apps:capture": "npm run build:ui && tsx scripts/apps-harness/capture.ts",
     "docs:api": "typedoc",
     "api:health": "tsx scripts/api-health-check.ts",
     "remote:health": "tsx scripts/remote-health-check.ts",

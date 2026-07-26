@@ -323,3 +323,4 @@ gBizID やマイナンバー/JPKI は初期 MVP に入れません。行政サ�
 - freee Developer: [https://developer.freee.co.jp](https://developer.freee.co.jp)
 - Digital Applied, MCP Adoption Statistics 2026: [https://www.digitalapplied.com/blog/mcp-adoption-statistics-2026-model-context-protocol](https://www.digitalapplied.com/blog/mcp-adoption-statistics-2026-model-context-protocol)
 - OAuth pass-through 設計の詳細記事（Zenn）: [他人のOAuthを預からないMCP Gatewayを設計する](https://zenn.dev/sugukuru_labs/articles/mcp-gateway-oauth-passthrough)
+- MCP Apps UI 実装の詳細記事（Zenn）: [会話の中に画面を置く — MCP Apps で入札ワークスペースを実装する](https://zenn.dev/sugukuru_labs/articles/mcp-apps-bid-workspace)

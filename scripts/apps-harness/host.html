@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<title>MCP Apps mock host — JP Bids AI Bid Workspace</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #ffffff; }
+  #frame { display: block; border: 0; width: 100%; height: 100vh; }
+  body.dark { background: #191919; }
+</style>
+</head>
+<body>
+<iframe id="frame" src="./search-results.html" title="AI Bid Workspace"></iframe>
+<script>
+// MCP Apps ホストの最小実装。ui/initialize に応答し、tool result を1回流す。
+// 本番UI（dist/apps/search-results.html）に一切手を入れずに決定的なキャプチャを得るために使う。
+//
+// Minimal MCP Apps host. Answers ui/initialize and pushes one tool result.
+// Used to obtain deterministic captures without touching the production UI bundle.
+//
+// Host MCP Apps minimal. Menjawab ui/initialize dan mengirim satu tool result.
+// Dipakai untuk mendapatkan tangkapan deterministik tanpa mengubah bundel UI production.
+const PROTOCOL_VERSION = "2026-01-26";
+
+const params = new URLSearchParams(location.search);
+const theme = params.get("theme") === "dark" ? "dark" : "light";
+const displayMode = params.get("displayMode") ?? "inline";
+// ホストが message / downloadFile を拒否する経路も再現できるようにする
+// Allow reproducing the paths where the host declines message / downloadFile
+// Memungkinkan reproduksi jalur ketika host menolak message / downloadFile
+const denyMessage = params.get("denyMessage") === "1";
+const denyDownload = params.get("denyDownload") === "1";
+const autoResult = params.get("autoResult") !== "0";
+// アコーディオンを開いた状態をキャプチャするため。UI側のコードは変更しない。
+// Lets us capture the accordion in its open state without touching the UI code.
+// Memungkinkan menangkap akordeon dalam keadaan terbuka tanpa mengubah kode UI.
+const openEvidence = params.get("openEvidence") === "1";
+// Action Dock のボタンを自動で押し、退避先の表示までキャプチャする
+// Auto-press an Action Dock button so the fallback notice can be captured
+// Menekan tombol Action Dock secara otomatis agar notifikasi fallback tertangkap
+const clickAction = params.get("clickAction");
+
+if (theme === "dark") document.body.classList.add("dark");
+
+const frame = document.getElementById("frame");
+const send = (message) => frame.contentWindow.postMessage(message, "*");
+
+const ACCESSED_AT = "2026-07-26T09:00:00.000Z";
+const attribution = {
+  dataSource: "中小企業庁 官公需情報ポータルサイト",
+  apiEndpoint: "http://www.kkj.go.jp/api/",
+  licenseUrl: "https://www.kkj.go.jp/s/help/notes/",
+  serviceDisclaimer:
+    "JP Bids MCP returns public procurement search results as reference information. Verify official documents before bidding.",
+  accessedAt: ACCESSED_AT,
+};
+
+const bids = [
+  {
+    resultId: 1,
+    key: "KKJ-2026-46201-0311",
+    projectName: "鹿児島市 学校教育情報システム 保守運用業務",
+    organizationName: "鹿児島市",
+    prefectureName: "鹿児島県",
+    cityName: "鹿児島市",
+    category: "役務",
+    procedureType: "一般競争入札",
+    certification: "役務の提供等 A・B等級",
+    cftIssueDate: "2026-07-21",
+    tenderSubmissionDeadline: "2026-08-03T17:00:00+09:00",
+    openingTendersEvent: "2026-08-07T14:00:00+09:00",
+    externalDocumentUri: "https://www.kkj.go.jp/doc/ja/661120260721.pdf",
+    fileType: "pdf",
+    fileSize: 486_912,
+    projectDescription:
+      "小中学校で運用する教育情報システムの保守および運用支援業務一式。障害一次対応、月次点検、教職員向け問い合わせ対応を含む。",
+    attachments: [{ name: "仕様書.pdf", uri: "https://www.kkj.go.jp/doc/ja/661120260721.pdf" }],
+  },
+  {
+    resultId: 2,
+    key: "KKJ-2026-46000-0288",
+    projectName: "鹿児島県 農林水産統計データ整備支援業務",
+    organizationName: "鹿児島県",
+    prefectureName: "鹿児島県",
+    category: "役務",
+    procedureType: "指名競争入札",
+    cftIssueDate: "2026-07-18",
+    tenderSubmissionDeadline: "2026-08-19T17:00:00+09:00",
+    openingTendersEvent: "2026-08-24T10:00:00+09:00",
+    externalDocumentUri: "https://www.kkj.go.jp/doc/ja/460020260718.pdf",
+    fileType: "pdf",
+    fileSize: 271_360,
+  },
+  {
+    resultId: 3,
+    key: "KKJ-2026-46215-0102",
+    projectName: "霧島市 上下水道台帳システム更新",
+    organizationName: "霧島市",
+    prefectureName: "鹿児島県",
+    cityName: "霧島市",
+    category: "物品",
+    cftIssueDate: "2026-07-14",
+    tenderSubmissionDeadline: "2026-07-28T17:00:00+09:00",
+    externalDocumentUri: "https://www.kkj.go.jp/doc/ja/462152026071.pdf",
+    fileType: "pdf",
+    fileSize: 158_720,
+  },
+  {
+    resultId: 4,
+    key: "KKJ-2026-46220-0077",
+    projectName: "薩摩川内市 庁舎清掃業務委託",
+    organizationName: "薩摩川内市",
+    prefectureName: "鹿児島県",
+    category: "役務",
+    cftIssueDate: "2026-07-09",
+    tenderSubmissionDeadline: "2026-07-22T17:00:00+09:00",
+  },
+  {
+    resultId: 5,
+    key: "KKJ-2026-46100-0455",
+    projectName: "県立高校 ネットワーク機器更新一式",
+    organizationName: "鹿児島県教育委員会",
+    prefectureName: "鹿児島県",
+    category: "物品",
+    cftIssueDate: "2026-07-24",
+    externalDocumentUri: "https://www.kkj.go.jp/doc/ja/461002026072.pdf",
+    fileType: "pdf",
+    fileSize: 92_160,
+  },
+];
+
+const searchResult = {
+  searchHits: 14,
+  returnedCount: bids.length,
+  bids,
+  query: { Query: "システム", CFT_Issue_Date: "2026-07-01", Prefecture: "46" },
+  attribution,
+  pagination: { has_more: true, next_cursor: "5", total_count: 14 },
+};
+
+const hostCapabilities = {
+  openLinks: {},
+  serverTools: { listChanged: false },
+  serverResources: { listChanged: false },
+  logging: {},
+  updateModelContext: {},
+  ...(denyMessage ? {} : { message: {} }),
+  ...(denyDownload ? {} : { downloadFile: {} }),
+};
+
+const hostContext = {
+  theme,
+  displayMode,
+  availableDisplayModes: ["inline", "fullscreen"],
+  userAgent: "mcp-apps-harness/1.0",
+  locale: "ja-JP",
+};
+
+const result = (id, value) => send({ jsonrpc: "2.0", id, result: value });
+const errorResult = (id, message) =>
+  send({ jsonrpc: "2.0", id, result: { isError: true, content: [{ type: "text", text: message }] } });
+
+window.appRequests = [];
+
+window.addEventListener("message", (event) => {
+  const message = event.data;
+  if (!message || message.jsonrpc !== "2.0") return;
+  if (message.method) window.appRequests.push(message.method);
+
+  switch (message.method) {
+    case "ui/initialize":
+      result(message.id, {
+        protocolVersion: PROTOCOL_VERSION,
+        hostInfo: { name: "mcp-apps-harness", version: "1.0.0" },
+        hostCapabilities,
+        hostContext,
+      });
+      return;
+    case "ui/notifications/initialized":
+      if (autoResult) {
+        send({
+          jsonrpc: "2.0",
+          method: "ui/notifications/tool-input",
+          params: { toolName: "search_bids_app", arguments: { query: "システム", limit: 20 } },
+        });
+        send({
+          jsonrpc: "2.0",
+          method: "ui/notifications/tool-result",
+          params: {
+            toolName: "search_bids_app",
+            result: { content: [{ type: "text", text: "14件見つかりました。" }], structuredContent: searchResult },
+            structuredContent: searchResult,
+            content: [{ type: "text", text: "14件見つかりました。" }],
+          },
+        });
+        if (openEvidence) {
+          setTimeout(() => {
+            const details = frame.contentDocument?.querySelector(".evidence-panel details");
+            if (details) details.open = true;
+          }, 400);
+        }
+        if (clickAction) {
+          setTimeout(() => {
+            const buttons = [...(frame.contentDocument?.querySelectorAll(".action-dock button") ?? [])];
+            buttons.find((b) => b.textContent?.includes(clickAction))?.click();
+          }, 500);
+        }
+      }
+      return;
+    case "ui/open-link":
+    case "ui/update-model-context":
+      result(message.id, {});
+      return;
+    case "ui/download-file":
+      if (denyDownload) errorResult(message.id, "download declined");
+      else result(message.id, {});
+      return;
+    case "ui/message":
+      if (denyMessage) errorResult(message.id, "message declined");
+      else result(message.id, {});
+      return;
+    case "ui/request-display-mode":
+      hostContext.displayMode = message.params?.mode ?? hostContext.displayMode;
+      result(message.id, { displayMode: hostContext.displayMode });
+      send({
+        jsonrpc: "2.0",
+        method: "ui/notifications/host-context-changed",
+        params: hostContext,
+      });
+      return;
+    case "tools/call":
+      result(message.id, { content: [{ type: "text", text: "ok" }], structuredContent: searchResult });
+      return;
+    default:
+      if (message.id !== undefined) result(message.id, {});
+  }
+});
+</script>
+</body>
+</html>

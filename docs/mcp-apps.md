@@ -41,6 +41,26 @@ v0.6.0 は MCP Apps UI を「検索結果表」から「AI Bid Workspace」に�
 - 各host actionが拒否されてもUIが壊れないこと。
 - non-UIクライアントではtext + structuredContentだけで使えること。
 
+### ローカル確認とスクリーンショット取得
+
+`scripts/apps-harness/` は最小のモックホストである。`ui/initialize` に応答し、固定の tool result を1回流すだけなので、本番バンドル（`dist/apps/search-results.html`）に手を入れずに実機相当の画面を確認できる。
+
+```bash
+npm run apps:harness   # http://127.0.0.1:8899/host.html をブラウザで開く
+npm run apps:capture   # images/mcp-apps-bid-workspace/ へ6枚を書き出す
+```
+
+クエリパラメータで host 側の条件を切り替える。
+
+| パラメータ | 効果 |
+|---|---|
+| `theme=dark` | `hostContext.theme` を dark にする（UI自体は `prefers-color-scheme` で切替） |
+| `denyMessage=1` | `hostCapabilities.message` を外し `ui/message` を拒否する |
+| `denyDownload=1` | `ui/download-file` を拒否する |
+| `autoResult=0` | tool result を流さず Welcome 画面を出す |
+| `openEvidence=1` | Evidence & Safety のアコーディオンを開く |
+| `clickAction=読む` | Action Dock のボタンを押して退避先の表示を見る |
+
 ## English
 
 v0.6.0 evolves the MCP Apps UI from a "search results table" to an "AI Bid Workspace".

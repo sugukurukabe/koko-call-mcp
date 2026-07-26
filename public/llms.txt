@@ -46,6 +46,7 @@ JP Bids MCP は、日本の官公需入札情報（中小企業庁 官公需情�
 
 - JP Bids MCP × Jグランツ MCP × freee MCP — 入札・補助金・会計をひとつの会話で: https://github.com/sugukurukabe/koko-call-mcp/blob/main/articles/zenn-jp-bids-jgrants.md
 - 無形資産の4SからみたMCP — 小さなプロトコルがなぜ新しい価値を生むのか: https://github.com/sugukurukabe/koko-call-mcp/blob/main/articles/mcp-intangible-assets-4s.md
+- 会話の中に画面を置く — MCP Apps で入札ワークスペースを実装する（MCP Apps UI の実装解説。単一HTML配信、CSP の connectDomains 空許可、ホストアクション7種と拒否時のフォールバック設計）: https://github.com/sugukurukabe/koko-call-mcp/blob/main/articles/mcp-apps-bid-workspace.md
 
 ## エコシステム / Ecosystem
 
