@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "name": "JP Bids",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "type": "mcp_server",
   "homepage": "https://mcp.bid-jp.com",
   "repository": "https://github.com/sugukurukabe/koko-call-mcp",
@@ -38,7 +38,12 @@
       "summarize_bids_by_org",
       "save_search",
       "check_saved_search",
-      "list_saved_searches"
+      "list_saved_searches",
+      "map_awards_to_listed",
+      "get_listed_award_history",
+      "analyze_award_price_impact",
+      "watch_listed_awards",
+      "search_investor_radar_app"
     ],
     "prompts": [
       "morning_bid_briefing",
@@ -46,6 +51,7 @@
       "competitor_radar",
       "bid_review_packet_workflow",
       "qualification_and_question_draft",
+      "investor_radar_briefing",
       "bid_due_alert"
     ],
     "resources": [
@@ -54,7 +60,8 @@
       "docs://agentic-cloud-roadmap",
       "docs://agentic-security-storage-readiness",
       "codes://prefectures",
-      "ui://jp-bids/search-results.html"
+      "ui://jp-bids/search-results.html",
+      "ui://jp-bids/investor-radar.html"
     ],
     "resource_templates": ["bid://{bid_key}", "prefecture://{lg_code}", "org://{organization_name}"]
   },

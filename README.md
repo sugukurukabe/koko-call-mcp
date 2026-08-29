@@ -103,6 +103,7 @@ npx --yes jp-bids-mcp --version
 - AI Bid Radar: 案件を実務優先度でスコアリング・ランキング。Ranking bid candidates by practical follow-up priority.
 - PDF/HTML要件抽出: 一時取得・SSRF防御・Vertex AI Gemini対応。PDF/HTML requirement extraction with SSRF guard and Vertex AI Gemini.
 - MCP Apps UI: Claude.aiのサイドパネルで入札案件を一覧・操作。Interactive workspace in MCP Apps-compatible clients.
+- Investor Radar: 官公需公告を上場企業へ名寄せ（投資助言ではない）。Map KKJ notices to listed tickers. Not investment advice.
 - Free/Proティア: ベータ期間（〜2026年9月末）は全機能無料。Free beta through September 2026, Pro ¥990/month thereafter.
 - Resources・Resource Templatesでコンテキストを精密に渡せる。Resources and Resource Templates for targeted context.
 - リモートStreamable HTTPとローカルstdioの両対応。Remote Streamable HTTP and local stdio transports.
@@ -130,6 +131,11 @@ npx --yes jp-bids-mcp --version
 | `save_search` | 検索条件を保存 / Save search criteria | Pro |
 | `check_saved_search` | 保存検索の新着確認 / Check for new bids | Pro |
 | `list_saved_searches` | 保存検索の一覧 / List saved searches | Pro |
+| `map_awards_to_listed` | 公告を上場企業へ名寄せ / Map notices to tickers | Pro |
+| `get_listed_award_history` | 上場企業の公告履歴 / Listed-company notice history | Pro |
+| `analyze_award_price_impact` | 公告日前後の終値 / Closes around notice date | Pro |
+| `watch_listed_awards` | 銘柄ウォッチ / Ticker watchlist | Pro |
+| `search_investor_radar_app` | Investor Radar UI | Pro |
 
 ## Resources
 
@@ -139,6 +145,7 @@ npx --yes jp-bids-mcp --version
 - `docs://agentic-security-storage-readiness`
 - `codes://prefectures`
 - `ui://jp-bids/search-results.html`
+- `ui://jp-bids/investor-radar.html`
 - `bid://{bid_key}`
 - `prefecture://{lg_code}`
 - `org://{organization_name}`
@@ -166,6 +173,7 @@ Slack briefing job: `docs/slack-briefing.md`.
 - `docs/inspector.md`
 - `docs/deployment-cloud-run.md`
 - `docs/mcp-apps.md`
+- `docs/investor-radar.md`
 - `docs/slack-briefing.md`
 - `docs/remote-release-checklist.md`
 - `docs/submissions/mcp-directories.md`

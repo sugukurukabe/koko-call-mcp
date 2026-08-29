@@ -37,6 +37,11 @@ const EXPECTED_TOOL_ANNOTATIONS: Record<
   draft_bid_questions: { readOnlyHint: true, destructiveHint: false },
   analyze_past_awards: { readOnlyHint: true, destructiveHint: false },
   summarize_bids_by_org: { readOnlyHint: true, destructiveHint: false },
+  map_awards_to_listed: { readOnlyHint: true, destructiveHint: false },
+  get_listed_award_history: { readOnlyHint: true, destructiveHint: false },
+  analyze_award_price_impact: { readOnlyHint: true, destructiveHint: false },
+  watch_listed_awards: { readOnlyHint: false, destructiveHint: false },
+  search_investor_radar_app: { readOnlyHint: true, destructiveHint: false },
   // in-memory state mutations
   save_search: { readOnlyHint: false, destructiveHint: false },
   check_saved_search: { readOnlyHint: false, destructiveHint: false },
@@ -50,6 +55,7 @@ const EXPECTED_PRO_PROMPTS = [
   "competitor_radar",
   "bid_review_packet_workflow",
   "qualification_and_question_draft",
+  "investor_radar_briefing",
   "bid_due_alert",
 ];
 
@@ -199,14 +205,14 @@ describe("Anthropic review: Free vs Pro tier surface", () => {
     await server.close();
   });
 
-  it("Pro tier exposes all 17 tools", async () => {
+  it("Pro tier exposes all 22 tools", async () => {
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     const server = createJpBidsServer({ tier: "pro" });
     const client = new Client({ name: "pro-tier-test", version: "0.1.0" });
     await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
 
     const { tools } = await client.listTools();
-    expect(tools.length).toBe(17);
+    expect(tools.length).toBe(22);
 
     await client.close();
     await server.close();
@@ -284,14 +290,14 @@ describe("Anthropic review: HTTP MCP session", () => {
     expect(response.headers["www-authenticate"]).toContain("Bearer");
   });
 
-  it("full MCP session via InMemoryTransport: initialize → tools/list returns 17 Pro tools", async () => {
+  it("full MCP session via InMemoryTransport: initialize → tools/list returns 22 Pro tools", async () => {
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     const server = createJpBidsServer({ tier: "pro" });
     const client = new Client({ name: "session-test", version: "0.1.0" });
     await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
 
     const { tools } = await client.listTools();
-    expect(tools.length).toBe(17);
+    expect(tools.length).toBe(22);
     expect(tools.map((t) => t.name)).toContain("search_bids");
     expect(tools.map((t) => t.name)).toContain("extract_bid_requirements");
 
@@ -388,6 +394,21 @@ describe("Anthropic review: MCP Apps UI metadata", () => {
     const appTool = tools.find((t) => t.name === "search_bids_app");
     expect(appTool).toBeDefined();
     expect(appTool?._meta?.ui?.resourceUri).toBe("ui://jp-bids/search-results.html");
+
+    await client.close();
+    await server.close();
+  });
+
+  it("search_investor_radar_app tool has _meta.ui.resourceUri annotation", async () => {
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    const server = createJpBidsServer({ tier: "pro" });
+    const client = new Client({ name: "investor-apps-meta-test", version: "0.1.0" });
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+
+    const { tools } = await client.listTools();
+    const appTool = tools.find((t) => t.name === "search_investor_radar_app");
+    expect(appTool).toBeDefined();
+    expect(appTool?._meta?.ui?.resourceUri).toBe("ui://jp-bids/investor-radar.html");
 
     await client.close();
     await server.close();

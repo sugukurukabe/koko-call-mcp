@@ -87,13 +87,18 @@ npx --yes jp-bids-export --prefecture 鹿児島県 --category 役務 --query シ
 | `save_search` | Simpan kriteria pencarian | Pro |
 | `check_saved_search` | Periksa tender baru tersimpan | Pro |
 | `list_saved_searches` | Daftar pencarian tersimpan | Pro |
+| `map_awards_to_listed` | Petakan pengumuman ke ticker | Pro |
+| `get_listed_award_history` | Riwayat pengumuman perusahaan tercatat | Pro |
+| `analyze_award_price_impact` | Harga penutupan di sekitar tanggal pengumuman | Pro |
+| `watch_listed_awards` | Daftar pantauan ticker | Pro |
+| `search_investor_radar_app` | UI Investor Radar | Pro |
 
 ## Harga / Pricing / 料金
 
 | Paket | Harga | Fitur |
 |---|---|---|
 | **Free** | Gratis | Pencarian, peringkat, detail |
-| **Pro** | ¥990/bulan | 17 alat + UI MCP Apps + ekstraksi PDF + pencarian tersimpan |
+| **Pro** | ¥990/bulan | 22 alat + UI MCP Apps + ekstraksi PDF + pencarian tersimpan + Investor Radar |
 
 Selama beta (sampai akhir September 2026), Pro juga gratis. Tidak perlu API key.
 

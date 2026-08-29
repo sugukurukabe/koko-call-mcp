@@ -1,7 +1,7 @@
 # JP Bids MCP
 
 > 中小企業庁の官公需情報ポータルサイト（KKJ）が公開する入札公示データを、AI アシスタントから検索・分析・要件抽出・カレンダー出力できる、読み取り専用の Model Context Protocol サーバーです。
-> A read-only Model Context Protocol server that exposes public procurement notice data from Japan's SME Agency KKJ portal as 17 AI tools for search, ranking, PDF requirement extraction, and calendar export.
+> A read-only Model Context Protocol server that exposes public procurement notice data from Japan's SME Agency KKJ portal as 22 AI tools for search, ranking, PDF requirement extraction, calendar export, and listed-company notice mapping (not investment advice).
 
 公式エンドポイント: `https://mcp.bid-jp.com/mcp`（Streamable HTTP + OAuth 2.0）
 ライセンス: Apache-2.0
@@ -32,6 +32,11 @@ JP Bids MCP は、日本の官公需入札情報（中小企業庁 官公需情�
 - create_bid_review_packet — 社内検討メモ生成 / Generate internal review packet
 - export_bid_shortlist — CSV 出力 / Export shortlist as CSV
 - save_search / check_saved_search / list_saved_searches — 保存検索 / Saved search alerts
+- map_awards_to_listed — 公告を上場企業へ名寄せ（投資助言ではない） / Map notices to listed tickers (not investment advice)
+- get_listed_award_history — 上場企業の公告履歴 / Listed-company notice history
+- analyze_award_price_impact — 公告日前後の公開終値 / Public closes around a notice date
+- watch_listed_awards — 銘柄ウォッチ / Ticker watchlist
+- search_investor_radar_app — Investor Radar MCP Apps UI
 
 ## ドキュメント / Documentation
 

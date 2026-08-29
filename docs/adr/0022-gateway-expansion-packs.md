@@ -82,7 +82,7 @@ Bundle は marketing / UX 概念であり、runtime には影響しない。
 |--------|---------------|-------------|
 | Public Sales Pack | JP Bids + J-Grants + 法人番号 | 入札・補助金を探す企業 |
 | Agri Expansion Pack | AgriOps + e-Stat + JP Bids + J-Grants | 農業法人・自治体・派遣会社 |
-| Finance Pack | freee + MoneyForward + 法人番号 | 経理・財務担当者 |
+| Finance Pack | freee + MoneyForward + 法人番号 + JP Bids Investor Radar（名寄せ。株価は J-Quants パススルー） | 経理・財務担当者 / 調査担当 |
 | Compliance Pack | SSW/Visa + e-Gov + audit log | 行政書士・登録支援機関 |
 
 ## Rationale / 理由 / Alasan

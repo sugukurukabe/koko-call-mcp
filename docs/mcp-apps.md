@@ -61,6 +61,10 @@ npm run apps:capture   # images/mcp-apps-bid-workspace/ へ6枚を書き出す
 | `openEvidence=1` | Evidence & Safety のアコーディオンを開く |
 | `clickAction=読む` | Action Dock のボタンを押して退避先の表示を見る |
 
+### Investor Radar
+
+`search_investor_radar_app` は `ui://jp-bids/investor-radar.html` を返す。CSP は Bid Workspace と同様 `connectDomains: []`。`openLink` 許可リストは `www.kkj.go.jp` に加え TDnet / EDINET / J-Quants 公式ドメイン。ハーネスは `scripts/apps-harness/investor-host.html`。
+
 ## English
 
 v0.6.0 evolves the MCP Apps UI from a "search results table" to an "AI Bid Workspace".

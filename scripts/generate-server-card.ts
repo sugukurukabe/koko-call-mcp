@@ -41,5 +41,5 @@ const card = {
 };
 
 await writeFile(outputPath, `${JSON.stringify(card, null, 2)}\n`, "utf8");
-execFileSync("npx", ["biome", "format", "--write", outputPath], { stdio: "inherit" });
+execFileSync("biome", ["format", "--write", outputPath], { stdio: "inherit" });
 console.error(`Generated ${outputPath}`);

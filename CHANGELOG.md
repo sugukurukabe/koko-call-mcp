@@ -2,6 +2,13 @@
 
 ## 日本語
 
+### Unreleased
+
+### 0.9.0
+
+- **Investor Radar**: 官公需公告を上場企業の銘柄コードへ名寄せする Pro ツール 5本（`map_awards_to_listed` / `get_listed_award_history` / `analyze_award_price_impact` / `watch_listed_awards` / `search_investor_radar_app`）。売買推奨は出さない。株価は J-Quants API キーのパススルー（ADR-0025 / ADR-0026）。
+- **公式ロードマップ対応メモ**: SDK 1.29.0 に Tasks / `ttlMs` / `cacheScope` / `server/discover` が無いことを検証し、ADR-0025 と spec-notes に将来課題として記録。
+
 ### 0.8.0
 
 - **KKJ APIのリトライ耐性**: 5xx・タイムアウト・ネットワーク断を一時障害として指数バックオフで最大2回再試行（`src/api/kkj-client.ts`）。再試行のたびにレートリミッタを通すため、KKJへの短時間大量アクセスにはならない。`JP_BIDS_KKJ_TIMEOUT_MS` でタイムアウトを調整できる。
@@ -169,6 +176,13 @@
 
 ## English
 
+### Unreleased
+
+### 0.9.0
+
+- **Investor Radar**: five Pro tools that map KKJ notices to listed-company tickers. No buy/sell advice. Prices use J-Quants API key passthrough (ADR-0025 / ADR-0026).
+- **Official roadmap note**: verified that SDK 1.29.0 lacks Tasks / `ttlMs` / `cacheScope` / `server/discover`; recorded as future work in ADR-0025.
+
 ### 0.8.0
 
 - **KKJ API retry resilience**: 5xx responses, timeouts, and network drops are treated as transient and retried up to twice with exponential backoff (`src/api/kkj-client.ts`). Every attempt passes through the rate limiter, so retries never turn into a burst against KKJ. `JP_BIDS_KKJ_TIMEOUT_MS` configures the per-request timeout.
@@ -335,6 +349,13 @@
 - Initial implementation with Tools, Prompts, Resources, Resource Templates, Completion, Logging, stdio, and Streamable HTTP.
 
 ## Bahasa Indonesia
+
+### Unreleased
+
+### 0.9.0
+
+- **Investor Radar**: lima alat Pro yang memetakan pengumuman KKJ ke ticker. Bukan nasihat beli/jual. Harga memakai passthrough kunci API J-Quants (ADR-0025 / ADR-0026).
+- **Catatan peta jalan resmi**: SDK 1.29.0 tidak memiliki Tasks / `ttlMs` / `cacheScope` / `server/discover`; dicatat sebagai pekerjaan masa depan di ADR-0025.
 
 ### 0.8.0
 

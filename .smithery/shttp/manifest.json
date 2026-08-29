@@ -7,14 +7,14 @@
       "serverInfo": {
         "name": "JP Bids MCP",
         "title": "JP Bids MCP",
-        "version": "0.8.0",
+        "version": "0.9.0",
         "description": "Japan government procurement bid search through the Model Context Protocol."
       },
       "tools": [
         {
           "name": "search_bids",
           "title": "官公需入札検索",
-          "description": "日本全国の官公需入札情報を検索する。全文検索は query、件名は project_name、発注機関は organization_name を使う。Search Japanese public procurement bids by keyword, project name, or organization. Cari tender pengadaan pemerintah Jepang berdasarkan kata kunci, nama proyek, atau instansi.",
+          "description": "日本全国の官公需入札情報を検索する。USE THIS WHEN: キーワード・件名・発注機関・都道府県・期間で入札候補を探したいとき。DO NOT USE WHEN: 既に Key があり1件の詳細が欲しいとき（get_bid_detail を使う）、追うべき順に並べたいとき（rank_bids を使う）。Search Japanese public procurement bids by keyword, project name, organization, prefecture, or date range. Cari tender pengadaan pemerintah Jepang berdasarkan kata kunci, nama proyek, instansi, prefektur, atau rentang tanggal.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -29,6 +29,7 @@
                 "minLength": 1
               },
               "prefecture": {
+                "description": "都道府県名で絞り込む。配列で複数指定可。例: 鹿児島県、東京都。",
                 "anyOf": [
                   {
                     "type": "string",
@@ -140,6 +141,7 @@
                 ]
               },
               "category": {
+                "description": "入札区分。物品、役務、工事、その他。",
                 "type": "string",
                 "enum": [
                   "物品",
@@ -148,6 +150,7 @@
                 ]
               },
               "procedure_type": {
+                "description": "公示種別。一般競争入札、指名競争入札、随意契約など。",
                 "type": "string",
                 "enum": [
                   "一般競争入札",
@@ -156,6 +159,7 @@
                 ]
               },
               "certification": {
+                "description": "全省庁統一資格の等級。A、B、C、D から複数指定可。",
                 "type": "array",
                 "items": {
                   "type": "string",
@@ -168,6 +172,7 @@
                 }
               },
               "organization_name": {
+                "description": "発注機関名で絞り込む。例: 農林水産省、防衛省。",
                 "type": "string",
                 "minLength": 1
               },
@@ -205,6 +210,7 @@
               },
               "limit": {
                 "default": 20,
+                "description": "取得件数の上限。デフォルト20、最大1000。",
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 1000
@@ -402,6 +408,34 @@
                   "accessedAt"
                 ],
                 "additionalProperties": false
+              },
+              "pagination": {
+                "type": "object",
+                "properties": {
+                  "has_more": {
+                    "type": "boolean"
+                  },
+                  "next_cursor": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "total_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "has_more",
+                  "total_count"
+                ],
+                "additionalProperties": false
               }
             },
             "required": [
@@ -420,14 +454,12 @@
             "idempotentHint": true,
             "openWorldHint": true
           },
-          "execution": {
-            "taskSupport": "forbidden"
-          }
+          "_meta": {}
         },
         {
           "name": "rank_bids",
           "title": "追うべき入札ランキング",
-          "description": "官公需入札を検索し、追うべき順にスコアリングする。候補整理用であり参加可否の最終判断ではない。Search and score bids by follow-up priority using AI Bid Radar. Cari dan peringkat tender berdasarkan prioritas tindak lanjut dengan AI Bid Radar.",
+          "description": "官公需入札を検索し、追うべき順にスコアリングする。USE THIS WHEN: 検索結果を営業優先度で並べ、pursue/review/skip の初期判断を作りたいとき。DO NOT USE WHEN: 法的な参加資格の最終判定が必要なとき（assess_bid_qualification と公式資料確認を併用）。Search and score bids by follow-up priority using AI Bid Radar. Cari dan peringkat tender berdasarkan prioritas tindak lanjut dengan AI Bid Radar.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -442,6 +474,7 @@
                 "minLength": 1
               },
               "prefecture": {
+                "description": "都道府県名で絞り込む。配列で複数指定可。例: 鹿児島県、東京都。",
                 "anyOf": [
                   {
                     "type": "string",
@@ -553,6 +586,7 @@
                 ]
               },
               "category": {
+                "description": "入札区分。物品、役務、工事、その他。",
                 "type": "string",
                 "enum": [
                   "物品",
@@ -561,6 +595,7 @@
                 ]
               },
               "procedure_type": {
+                "description": "公示種別。一般競争入札、指名競争入札、随意契約など。",
                 "type": "string",
                 "enum": [
                   "一般競争入札",
@@ -569,6 +604,7 @@
                 ]
               },
               "certification": {
+                "description": "全省庁統一資格の等級。A、B、C、D から複数指定可。",
                 "type": "array",
                 "items": {
                   "type": "string",
@@ -581,6 +617,7 @@
                 }
               },
               "organization_name": {
+                "description": "発注機関名で絞り込む。例: 農林水産省、防衛省。",
                 "type": "string",
                 "minLength": 1
               },
@@ -618,6 +655,7 @@
               },
               "limit": {
                 "default": 20,
+                "description": "取得件数の上限。デフォルト20、最大1000。",
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 1000
@@ -931,18 +969,17 @@
             "idempotentHint": true,
             "openWorldHint": true
           },
-          "execution": {
-            "taskSupport": "forbidden"
-          }
+          "_meta": {}
         },
         {
           "name": "list_recent_bids",
           "title": "直近の官公需入札一覧",
-          "description": "過去1〜30日間に公告された新着官公需入札を一覧する。毎朝の営業チェックに使う。List recently published bid notices from the past 1–30 days for daily morning sales checks. Daftar pengumuman tender baru dalam 1–30 hari terakhir untuk cek pagi harian.",
+          "description": "過去1〜30日間に公告された新着官公需入札を一覧する。USE THIS WHEN: 毎朝の営業チェック、都道府県別の新着確認、直近公告の漏れ確認をしたいとき。DO NOT USE WHEN: 古い公告や細かい条件検索が必要なとき（search_bids を使う）。List recently published bid notices from the past 1–30 days for daily morning sales checks. Daftar pengumuman tender baru dalam 1–30 hari terakhir untuk cek pagi harian.",
           "inputSchema": {
             "type": "object",
             "properties": {
               "prefecture": {
+                "description": "都道府県名で絞り込む。例: 鹿児島県。",
                 "type": "string",
                 "enum": [
                   "北海道",
@@ -995,6 +1032,7 @@
                 ]
               },
               "category": {
+                "description": "入札区分。物品、役務、工事、その他。",
                 "type": "string",
                 "enum": [
                   "物品",
@@ -1004,12 +1042,14 @@
               },
               "days": {
                 "default": 7,
+                "description": "過去何日分の公告を取得するか。デフォルト7日。",
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 30
               },
               "limit": {
                 "default": 50,
+                "description": "取得件数の上限。デフォルト50。",
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 1000
@@ -1207,6 +1247,34 @@
                   "accessedAt"
                 ],
                 "additionalProperties": false
+              },
+              "pagination": {
+                "type": "object",
+                "properties": {
+                  "has_more": {
+                    "type": "boolean"
+                  },
+                  "next_cursor": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "total_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "has_more",
+                  "total_count"
+                ],
+                "additionalProperties": false
               }
             },
             "required": [
@@ -1225,14 +1293,12 @@
             "idempotentHint": true,
             "openWorldHint": true
           },
-          "execution": {
-            "taskSupport": "forbidden"
-          }
+          "_meta": {}
         },
         {
           "name": "get_bid_detail",
           "title": "官公需入札詳細",
-          "description": "入札Keyから1件の詳細を取得する。添付資料は保存せず公式サイトのURIのみ返す。Fetch full details for one bid by key without storing attachments. Ambil detail lengkap satu tender berdasarkan kunci tanpa menyimpan lampiran.",
+          "description": "入札Keyから1件の詳細を取得する。添付資料は保存せず公式サイトのURIのみ返す。USE THIS WHEN: search_bids/list_recent_bids が返した Key から公式公告ページ・添付URI・機関情報を確認したいとき。DO NOT USE WHEN: Key がまだ無いとき（search_bids を先に使う）。Fetch full details for one bid by key without storing attachments. Ambil detail lengkap satu tender berdasarkan kunci tanpa menyimpan lampiran.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -1437,6 +1503,34 @@
                   "accessedAt"
                 ],
                 "additionalProperties": false
+              },
+              "pagination": {
+                "type": "object",
+                "properties": {
+                  "has_more": {
+                    "type": "boolean"
+                  },
+                  "next_cursor": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "total_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "has_more",
+                  "total_count"
+                ],
+                "additionalProperties": false
               }
             },
             "required": [
@@ -1455,14 +1549,12 @@
             "idempotentHint": true,
             "openWorldHint": true
           },
-          "execution": {
-            "taskSupport": "forbidden"
-          }
+          "_meta": {}
         },
         {
           "name": "explain_bid_fit",
           "title": "入札追跡判断の説明",
-          "description": "1件の入札について追うべきか・要確認か・見送るべきかを理由・リスク・次アクション付きで説明する。Explain bid fit with rationale, risks, and next actions for one bid. Jelaskan kesesuaian tender dengan alasan, risiko, dan langkah selanjutnya.",
+          "description": "1件の入札について追うべきか・要確認か・見送るべきかを理由・リスク・次アクション付きで説明する。USE THIS WHEN: Key がある案件について営業会議向けに判断理由を説明したいとき。DO NOT USE WHEN: 複数案件を並べ替えたいとき（rank_bids を使う）、公式要件だけを抽出したいとき（extract_bid_requirements を使う）。Explain bid fit with rationale, risks, and next actions for one bid. Jelaskan kesesuaian tender dengan alasan, risiko, dan langkah selanjutnya.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -1489,6 +1581,7 @@
               },
               "due_within_days": {
                 "default": 30,
+                "description": "この日数以内に提出期限が来る案件を優先。デフォルト30日。",
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 180
@@ -1759,17 +1852,15 @@
           "annotations": {
             "readOnlyHint": true,
             "destructiveHint": false,
-            "idempotentHint": true,
+            "idempotentHint": false,
             "openWorldHint": true
           },
-          "execution": {
-            "taskSupport": "forbidden"
-          }
+          "_meta": {}
         },
         {
           "name": "assess_bid_qualification",
           "title": "入札資格適合MVP判定",
-          "description": "1件の入札について自社の地域・カテゴリ・資格と照合し参加可否をMVP判定する。Check bid participation eligibility against your company's region, category, and certifications. Periksa kelayakan mengikuti tender berdasarkan wilayah, kategori, dan sertifikasi perusahaan.",
+          "description": "1件の入札について自社の地域・カテゴリ・資格と照合し参加可否をMVP判定する。USE THIS WHEN: 自社の都道府県・対応カテゴリ・全省庁統一資格を使って参加可否の初期確認をしたいとき。DO NOT USE WHEN: 公式公告・添付PDFの詳細条件を読まずに最終判断したいとき（必ず人間レビューが必要）。Check bid participation eligibility against your company's region, category, and certifications. Periksa kelayakan mengikuti tender berdasarkan wilayah, kategori, dan sertifikasi perusahaan.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -2151,17 +2242,15 @@
           "annotations": {
             "readOnlyHint": true,
             "destructiveHint": false,
-            "idempotentHint": true,
+            "idempotentHint": false,
             "openWorldHint": true
           },
-          "execution": {
-            "taskSupport": "forbidden"
-          }
+          "_meta": {}
         },
         {
           "name": "extract_bid_requirements",
           "title": "入札要件抽出MVP",
-          "description": "1件の入札の参加条件・期限・確認すべきPDFを構造化する。PDFは保存しない。Extract bid requirements, deadlines, and PDF checklist from metadata and attachments without storing files. Ekstrak persyaratan tender, tenggat waktu, dan daftar PDF tanpa menyimpan berkas.",
+          "description": "1件の入札の参加条件・期限・確認すべきPDFを構造化する。PDFは保存しない。USE THIS WHEN: Key がある案件の参加条件、提出期限、確認対象資料をレビュー用に整理したいとき。DO NOT USE WHEN: 入札検索だけで十分なとき、または公式PDFの最終解釈を人間レビューなしで確定したいとき。Extract bid requirements, deadlines, and PDF checklist from metadata and attachments without storing files. Ekstrak persyaratan tender, tenggat waktu, dan daftar PDF tanpa menyimpan berkas.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -2656,17 +2745,15 @@
           "annotations": {
             "readOnlyHint": true,
             "destructiveHint": false,
-            "idempotentHint": true,
+            "idempotentHint": false,
             "openWorldHint": true
           },
-          "execution": {
-            "taskSupport": "forbidden"
-          }
+          "_meta": {}
         },
         {
           "name": "export_bid_shortlist",
           "title": "入札検討shortlist CSV",
-          "description": "入札を検索・ランキングしてGoogle Sheets/Excel用のCSVを返す。スコア・判断・リスク・次アクション付き。Search and rank bids, then export a CSV shortlist for Google Sheets/Excel with scores and next actions. Cari, peringkat, dan ekspor shortlist CSV untuk Google Sheets/Excel.",
+          "description": "入札を検索・ランキングしてGoogle Sheets/Excel用のCSVを返す。スコア・判断・リスク・次アクション付き。USE THIS WHEN: 複数案件を営業リストとして表計算ソフトに渡したいとき。DO NOT USE WHEN: 1件の深いレビュー資料が欲しいとき（create_bid_review_packet を使う）。Search and rank bids, then export a CSV shortlist for Google Sheets/Excel with scores and next actions. Cari, peringkat, dan ekspor shortlist CSV untuk Google Sheets/Excel.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -2681,6 +2768,7 @@
                 "minLength": 1
               },
               "prefecture": {
+                "description": "都道府県名で絞り込む。配列で複数指定可。例: 鹿児島県、東京都。",
                 "anyOf": [
                   {
                     "type": "string",
@@ -2792,6 +2880,7 @@
                 ]
               },
               "category": {
+                "description": "入札区分。物品、役務、工事、その他。",
                 "type": "string",
                 "enum": [
                   "物品",
@@ -2800,6 +2889,7 @@
                 ]
               },
               "procedure_type": {
+                "description": "公示種別。一般競争入札、指名競争入札、随意契約など。",
                 "type": "string",
                 "enum": [
                   "一般競争入札",
@@ -2808,6 +2898,7 @@
                 ]
               },
               "certification": {
+                "description": "全省庁統一資格の等級。A、B、C、D から複数指定可。",
                 "type": "array",
                 "items": {
                   "type": "string",
@@ -2820,6 +2911,7 @@
                 }
               },
               "organization_name": {
+                "description": "発注機関名で絞り込む。例: 農林水産省、防衛省。",
                 "type": "string",
                 "minLength": 1
               },
@@ -2857,6 +2949,7 @@
               },
               "limit": {
                 "default": 20,
+                "description": "取得件数の上限。デフォルト20、最大1000。",
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 1000
@@ -2879,12 +2972,14 @@
               },
               "due_within_days": {
                 "default": 30,
+                "description": "この日数以内に提出期限が来る案件を優先。デフォルト30日。",
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 180
               },
               "shortlist_limit": {
                 "default": 10,
+                "description": "CSV出力する最大件数。デフォルト10件。",
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 50
@@ -2986,17 +3081,15 @@
           "annotations": {
             "readOnlyHint": true,
             "destructiveHint": false,
-            "idempotentHint": true,
+            "idempotentHint": false,
             "openWorldHint": true
           },
-          "execution": {
-            "taskSupport": "forbidden"
-          }
+          "_meta": {}
         },
         {
           "name": "create_bid_calendar",
           "title": "入札締切カレンダーICS",
-          "description": "入札の提出期限・開札日・納入期限をGoogle Calendar/OutlookへインポートできるICS形式で返す。Generate an ICS calendar file with bid deadlines for Google Calendar or Outlook. Buat file kalender ICS untuk tenggat waktu tender di Google Calendar atau Outlook.",
+          "description": "入札の提出期限・開札日・納入期限をGoogle Calendar/OutlookへインポートできるICS形式で返す。USE THIS WHEN: Key がある案件の社内レビュー日、提出期限、開札日をカレンダー化したいとき。DO NOT USE WHEN: 日付の根拠資料や参加条件もまとめたいとき（create_bid_review_packet を使う）。Generate an ICS calendar file with bid deadlines for Google Calendar or Outlook. Buat file kalender ICS untuk tenggat waktu tender di Google Calendar atau Outlook.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -3131,17 +3224,15 @@
           "annotations": {
             "readOnlyHint": true,
             "destructiveHint": false,
-            "idempotentHint": true,
+            "idempotentHint": false,
             "openWorldHint": true
           },
-          "execution": {
-            "taskSupport": "forbidden"
-          }
+          "_meta": {}
         },
         {
           "name": "create_bid_review_packet",
           "title": "入札社内検討パック",
-          "description": "入札1件の判断サマリー・理由・リスク・要件・締切・次アクションをMarkdown社内メモとして返す。Generate a Markdown review packet with decision summary, risks, and next actions for one bid. Buat ringkasan tinjauan Markdown dengan keputusan, risiko, dan langkah selanjutnya untuk satu tender.",
+          "description": "入札1件の判断サマリー・理由・リスク・要件・締切・次アクションをMarkdown社内メモとして返す。USE THIS WHEN: Key がある案件を社内で検討するため、判断材料を1つのレビュー資料にまとめたいとき。DO NOT USE WHEN: CSV一覧やカレンダーだけが欲しいとき（export_bid_shortlist / create_bid_calendar を使う）。Generate a Markdown review packet with decision summary, risks, and next actions for one bid. Buat ringkasan tinjauan Markdown dengan keputusan, risiko, dan langkah selanjutnya untuk satu tender.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -3151,6 +3242,7 @@
                 "description": "search_bids、rank_bids、またはlist_recent_bidsが返したKeyフィールド"
               },
               "preferred_keywords": {
+                "description": "優先したい語句。例: ソフトウェア、保守、クラウド。",
                 "type": "array",
                 "items": {
                   "type": "string",
@@ -3158,6 +3250,7 @@
                 }
               },
               "avoid_keywords": {
+                "description": "避けたい語句。例: 工事、常駐、夜間。",
                 "type": "array",
                 "items": {
                   "type": "string",
@@ -3166,6 +3259,7 @@
               },
               "due_within_days": {
                 "default": 30,
+                "description": "この日数以内に提出期限が来る案件を優先。デフォルト30日。",
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 180
@@ -4109,17 +4203,15 @@
           "annotations": {
             "readOnlyHint": true,
             "destructiveHint": false,
-            "idempotentHint": true,
+            "idempotentHint": false,
             "openWorldHint": true
           },
-          "execution": {
-            "taskSupport": "forbidden"
-          }
+          "_meta": {}
         },
         {
           "name": "draft_bid_questions",
           "title": "入札質問書ドラフト",
-          "description": "入札1件の発注者への質問案をMarkdownで返す。提出前に公式書類と照合すること。Draft clarification questions for a bid in Markdown format. Buat draf pertanyaan klarifikasi untuk satu tender dalam format Markdown.",
+          "description": "入札1件の発注者への質問案をMarkdownで返す。提出前に公式書類と照合すること。USE THIS WHEN: Key がある案件について不明点・リスク・提出前確認事項を質問案にしたいとき。DO NOT USE WHEN: 質問提出そのものを自動化したいとき（このツールはドラフトのみ）。Draft clarification questions for a bid in Markdown format. Buat draf pertanyaan klarifikasi untuk satu tender dalam format Markdown.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -4364,17 +4456,15 @@
           "annotations": {
             "readOnlyHint": true,
             "destructiveHint": false,
-            "idempotentHint": true,
+            "idempotentHint": false,
             "openWorldHint": true
           },
-          "execution": {
-            "taskSupport": "forbidden"
-          }
+          "_meta": {}
         },
         {
           "name": "analyze_past_awards",
           "title": "過去公告・競合レーダー",
-          "description": "過去公告を集計し発注機関の頻度・カテゴリ偏り・月次トレンドを返す。公告履歴から競合パターンを推定する。Analyze past bid announcements to surface procurement patterns, category trends, and notable organizations. Analisis pengumuman tender masa lalu untuk menemukan pola pengadaan dan tren kategori.",
+          "description": "過去公告を集計し発注機関の頻度・カテゴリ偏り・月次トレンドを返す。公告履歴から競合パターンを推定する。USE THIS WHEN: 地域・キーワード・カテゴリごとの過去傾向を見て、営業戦略や競合仮説を作りたいとき。DO NOT USE WHEN: 現在募集中の案件だけを探したいとき（search_bids/list_recent_bids を使う）。Analyze past bid announcements to surface procurement patterns, category trends, and notable organizations. Analisis pengumuman tender masa lalu untuk menemukan pola pengadaan dan tren kategori.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -4384,6 +4474,7 @@
                 "minLength": 1
               },
               "prefecture": {
+                "description": "都道府県名で絞り込む。配列で複数指定可。",
                 "anyOf": [
                   {
                     "type": "string",
@@ -4495,6 +4586,7 @@
                 ]
               },
               "category": {
+                "description": "入札区分。物品、役務、工事、その他。",
                 "type": "string",
                 "enum": [
                   "物品",
@@ -4503,6 +4595,7 @@
                 ]
               },
               "procedure_type": {
+                "description": "公示種別。一般競争入札、指名競争入札、随意契約など。",
                 "type": "string",
                 "enum": [
                   "一般競争入札",
@@ -4718,14 +4811,12 @@
             "idempotentHint": true,
             "openWorldHint": true
           },
-          "execution": {
-            "taskSupport": "forbidden"
-          }
+          "_meta": {}
         },
         {
           "name": "summarize_bids_by_org",
           "title": "発注機関別の入札傾向分析",
-          "description": "発注機関名を指定してカテゴリ別・公示種別別の入札傾向と直近案件を集計する。Summarize bid trends and recent notices for a specific procurement organization by category and procedure type. Ringkas tren tender dan pengumuman terbaru untuk instansi tertentu berdasarkan kategori.",
+          "description": "発注機関名を指定してカテゴリ別・公示種別別の入札傾向と直近案件を集計する。USE THIS WHEN: 特定の発注機関がどのカテゴリ・公示種別を多く出すか、営業仮説を立てたいとき。DO NOT USE WHEN: 個別案件の参加可否を判断したいとき（assess_bid_qualification を使う）。Summarize bid trends and recent notices for a specific procurement organization by category and procedure type. Ringkas tren tender dan pengumuman terbaru untuk instansi tertentu berdasarkan kategori.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -4740,6 +4831,7 @@
               },
               "limit": {
                 "default": 200,
+                "description": "集計対象の最大取得件数。デフォルト200。",
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 1000
@@ -4969,14 +5061,12 @@
             "idempotentHint": true,
             "openWorldHint": true
           },
-          "execution": {
-            "taskSupport": "forbidden"
-          }
+          "_meta": {}
         },
         {
           "name": "save_search",
           "title": "検索条件を保存",
-          "description": "入札検索条件を名前付きで保存する。保存した条件は check_saved_search で新着確認に使える。Save named bid search criteria for recurring alert checks. Simpan kriteria pencarian tender bernama untuk pemeriksaan peringatan berulang.",
+          "description": "入札検索条件を名前付きでセッション内に保存する。USE THIS WHEN: stdio や同一インスタンス内で同じ検索条件を後で再確認したいとき。DO NOT USE WHEN: HTTP ステートレス環境で永続保存したいとき（状態はサーバーインスタンス内のみで保持される）。Save named bid search criteria in the current session for recurring alert checks. State is held per-instance and does not persist across HTTP stateless connections. Simpan kriteria pencarian tender bernama dalam sesi ini untuk pemeriksaan peringatan berulang.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -4991,6 +5081,7 @@
                 "type": "string"
               },
               "prefecture": {
+                "description": "都道府県名で絞り込む。配列で複数指定可。",
                 "anyOf": [
                   {
                     "type": "string",
@@ -5102,6 +5193,7 @@
                 ]
               },
               "category": {
+                "description": "入札区分。物品、役務、工事、その他。",
                 "type": "string",
                 "enum": [
                   "物品",
@@ -5112,6 +5204,10 @@
               "organization_name": {
                 "description": "発注機関名。Organization name.",
                 "type": "string"
+              },
+              "state_token": {
+                "description": "既存の保存検索state token。Existing saved-search state token.",
+                "type": "string"
               }
             },
             "required": [
@@ -5119,20 +5215,55 @@
             ],
             "$schema": "http://json-schema.org/draft-07/schema#"
           },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "saved": {
+                "type": "boolean"
+              },
+              "name": {
+                "type": "string"
+              },
+              "criteria": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              "totalSaved": {
+                "type": "number"
+              },
+              "stateToken": {
+                "type": "string"
+              },
+              "nextStep": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "saved",
+              "name",
+              "criteria",
+              "totalSaved",
+              "stateToken",
+              "nextStep"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "additionalProperties": false
+          },
           "annotations": {
             "readOnlyHint": false,
             "destructiveHint": false,
-            "idempotentHint": true,
+            "idempotentHint": false,
             "openWorldHint": false
           },
-          "execution": {
-            "taskSupport": "forbidden"
-          }
+          "_meta": {}
         },
         {
           "name": "check_saved_search",
           "title": "保存検索の新着確認",
-          "description": "保存した検索条件で新着入札を確認する。前回チェック以降の新着のみを返す。Check for new bids since last check using saved search criteria. Periksa tender baru sejak pemeriksaan terakhir menggunakan kriteria tersimpan.",
+          "description": "保存した検索条件で新着入札を確認する。USE THIS WHEN: save_search で保存済みの条件について、前回チェック以降の新着だけを確認したいとき。DO NOT USE WHEN: 保存条件が無いとき、または HTTP ステートレスで永続アラートが必要なとき。Check for new bids since last check using saved search criteria. Periksa tender baru sejak pemeriksaan terakhir menggunakan kriteria tersimpan.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -5140,6 +5271,10 @@
                 "type": "string",
                 "minLength": 1,
                 "description": "確認する保存検索の名前。Name of saved search to check."
+              },
+              "state_token": {
+                "description": "save_search が返した保存検索state token。State token returned by save_search.",
+                "type": "string"
               }
             },
             "required": [
@@ -5147,24 +5282,205 @@
             ],
             "$schema": "http://json-schema.org/draft-07/schema#"
           },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "newBidsCount": {
+                "type": "number"
+              },
+              "bids": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "projectName": {
+                      "type": "string"
+                    },
+                    "organizationName": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "prefectureName": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "cftIssueDate": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tenderSubmissionDeadline": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "key": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "projectName",
+                    "organizationName",
+                    "prefectureName",
+                    "cftIssueDate",
+                    "tenderSubmissionDeadline",
+                    "key"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "checkedAt": {
+                "type": "string"
+              },
+              "previousCheck": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "nextStateToken": {
+                "type": "string"
+              },
+              "attribution": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              "webhookHint": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "newBidsCount",
+              "bids",
+              "checkedAt",
+              "previousCheck",
+              "nextStateToken",
+              "attribution",
+              "webhookHint"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "additionalProperties": false
+          },
           "annotations": {
-            "readOnlyHint": true,
+            "readOnlyHint": false,
             "destructiveHint": false,
-            "idempotentHint": true,
+            "idempotentHint": false,
             "openWorldHint": true
           },
-          "execution": {
-            "taskSupport": "forbidden"
-          }
+          "_meta": {}
         },
         {
           "name": "list_saved_searches",
           "title": "保存検索の一覧",
-          "description": "保存されている検索条件の一覧を返す。List all saved search criteria. Daftar semua kriteria pencarian yang tersimpan.",
+          "description": "保存されている検索条件の一覧を返す。USE THIS WHEN: 現在のサーバーインスタンスに保存された検索名と条件を確認したいとき。DO NOT USE WHEN: 永続DBに保存されたアラート一覧を期待しているとき（このツールはインメモリ）。List all saved search criteria. Daftar semua kriteria pencarian yang tersimpan.",
           "inputSchema": {
             "type": "object",
-            "properties": {},
+            "properties": {
+              "state_tokens": {
+                "description": "保存検索state tokenの配列。Array of saved-search state tokens.",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
             "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "totalSaved": {
+                "type": "number"
+              },
+              "searches": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "criteria": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "lastCheckedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "criteria",
+                    "createdAt",
+                    "lastCheckedAt"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "stateToken": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "totalSaved",
+              "searches",
+              "stateToken"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "additionalProperties": false
           },
           "annotations": {
             "readOnlyHint": true,
@@ -5172,14 +5488,12 @@
             "idempotentHint": true,
             "openWorldHint": false
           },
-          "execution": {
-            "taskSupport": "forbidden"
-          }
+          "_meta": {}
         },
         {
-          "name": "search_bids_app",
-          "title": "官公需入札検索テーブル",
-          "description": "日本全国の官公需入札情報を検索し、MCP Apps対応クライアントでは検索結果を表で表示する。非対応クライアントでも通常のテキスト要約とstructuredContentを返す。",
+          "name": "map_awards_to_listed",
+          "title": "公告を上場企業へ名寄せ",
+          "description": "官公需公告の件名から上場企業・銘柄コードへ名寄せする。USE THIS WHEN: 入札公告に登場する企業をティッカーに結びたいとき。DO NOT USE WHEN: 売買判断や落札者の確定が欲しいとき（KKJは公告であり公式落札結果ではない）。Map KKJ notices to listed-company tickers. This is not investment advice. Petakan pengumuman KKJ ke ticker perusahaan tercatat. Bukan nasihat investasi.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -5194,6 +5508,7 @@
                 "minLength": 1
               },
               "prefecture": {
+                "description": "都道府県名で絞り込む。配列で複数指定可。例: 鹿児島県、東京都。",
                 "anyOf": [
                   {
                     "type": "string",
@@ -5305,6 +5620,7 @@
                 ]
               },
               "category": {
+                "description": "入札区分。物品、役務、工事、その他。",
                 "type": "string",
                 "enum": [
                   "物品",
@@ -5313,6 +5629,7 @@
                 ]
               },
               "procedure_type": {
+                "description": "公示種別。一般競争入札、指名競争入札、随意契約など。",
                 "type": "string",
                 "enum": [
                   "一般競争入札",
@@ -5321,6 +5638,7 @@
                 ]
               },
               "certification": {
+                "description": "全省庁統一資格の等級。A、B、C、D から複数指定可。",
                 "type": "array",
                 "items": {
                   "type": "string",
@@ -5333,6 +5651,7 @@
                 }
               },
               "organization_name": {
+                "description": "発注機関名で絞り込む。例: 農林水産省、防衛省。",
                 "type": "string",
                 "minLength": 1
               },
@@ -5370,6 +5689,1450 @@
               },
               "limit": {
                 "default": 20,
+                "description": "取得件数の上限。デフォルト20、最大1000。",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000
+              },
+              "jquants_api_key": {
+                "description": "任意。J-Quants refresh token。未指定時はバンドル名寄せのみ。ホストの会話履歴に残る可能性があるため、stdioでは JQUANTS_API_KEY を推奨。",
+                "type": "string",
+                "minLength": 8
+              }
+            },
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "searchHits": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "returnedCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "mappedCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "unmappedCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "mapped": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "bid": {
+                      "type": "object",
+                      "properties": {
+                        "resultId": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "key": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "externalDocumentUri": {
+                          "type": "string"
+                        },
+                        "projectName": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "date": {
+                          "type": "string"
+                        },
+                        "fileType": {
+                          "type": "string"
+                        },
+                        "fileSize": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "lgCode": {
+                          "type": "string"
+                        },
+                        "prefectureName": {
+                          "type": "string"
+                        },
+                        "cityCode": {
+                          "type": "string"
+                        },
+                        "cityName": {
+                          "type": "string"
+                        },
+                        "organizationName": {
+                          "type": "string"
+                        },
+                        "certification": {
+                          "type": "string"
+                        },
+                        "cftIssueDate": {
+                          "type": "string"
+                        },
+                        "periodEndTime": {
+                          "type": "string"
+                        },
+                        "category": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "enum": [
+                                "物品",
+                                "工事",
+                                "役務"
+                              ]
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "procedureType": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "enum": [
+                                "一般競争入札",
+                                "簡易公募型競争入札",
+                                "簡易公募型指名競争入札"
+                              ]
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "location": {
+                          "type": "string"
+                        },
+                        "tenderSubmissionDeadline": {
+                          "type": "string"
+                        },
+                        "openingTendersEvent": {
+                          "type": "string"
+                        },
+                        "itemCode": {
+                          "type": "string"
+                        },
+                        "projectDescription": {
+                          "type": "string"
+                        },
+                        "attachments": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "uri": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "name",
+                              "uri"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "resultId",
+                        "key",
+                        "projectName"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "matches": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "company": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string",
+                                "minLength": 4,
+                                "maxLength": 5
+                              },
+                              "name": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "aliases": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "sector": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "required": [
+                              "code",
+                              "name",
+                              "aliases",
+                              "sector"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "confidence": {
+                            "type": "string",
+                            "enum": [
+                              "exact",
+                              "alias",
+                              "contains",
+                              "code"
+                            ]
+                          },
+                          "matchedText": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "company",
+                          "confidence",
+                          "matchedText"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "bid",
+                    "matches"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "companies": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "company": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "minLength": 4,
+                          "maxLength": 5
+                        },
+                        "name": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "aliases": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "sector": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "name",
+                        "aliases",
+                        "sector"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "noticeCount": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "latestNoticeDate": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "latestNoticeKey": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "prefectureBreakdown": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {
+                        "type": "number"
+                      }
+                    },
+                    "categoryBreakdown": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {
+                        "type": "number"
+                      }
+                    },
+                    "noticeKeys": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "company",
+                    "noticeCount",
+                    "latestNoticeDate",
+                    "latestNoticeKey",
+                    "prefectureBreakdown",
+                    "categoryBreakdown",
+                    "noticeKeys"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "catalogSource": {
+                "type": "string",
+                "enum": [
+                  "bundled",
+                  "jquants"
+                ]
+              },
+              "caveats": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "investmentDisclaimer": {
+                "type": "string",
+                "const": "本情報は投資助言ではありません。売買の推奨は行いません。投資判断は自己責任で、公式の調達書類・開示・市場データをご自身で確認してください。 / This is not investment advice and is not a buy or sell recommendation. / Informasi ini bukan nasihat investasi dan bukan rekomendasi beli atau jual."
+              },
+              "attribution": {
+                "type": "object",
+                "properties": {
+                  "dataSource": {
+                    "type": "string",
+                    "const": "中小企業庁 官公需情報ポータルサイト"
+                  },
+                  "apiEndpoint": {
+                    "type": "string",
+                    "const": "http://www.kkj.go.jp/api/"
+                  },
+                  "licenseUrl": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "serviceDisclaimer": {
+                    "type": "string"
+                  },
+                  "accessedAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                  }
+                },
+                "required": [
+                  "dataSource",
+                  "apiEndpoint",
+                  "licenseUrl",
+                  "serviceDisclaimer",
+                  "accessedAt"
+                ],
+                "additionalProperties": false
+              },
+              "jquantsAttribution": {
+                "type": "object",
+                "properties": {
+                  "dataSource": {
+                    "type": "string",
+                    "const": "J-Quants API"
+                  },
+                  "apiEndpoint": {
+                    "type": "string",
+                    "const": "https://api.jquants.com/v2"
+                  },
+                  "licenseUrl": {
+                    "type": "string",
+                    "const": "https://jpx-jquants.com/"
+                  },
+                  "accessedAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                  }
+                },
+                "required": [
+                  "dataSource",
+                  "apiEndpoint",
+                  "licenseUrl",
+                  "accessedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "searchHits",
+              "returnedCount",
+              "mappedCount",
+              "unmappedCount",
+              "mapped",
+              "companies",
+              "catalogSource",
+              "caveats",
+              "investmentDisclaimer",
+              "attribution"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          },
+          "_meta": {}
+        },
+        {
+          "name": "get_listed_award_history",
+          "title": "上場企業の官公需公告履歴",
+          "description": "指定した上場企業・銘柄の官公需公告履歴を集計する。USE THIS WHEN: ある企業名や銘柄コードがKKJ公告に何件出るかを事実として見たいとき。DO NOT USE WHEN: 受注確度や株価の売買判断が欲しいとき。KKJは公告であり公式落札結果ではない。List KKJ notice history for a listed company. This is not investment advice. Riwayat pengumuman KKJ untuk perusahaan tercatat. Bukan nasihat investasi.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "query": {
+                "type": "string",
+                "minLength": 1,
+                "description": "企業名または4桁銘柄コード。例: 富士通、6702。"
+              },
+              "window_days": {
+                "default": 365,
+                "description": "過去何日分の公告を対象にするか。デフォルト365日。",
+                "type": "integer",
+                "minimum": 7,
+                "maximum": 1825
+              },
+              "limit": {
+                "default": 200,
+                "description": "KKJ取得件数の上限。",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000
+              },
+              "jquants_api_key": {
+                "description": "任意。J-Quants refresh token。未指定時はバンドル名寄せのみ。",
+                "type": "string",
+                "minLength": 8
+              }
+            },
+            "required": [
+              "query"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "company": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 4,
+                    "maxLength": 5
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "aliases": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "sector": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "code",
+                  "name",
+                  "aliases",
+                  "sector"
+                ],
+                "additionalProperties": false
+              },
+              "windowDays": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "noticeCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "latestNoticeDate": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "latestNoticeKey": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "prefectureBreakdown": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "type": "number"
+                }
+              },
+              "categoryBreakdown": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "type": "number"
+                }
+              },
+              "bids": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "resultId": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "key": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "externalDocumentUri": {
+                      "type": "string"
+                    },
+                    "projectName": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "date": {
+                      "type": "string"
+                    },
+                    "fileType": {
+                      "type": "string"
+                    },
+                    "fileSize": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "lgCode": {
+                      "type": "string"
+                    },
+                    "prefectureName": {
+                      "type": "string"
+                    },
+                    "cityCode": {
+                      "type": "string"
+                    },
+                    "cityName": {
+                      "type": "string"
+                    },
+                    "organizationName": {
+                      "type": "string"
+                    },
+                    "certification": {
+                      "type": "string"
+                    },
+                    "cftIssueDate": {
+                      "type": "string"
+                    },
+                    "periodEndTime": {
+                      "type": "string"
+                    },
+                    "category": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "物品",
+                            "工事",
+                            "役務"
+                          ]
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "procedureType": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "一般競争入札",
+                            "簡易公募型競争入札",
+                            "簡易公募型指名競争入札"
+                          ]
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "location": {
+                      "type": "string"
+                    },
+                    "tenderSubmissionDeadline": {
+                      "type": "string"
+                    },
+                    "openingTendersEvent": {
+                      "type": "string"
+                    },
+                    "itemCode": {
+                      "type": "string"
+                    },
+                    "projectDescription": {
+                      "type": "string"
+                    },
+                    "attachments": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "uri": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "uri"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "resultId",
+                    "key",
+                    "projectName"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "caveats": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "investmentDisclaimer": {
+                "type": "string",
+                "const": "本情報は投資助言ではありません。売買の推奨は行いません。投資判断は自己責任で、公式の調達書類・開示・市場データをご自身で確認してください。 / This is not investment advice and is not a buy or sell recommendation. / Informasi ini bukan nasihat investasi dan bukan rekomendasi beli atau jual."
+              },
+              "attribution": {
+                "type": "object",
+                "properties": {
+                  "dataSource": {
+                    "type": "string",
+                    "const": "中小企業庁 官公需情報ポータルサイト"
+                  },
+                  "apiEndpoint": {
+                    "type": "string",
+                    "const": "http://www.kkj.go.jp/api/"
+                  },
+                  "licenseUrl": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "serviceDisclaimer": {
+                    "type": "string"
+                  },
+                  "accessedAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                  }
+                },
+                "required": [
+                  "dataSource",
+                  "apiEndpoint",
+                  "licenseUrl",
+                  "serviceDisclaimer",
+                  "accessedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "company",
+              "windowDays",
+              "noticeCount",
+              "latestNoticeDate",
+              "latestNoticeKey",
+              "prefectureBreakdown",
+              "categoryBreakdown",
+              "bids",
+              "caveats",
+              "investmentDisclaimer",
+              "attribution"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          },
+          "_meta": {}
+        },
+        {
+          "name": "analyze_award_price_impact",
+          "title": "公告日前後の株価推移",
+          "description": "官公需公告日前後の公開終値を返す。USE THIS WHEN: 公告日を挟んだ株価の事実系列が見たいとき。DO NOT USE WHEN: 買い推奨や因果の断定が欲しいとき。変化率は相関の事実であり投資助言ではない。Return public daily closes around a KKJ notice date. This is not investment advice. Kembalikan harga penutupan di sekitar tanggal pengumuman. Bukan nasihat investasi.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "query": {
+                "type": "string",
+                "minLength": 1,
+                "description": "企業名または4桁銘柄コード。"
+              },
+              "event_date": {
+                "description": "事象日 YYYY-MM-DD。省略時は bid_key の公告日、それも無ければ今日。",
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "bid_key": {
+                "description": "KKJ案件キー。公告日の取得に使う。",
+                "type": "string",
+                "minLength": 1
+              },
+              "window_days": {
+                "default": 5,
+                "description": "公告日の前後営業日に近い暦日ウィンドウ。デフォルト5日。",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 30
+              },
+              "jquants_api_key": {
+                "description": "必須（環境変数 JQUANTS_API_KEY でも可）。J-Quants refresh token。会話履歴に残る可能性あり。",
+                "type": "string",
+                "minLength": 8
+              }
+            },
+            "required": [
+              "query"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "company": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 4,
+                    "maxLength": 5
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "aliases": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "sector": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "code",
+                  "name",
+                  "aliases",
+                  "sector"
+                ],
+                "additionalProperties": false
+              },
+              "eventDate": {
+                "type": "string"
+              },
+              "bidKey": {
+                "type": "string"
+              },
+              "projectName": {
+                "type": "string"
+              },
+              "windowDays": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "from": {
+                "type": "string"
+              },
+              "to": {
+                "type": "string"
+              },
+              "closeAtOrBeforeEvent": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "closeAtOrAfterWindowEnd": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "pctChange": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "bars": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "date": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "open": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "high": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "low": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "close": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "volume": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "adjustmentClose": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "date",
+                    "code",
+                    "open",
+                    "high",
+                    "low",
+                    "close",
+                    "volume",
+                    "adjustmentClose"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "caveats": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "investmentDisclaimer": {
+                "type": "string",
+                "const": "本情報は投資助言ではありません。売買の推奨は行いません。投資判断は自己責任で、公式の調達書類・開示・市場データをご自身で確認してください。 / This is not investment advice and is not a buy or sell recommendation. / Informasi ini bukan nasihat investasi dan bukan rekomendasi beli atau jual."
+              },
+              "attribution": {
+                "type": "object",
+                "properties": {
+                  "dataSource": {
+                    "type": "string",
+                    "const": "中小企業庁 官公需情報ポータルサイト"
+                  },
+                  "apiEndpoint": {
+                    "type": "string",
+                    "const": "http://www.kkj.go.jp/api/"
+                  },
+                  "licenseUrl": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "serviceDisclaimer": {
+                    "type": "string"
+                  },
+                  "accessedAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                  }
+                },
+                "required": [
+                  "dataSource",
+                  "apiEndpoint",
+                  "licenseUrl",
+                  "serviceDisclaimer",
+                  "accessedAt"
+                ],
+                "additionalProperties": false
+              },
+              "jquantsAttribution": {
+                "type": "object",
+                "properties": {
+                  "dataSource": {
+                    "type": "string",
+                    "const": "J-Quants API"
+                  },
+                  "apiEndpoint": {
+                    "type": "string",
+                    "const": "https://api.jquants.com/v2"
+                  },
+                  "licenseUrl": {
+                    "type": "string",
+                    "const": "https://jpx-jquants.com/"
+                  },
+                  "accessedAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                  }
+                },
+                "required": [
+                  "dataSource",
+                  "apiEndpoint",
+                  "licenseUrl",
+                  "accessedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "company",
+              "eventDate",
+              "windowDays",
+              "from",
+              "to",
+              "closeAtOrBeforeEvent",
+              "closeAtOrAfterWindowEnd",
+              "pctChange",
+              "bars",
+              "caveats",
+              "investmentDisclaimer",
+              "attribution",
+              "jquantsAttribution"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          },
+          "_meta": {}
+        },
+        {
+          "name": "watch_listed_awards",
+          "title": "上場企業の公告ウォッチ",
+          "description": "銘柄・企業名のウォッチリストを state_token で差分確認する。USE THIS WHEN: 特定銘柄に関する新しいKKJ公告を追いたいとき。DO NOT USE WHEN: 売買アラートが欲しいとき。This is not investment advice. Pantau pengumuman KKJ untuk ticker. Bukan nasihat investasi.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "action": {
+                "type": "string",
+                "enum": [
+                  "save",
+                  "check",
+                  "list"
+                ],
+                "description": "save=追加, check=差分確認, list=一覧。"
+              },
+              "name": {
+                "description": "ウォッチ名。save / check で必須。",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "query": {
+                "description": "企業名または銘柄コード。save で必須。",
+                "type": "string",
+                "minLength": 1
+              },
+              "state_token": {
+                "description": "前回の state_token。HTTPステートレス接続で必須。",
+                "type": "string"
+              }
+            },
+            "required": [
+              "action"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "action": {
+                "type": "string",
+                "enum": [
+                  "save",
+                  "check",
+                  "list"
+                ]
+              },
+              "watchlist": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "query": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "lastCheckedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "query",
+                    "createdAt",
+                    "lastCheckedAt"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "newNoticesCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "newNotices": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string"
+                    },
+                    "projectName": {
+                      "type": "string"
+                    },
+                    "query": {
+                      "type": "string"
+                    },
+                    "cftIssueDate": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "key",
+                    "projectName",
+                    "query",
+                    "cftIssueDate"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "stateToken": {
+                "type": "string"
+              },
+              "nextStep": {
+                "type": "string"
+              },
+              "investmentDisclaimer": {
+                "type": "string",
+                "const": "本情報は投資助言ではありません。売買の推奨は行いません。投資判断は自己責任で、公式の調達書類・開示・市場データをご自身で確認してください。 / This is not investment advice and is not a buy or sell recommendation. / Informasi ini bukan nasihat investasi dan bukan rekomendasi beli atau jual."
+              },
+              "attribution": {
+                "type": "object",
+                "properties": {
+                  "dataSource": {
+                    "type": "string",
+                    "const": "中小企業庁 官公需情報ポータルサイト"
+                  },
+                  "apiEndpoint": {
+                    "type": "string",
+                    "const": "http://www.kkj.go.jp/api/"
+                  },
+                  "licenseUrl": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "serviceDisclaimer": {
+                    "type": "string"
+                  },
+                  "accessedAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                  }
+                },
+                "required": [
+                  "dataSource",
+                  "apiEndpoint",
+                  "licenseUrl",
+                  "serviceDisclaimer",
+                  "accessedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "action",
+              "watchlist",
+              "stateToken",
+              "nextStep",
+              "investmentDisclaimer",
+              "attribution"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": false,
+            "openWorldHint": true
+          },
+          "_meta": {}
+        },
+        {
+          "name": "search_bids_app",
+          "title": "AI Bid Workspace",
+          "description": "日本全国の官公需入札情報を検索し、MCP Apps対応クライアントではAI Bid Workspaceとして検索結果を表示する。USE THIS WHEN: 対応クライアントで入札検索結果をカード/ワークスペースUIとして確認したいとき。DO NOT USE WHEN: テキストと structuredContent だけで十分なとき（search_bids を使う）。非対応クライアントでも通常のテキスト要約と structuredContent を返す。",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "query": {
+                "description": "自由記述キーワード。複数キーワードはAND結合で検索されます。",
+                "type": "string",
+                "minLength": 1
+              },
+              "project_name": {
+                "description": "件名で絞り込む場合に指定します。",
+                "type": "string",
+                "minLength": 1
+              },
+              "prefecture": {
+                "description": "都道府県名で絞り込む。配列で複数指定可。例: 鹿児島県、東京都。",
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "北海道",
+                      "青森県",
+                      "岩手県",
+                      "宮城県",
+                      "秋田県",
+                      "山形県",
+                      "福島県",
+                      "茨城県",
+                      "栃木県",
+                      "群馬県",
+                      "埼玉県",
+                      "千葉県",
+                      "東京都",
+                      "神奈川県",
+                      "新潟県",
+                      "富山県",
+                      "石川県",
+                      "福井県",
+                      "山梨県",
+                      "長野県",
+                      "岐阜県",
+                      "静岡県",
+                      "愛知県",
+                      "三重県",
+                      "滋賀県",
+                      "京都府",
+                      "大阪府",
+                      "兵庫県",
+                      "奈良県",
+                      "和歌山県",
+                      "鳥取県",
+                      "島根県",
+                      "岡山県",
+                      "広島県",
+                      "山口県",
+                      "徳島県",
+                      "香川県",
+                      "愛媛県",
+                      "高知県",
+                      "福岡県",
+                      "佐賀県",
+                      "長崎県",
+                      "熊本県",
+                      "大分県",
+                      "宮崎県",
+                      "鹿児島県",
+                      "沖縄県"
+                    ]
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "北海道",
+                        "青森県",
+                        "岩手県",
+                        "宮城県",
+                        "秋田県",
+                        "山形県",
+                        "福島県",
+                        "茨城県",
+                        "栃木県",
+                        "群馬県",
+                        "埼玉県",
+                        "千葉県",
+                        "東京都",
+                        "神奈川県",
+                        "新潟県",
+                        "富山県",
+                        "石川県",
+                        "福井県",
+                        "山梨県",
+                        "長野県",
+                        "岐阜県",
+                        "静岡県",
+                        "愛知県",
+                        "三重県",
+                        "滋賀県",
+                        "京都府",
+                        "大阪府",
+                        "兵庫県",
+                        "奈良県",
+                        "和歌山県",
+                        "鳥取県",
+                        "島根県",
+                        "岡山県",
+                        "広島県",
+                        "山口県",
+                        "徳島県",
+                        "香川県",
+                        "愛媛県",
+                        "高知県",
+                        "福岡県",
+                        "佐賀県",
+                        "長崎県",
+                        "熊本県",
+                        "大分県",
+                        "宮崎県",
+                        "鹿児島県",
+                        "沖縄県"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "category": {
+                "description": "入札区分。物品、役務、工事、その他。",
+                "type": "string",
+                "enum": [
+                  "物品",
+                  "工事",
+                  "役務"
+                ]
+              },
+              "procedure_type": {
+                "description": "公示種別。一般競争入札、指名競争入札、随意契約など。",
+                "type": "string",
+                "enum": [
+                  "一般競争入札",
+                  "簡易公募型競争入札",
+                  "簡易公募型指名競争入札"
+                ]
+              },
+              "certification": {
+                "description": "全省庁統一資格の等級。A、B、C、D から複数指定可。",
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "A",
+                    "B",
+                    "C",
+                    "D"
+                  ]
+                }
+              },
+              "organization_name": {
+                "description": "発注機関名で絞り込む。例: 農林水産省、防衛省。",
+                "type": "string",
+                "minLength": 1
+              },
+              "issued_after": {
+                "description": "公告日 YYYY-MM-DD 以降",
+                "type": "string"
+              },
+              "issued_before": {
+                "description": "公告日 YYYY-MM-DD 以前",
+                "type": "string"
+              },
+              "due_after": {
+                "description": "入札書提出期限 YYYY-MM-DD 以降",
+                "type": "string"
+              },
+              "due_before": {
+                "description": "入札書提出期限 YYYY-MM-DD 以前",
+                "type": "string"
+              },
+              "opening_after": {
+                "description": "開札日 YYYY-MM-DD 以降",
+                "type": "string"
+              },
+              "opening_before": {
+                "description": "開札日 YYYY-MM-DD 以前",
+                "type": "string"
+              },
+              "period_end_after": {
+                "description": "納入期限日 YYYY-MM-DD 以降",
+                "type": "string"
+              },
+              "period_end_before": {
+                "description": "納入期限日 YYYY-MM-DD 以前",
+                "type": "string"
+              },
+              "limit": {
+                "default": 20,
+                "description": "取得件数の上限。デフォルト20、最大1000。",
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 1000
@@ -5567,6 +7330,34 @@
                   "accessedAt"
                 ],
                 "additionalProperties": false
+              },
+              "pagination": {
+                "type": "object",
+                "properties": {
+                  "has_more": {
+                    "type": "boolean"
+                  },
+                  "next_cursor": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "total_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "has_more",
+                  "total_count"
+                ],
+                "additionalProperties": false
               }
             },
             "required": [
@@ -5585,14 +7376,643 @@
             "idempotentHint": true,
             "openWorldHint": true
           },
-          "execution": {
-            "taskSupport": "forbidden"
-          },
           "_meta": {
             "ui": {
               "resourceUri": "ui://jp-bids/search-results.html"
             },
             "ui/resourceUri": "ui://jp-bids/search-results.html"
+          }
+        },
+        {
+          "name": "search_investor_radar_app",
+          "title": "Investor Radar",
+          "description": "官公需公告を上場企業へ名寄せし、MCP Apps対応クライアントではInvestor Radar画面を表示する。USE THIS WHEN: 対応クライアントで銘柄付き公告フィードを見たいとき。DO NOT USE WHEN: テキストだけで足りるとき（map_awards_to_listed を使う）。投資助言ではない。Show KKJ notices mapped to listed tickers. This is not investment advice. Tampilkan pengumuman KKJ yang dipetakan ke ticker. Bukan nasihat investasi.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "query": {
+                "description": "自由記述キーワード。複数キーワードはAND結合で検索されます。",
+                "type": "string",
+                "minLength": 1
+              },
+              "project_name": {
+                "description": "件名で絞り込む場合に指定します。",
+                "type": "string",
+                "minLength": 1
+              },
+              "prefecture": {
+                "description": "都道府県名で絞り込む。配列で複数指定可。例: 鹿児島県、東京都。",
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "北海道",
+                      "青森県",
+                      "岩手県",
+                      "宮城県",
+                      "秋田県",
+                      "山形県",
+                      "福島県",
+                      "茨城県",
+                      "栃木県",
+                      "群馬県",
+                      "埼玉県",
+                      "千葉県",
+                      "東京都",
+                      "神奈川県",
+                      "新潟県",
+                      "富山県",
+                      "石川県",
+                      "福井県",
+                      "山梨県",
+                      "長野県",
+                      "岐阜県",
+                      "静岡県",
+                      "愛知県",
+                      "三重県",
+                      "滋賀県",
+                      "京都府",
+                      "大阪府",
+                      "兵庫県",
+                      "奈良県",
+                      "和歌山県",
+                      "鳥取県",
+                      "島根県",
+                      "岡山県",
+                      "広島県",
+                      "山口県",
+                      "徳島県",
+                      "香川県",
+                      "愛媛県",
+                      "高知県",
+                      "福岡県",
+                      "佐賀県",
+                      "長崎県",
+                      "熊本県",
+                      "大分県",
+                      "宮崎県",
+                      "鹿児島県",
+                      "沖縄県"
+                    ]
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "北海道",
+                        "青森県",
+                        "岩手県",
+                        "宮城県",
+                        "秋田県",
+                        "山形県",
+                        "福島県",
+                        "茨城県",
+                        "栃木県",
+                        "群馬県",
+                        "埼玉県",
+                        "千葉県",
+                        "東京都",
+                        "神奈川県",
+                        "新潟県",
+                        "富山県",
+                        "石川県",
+                        "福井県",
+                        "山梨県",
+                        "長野県",
+                        "岐阜県",
+                        "静岡県",
+                        "愛知県",
+                        "三重県",
+                        "滋賀県",
+                        "京都府",
+                        "大阪府",
+                        "兵庫県",
+                        "奈良県",
+                        "和歌山県",
+                        "鳥取県",
+                        "島根県",
+                        "岡山県",
+                        "広島県",
+                        "山口県",
+                        "徳島県",
+                        "香川県",
+                        "愛媛県",
+                        "高知県",
+                        "福岡県",
+                        "佐賀県",
+                        "長崎県",
+                        "熊本県",
+                        "大分県",
+                        "宮崎県",
+                        "鹿児島県",
+                        "沖縄県"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "category": {
+                "description": "入札区分。物品、役務、工事、その他。",
+                "type": "string",
+                "enum": [
+                  "物品",
+                  "工事",
+                  "役務"
+                ]
+              },
+              "procedure_type": {
+                "description": "公示種別。一般競争入札、指名競争入札、随意契約など。",
+                "type": "string",
+                "enum": [
+                  "一般競争入札",
+                  "簡易公募型競争入札",
+                  "簡易公募型指名競争入札"
+                ]
+              },
+              "certification": {
+                "description": "全省庁統一資格の等級。A、B、C、D から複数指定可。",
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "A",
+                    "B",
+                    "C",
+                    "D"
+                  ]
+                }
+              },
+              "organization_name": {
+                "description": "発注機関名で絞り込む。例: 農林水産省、防衛省。",
+                "type": "string",
+                "minLength": 1
+              },
+              "issued_after": {
+                "description": "公告日 YYYY-MM-DD 以降",
+                "type": "string"
+              },
+              "issued_before": {
+                "description": "公告日 YYYY-MM-DD 以前",
+                "type": "string"
+              },
+              "due_after": {
+                "description": "入札書提出期限 YYYY-MM-DD 以降",
+                "type": "string"
+              },
+              "due_before": {
+                "description": "入札書提出期限 YYYY-MM-DD 以前",
+                "type": "string"
+              },
+              "opening_after": {
+                "description": "開札日 YYYY-MM-DD 以降",
+                "type": "string"
+              },
+              "opening_before": {
+                "description": "開札日 YYYY-MM-DD 以前",
+                "type": "string"
+              },
+              "period_end_after": {
+                "description": "納入期限日 YYYY-MM-DD 以降",
+                "type": "string"
+              },
+              "period_end_before": {
+                "description": "納入期限日 YYYY-MM-DD 以前",
+                "type": "string"
+              },
+              "limit": {
+                "default": 20,
+                "description": "取得件数の上限。デフォルト20、最大1000。",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000
+              }
+            },
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "searchHits": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "returnedCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "mappedCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "unmappedCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "mapped": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "bid": {
+                      "type": "object",
+                      "properties": {
+                        "resultId": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "key": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "externalDocumentUri": {
+                          "type": "string"
+                        },
+                        "projectName": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "date": {
+                          "type": "string"
+                        },
+                        "fileType": {
+                          "type": "string"
+                        },
+                        "fileSize": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "lgCode": {
+                          "type": "string"
+                        },
+                        "prefectureName": {
+                          "type": "string"
+                        },
+                        "cityCode": {
+                          "type": "string"
+                        },
+                        "cityName": {
+                          "type": "string"
+                        },
+                        "organizationName": {
+                          "type": "string"
+                        },
+                        "certification": {
+                          "type": "string"
+                        },
+                        "cftIssueDate": {
+                          "type": "string"
+                        },
+                        "periodEndTime": {
+                          "type": "string"
+                        },
+                        "category": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "enum": [
+                                "物品",
+                                "工事",
+                                "役務"
+                              ]
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "procedureType": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "enum": [
+                                "一般競争入札",
+                                "簡易公募型競争入札",
+                                "簡易公募型指名競争入札"
+                              ]
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "location": {
+                          "type": "string"
+                        },
+                        "tenderSubmissionDeadline": {
+                          "type": "string"
+                        },
+                        "openingTendersEvent": {
+                          "type": "string"
+                        },
+                        "itemCode": {
+                          "type": "string"
+                        },
+                        "projectDescription": {
+                          "type": "string"
+                        },
+                        "attachments": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "uri": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "name",
+                              "uri"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "resultId",
+                        "key",
+                        "projectName"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "matches": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "company": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string",
+                                "minLength": 4,
+                                "maxLength": 5
+                              },
+                              "name": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "aliases": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "sector": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "required": [
+                              "code",
+                              "name",
+                              "aliases",
+                              "sector"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "confidence": {
+                            "type": "string",
+                            "enum": [
+                              "exact",
+                              "alias",
+                              "contains",
+                              "code"
+                            ]
+                          },
+                          "matchedText": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "company",
+                          "confidence",
+                          "matchedText"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "bid",
+                    "matches"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "companies": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "company": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "minLength": 4,
+                          "maxLength": 5
+                        },
+                        "name": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "aliases": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "sector": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "name",
+                        "aliases",
+                        "sector"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "noticeCount": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "latestNoticeDate": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "latestNoticeKey": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "prefectureBreakdown": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {
+                        "type": "number"
+                      }
+                    },
+                    "categoryBreakdown": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {
+                        "type": "number"
+                      }
+                    },
+                    "noticeKeys": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "company",
+                    "noticeCount",
+                    "latestNoticeDate",
+                    "latestNoticeKey",
+                    "prefectureBreakdown",
+                    "categoryBreakdown",
+                    "noticeKeys"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "catalogSource": {
+                "type": "string",
+                "enum": [
+                  "bundled",
+                  "jquants"
+                ]
+              },
+              "caveats": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "investmentDisclaimer": {
+                "type": "string",
+                "const": "本情報は投資助言ではありません。売買の推奨は行いません。投資判断は自己責任で、公式の調達書類・開示・市場データをご自身で確認してください。 / This is not investment advice and is not a buy or sell recommendation. / Informasi ini bukan nasihat investasi dan bukan rekomendasi beli atau jual."
+              },
+              "attribution": {
+                "type": "object",
+                "properties": {
+                  "dataSource": {
+                    "type": "string",
+                    "const": "中小企業庁 官公需情報ポータルサイト"
+                  },
+                  "apiEndpoint": {
+                    "type": "string",
+                    "const": "http://www.kkj.go.jp/api/"
+                  },
+                  "licenseUrl": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "serviceDisclaimer": {
+                    "type": "string"
+                  },
+                  "accessedAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                  }
+                },
+                "required": [
+                  "dataSource",
+                  "apiEndpoint",
+                  "licenseUrl",
+                  "serviceDisclaimer",
+                  "accessedAt"
+                ],
+                "additionalProperties": false
+              },
+              "jquantsAttribution": {
+                "type": "object",
+                "properties": {
+                  "dataSource": {
+                    "type": "string",
+                    "const": "J-Quants API"
+                  },
+                  "apiEndpoint": {
+                    "type": "string",
+                    "const": "https://api.jquants.com/v2"
+                  },
+                  "licenseUrl": {
+                    "type": "string",
+                    "const": "https://jpx-jquants.com/"
+                  },
+                  "accessedAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                  }
+                },
+                "required": [
+                  "dataSource",
+                  "apiEndpoint",
+                  "licenseUrl",
+                  "accessedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "searchHits",
+              "returnedCount",
+              "mappedCount",
+              "unmappedCount",
+              "mapped",
+              "companies",
+              "catalogSource",
+              "caveats",
+              "investmentDisclaimer",
+              "attribution"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          },
+          "_meta": {
+            "ui": {
+              "resourceUri": "ui://jp-bids/investor-radar.html"
+            },
+            "ui/resourceUri": "ui://jp-bids/investor-radar.html"
           }
         }
       ],

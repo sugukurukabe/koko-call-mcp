@@ -1,6 +1,8 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { JquantsClient } from "../api/jquants-client.js";
 import type { KkjClient } from "../api/kkj-client.js";
 import type { Tier } from "../lib/auth.js";
+import { registerAnalyzeAwardPriceImpact } from "./analyze-award-price-impact.js";
 import { registerAnalyzePastAwards } from "./analyze-past-awards.js";
 import { registerAssessBidQualification } from "./assess-bid-qualification.js";
 import { registerCreateBidCalendar } from "./create-bid-calendar.js";
@@ -10,11 +12,14 @@ import { registerExplainBidFit } from "./explain-bid-fit.js";
 import { registerExportBidShortlist } from "./export-bid-shortlist.js";
 import { registerExtractBidRequirements } from "./extract-bid-requirements.js";
 import { registerGetBidDetail } from "./get-bid-detail.js";
+import { registerGetListedAwardHistory } from "./get-listed-award-history.js";
 import { registerListRecentBids } from "./list-recent-bids.js";
+import { registerMapAwardsToListed } from "./map-awards-to-listed.js";
 import { registerRankBids } from "./rank-bids.js";
 import { registerSavedSearchAlert } from "./saved-search-alert.js";
 import { registerSearchBids } from "./search-bids.js";
 import { registerSummarizeBidsByOrg } from "./summarize-bids-by-org.js";
+import { registerWatchListedAwards } from "./watch-listed-awards.js";
 
 // Freeティアで利用可能なツール: search, rank, list, detail のみ
 // Tools available in Free tier: only search, rank, list, detail
@@ -42,7 +47,12 @@ const PRO_ONLY_REGISTRATIONS = [
   registerSavedSearchAlert,
 ] as const;
 
-export function registerTools(server: McpServer, client: KkjClient, tier: Tier = "pro"): void {
+export function registerTools(
+  server: McpServer,
+  client: KkjClient,
+  tier: Tier = "pro",
+  jquants: JquantsClient = new JquantsClient(),
+): void {
   for (const register of FREE_TIER_REGISTRATIONS) {
     register(server, client);
   }
@@ -50,5 +60,9 @@ export function registerTools(server: McpServer, client: KkjClient, tier: Tier =
     for (const register of PRO_ONLY_REGISTRATIONS) {
       register(server, client);
     }
+    registerMapAwardsToListed(server, client, jquants);
+    registerGetListedAwardHistory(server, client, jquants);
+    registerAnalyzeAwardPriceImpact(server, client, jquants);
+    registerWatchListedAwards(server, client, jquants);
   }
 }

@@ -14,7 +14,19 @@
       "tool_modes": {
         "bid_search": ["search_bids", "rank_bids", "list_recent_bids", "get_bid_detail"],
         "subsidy_search": [],
-        "financial_check": [],
+        "financial_check": [
+          "map_awards_to_listed",
+          "get_listed_award_history",
+          "analyze_award_price_impact",
+          "watch_listed_awards"
+        ],
+        "investor_radar": [
+          "map_awards_to_listed",
+          "get_listed_award_history",
+          "analyze_award_price_impact",
+          "watch_listed_awards",
+          "search_investor_radar_app"
+        ],
         "full_orchestration": []
       },
       "cache_ttl_seconds": 60,
@@ -39,7 +51,12 @@
         "procurement",
         "tender",
         "government contract",
-        "public notice"
+        "public notice",
+        "上場企業",
+        "銘柄コード",
+        "investor radar",
+        "listed company",
+        "ticker"
       ]
     },
     {

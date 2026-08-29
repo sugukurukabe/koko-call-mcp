@@ -87,13 +87,18 @@ npx --yes jp-bids-export --prefecture 鹿児島県 --category 役務 --query シ
 | `save_search` | 検索条件を保存 | Pro |
 | `check_saved_search` | 保存検索の新着確認 | Pro |
 | `list_saved_searches` | 保存検索の一覧 | Pro |
+| `map_awards_to_listed` | 公告を上場企業へ名寄せ | Pro |
+| `get_listed_award_history` | 上場企業の公告履歴 | Pro |
+| `analyze_award_price_impact` | 公告日前後の終値 | Pro |
+| `watch_listed_awards` | 銘柄ウォッチ | Pro |
+| `search_investor_radar_app` | Investor Radar UI | Pro |
 
 ## 料金 / Pricing / Harga
 
 | プラン | 料金 | 機能 |
 |---|---|---|
 | **Free** | 無料 | 検索・ランキング・詳細取得 |
-| **Pro** | ¥990/月 | 全17ツール＋MCP Apps UI＋PDF抽出＋保存検索 |
+| **Pro** | ¥990/月 | 全22ツール＋MCP Apps UI＋PDF抽出＋保存検索＋Investor Radar |
 
 ベータ期間（〜2026年9月末）はProも無料。APIキー不要。
 

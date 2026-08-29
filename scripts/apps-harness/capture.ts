@@ -209,6 +209,37 @@ try {
     console.error(`captured ${shot.file} (${shot.width}x${shot.height}, ${shot.colorScheme})`);
   }
 
+  const investorOutDir = fileURLToPath(
+    new URL("../../images/mcp-apps-investor-radar/", import.meta.url),
+  );
+  await mkdir(investorOutDir, { recursive: true });
+  await browser.send(
+    "Emulation.setDeviceMetricsOverride",
+    { width: 1280, height: 880, deviceScaleFactor: 2, mobile: false },
+    sessionId,
+  );
+  await browser.send(
+    "Emulation.setEmulatedMedia",
+    { features: [{ name: "prefers-color-scheme", value: "light" }] },
+    sessionId,
+  );
+  await browser.send(
+    "Page.navigate",
+    { url: `http://127.0.0.1:${harnessPort}/investor-host.html` },
+    sessionId,
+  );
+  await sleep(1800);
+  const investorShot = await browser.send<{ data: string }>(
+    "Page.captureScreenshot",
+    { format: "png" },
+    sessionId,
+  );
+  await writeFile(
+    new URL("01-workspace.png", `file://${investorOutDir}`),
+    Buffer.from(investorShot.data, "base64"),
+  );
+  console.error("captured investor-radar 01-workspace.png");
+
   browser.close();
 } finally {
   chrome.kill();

@@ -17,9 +17,9 @@ const remoteMcpUrl = process.env.JP_BIDS_REMOTE_MCP_URL ?? "https://mcp.bid-jp.c
 const apiKey = process.env.JP_BIDS_REMOTE_API_KEY ?? "free";
 const verifiedAt = new Date().toISOString();
 
-// 全17ツールの期待する annotations
-// Expected annotations for all 17 tools
-// Anotasi yang diharapkan untuk semua 17 alat
+// 全22ツールの期待する annotations
+// Expected annotations for all 22 tools
+// Anotasi yang diharapkan untuk semua 22 alat
 const EXPECTED_TOOLS: { name: string; readOnlyHint: boolean; title: string }[] = [
   { name: "search_bids", readOnlyHint: true, title: "官公需入札検索" },
   { name: "rank_bids", readOnlyHint: true, title: "入札AI Bid Radar" },
@@ -38,6 +38,11 @@ const EXPECTED_TOOLS: { name: string; readOnlyHint: boolean; title: string }[] =
   { name: "save_search", readOnlyHint: false, title: "検索条件を保存" },
   { name: "check_saved_search", readOnlyHint: false, title: "保存検索の新着確認" },
   { name: "list_saved_searches", readOnlyHint: true, title: "保存検索の一覧" },
+  { name: "map_awards_to_listed", readOnlyHint: true, title: "公告を上場企業へ名寄せ" },
+  { name: "get_listed_award_history", readOnlyHint: true, title: "上場企業の官公需公告履歴" },
+  { name: "analyze_award_price_impact", readOnlyHint: true, title: "公告日前後の株価推移" },
+  { name: "watch_listed_awards", readOnlyHint: false, title: "上場企業の公告ウォッチ" },
+  { name: "search_investor_radar_app", readOnlyHint: true, title: "Investor Radar" },
 ];
 
 const FREE_TOOLS = ["search_bids", "rank_bids", "list_recent_bids", "get_bid_detail"];
@@ -55,6 +60,7 @@ const EXPECTED_PROMPTS = [
   "competitor_radar",
   "bid_review_packet_workflow",
   "qualification_and_question_draft",
+  "investor_radar_briefing",
   "bid_due_alert",
 ];
 const log = (msg: string) => console.error(msg);
@@ -168,6 +174,10 @@ try {
     check(
       resourceUris.includes("ui://jp-bids/search-results.html"),
       "resource present: ui://jp-bids/search-results.html (MCP Apps)",
+    );
+    check(
+      resourceUris.includes("ui://jp-bids/investor-radar.html"),
+      "resource present: ui://jp-bids/investor-radar.html (Investor Radar)",
     );
   }
 

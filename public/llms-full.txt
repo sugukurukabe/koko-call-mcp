@@ -1,7 +1,7 @@
 # JP Bids MCP — 完全版コンテキスト / Full context for AI ingestion
 
 > 中小企業庁の官公需情報ポータルサイト（KKJ）が公開する入札公示データを、AI アシスタントから検索・分析できる読み取り専用 MCP サーバー
-> A read-only Model Context Protocol server exposing Japan's SME Agency procurement portal as 17 AI tools
+> A read-only Model Context Protocol server exposing Japan's SME Agency procurement portal as 22 AI tools
 
 このファイルは、AI 検索クローラー（GPTBot, ClaudeBot, PerplexityBot, Google-Extended など）が JP Bids MCP を理解するための主要情報を一つにまとめたものです。リンクを辿らないクローラーでも、この一枚で全体像を把握できます。
 
@@ -18,7 +18,7 @@ JP Bids MCP は、中小企業庁の官公需情報ポータルサイト（KKJ�
 - データ出典: 中小企業庁 官公需情報ポータルサイト（KKJ, https://kkj.go.jp ）
 - MCP Registry metadata name: `io.github.sugukurukabe/jp-bids`
 
-## 2. 17 のツール / 17 Tools
+## 2. 22 のツール / 22 Tools
 
 ### 検索・発見 / Discovery
 
@@ -52,13 +52,21 @@ JP Bids MCP は、中小企業庁の官公需情報ポータルサイト（KKJ�
 - `check_saved_search(name)` — 新着確認 / Check saved search for new notices
 - `list_saved_searches()` — 保存検索の一覧 / List all saved searches
 
+### Investor Radar（投資助言ではない / not investment advice）
+
+- `map_awards_to_listed(...)` — 公告を上場企業へ名寄せ / Map notices to listed tickers
+- `get_listed_award_history(query)` — 上場企業の公告履歴 / Listed-company notice history
+- `analyze_award_price_impact(query, event_date)` — 公告日前後の公開終値 / Public closes around a notice date
+- `watch_listed_awards(action, name, query)` — 銘柄ウォッチ / Ticker watchlist
+- `search_investor_radar_app(...)` — Investor Radar MCP Apps UI
+
 ## 3. MCP 仕様対応 / MCP Spec Support
 
 JP Bids MCP は MCP 2025-11-25 仕様に基づき、入札検索に必要な主要 primitive を実装します。Logging / Notifications は現行版では宣言していません。
 
 | プリミティブ | 実装 |
 |---|---|
-| Tools | 17 ツール、すべてに `inputSchema`, `outputSchema`, `annotations` を付与 |
+| Tools | 22 ツール、すべてに `inputSchema`, `outputSchema`, `annotations` を付与 |
 | Resources | KKJ 出典、API リファレンス、都道府県コード、Search Results App |
 | Resource Templates | `bid://{key}` の動的解決 |
 | Prompts | morning briefing / competitor radar / deadline alert（tier により一部非表示） |
@@ -166,7 +174,7 @@ npx jp-bids-mcp
 A. 日本の官公需入札情報を AI から検索・分析するための、読み取り専用の MCP サーバーです。中小企業庁の公開データを AI が直接扱える形に変換します。
 
 ### Q. 利用は無料ですか？
-A. 2026 年 9 月末までのベータ期間中は全機能無料です。それ以降は Free（4 ツール）と Pro（全 17 ツール、月額 ¥990）の二段構成を予定しています。
+A. 2026 年 9 月末までのベータ期間中は全機能無料です。それ以降は Free（4 ツール）と Pro（全 22 ツール、月額 ¥990）の二段構成を予定しています。
 
 ### Q. Cursor / Claude Desktop で使えますか？
 A. はい。Cursor / Claude Desktop / ChatGPT / その他の MCP 対応クライアントすべてで使えます。リモート URL `https://mcp.bid-jp.com/mcp` を設定するだけです。

@@ -1,5 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { JquantsClient } from "./api/jquants-client.js";
 import { KkjClient, type KkjClientOptions } from "./api/kkj-client.js";
+import { registerInvestorRadarApp } from "./apps/register-investor-app.js";
 import { registerSearchResultsApp } from "./apps/register-search-app.js";
 import type { Tier } from "./lib/auth.js";
 import { getBranding } from "./lib/branding.js";
@@ -11,6 +13,7 @@ import { registerTools } from "./tools/register-tools.js";
 export interface CreateJpBidsServerOptions {
   kkjClient?: KkjClient;
   kkjClientOptions?: KkjClientOptions;
+  jquantsClient?: JquantsClient;
   // リクエストごとのティア（Free/Pro）。省略時はPro（stdio・開発環境）
   // Per-request tier (Free/Pro). Defaults to Pro (stdio / dev environments)
   // Tier per permintaan (Free/Pro). Default Pro (stdio / lingkungan pengembangan)
@@ -28,9 +31,6 @@ export function createJpBidsServer(options: CreateJpBidsServerOptions = {}): Mcp
       description: "Japan government procurement bid search through the Model Context Protocol.",
     },
     {
-      // 宣言する capability は実装が伴うものだけに限定する（mcp-reference-build 原則）
-      // Only declare capabilities the server actually implements (mcp-reference-build principle)
-      // Hanya nyatakan kapabilitas yang benar-benar diimplementasikan server (prinsip mcp-reference-build)
       capabilities: {
         tools: { listChanged: false },
         resources: { listChanged: false, subscribe: false },
@@ -39,14 +39,16 @@ export function createJpBidsServer(options: CreateJpBidsServerOptions = {}): Mcp
       },
       instructions:
         tier === "pro"
-          ? "Use JP Bids to search public Japanese government procurement bid information. Always show the KKJ attribution included in tool results."
+          ? "Use JP Bids to search public Japanese government procurement bid information. Investor Radar tools map notices to listed-company tickers and never give investment advice. Always show the KKJ attribution included in tool results."
           : "Use JP Bids (Free tier) to search public Japanese government procurement bid information. Available tools: search_bids, rank_bids, list_recent_bids, get_bid_detail. Upgrade to Pro (990 JPY/month) for AI analysis and PDF extraction tools. Always show the KKJ attribution included in tool results.",
     },
   );
   const client = options.kkjClient ?? new KkjClient(options.kkjClientOptions);
-  registerTools(server, client, tier);
+  const jquants = options.jquantsClient ?? new JquantsClient();
+  registerTools(server, client, tier, jquants);
   if (tier === "pro") {
     registerSearchResultsApp(server, client);
+    registerInvestorRadarApp(server, client, jquants);
   }
   registerPrompts(server, tier);
   registerResources(server, client);

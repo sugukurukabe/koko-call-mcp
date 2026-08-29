@@ -68,6 +68,7 @@ JP Bids MCP menerima versi protokol <code>2025-11-25</code> dan <code>2026-07-28
 <li>AI Bid Radar: 案件を実務優先度でスコアリング・ランキング。Ranking bid candidates by practical follow-up priority.</li>
 <li>PDF/HTML要件抽出: 一時取得・SSRF防御・Vertex AI Gemini対応。PDF/HTML requirement extraction with SSRF guard and Vertex AI Gemini.</li>
 <li>MCP Apps UI: Claude.aiのサイドパネルで入札案件を一覧・操作。Interactive workspace in MCP Apps-compatible clients.</li>
+<li>Investor Radar: 官公需公告を上場企業へ名寄せ（投資助言ではない）。Map KKJ notices to listed tickers. Not investment advice.</li>
 <li>Free/Proティア: ベータ期間（〜2026年9月末）は全機能無料。Free beta through September 2026, Pro ¥990/month thereafter.</li>
 <li>Resources・Resource Templatesでコンテキストを精密に渡せる。Resources and Resource Templates for targeted context.</li>
 <li>リモートStreamable HTTPとローカルstdioの両対応。Remote Streamable HTTP and local stdio transports.</li>
@@ -168,6 +169,31 @@ JP Bids MCP menerima versi protokol <code>2025-11-25</code> dan <code>2026-07-28
 <td>保存検索の一覧 / List saved searches</td>
 <td>Pro</td>
 </tr>
+<tr>
+<td><code>map_awards_to_listed</code></td>
+<td>公告を上場企業へ名寄せ / Map notices to tickers</td>
+<td>Pro</td>
+</tr>
+<tr>
+<td><code>get_listed_award_history</code></td>
+<td>上場企業の公告履歴 / Listed-company notice history</td>
+<td>Pro</td>
+</tr>
+<tr>
+<td><code>analyze_award_price_impact</code></td>
+<td>公告日前後の終値 / Closes around notice date</td>
+<td>Pro</td>
+</tr>
+<tr>
+<td><code>watch_listed_awards</code></td>
+<td>銘柄ウォッチ / Ticker watchlist</td>
+<td>Pro</td>
+</tr>
+<tr>
+<td><code>search_investor_radar_app</code></td>
+<td>Investor Radar UI</td>
+<td>Pro</td>
+</tr>
 </tbody>
 </table>
 <h2 id="resources" class="tsd-anchor-link">Resources<a href="#resources" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
@@ -178,6 +204,7 @@ JP Bids MCP menerima versi protokol <code>2025-11-25</code> dan <code>2026-07-28
 <li><code>docs://agentic-security-storage-readiness</code></li>
 <li><code>codes://prefectures</code></li>
 <li><code>ui://jp-bids/search-results.html</code></li>
+<li><code>ui://jp-bids/investor-radar.html</code></li>
 <li><code>bid://{bid_key}</code></li>
 <li><code>prefecture://{lg_code}</code></li>
 <li><code>org://{organization_name}</code></li>
@@ -200,6 +227,7 @@ JP Bids MCP menerima versi protokol <code>2025-11-25</code> dan <code>2026-07-28
 <li><code>docs/inspector.md</code></li>
 <li><code>docs/deployment-cloud-run.md</code></li>
 <li><code>docs/mcp-apps.md</code></li>
+<li><code>docs/investor-radar.md</code></li>
 <li><code>docs/slack-briefing.md</code></li>
 <li><code>docs/remote-release-checklist.md</code></li>
 <li><code>docs/submissions/mcp-directories.md</code></li>

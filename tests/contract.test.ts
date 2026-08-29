@@ -26,6 +26,11 @@ describe("MCP contract", () => {
         "create_bid_review_packet",
         "draft_bid_questions",
         "analyze_past_awards",
+        "map_awards_to_listed",
+        "get_listed_award_history",
+        "analyze_award_price_impact",
+        "watch_listed_awards",
+        "search_investor_radar_app",
         "list_recent_bids",
         "get_bid_detail",
         "summarize_bids_by_org",
@@ -43,6 +48,7 @@ describe("MCP contract", () => {
         "competitor_radar",
         "bid_review_packet_workflow",
         "qualification_and_question_draft",
+        "investor_radar_briefing",
         "bid_due_alert",
       ]),
     );
@@ -56,6 +62,7 @@ describe("MCP contract", () => {
         "docs://agentic-security-storage-readiness",
         "codes://prefectures",
         "ui://jp-bids/search-results.html",
+        "ui://jp-bids/investor-radar.html",
       ]),
     );
 
@@ -118,6 +125,23 @@ describe("MCP contract", () => {
     await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
 
     const resource = await client.readResource({ uri: "ui://jp-bids/search-results.html" });
+    expect(resource.contents[0]).toMatchObject({
+      mimeType: "text/html;profile=mcp-app",
+    });
+    expect(resource.contents[0]?.text).toContain('<div id="root"></div>');
+
+    await client.close();
+    await server.close();
+  });
+
+  it("reads the MCP Apps Investor Radar UI resource", async () => {
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    const server = createJpBidsServer();
+    const client = new Client({ name: "investor-app-resource-test", version: "0.1.0" });
+
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+
+    const resource = await client.readResource({ uri: "ui://jp-bids/investor-radar.html" });
     expect(resource.contents[0]).toMatchObject({
       mimeType: "text/html;profile=mcp-app",
     });

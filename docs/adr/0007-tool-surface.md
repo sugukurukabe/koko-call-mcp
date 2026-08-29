@@ -31,3 +31,15 @@ Add one MCP Apps view tool: `search_bids_app` (UI overlay; falls back to text + 
 The original four tools cover discovery only. AI Bid Radar adds the candidate-to-decision loop (rank, explain, qualify, extract, export, schedule, document, ask, study competitors), which is what real public-procurement teams need next. The v0.4 tools all stay read-only against KKJ and degrade gracefully when fields are missing.
 
 `search_bids_app` reuses the same input/output schemas as `search_bids` and is intentionally separated so MCP Apps-aware hosts can render the table while non-UI clients keep the standard tool surface untouched.
+
+### v0.8.x (Investor Radar)
+
+Add Pro-tier fact tools that map KKJ notices to listed-company tickers. No buy/sell advice (ADR-0025):
+
+- `map_awards_to_listed` — name-match notices to ticker codes (bundled catalog; J-Quants key optional)
+- `get_listed_award_history` — KKJ notice history for a company or ticker
+- `analyze_award_price_impact` — notice-date window of public daily closes (J-Quants key required)
+- `watch_listed_awards` — ticker watchlist + state_token diff (saved-search pattern)
+- `search_investor_radar_app` — MCP Apps overlay; text + structuredContent fallback
+
+Existing published tool names and required arguments are unchanged.

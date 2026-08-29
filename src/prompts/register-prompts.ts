@@ -217,6 +217,33 @@ export function registerPrompts(server: McpServer, tier: Tier = "pro"): void {
         ],
       }),
     );
+
+    server.registerPrompt(
+      "investor_radar_briefing",
+      {
+        title: "Investor Radar ブリーフィング",
+        description:
+          "指定企業・銘柄の官公需公告を事実として整理する。売買推奨はしない。Brief KKJ notices for a listed company without investment advice. Ringkas pengumuman KKJ untuk perusahaan tercatat tanpa nasihat investasi.",
+        argsSchema: {
+          query: z.string().min(1).describe("企業名または4桁銘柄コード。"),
+        },
+      },
+      (args) => ({
+        messages: [
+          {
+            role: "user",
+            content: {
+              type: "text",
+              text: [
+                `search_investor_radar_app または map_awards_to_listed と get_listed_award_history を使い、${args.query} に関する官公需公告を事実としてまとめてください。`,
+                "KKJは公告であり公式落札結果ではないこと、本情報は投資助言ではないことを必ず書いてください。",
+                "買い・売り・オーバーウェイトなどの推奨語は使わないでください。",
+              ].join("\n"),
+            },
+          },
+        ],
+      }),
+    );
   }
 
   server.registerPrompt(

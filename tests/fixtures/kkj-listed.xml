@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Results>
+  <Version>1.0</Version>
+  <SearchResults>
+    <SearchHits>1</SearchHits>
+    <SearchResult>
+      <ResultId>1</ResultId>
+      <Key>KKJ-LISTED-001</Key>
+      <ExternalDocumentURI>https://www.kkj.go.jp/test/listed</ExternalDocumentURI>
+      <ProjectName>富士通株式会社 システム保守業務委託</ProjectName>
+      <LgCode>46</LgCode>
+      <PrefectureName>鹿児島県</PrefectureName>
+      <OrganizationName>鹿児島市</OrganizationName>
+      <CftIssueDate>2026-04-25</CftIssueDate>
+      <Category>役務</Category>
+      <ProcedureType>一般競争入札</ProcedureType>
+      <ProjectDescription>富士通製システムの保守。</ProjectDescription>
+    </SearchResult>
+  </SearchResults>
+</Results>

@@ -686,3 +686,111 @@ describe("MCP tool execution", () => {
     await server.close();
   });
 });
+
+describe("Investor Radar tools", () => {
+  it("maps listed-company names in KKJ notices", async () => {
+    const xml = await readFile("tests/fixtures/kkj-listed.xml", "utf8");
+    const kkjClient = new KkjClient({
+      rateLimitPerSecond: 1000,
+      fetchImpl: async () => new Response(xml, { status: 200 }),
+    });
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    const server = createJpBidsServer({ kkjClient });
+    const client = new Client({ name: "investor-map-test", version: "0.1.0" });
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+
+    const result = await client.callTool({
+      name: "map_awards_to_listed",
+      arguments: { query: "富士通", limit: 5 },
+    });
+    expect(result.isError).not.toBe(true);
+    expect(result.structuredContent).toMatchObject({
+      mappedCount: 1,
+      catalogSource: "bundled",
+      companies: [{ company: { code: "6702" } }],
+      attribution: { dataSource: "中小企業庁 官公需情報ポータルサイト" },
+    });
+    expect(JSON.stringify(result.structuredContent)).toContain("投資助言ではありません");
+
+    await client.close();
+    await server.close();
+  });
+
+  it("returns listed award history for a ticker", async () => {
+    const xml = await readFile("tests/fixtures/kkj-listed.xml", "utf8");
+    const kkjClient = new KkjClient({
+      rateLimitPerSecond: 1000,
+      fetchImpl: async () => new Response(xml, { status: 200 }),
+    });
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    const server = createJpBidsServer({ kkjClient });
+    const client = new Client({ name: "investor-history-test", version: "0.1.0" });
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+
+    const result = await client.callTool({
+      name: "get_listed_award_history",
+      arguments: { query: "6702", window_days: 365, limit: 10 },
+    });
+    expect(result.isError).not.toBe(true);
+    expect(result.structuredContent).toMatchObject({
+      company: { code: "6702" },
+      noticeCount: 1,
+    });
+
+    await client.close();
+    await server.close();
+  });
+
+  it("requires a J-Quants key for price impact", async () => {
+    const xml = await readFile("tests/fixtures/kkj-listed.xml", "utf8");
+    const kkjClient = new KkjClient({
+      rateLimitPerSecond: 1000,
+      fetchImpl: async () => new Response(xml, { status: 200 }),
+    });
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    const server = createJpBidsServer({ kkjClient });
+    const client = new Client({ name: "investor-price-test", version: "0.1.0" });
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+
+    const result = await client.callTool({
+      name: "analyze_award_price_impact",
+      arguments: { query: "6702", event_date: "2026-04-25" },
+    });
+    expect(result.isError).toBe(true);
+
+    await client.close();
+    await server.close();
+  });
+
+  it("saves and checks a listed-award watchlist", async () => {
+    const xml = await readFile("tests/fixtures/kkj-listed.xml", "utf8");
+    const kkjClient = new KkjClient({
+      rateLimitPerSecond: 1000,
+      fetchImpl: async () => new Response(xml, { status: 200 }),
+    });
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    const server = createJpBidsServer({ kkjClient });
+    const client = new Client({ name: "investor-watch-test", version: "0.1.0" });
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+
+    const saved = await client.callTool({
+      name: "watch_listed_awards",
+      arguments: { action: "save", name: "fujitsu", query: "富士通" },
+    });
+    expect(saved.isError).not.toBe(true);
+    const stateToken = (saved.structuredContent as { stateToken: string }).stateToken;
+
+    const checked = await client.callTool({
+      name: "watch_listed_awards",
+      arguments: { action: "check", name: "fujitsu", state_token: stateToken },
+    });
+    expect(checked.isError).not.toBe(true);
+    expect(checked.structuredContent).toMatchObject({
+      action: "check",
+      newNoticesCount: 1,
+    });
+
+    await client.close();
+    await server.close();
+  });
+});
