@@ -7,7 +7,7 @@ JP Bids MCP が解決する、顧客ごとの具体的な課題。
 **課題**: 既存の検索UIに加え、AI対話型のアクセスを顧客に提供したい。自社でMCP基盤を開発するコストと時間が障壁。
 
 **JP Bids MCPでの解決**:
-- 17ツール・Remote Streamable HTTP・OAuth 2.0が即利用可能
+- 22ツール・Remote Streamable HTTP・OAuth 2.0が即利用可能
 - 自社ブランドでラベリングし、既存顧客にAI機能を追加提供
 - Free/Proティア分離済み。¥990/月の課金基盤が稼働中
 - MCP Apps UIで、Claude.aiのサイドパネルに入札一覧を表示
@@ -28,7 +28,7 @@ AI:   JP Bids MCPで検索 → 8件ヒット
 | 開発期間 | 3-6ヶ月 | 即日 |
 | MCP仕様対応 | 要学習 | 2025-11-25仕様に基づく実装 |
 | OAuth 2.0 | 要実装 | 実装済み（PKCE + DCR） |
-| AI分析機能 | 要設計 | 17ツール即利用 |
+| AI分析機能 | 要設計 | 22ツール即利用 |
 | 保守コスト | エンジニア人件費 | サブスク or OEMライセンス |
 
 ---
@@ -92,7 +92,7 @@ AI:       search_bids → 23件
 - `server.json`: MCP Registry メタデータの標準構造
 - `src/oauth/`: PKCE + DCR + JWT の実装パターン
 - `src/transports/http.ts`: Streamable HTTP の実装パターン
-- `src/tools/`: 17ツールの設計パターン（zod入力・構造化出力・エラーハンドリング）
+- `src/tools/`: 22ツールの設計パターン（zod入力・構造化出力・エラーハンドリング）
 - `examples/`: エコシステム連携の設定テンプレート
 
 ---
@@ -117,12 +117,32 @@ AI:     get_bid_detail で案件情報取得
 
 ---
 
+## 6. 上場企業の官公需調査（Investor Radar）
+
+**課題**: 官公需の公告にどの上場企業が名前として出てくるかを、KKJ と株価画面を行き来しながら手で集めている。
+
+**JP Bids MCPでの解決**:
+- `map_awards_to_listed` で公告を銘柄コードへ名寄せ
+- `analyze_award_price_impact` で公告日前後の公開終値（J-Quants キー）
+- 市場データ MCP を同じ会話に並べれば日足と突き合わせ
+- 売買推奨は出さない。KKJ は公告であり公式落札結果ではない
+
+**想定シナリオ**:
+```
+調査: 「6702 の官公需公告と、公告日前後の終値を見せて」
+AI:   map_awards_to_listed → get_listed_award_history
+      → analyze_award_price_impact（J-Quants）
+      → 「投資助言ではありません」と出典を添えて返す
+```
+
+---
+
 ## 導入判断のための数字
 
 | 指標 | 値 |
 |------|-----|
 | MCP仕様バージョン | 2025-11-25 |
-| ツール数 | 17 |
+| ツール数 | 22 |
 | テスト数 | 103 (23ファイル) |
 | コードカバレッジ | 71% |
 | CIチェック | lint + build + test + docs + security |

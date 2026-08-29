@@ -4,7 +4,7 @@
 
 ## 概要 / Overview / Gambaran Umum
 
-JP Bids MCP は、中小企業庁「官公需情報ポータルサイト」の入札情報をModel Context Protocolで検索・AI分析するサーバーです。
+JP Bids MCP は、中小企業庁「官公需情報ポータルサイト」の入札情報をModel Context Protocolで検索・AI分析するサーバーです。v0.9.0 の Investor Radar で公告を上場銘柄へ名寄せし、J-Quants キーがあれば公開終値も同じ会話で見られます（投資助言ではありません）。
 
 JP Bids MCP is an MCP server for searching and AI-analyzing Japanese government procurement notices from the SME Agency's KKJ portal.
 
@@ -33,6 +33,12 @@ JP Bids MCP adalah server MCP untuk mencari dan menganalisis pengumuman pengadaa
 ```
 
 → 落札実績取得 → 予算規模・競合・落札率を分析 → 次の入札戦略を提案。
+
+```text
+「富士通（6702）の官公需公告を出して、公告日前後の終値も見せて」
+```
+
+→ 公告を銘柄コードへ名寄せ → 履歴を事実として集計 → J-Quants キーがあれば公開終値の前後窓。売買の推奨はしない。市場データ MCP を同じクライアントに並べれば日足・開示と突き合わせできる。
 
 ## クイックスタート / Quick Start / Mulai Cepat
 
@@ -119,6 +125,8 @@ Claude Desktop・Cursor用の設定ファイルと3つのエンドツーエン�
 技術的な連携詳細：[docs/integrations/jgrants.md](docs/integrations/jgrants.md)
 
 JP Bids MCPは[freee MCP](https://www.npmjs.com/package/freee-mcp)（freee株式会社）とも連携でき、入札→会計処理の自動化（資金余力確認、落札後の売上取引登録、請求書生成）が可能です。設定例：[examples/freee-integration/](examples/freee-integration/)
+
+Investor Radar は J-Quants API キーのパススルーで公告日前後の公開終値を返せます。市場データ MCP を同じ Cursor / Claude セッションに追加すれば、日足・有報と官公需公告を一つの会話で突き合わせできます。売買推奨はしません。詳細: [docs/investor-radar.md](docs/investor-radar.md)
 
 > JP Bids MCP・Jグランツ MCP・freee MCPはそれぞれ別組織が運営する独立サーバーです。結果は参考情報であり、必ず公式書類で確認してください。
 

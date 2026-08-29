@@ -8,9 +8,9 @@
   "privacy_policy": "https://mcp.bid-jp.com/privacy",
   "terms_of_service": "https://mcp.bid-jp.com/terms",
   "description": {
-    "ja": "日本の官公需入札情報をMCPで検索・AI分析するサーバー。",
-    "en": "Search and AI-analyze Japanese government procurement bids through MCP.",
-    "id": "Server MCP untuk mencari dan menganalisis pengadaan pemerintah Jepang dengan AI."
+    "ja": "日本の官公需公告をMCPで検索・AI分析し、上場銘柄へ名寄せするサーバー。投資助言ではない。",
+    "en": "Search and AI-analyze Japan's KKJ procurement notices and map them to listed-company tickers through MCP. Not investment advice.",
+    "id": "Server MCP untuk mencari pengumuman pengadaan KKJ Jepang dan memetakannya ke ticker. Bukan nasihat investasi."
   },
   "data_sources": [
     {

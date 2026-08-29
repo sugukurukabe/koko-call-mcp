@@ -1,7 +1,7 @@
 {
   "name": "JP Bids",
   "version": "0.9.0",
-  "description": "日本の官公需入札情報をMCPで検索・AI分析。Japan government procurement bid search and AI analysis through MCP.",
+  "description": "日本の官公需公告をMCPで検索・AI分析し、上場銘柄へ名寄せする（投資助言ではない）。KKJ procurement search, AI analysis, and listed-ticker mapping through MCP. Not investment advice.",
   "homepage": "https://mcp.bid-jp.com",
   "repository": "https://github.com/sugukurukabe/koko-call-mcp",
   "license": "Apache-2.0",

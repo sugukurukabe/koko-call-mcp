@@ -7,4 +7,4 @@ authors:
 version: 0.9.0
 license: Apache-2.0
 repository-code: "https://github.com/sugukurukabe/koko-call-mcp"
-abstract: "A Model Context Protocol server for searching Japanese government procurement bid information."
+abstract: "A Model Context Protocol server for Japan's KKJ procurement notices, including Investor Radar mapping to listed-company tickers. Not investment advice."

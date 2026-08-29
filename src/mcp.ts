@@ -28,7 +28,8 @@ export function createJpBidsServer(options: CreateJpBidsServerOptions = {}): Mcp
       name: branding.serviceName,
       title: branding.serviceName,
       version: VERSION,
-      description: "Japan government procurement bid search through the Model Context Protocol.",
+      description:
+        "Japan KKJ procurement notices through MCP, with Investor Radar ticker mapping. Not investment advice.",
     },
     {
       capabilities: {
@@ -39,7 +40,7 @@ export function createJpBidsServer(options: CreateJpBidsServerOptions = {}): Mcp
       },
       instructions:
         tier === "pro"
-          ? "Use JP Bids to search public Japanese government procurement bid information. Investor Radar tools map notices to listed-company tickers and never give investment advice. Always show the KKJ attribution included in tool results."
+          ? "Use JP Bids to search public Japanese government procurement notices. Investor Radar tools map notices to listed-company tickers and can overlay public daily closes when a J-Quants API key is provided. Never give buy/sell advice. Always show the KKJ attribution included in tool results."
           : "Use JP Bids (Free tier) to search public Japanese government procurement bid information. Available tools: search_bids, rank_bids, list_recent_bids, get_bid_detail. Upgrade to Pro (990 JPY/month) for AI analysis and PDF extraction tools. Always show the KKJ attribution included in tool results.",
     },
   );

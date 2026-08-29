@@ -5,9 +5,9 @@
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Smithery](https://smithery.ai/badge/a-kabe-1qio/jp-bids-mcp)](https://smithery.ai/servers/a-kabe-1qio/jp-bids-mcp)
 
-日本の官公需入札情報をMCPで検索・AI分析するサーバー。  
-Search and AI-analyze Japanese public procurement notices through MCP.  
-Server MCP untuk mencari dan menganalisis pengadaan pemerintah Jepang dengan AI.
+日本の官公需入札情報をMCPで検索・AI分析するサーバー。v0.9.0 の Investor Radar で、公告を上場銘柄へ名寄せし、J-Quants キーがあれば公開終値も同じ会話で見られます（投資助言ではありません）。  
+Search and AI-analyze Japanese public procurement notices through MCP. Investor Radar maps notices to listed-company tickers and can overlay public daily closes. Not investment advice.  
+Server MCP untuk mencari pengumuman pengadaan pemerintah Jepang. Investor Radar memetakan pengumuman ke ticker. Bukan nasihat investasi.
 
 > **ベータ期間中（〜2026年9月末）は全機能を無料で利用できます。**  
 > During beta (until end of September 2026), all features are available for free.
@@ -45,6 +45,12 @@ JP Bids MCP menerima versi protokol `2025-11-25` dan `2026-07-28`. Jika header `
 ```
 
 → 落札実績取得 → 予算規模・競合・落札率を分析 → 次の入札戦略を提案。
+
+```text
+「富士通（6702）の官公需公告を出して、公告日前後の終値も見せて」
+```
+
+→ 公告を銘柄コードへ名寄せ → 履歴と件数を事実として集計 → J-Quants キーがあれば公開終値の前後窓を表示。売買の推奨はしない。市場データ MCP を同じクライアントに並べれば、日足・開示と突き合わせできる。
 
 ## Quick Start / クイックスタート
 
@@ -195,6 +201,8 @@ See [examples/jgrants-integration/](examples/jgrants-integration/) for ready-to-
 Technical integration details: [docs/integrations/jgrants.md](docs/integrations/jgrants.md).
 
 JP Bids MCP also pairs with [freee MCP](https://www.npmjs.com/package/freee-mcp) (freee K.K.) for procurement-to-accounting automation — financial readiness checks, post-award deal entries, and invoice generation from bid data. See [examples/freee-integration/](examples/freee-integration/).
+
+Investor Radar can overlay public daily closes around a notice date when a J-Quants API key is passed through. Adding a market-data MCP in the same Cursor / Claude session lets you compare KKJ notices with daily bars and filings in one conversation. No buy/sell advice. Details: [docs/investor-radar.md](docs/investor-radar.md).
 
 > JP Bids MCP, J-Grants MCP, and freee MCP are independent servers operated by separate organizations. Results are reference information; always verify against official documents.
 

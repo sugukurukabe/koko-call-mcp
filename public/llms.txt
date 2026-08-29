@@ -11,7 +11,7 @@ npm: https://www.npmjs.com/package/jp-bids-mcp
 
 ## このサーバーの定義 / What this server is
 
-JP Bids MCP は、日本の官公需入札情報（中小企業庁 官公需情報ポータルサイト KKJ が公開する公示データ）を、Model Context Protocol 2025-11-25 仕様で AI に提供するサーバーです。Claude Desktop / Cursor / ChatGPT などの MCP 対応クライアントから、自然言語で入札を検索し、PDF 仕様書から要件を抽出し、自社プロファイルに基づきランキングし、ICS カレンダーや CSV に出力できます。
+JP Bids MCP は、日本の官公需入札情報（中小企業庁 官公需情報ポータルサイト KKJ が公開する公示データ）を、Model Context Protocol 2025-11-25 仕様で AI に提供するサーバーです。Claude Desktop / Cursor / ChatGPT などの MCP 対応クライアントから、自然言語で入札を検索し、PDF 仕様書から要件を抽出し、自社プロファイルに基づきランキングし、ICS カレンダーや CSV に出力できます。v0.9.0 の Investor Radar は公告を上場銘柄へ名寄せし、J-Quants キーがあれば公開終値の前後窓を返します。投資助言ではありません。
 
 公示データは `https://kkj.go.jp` の公開 API を経由して取得します。本サーバーは入札を読み取るだけで、応札や提出は扱いません。
 
@@ -50,6 +50,7 @@ JP Bids MCP は、日本の官公需入札情報（中小企業庁 官公需情�
 ## 解説記事 / Articles
 
 - JP Bids MCP × Jグランツ MCP × freee MCP — 入札・補助金・会計をひとつの会話で: https://github.com/sugukurukabe/koko-call-mcp/blob/main/articles/zenn-jp-bids-jgrants.md
+- Investor Radar — 官公需公告を上場銘柄へ名寄せする: https://github.com/sugukurukabe/koko-call-mcp/blob/main/articles/investor-radar.md
 - 無形資産の4SからみたMCP — 小さなプロトコルがなぜ新しい価値を生むのか: https://github.com/sugukurukabe/koko-call-mcp/blob/main/articles/mcp-intangible-assets-4s.md
 - 会話の中に画面を置く — MCP Apps で入札ワークスペースを実装する（MCP Apps UI の実装解説。単一HTML配信、CSP の connectDomains 空許可、Host/View通信分類と拒否時のフォールバック設計）: https://github.com/sugukurukabe/koko-call-mcp/blob/main/articles/mcp-apps-bid-workspace.md
 
@@ -57,6 +58,7 @@ JP Bids MCP は、日本の官公需入札情報（中小企業庁 官公需情�
 
 - Jグランツ MCP（補助金・デジタル庁公式 OSS）: https://github.com/digital-go-jp/jgrants-mcp-server
 - freee MCP（会計・freee 株式会社）: https://www.npmjs.com/package/freee-mcp
+- Investor Radar + 市場データ MCP: 公告と公開終値を同じ会話で（投資助言ではない） https://github.com/sugukurukabe/koko-call-mcp/blob/main/docs/investor-radar.md
 
 ## 著者 / Author
 

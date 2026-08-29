@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>JP Bids MCP — 入札情報をAIで</title>
-<meta name="description" content="日本の官公需入札情報をAIアシスタントで検索・分析。Claude / Cursor / ChatGPT で即利用可能。">
+<meta name="description" content="日本の官公需入札情報をAIアシスタントで検索・分析。公告を上場銘柄へ名寄せし、公開終値と突き合わせ可能（投資助言ではない）。Claude / Cursor / ChatGPT で即利用。">
 <link rel="icon" href="/favicon.png" type="image/png">
 <meta property="og:title" content="JP Bids MCP — 入札情報をAIで">
-<meta property="og:description" content="中小企業庁 官公需情報ポータルサイトの公開入札公示データをAIアシスタントから直接検索・分析。30秒で利用開始。">
+<meta property="og:description" content="中小企業庁 KKJ の公開入札公示をAIから検索。Investor Radar で上場銘柄へ名寄せし、公開終値と突き合わせ可能。投資助言ではありません。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://mcp.bid-jp.com">
 <meta property="og:image" content="https://mcp.bid-jp.com/ogp.png">
@@ -15,7 +15,7 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="JP Bids MCP — 入札情報をAIで">
-<meta name="twitter:description" content="中小企業庁 官公需情報ポータルサイトの公開入札公示データをAIアシスタントから直接検索・分析。30秒で利用開始。">
+<meta name="twitter:description" content="中小企業庁 KKJ の公開入札公示をAIから検索。Investor Radar で上場銘柄へ名寄せ。投資助言ではありません。">
 <meta name="twitter:image" content="https://mcp.bid-jp.com/ogp.png">
 <link rel="canonical" href="https://mcp.bid-jp.com/">
 <link rel="alternate" type="text/markdown" href="https://mcp.bid-jp.com/llms.txt" title="LLM-friendly summary (Markdown)">
@@ -30,7 +30,7 @@
       "@id": "https://mcp.bid-jp.com/#website",
       "url": "https://mcp.bid-jp.com/",
       "name": "JP Bids MCP",
-      "description": "中小企業庁の官公需入札情報を AI から扱える Model Context Protocol サーバー",
+      "description": "中小企業庁の官公需入札情報を AI から扱える Model Context Protocol サーバー。Investor Radar で上場銘柄へ名寄せする（投資助言ではない）",
       "inLanguage": "ja",
       "publisher": { "@id": "https://sugu-kuru.co.jp/#organization" }
     },
@@ -46,7 +46,7 @@
       "downloadUrl": "https://www.npmjs.com/package/jp-bids-mcp",
       "softwareVersion": "0.9.0",
       "license": "https://www.apache.org/licenses/LICENSE-2.0",
-      "description": "Read-only Model Context Protocol server that exposes public procurement notice data from Japan's SME Agency KKJ portal as 22 AI tools for search, ranking, PDF requirement extraction, calendar export, and listed-company notice mapping.",
+      "description": "Read-only Model Context Protocol server that exposes public procurement notice data from Japan's SME Agency KKJ portal as 22 AI tools for search, ranking, PDF requirement extraction, calendar export, and listed-company ticker mapping. Not investment advice.",
       "inLanguage": ["ja", "en", "id"],
       "offers": {
         "@type": "Offer",
@@ -66,6 +66,8 @@
         "ICS calendar export",
         "CSV shortlist export",
         "MCP Apps UI (search results table inside the conversation)",
+        "Investor Radar: map KKJ notices to listed-company tickers (not investment advice)",
+        "Optional public daily closes around a notice date via J-Quants API key passthrough",
         "OAuth 2.0 with PKCE and Dynamic Client Registration",
         "Streamable HTTP transport"
       ]
@@ -103,7 +105,7 @@
           "name": "JP Bids MCP は何のためのサーバーですか？",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "中小企業庁 官公需情報ポータルサイト KKJ の公開入札公示データを、Model Context Protocol 2025-11-25 仕様で AI に提供する読み取り専用のサーバーです。Claude Desktop / Cursor / ChatGPT などの MCP 対応クライアントから、自然言語で入札を検索・分析・要件抽出・カレンダー出力できます。"
+            "text": "中小企業庁 官公需情報ポータルサイト KKJ の公開入札公示データを、Model Context Protocol 2025-11-25 仕様で AI に提供する読み取り専用のサーバーです。Claude Desktop / Cursor / ChatGPT などの MCP 対応クライアントから、自然言語で入札を検索・分析・要件抽出でき、Investor Radar で公告を上場銘柄へ名寄せできます。投資助言ではありません。"
           }
         },
         {
@@ -136,6 +138,14 @@
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "中小企業庁の官公需情報ポータルサイト（KKJ, https://kkj.go.jp ）の公開 API です。政府標準利用規約 第 2.0 版に従い、本サーバーが返すすべての結果に出典を含めます。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "上場企業の官公需と株価を同じ会話で見られますか？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "できます。Investor Radar（Pro）が KKJ 公告を銘柄コードへ名寄せします。J-Quants API キーを渡すと公告日前後の公開終値も返せます。市場データ MCP を同じクライアントに並べれば日足と突き合わせできます。売買の推奨はしません。KKJ は公告であり公式落札結果ではありません。"
           }
         },
         {
@@ -242,7 +252,7 @@ footer a{color:var(--muted)}
 <section class="hero">
   <div class="hero-badge">Beta — 2026年9月末まで全機能無料</div>
   <h1>入札情報を<span>AIで</span></h1>
-  <p>中小企業庁 官公需情報ポータルサイトの公開入札公示データを、AIアシスタントから直接検索・分析。<br>Claude / Cursor / ChatGPT で30秒で利用開始。</p>
+  <p>中小企業庁 官公需情報ポータルサイトの公開入札公示データを、AIアシスタントから直接検索・分析。<br>Investor Radar で公告を上場銘柄へ名寄せし、公開終値と突き合わせ可能。<strong>投資助言ではありません。</strong></p>
   <div class="hero-actions">
     <a href="#setup" class="btn btn-primary">今すぐ使う</a>
     <a href="https://github.com/sugukurukabe/koko-call-mcp" class="btn btn-outline">GitHub</a>
@@ -251,7 +261,7 @@ footer a{color:var(--muted)}
 
 <section class="stats">
   <div class="stat-card">
-    <div class="stat-num">17</div>
+    <div class="stat-num">22</div>
     <div class="stat-label">AIツール</div>
   </div>
   <div class="stat-card">
@@ -343,6 +353,11 @@ footer a{color:var(--muted)}
       <h3>「落札したらfreeeに売上を登録して」</h3>
       <p>JP Bids MCP × freee MCP の連携で、落札情報から売上取引・請求書を自動生成。入札から経理まで一気通貫。</p>
     </div>
+    <div class="workflow-card">
+      <div class="step">会話例 7</div>
+      <h3>「6702の官公需公告と、公告日前後の終値を見せて」</h3>
+      <p>Investor Radar が公告を銘柄へ名寄せ。J-Quants キーがあれば公開終値の前後窓を表示。市場データ MCP を並べれば日足と突き合わせ。売買推奨はしない。</p>
+    </div>
   </div>
 </section>
 
@@ -363,7 +378,7 @@ footer a{color:var(--muted)}
 </section>
 
 <section class="features">
-  <h2>17のAIツール</h2>
+  <h2>22のAIツール</h2>
   <div class="feature-grid">
     <div class="feature-card">
       <div class="feature-icon">&#x1F50D;</div>
@@ -401,6 +416,11 @@ footer a{color:var(--muted)}
       <p>検索条件を保存して「新着あった？」と聞くだけ。Webhook拡張可能。</p>
     </div>
     <div class="feature-card">
+      <div class="feature-icon">&#x1F4C8;</div>
+      <h3>Investor Radar</h3>
+      <p>官公需公告を上場銘柄へ名寄せ。公開終値の前後窓も可。投資助言ではない。</p>
+    </div>
+    <div class="feature-card">
       <div class="feature-icon">&#x1F3F7;</div>
       <h3>ホワイトラベル対応</h3>
       <p>ENV変数でブランド名・URL・組織名を切替。OEM提供に対応。</p>
@@ -433,6 +453,18 @@ footer a{color:var(--muted)}
       </div>
       <h3>常連落札者を取引先候補として照合する</h3>
       <p>過去公告・競合レーダーで常連落札企業を特定し、法人番号レジストリで実在性・所在地を確認。競合が共同入札（JV）のパートナー候補になることもある。</p>
+    </div>
+    <div class="usecase-card">
+      <span class="usecase-target">上場企業の官公需を追う調査</span>
+      <div class="usecase-flow">
+        <div class="usecase-node"><span class="icon">&#x1F4CB;</span><span class="label">KKJ公告</span></div>
+        <span class="usecase-arrow">&#x2192;</span>
+        <div class="usecase-node"><span class="icon">&#x1F3F7;</span><span class="label">銘柄</span></div>
+        <span class="usecase-arrow">&#x2192;</span>
+        <div class="usecase-node"><span class="icon">&#x1F4C8;</span><span class="label">公開終値</span></div>
+      </div>
+      <h3>公告と公開株価を同じ会話で見る</h3>
+      <p>Investor Radar が件名の企業名を銘柄コードへ名寄せする。J-Quants キーまたは市場データ MCP で公開終値を重ねる。買い推奨は出さない。KKJ は公告であり公式落札ではない。</p>
     </div>
     <div class="usecase-card">
       <span class="usecase-target">営業3〜5名規模の中小企業</span>

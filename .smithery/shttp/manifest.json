@@ -8,7 +8,7 @@
         "name": "JP Bids MCP",
         "title": "JP Bids MCP",
         "version": "0.9.0",
-        "description": "Japan government procurement bid search through the Model Context Protocol."
+        "description": "Japan KKJ procurement notices through MCP, with Investor Radar ticker mapping. Not investment advice."
       },
       "tools": [
         {

@@ -4,7 +4,7 @@
 
 ## Gambaran Umum / Overview / 概要
 
-JP Bids MCP adalah server MCP untuk mencari dan menganalisis pengumuman pengadaan pemerintah Jepang dari portal KKJ (Badan UKM).
+JP Bids MCP adalah server MCP untuk mencari dan menganalisis pengumuman pengadaan pemerintah Jepang dari portal KKJ (Badan UKM). Investor Radar (v0.9.0) memetakan pengumuman ke ticker dan dapat menampilkan penutupan harian publik jika kunci J-Quants diberikan. Bukan nasihat investasi.
 
 JP Bids MCP is an MCP server for searching and AI-analyzing Japanese government procurement notices from the SME Agency's KKJ portal.
 
@@ -33,6 +33,12 @@ JP Bids MCP は、中小企業庁「官公需情報ポータルサイト」の�
 ```
 
 → Ambil riwayat pemenang → Analisis anggaran, pesaing, rasio → Usulkan strategi tender.
+
+```text
+"Tampilkan pengumuman KKJ untuk Fujitsu (6702) dan penutupan di sekitar tanggal pengumuman"
+```
+
+→ Pemetaan ke ticker → riwayat sebagai fakta → jendela penutupan publik jika kunci J-Quants ada. Bukan rekomendasi beli/jual. MCP data pasar di sesi yang sama memungkinkan perbandingan dengan bar harian.
 
 ## Mulai Cepat / Quick Start / クイックスタート
 
@@ -119,6 +125,8 @@ File konfigurasi Claude Desktop dan Cursor yang siap digunakan beserta tiga cont
 Detail integrasi teknis: [docs/integrations/jgrants.md](docs/integrations/jgrants.md)
 
 JP Bids MCP juga terintegrasi dengan [freee MCP](https://www.npmjs.com/package/freee-mcp) (freee K.K.) untuk otomatisasi pengadaan-ke-akuntansi — pemeriksaan kesiapan keuangan, pencatatan transaksi pasca-kontrak, dan pembuatan faktur dari data tender. Lihat [examples/freee-integration/](examples/freee-integration/).
+
+Investor Radar dapat menampilkan penutupan harian publik di sekitar tanggal pengumuman jika kunci API J-Quants diteruskan. MCP data pasar di sesi Cursor / Claude yang sama memungkinkan perbandingan dengan bar harian. Bukan nasihat beli/jual. Lihat [docs/investor-radar.md](docs/investor-radar.md).
 
 > JP Bids MCP, J-Grants MCP, dan freee MCP adalah server independen yang dioperasikan oleh organisasi berbeda. Hasil adalah informasi referensi; selalu verifikasi dengan dokumen resmi.
 
