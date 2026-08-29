@@ -3,9 +3,9 @@
 <a href="https://github.com/sugukurukabe/koko-call-mcp/actions/workflows/ci.yml"><img src="https://github.com/sugukurukabe/koko-call-mcp/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License: Apache 2.0"></a>
 <a href="https://smithery.ai/servers/a-kabe-1qio/jp-bids-mcp"><img src="https://smithery.ai/badge/a-kabe-1qio/jp-bids-mcp" alt="Smithery"></a></p>
-<p>日本の官公需入札情報をMCPで検索・AI分析するサーバー。<br>
-Search and AI-analyze Japanese public procurement notices through MCP.<br>
-Server MCP untuk mencari dan menganalisis pengadaan pemerintah Jepang dengan AI.</p>
+<p>日本の官公需入札情報をMCPで検索・AI分析するサーバー。v0.9.0 の Investor Radar で、公告を上場銘柄へ名寄せし、J-Quants キーがあれば公開終値も同じ会話で見られます（投資助言ではありません）。<br>
+Search and AI-analyze Japanese public procurement notices through MCP. Investor Radar maps notices to listed-company tickers and can overlay public daily closes. Not investment advice.<br>
+Server MCP untuk mencari pengumuman pengadaan pemerintah Jepang. Investor Radar memetakan pengumuman ke ticker. Bukan nasihat investasi.</p>
 <blockquote>
 <p><strong>ベータ期間中（〜2026年9月末）は全機能を無料で利用できます。</strong><br>
 During beta (until end of September 2026), all features are available for free.</p>
@@ -33,6 +33,10 @@ JP Bids MCP menerima versi protokol <code>2025-11-25</code> dan <code>2026-07-28
 </code><button type="button">Copy</button></pre>
 
 <p>→ 落札実績取得 → 予算規模・競合・落札率を分析 → 次の入札戦略を提案。</p>
+<pre><code class="text">「富士通（6702）の官公需公告を出して、公告日前後の終値も見せて」
+</code><button type="button">Copy</button></pre>
+
+<p>→ 公告を銘柄コードへ名寄せ → 履歴と件数を事実として集計 → J-Quants キーがあれば公開終値の前後窓を表示。売買の推奨はしない。市場データ MCP を同じクライアントに並べれば、日足・開示と突き合わせできる。</p>
 <h2 id="quick-start-クイックスタート" class="tsd-anchor-link">Quick Start / クイックスタート<a href="#quick-start-クイックスタート" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
 <p>Use the remote endpoint from any Streamable HTTP compatible MCP client:</p>
 <pre><code class="text">https://mcp.bid-jp.com/mcp
@@ -244,6 +248,7 @@ JP Bids MCP menerima versi protokol <code>2025-11-25</code> dan <code>2026-07-28
 <p>See <a href="media/jgrants-integration">examples/jgrants-integration/</a> for ready-to-use Claude Desktop and Cursor configuration files, and three end-to-end workflow examples.<br>
 Technical integration details: <a href="media/jgrants.md">docs/integrations/jgrants.md</a>.</p>
 <p>JP Bids MCP also pairs with <a href="https://www.npmjs.com/package/freee-mcp">freee MCP</a> (freee K.K.) for procurement-to-accounting automation — financial readiness checks, post-award deal entries, and invoice generation from bid data. See <a href="media/freee-integration">examples/freee-integration/</a>.</p>
+<p>Investor Radar can overlay public daily closes around a notice date when a J-Quants API key is passed through. Adding a market-data MCP in the same Cursor / Claude session lets you compare KKJ notices with daily bars and filings in one conversation. No buy/sell advice. Details: <a href="media/investor-radar.md">docs/investor-radar.md</a>.</p>
 <blockquote>
 <p>JP Bids MCP, J-Grants MCP, and freee MCP are independent servers operated by separate organizations. Results are reference information; always verify against official documents.</p>
 </blockquote>
