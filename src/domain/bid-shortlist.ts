@@ -32,14 +32,42 @@ const pdfExtraColumns = [
   "pdf_contact_point",
 ];
 
-export function exportBidShortlistCsv(
+export function exportBidShortlist(
   result: BidRankingResult,
   extractionMap?: Map<string, BidRequirementExtraction>,
+  format: "csv" | "json" = "csv",
 ): BidShortlistExport {
   const hasPdfData = extractionMap && extractionMap.size > 0;
   const columns = hasPdfData ? [...baseColumns, ...pdfExtraColumns] : baseColumns;
-  const rows = result.rankedBids.map((rankedBid) => toShortlistRow(rankedBid, extractionMap));
-  const csv = [columns, ...rows].map((row) => row.map(escapeCsvCell).join(",")).join("\n");
+  const isSelection = result.rankedBids.some((b) => b.selectionIndex !== undefined);
+  const orderedBids = isSelection
+    ? [...result.rankedBids].sort((a, b) => (a.selectionIndex ?? 0) - (b.selectionIndex ?? 0))
+    : result.rankedBids;
+  const rawRows = orderedBids.map((rankedBid) => toShortlistRow(rankedBid, extractionMap));
+
+  if (format === "json") {
+    const jsonContent = rawRows.map((row) => {
+      const record: Record<string, unknown> = {};
+      for (let i = 0; i < columns.length; i++) {
+        const col = columns[i];
+        if (col) {
+          record[col] = row[i];
+        }
+      }
+      return record;
+    });
+    return {
+      format: "json",
+      filename: "jp-bids-shortlist.json",
+      rankedCount: result.rankedCount,
+      columns,
+      jsonContent,
+      attribution: result.attribution,
+      scoringPolicy: result.scoringPolicy,
+    };
+  }
+
+  const csv = [columns, ...rawRows].map((row) => row.map(escapeCsvCell).join(",")).join("\n");
   return {
     format: "csv",
     filename: "jp-bids-shortlist.csv",
@@ -49,6 +77,13 @@ export function exportBidShortlistCsv(
     attribution: result.attribution,
     scoringPolicy: result.scoringPolicy,
   };
+}
+
+export function exportBidShortlistCsv(
+  result: BidRankingResult,
+  extractionMap?: Map<string, BidRequirementExtraction>,
+): BidShortlistExport {
+  return exportBidShortlist(result, extractionMap, "csv");
 }
 
 function toShortlistRow(
@@ -71,7 +106,7 @@ function toShortlistRow(
     bid.openingTendersEvent ?? "",
     rankedBid.reasons.join(" / "),
     rankedBid.risks.join(" / "),
-    rankedBid.nextActions[0] ?? "",
+    rankedBid.nextActions?.[0] ?? "",
     bid.externalDocumentUri ?? "",
   ];
   if (!extractionMap || extractionMap.size === 0) {
@@ -88,9 +123,14 @@ function toShortlistRow(
   ];
 }
 
-function escapeCsvCell(value: string): string {
-  if (!/[",\n\r]/.test(value)) {
-    return value;
+export function escapeCsvCell(value: string): string {
+  let cell = value;
+  // Prevent CSV formula injection in spreadsheet software (Excel, Sheets)
+  if (/^[=+\-@\t\r]/.test(cell)) {
+    cell = `'${cell}`;
   }
-  return `"${value.replaceAll('"', '""')}"`;
+  if (!/[",\n\r]/.test(cell)) {
+    return cell;
+  }
+  return `"${cell.replaceAll('"', '""')}"`;
 }

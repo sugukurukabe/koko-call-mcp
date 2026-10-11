@@ -2,7 +2,7 @@
 // Unit tests for API key authentication
 // Pengujian unit untuk autentikasi kunci API
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { BETA_UNTIL, isInBetaPeriod, parseProApiKeys, parseTier } from "../../src/lib/auth.js";
 
 // 期日を直接書かずBETA_UNTILからの相対で組む。延長時にテストが腐らない。
@@ -46,7 +46,13 @@ describe("isInBetaPeriod", () => {
   // A lapsed cutoff silently contradicts the README and landing page copy
   // Batas waktu yang kedaluwarsa bertentangan dengan README dan landing page
   it("現在はベータ期間内 / the cutoff is still in the future / batas waktu masih di depan", () => {
-    expect(isInBetaPeriod()).toBe(true);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-01T00:00:00Z"));
+    try {
+      expect(isInBetaPeriod()).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 

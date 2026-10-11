@@ -83,4 +83,57 @@ describe("bid workspace view model", () => {
 
     expect(card.hasPdf).toBe(true);
   });
+
+  it("K1-b: formats submissionDeadline in JST for ISO strings with times and offsets, matching calculation", () => {
+    // Both deadlines represent the same instant: 2026-10-10 09:00:00 UTC (18:00 JST)
+    const cardOffsetA = toBidCardViewModel(
+      {
+        resultId: 10,
+        key: "KKJ-010",
+        projectName: "offset -10:00",
+        tenderSubmissionDeadline: "2026-10-09T23:00:00-10:00",
+      },
+      new Date("2026-10-10T08:30:00Z"),
+    );
+    const cardOffsetB = toBidCardViewModel(
+      {
+        resultId: 11,
+        key: "KKJ-011",
+        projectName: "offset +09:00",
+        tenderSubmissionDeadline: "2026-10-10T18:00:00+09:00",
+      },
+      new Date("2026-10-10T08:30:00Z"),
+    );
+
+    // Both should format to the exact same JST date and time
+    expect(cardOffsetA.submissionDeadline).toBe("2026-10-10 18:00 JST");
+    expect(cardOffsetB.submissionDeadline).toBe("2026-10-10 18:00 JST");
+    expect(cardOffsetA.rawDeadline).toBe("2026-10-09T23:00:00-10:00");
+    expect(cardOffsetB.rawDeadline).toBe("2026-10-10T18:00:00+09:00");
+    expect(cardOffsetA.deadlineUrgency).toBe(cardOffsetB.deadlineUrgency);
+
+    // Date only: does NOT fabricate time
+    const cardDateOnly = toBidCardViewModel(
+      {
+        resultId: 12,
+        key: "KKJ-012",
+        projectName: "日付のみ",
+        tenderSubmissionDeadline: "2026-11-20",
+      },
+      now,
+    );
+    expect(cardDateOnly.submissionDeadline).toBe("2026-11-20");
+
+    // Invalid date: preserves raw string
+    const cardInvalid = toBidCardViewModel(
+      {
+        resultId: 13,
+        key: "KKJ-013",
+        projectName: "不正日",
+        tenderSubmissionDeadline: "2026-02-31",
+      },
+      now,
+    );
+    expect(cardInvalid.submissionDeadline).toBe("2026-02-31");
+  });
 });

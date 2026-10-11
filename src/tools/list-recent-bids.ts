@@ -2,8 +2,9 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { KkjClient, KkjSearchParams } from "../api/kkj-client.js";
 import { BidSearchResultSchema } from "../domain/bid.js";
+import { signBidRef } from "../domain/bid-ref.js";
 import { CategorySchema, categoryCodes } from "../domain/codes.js";
-import { daysAgoDate, formatKkjDateRange, todayDate } from "../domain/date-range.js";
+import { daysAgoDateJst, formatKkjDateRange, todayDateJst } from "../domain/date-range.js";
 import { PrefectureNameSchema, prefectureEntries, toLgCode } from "../domain/prefectures.js";
 import { toolError } from "../lib/tool-result.js";
 import { capSearchResult } from "./search-bids.js";
@@ -39,8 +40,8 @@ export function registerListRecentBids(server: McpServer, client: KkjClient): vo
     },
     async (args) => {
       try {
-        const since = daysAgoDate(args.days);
-        const until = todayDate();
+        const since = daysAgoDateJst(args.days);
+        const until = todayDateJst();
         const params: KkjSearchParams = {
           Count: args.limit,
         };
@@ -57,7 +58,19 @@ export function registerListRecentBids(server: McpServer, client: KkjClient): vo
           params.Category = categoryCodes[args.category];
         }
         const result = await client.search(params);
-        const capped = capSearchResult(result);
+        const bidsWithRef = result.bids.map((bid) => ({
+          ...bid,
+          bidRef:
+            bid.bidRef ??
+            signBidRef(bid, {
+              fetchedAt:
+                (bid as { fetchedAt?: string }).fetchedAt ?? result.attribution?.accessedAt,
+            }),
+        }));
+        const capped = capSearchResult({
+          ...result,
+          bids: bidsWithRef,
+        });
         return {
           content: [
             {

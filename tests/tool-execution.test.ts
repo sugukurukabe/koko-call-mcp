@@ -1,11 +1,14 @@
 import { readFile } from "node:fs/promises";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { KkjClient } from "../src/api/kkj-client.js";
 import { createJpBidsServer } from "../src/mcp.js";
 
 describe("MCP tool execution", () => {
+  beforeEach(() => {
+    process.env.JP_BIDS_PROFILE = "full_local";
+  });
   it("executes search_bids and returns structured attribution", async () => {
     const xml = await readFile("tests/fixtures/kkj-search.xml", "utf8");
     const kkjClient = new KkjClient({
@@ -105,7 +108,7 @@ describe("MCP tool execution", () => {
     expect(result.structuredContent).toMatchObject({
       rankedCount: 1,
       rankedBids: [{ bid: { key: "KKJ-TEST-001" } }],
-      scoringPolicy: { version: "ai-bid-radar-0.1" },
+      scoringPolicy: { version: expect.stringMatching(/^ai-bid-radar-/) },
       attribution: {
         dataSource: "中小企業庁 官公需情報ポータルサイト",
       },
@@ -145,7 +148,7 @@ describe("MCP tool execution", () => {
       rankedBid: {
         bid: { key: "KKJ-TEST-001" },
       },
-      scoringPolicy: { version: "ai-bid-radar-0.1" },
+      scoringPolicy: { version: expect.stringMatching(/^ai-bid-radar-/) },
       attribution: {
         dataSource: "中小企業庁 官公需情報ポータルサイト",
       },

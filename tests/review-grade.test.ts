@@ -48,7 +48,15 @@ const EXPECTED_TOOL_ANNOTATIONS: Record<
   list_saved_searches: { readOnlyHint: true, destructiveHint: false },
 };
 
-const FREE_TIER_TOOLS = ["search_bids", "rank_bids", "list_recent_bids", "get_bid_detail"];
+const FREE_TIER_TOOLS = [
+  "search_bids",
+  "search_bids_app",
+  "rank_bids",
+  "list_recent_bids",
+  "get_bid_detail",
+  "extract_bid_requirements",
+  "export_bid_shortlist",
+];
 const EXPECTED_PRO_PROMPTS = [
   "morning_bid_briefing",
   "bid_discovery_workspace",
@@ -191,7 +199,7 @@ describe("Anthropic review: tool annotations", () => {
 });
 
 describe("Anthropic review: Free vs Pro tier surface", () => {
-  it("Free tier exposes exactly the 4 documented Free tools (no Pro tools)", async () => {
+  it("Free tier / Public MVP exposes exactly the 7 documented tools (no Pro tools)", async () => {
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     const server = createJpBidsServer({ tier: "free" });
     const client = new Client({ name: "free-tier-test", version: "0.1.0" });

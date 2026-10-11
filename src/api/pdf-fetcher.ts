@@ -21,6 +21,7 @@ export interface PdfFetcherOptions {
   timeoutMs?: number;
   maxRedirects?: number;
   allowedHosts?: string[];
+  onBytesRead?: ((bytes: number) => void) | undefined;
 }
 
 interface CachedDocument {
@@ -60,6 +61,7 @@ export async function fetchDocument(
     timeoutMs,
     maxRedirects,
     allowedHosts,
+    onBytesRead: options.onBytesRead,
   });
   const sha256 = createHash("sha256").update(fetched.bytes).digest("hex");
   const cachedDocument = { ...fetched, sha256 };
@@ -82,93 +84,116 @@ async function fetchWithRedirects(
     timeoutMs: number;
     maxRedirects: number;
     allowedHosts: string[];
+    onBytesRead?: ((bytes: number) => void) | undefined;
   },
 ): Promise<Omit<CachedDocument, "sha256">> {
   let currentUrl = startUrl;
   for (let redirectCount = 0; redirectCount <= options.maxRedirects; redirectCount += 1) {
     await assertPublicHttpTarget(currentUrl, options.resolveHostname);
-    const response = await fetchWithTimeout(currentUrl, options);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), options.timeoutMs);
+    try {
+      const response = await options.fetchImpl(currentUrl, {
+        redirect: "manual",
+        signal: controller.signal,
+        headers: {
+          Accept: "application/pdf,text/html;q=0.8,*/*;q=0.1",
+          "User-Agent": `JP Bids MCP PDF Fetcher/${VERSION}`,
+        },
+      });
 
-    if (isRedirect(response.status)) {
-      const location = response.headers.get("location");
-      if (!location) {
-        throw new UpstreamError("PDF取得先がLocationなしのredirectを返しました。", response.status);
+      if (isRedirect(response.status)) {
+        const location = response.headers.get("location");
+        if (!location) {
+          throw new UpstreamError(
+            "PDF取得先がLocationなしのredirectを返しました。",
+            response.status,
+          );
+        }
+        if (redirectCount === options.maxRedirects) {
+          throw new UpstreamError("PDF取得先のredirect回数が上限を超えました。", response.status);
+        }
+        currentUrl = parseHttpUrl(new URL(location, currentUrl).toString());
+        assertAllowedHost(currentUrl, options.allowedHosts);
+        continue;
       }
-      if (redirectCount === options.maxRedirects) {
-        throw new UpstreamError("PDF取得先のredirect回数が上限を超えました。", response.status);
+
+      if (!response.ok) {
+        throw new UpstreamError(
+          `PDF取得先がHTTP ${response.status}を返しました。`,
+          response.status,
+        );
       }
-      currentUrl = parseHttpUrl(new URL(location, currentUrl).toString());
-      assertAllowedHost(currentUrl, options.allowedHosts);
-      continue;
-    }
 
-    if (!response.ok) {
-      throw new UpstreamError(`PDF取得先がHTTP ${response.status}を返しました。`, response.status);
-    }
+      const mimeType = normalizeMimeType(response.headers.get("content-type"));
+      if (!allowedMimeTypes.has(mimeType)) {
+        throw new UserInputError(
+          `PDF取得対象のMIME type "${mimeType}" は未対応です。application/pdf または text/html を指定してください。`,
+        );
+      }
 
-    const mimeType = normalizeMimeType(response.headers.get("content-type"));
-    if (!allowedMimeTypes.has(mimeType)) {
-      throw new UserInputError(
-        `PDF取得対象のMIME type "${mimeType}" は未対応です。application/pdf または text/html を指定してください。`,
+      const contentLength = response.headers.get("content-length");
+      if (contentLength && Number(contentLength) > options.maxBytes) {
+        throw new UserInputError(
+          `PDF取得対象がサイズ上限 ${options.maxBytes} bytes を超えています。`,
+        );
+      }
+
+      const bytes = await readResponseBytes(
+        response,
+        options.maxBytes,
+        controller.signal,
+        options.onBytesRead,
       );
+      return {
+        finalUri: currentUrl.toString(),
+        mimeType,
+        bytes,
+        sizeBytes: bytes.byteLength,
+      };
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new UpstreamError(`PDF取得が ${options.timeoutMs}ms でタイムアウトしました。`);
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeout);
     }
-
-    const contentLength = response.headers.get("content-length");
-    if (contentLength && Number(contentLength) > options.maxBytes) {
-      throw new UserInputError(
-        `PDF取得対象がサイズ上限 ${options.maxBytes} bytes を超えています。`,
-      );
-    }
-
-    const bytes = await readResponseBytes(response, options.maxBytes);
-    return {
-      finalUri: currentUrl.toString(),
-      mimeType,
-      bytes,
-      sizeBytes: bytes.byteLength,
-    };
   }
   throw new UpstreamError("PDF取得先のredirect処理に失敗しました。");
 }
 
-async function fetchWithTimeout(
-  url: URL,
-  options: Required<Pick<PdfFetcherOptions, "fetchImpl">> & { timeoutMs: number },
-): Promise<Response> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), options.timeoutMs);
-  try {
-    return await options.fetchImpl(url, {
-      redirect: "manual",
-      signal: controller.signal,
-      headers: {
-        Accept: "application/pdf,text/html;q=0.8,*/*;q=0.1",
-        "User-Agent": `JP Bids MCP PDF Fetcher/${VERSION}`,
-      },
-    });
-  } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
-      throw new UpstreamError(`PDF取得が ${options.timeoutMs}ms でタイムアウトしました。`);
-    }
-    throw error;
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
-async function readResponseBytes(response: Response, maxBytes: number): Promise<Uint8Array> {
+async function readResponseBytes(
+  response: Response,
+  maxBytes: number,
+  signal?: AbortSignal,
+  onBytesRead?: (bytes: number) => void,
+): Promise<Uint8Array> {
   const reader = response.body?.getReader();
   if (!reader) {
-    return new Uint8Array(await response.arrayBuffer());
+    if (signal?.aborted) {
+      throw new UpstreamError("PDF取得がタイムアウトしました。");
+    }
+    const buf = await response.arrayBuffer();
+    onBytesRead?.(buf.byteLength);
+    if (buf.byteLength > maxBytes) {
+      throw new UserInputError(`PDF取得対象がサイズ上限 ${maxBytes} bytes を超えています。`);
+    }
+    return new Uint8Array(buf);
   }
 
   const chunks: Uint8Array[] = [];
   let totalBytes = 0;
   while (true) {
+    if (signal?.aborted) {
+      await reader.cancel();
+      throw new UpstreamError("PDF取得がタイムアウトしました。");
+    }
     const { value, done } = await reader.read();
     if (done) {
       break;
     }
+    onBytesRead?.(value.byteLength);
     totalBytes += value.byteLength;
     if (totalBytes > maxBytes) {
       await reader.cancel();
@@ -232,18 +257,41 @@ async function defaultResolveHostname(hostname: string): Promise<string[]> {
   return records.map((record) => record.address);
 }
 
-function isPrivateAddress(address: string): boolean {
-  if (address === "::1") {
+export function isPrivateAddress(address: string): boolean {
+  const norm = address.trim().toLowerCase();
+  if (norm === "::" || norm === "::1" || norm === "0.0.0.0") {
     return true;
   }
-  if (address.startsWith("fc") || address.startsWith("fd") || address.startsWith("fe80:")) {
+  if (
+    norm.startsWith("fc") ||
+    norm.startsWith("fd") ||
+    norm.startsWith("fe8") ||
+    norm.startsWith("fe9") ||
+    norm.startsWith("fea") ||
+    norm.startsWith("feb") ||
+    norm.startsWith("ff")
+  ) {
     return true;
   }
-  if (address.startsWith("::ffff:")) {
-    return isPrivateAddress(address.slice("::ffff:".length));
+  if (norm.startsWith("::ffff:")) {
+    const rest = norm.slice("::ffff:".length);
+    if (rest.includes(".")) {
+      return isPrivateAddress(rest);
+    }
+    // IPv4-mapped IPv6 in hex notation, e.g. 7f00:1 or 7f00:0001
+    const hexParts = rest.split(":");
+    if (hexParts.length === 2) {
+      const hi = parseInt(hexParts[0] ?? "", 16);
+      const lo = parseInt(hexParts[1] ?? "", 16);
+      if (!Number.isNaN(hi) && !Number.isNaN(lo)) {
+        const ip4 = `${(hi >> 8) & 0xff}.${hi & 0xff}.${(lo >> 8) & 0xff}.${lo & 0xff}`;
+        return isPrivateAddress(ip4);
+      }
+    }
+    return true;
   }
 
-  const parts = address.split(".").map((part) => Number(part));
+  const parts = norm.split(".").map((part) => Number(part));
   if (parts.length !== 4 || parts.some((part) => !Number.isInteger(part))) {
     return false;
   }

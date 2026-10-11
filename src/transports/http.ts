@@ -5,11 +5,17 @@ import cors from "cors";
 import express, { type Request, type Response } from "express";
 import { KkjClient } from "../api/kkj-client.js";
 import { parseProApiKeys, parseTier } from "../lib/auth.js";
+import { authenticateMcpRequest } from "../lib/authn.js";
 import { parsePortEnv, parsePositiveNumberEnv } from "../lib/env.js";
 import { parseAllowedOrigins, validateOrigin } from "../lib/http.js";
+import {
+  getActiveProfile,
+  isProductionEnvironment,
+  resolveServerProfile,
+  type ServerProfile,
+} from "../lib/profile.js";
 import { VERSION } from "../lib/version.js";
 import { createJpBidsServer } from "../mcp.js";
-import { validateMcpAccessTokenClaims, verifyJwt } from "../oauth/jwt.js";
 import { createOAuthRouterWithStore } from "../oauth/router.js";
 import { createOAuthStoreFromEnv } from "../oauth/store.js";
 
@@ -58,7 +64,7 @@ function validateRoutableMcpHeaders(req: Request, res: Response): boolean {
 function resolveOAuthSecret(): string | undefined {
   const explicit = process.env.JP_BIDS_OAUTH_SECRET;
   if (explicit) return explicit;
-  if (process.env.K_SERVICE) {
+  if (isProductionEnvironment()) {
     throw new Error(
       "JP_BIDS_OAUTH_SECRET is required in production. Refusing to start with an ephemeral OAuth signing key.",
     );
@@ -68,16 +74,23 @@ function resolveOAuthSecret(): string | undefined {
   return generated;
 }
 
-function assertProductionOriginPolicy(allowedOrigins: ReadonlySet<string>): void {
-  if (process.env.K_SERVICE && allowedOrigins.size === 0) {
+function assertProductionConfig(allowedOrigins: ReadonlySet<string>): void {
+  if (!isProductionEnvironment()) return;
+
+  if (!process.env.JP_BIDS_OAUTH_SECRET) {
+    throw new Error(
+      "JP_BIDS_OAUTH_SECRET is required in production. Refusing to start with an ephemeral OAuth signing key.",
+    );
+  }
+  if (!process.env.JP_BIDS_BASE_URL) {
+    throw new Error("JP_BIDS_BASE_URL is required in production.");
+  }
+  if (allowedOrigins.size === 0) {
     throw new Error(
       "ALLOWED_ORIGINS is required in production. Refusing to expose /mcp to all browser origins.",
     );
   }
-}
-
-function assertProductionDocumentFetchPolicy(): void {
-  if (process.env.K_SERVICE && !process.env.JP_BIDS_PDF_ALLOWED_HOSTS) {
+  if (!process.env.JP_BIDS_PDF_ALLOWED_HOSTS) {
     throw new Error(
       "JP_BIDS_PDF_ALLOWED_HOSTS is required in production to avoid unrestricted document-fetch egress.",
     );
@@ -95,8 +108,7 @@ export function createHttpApp(): express.Express {
   const app = express();
   app.set("trust proxy", 1);
   const allowedOrigins = parseAllowedOrigins(process.env.ALLOWED_ORIGINS);
-  assertProductionOriginPolicy(allowedOrigins);
-  assertProductionDocumentFetchPolicy();
+  assertProductionConfig(allowedOrigins);
   const proApiKeys = parseProApiKeys(process.env.JP_BIDS_PRO_API_KEYS);
   const oauthSecret = resolveOAuthSecret();
   const oauthStore = oauthSecret ? createOAuthStoreFromEnv() : undefined;
@@ -220,8 +232,9 @@ export function createHttpApp(): express.Express {
     // When OAuth is enabled: return 401 without Bearer token to trigger OAuth flow
     // Saat OAuth aktif: kembalikan 401 tanpa Bearer token untuk memulai alur OAuth
     const authHeader = req.header("Authorization");
+    const base = getBaseUrl(req);
+
     if (oauthSecret && !authHeader) {
-      const base = getBaseUrl(req);
       res
         .status(401)
         .set(
@@ -232,43 +245,59 @@ export function createHttpApp(): express.Express {
       return;
     }
 
-    // JWT（OAuth）またはAPIキーのどちらでも受け付ける
-    // Accept either JWT (OAuth) or API key
-    // Terima JWT (OAuth) atau API key
-    let isOAuthAuthenticated = false;
-    if (oauthSecret && authHeader) {
-      const match = /^Bearer\s+(.+)$/i.exec(authHeader.trim());
-      const token = match?.[1];
-      if (token?.includes(".")) {
-        const apiKeyTier = parseTier(authHeader, proApiKeys);
-        const jwt = verifyJwt(token, oauthSecret);
-        if (!jwt) {
-          if (apiKeyTier === "pro") {
-            isOAuthAuthenticated = false;
-          } else {
-            res.status(401).json({ error: "invalid_token" });
-            return;
-          }
-        } else {
-          const base = getBaseUrl(req);
-          const accessClaims = validateMcpAccessTokenClaims(jwt, {
-            issuer: base,
-            audience: `${base}/mcp`,
-            requiredScope: "mcp:read",
-          });
-          if (!accessClaims) {
-            res.status(401).json({ error: "invalid_token" });
-            return;
-          }
-          isOAuthAuthenticated = true;
-        }
-      }
+    const authResult = authenticateMcpRequest(authHeader, {
+      serviceKeys: proApiKeys,
+      oauthSecret,
+      baseUrl: base,
+    });
+
+    if (authResult.status === "missing_header") {
+      res
+        .status(401)
+        .set(
+          "WWW-Authenticate",
+          `Bearer resource_metadata="${base}/.well-known/oauth-protected-resource/mcp"`,
+        )
+        .json({ error: "unauthorized" });
+      return;
     }
 
+    if (authResult.status === "invalid_token" || authResult.status === "invalid_format") {
+      res
+        .status(401)
+        .set(
+          "WWW-Authenticate",
+          'Bearer error="invalid_token", error_description="The access token is invalid or expired"',
+        )
+        .json({ error: "invalid_token" });
+      return;
+    }
+
+    if (authResult.status === "insufficient_scope") {
+      res
+        .status(403)
+        .set("WWW-Authenticate", 'Bearer error="insufficient_scope", scope="mcp:read"')
+        .json({ error: "insufficient_scope" });
+      return;
+    }
+
+    const isOAuthAuthenticated = authResult.subject.kind === "oauth_user";
     const tier = isOAuthAuthenticated
       ? parseOAuthTier(proApiKeys)
       : parseTier(authHeader, proApiKeys);
-    const server = createJpBidsServer({ kkjClient: sharedKkjClient, tier });
+
+    const resolvedProfile = resolveServerProfile();
+    const activeProfile: ServerProfile =
+      resolvedProfile === "public_mvp"
+        ? "public_mvp"
+        : tier === "free"
+          ? "public_mvp"
+          : "full_local";
+    const server = createJpBidsServer({
+      kkjClient: sharedKkjClient,
+      profile: activeProfile,
+      tier,
+    });
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
       enableJsonResponse: true,
@@ -301,7 +330,12 @@ function parseOAuthTier(proApiKeys: ReadonlySet<string>): "free" | "pro" {
 export async function startHttpServer(): Promise<void> {
   const app = createHttpApp();
   const port = parsePortEnv(process.env.PORT, 8080);
+  const profile = getActiveProfile();
   const host = process.env.HTTP_HOST ?? (process.env.K_SERVICE ? "0.0.0.0" : "127.0.0.1");
+
+  if (profile === "full_local" && host !== "127.0.0.1" && host !== "localhost") {
+    throw new Error(`full_local profile must bind strictly to 127.0.0.1. Requested host: ${host}`);
+  }
   const allowedOrigins = parseAllowedOrigins(process.env.ALLOWED_ORIGINS);
 
   if (allowedOrigins.size === 0) {

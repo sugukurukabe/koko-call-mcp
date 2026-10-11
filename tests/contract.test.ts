@@ -7,7 +7,7 @@ import { createJpBidsServer } from "../src/mcp.js";
 describe("MCP contract", () => {
   it("exposes tools, prompts, resources, templates, and completion", async () => {
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
-    const server = createJpBidsServer();
+    const server = createJpBidsServer({ profile: "full_local" });
     const client = new Client({ name: "contract-test", version: "0.1.0" });
 
     await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
@@ -100,7 +100,7 @@ describe("MCP contract", () => {
     });
     await kkjClient.search({ Query: "cached", Count: 1 });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
-    const server = createJpBidsServer({ kkjClient });
+    const server = createJpBidsServer({ kkjClient, profile: "full_local" });
     const client = new Client({ name: "resource-cache-test", version: "0.1.0" });
 
     await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
@@ -136,7 +136,7 @@ describe("MCP contract", () => {
 
   it("reads the MCP Apps Investor Radar UI resource", async () => {
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
-    const server = createJpBidsServer();
+    const server = createJpBidsServer({ profile: "full_local" });
     const client = new Client({ name: "investor-app-resource-test", version: "0.1.0" });
 
     await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
@@ -153,7 +153,7 @@ describe("MCP contract", () => {
 
   it("reads the agentic cloud roadmap resource", async () => {
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
-    const server = createJpBidsServer();
+    const server = createJpBidsServer({ profile: "full_local" });
     const client = new Client({ name: "agentic-cloud-resource-test", version: "0.1.0" });
 
     await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
@@ -171,7 +171,7 @@ describe("MCP contract", () => {
 
   it("reads the agentic security and storage readiness resource", async () => {
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
-    const server = createJpBidsServer();
+    const server = createJpBidsServer({ profile: "full_local" });
     const client = new Client({ name: "agentic-security-storage-test", version: "0.1.0" });
 
     await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
@@ -206,7 +206,7 @@ describe("MCP contract", () => {
         ),
     });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
-    const server = createJpBidsServer({ kkjClient });
+    const server = createJpBidsServer({ kkjClient, profile: "full_local" });
     const client = new Client({ name: "org-resource-test", version: "0.1.0" });
 
     await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);

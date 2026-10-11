@@ -18,6 +18,8 @@
 import { spawn } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 interface Shot {
@@ -48,7 +50,28 @@ const shots: Shot[] = [
   { file: "05-mobile.png", query: "", width: 420, height: 860, colorScheme: "light" },
   {
     file: "06-fallback.png",
-    query: "?denyMessage=1&clickAction=%E8%AA%AD%E3%82%80",
+    query: `?denyMessage=1&clickAction=${encodeURIComponent("要件抽出")}`,
+    width: 1280,
+    height: 880,
+    colorScheme: "light",
+  },
+  {
+    file: "07-ranked.png",
+    query: `?selectBids=11_unordered&clickAction=${encodeURIComponent("選択比較")}`,
+    width: 1280,
+    height: 880,
+    colorScheme: "light",
+  },
+  {
+    file: "08-export.png",
+    query: `?selectBids=11_unordered&clickAction=${encodeURIComponent("選択CSV")}`,
+    width: 1280,
+    height: 880,
+    colorScheme: "light",
+  },
+  {
+    file: "09-export-json.png",
+    query: `?selectBids=11_unordered&clickAction=${encodeURIComponent("選択JSON")}`,
     width: 1280,
     height: 880,
     colorScheme: "light",
@@ -56,7 +79,10 @@ const shots: Shot[] = [
 ];
 
 const chromePath =
-  process.env.CHROME_PATH ?? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+  process.env.CHROME_PATH ??
+  (process.platform === "win32"
+    ? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+    : "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome");
 const harnessPort = Number(process.env.HARNESS_PORT ?? 8899);
 const debugPort = Number(process.env.CHROME_DEBUG_PORT ?? 9333);
 const outDir = fileURLToPath(new URL("../../images/mcp-apps-bid-workspace/", import.meta.url));
@@ -159,7 +185,7 @@ const chrome = spawn(
     "--disable-gpu",
     "--hide-scrollbars",
     `--remote-debugging-port=${debugPort}`,
-    "--user-data-dir=/tmp/jp-bids-apps-harness-profile",
+    `--user-data-dir=${join(tmpdir(), "jp-bids-apps-harness-profile")}`,
     "about:blank",
   ],
   { stdio: "ignore" },
@@ -196,16 +222,209 @@ try {
       sessionId,
     );
     // ホストのハンドシェイクと tool result の反映を待つ
-    // Wait for the host handshake and the tool result to land
-    // Tunggu handshake host dan tool result diterapkan
     await sleep(1800);
+
+    if (shot.file === "06-fallback.png") {
+      const evalRes = await browser.send<{ result: { value: unknown } }>(
+        "Runtime.evaluate",
+        {
+          expression: `JSON.stringify({ clicked: window.actionClicked, error: window.actionClickError })`,
+          returnByValue: true,
+        },
+        sessionId,
+      );
+      const status = JSON.parse(String(evalRes.result?.value ?? "{}"));
+      if (status.error) {
+        throw new Error(`Screenshot assertion failed for ${shot.file}: ${status.error}`);
+      }
+      if (!status.clicked) {
+        throw new Error(`Screenshot assertion failed for ${shot.file}: action not clicked`);
+      }
+      await sleep(400);
+    } else if (shot.file === "07-ranked.png") {
+      const evalRes = await browser.send<{ result: { value: unknown } }>(
+        "Runtime.evaluate",
+        {
+          expression: `(() => {
+            const lastCall = window.lastToolCall;
+            const frameDoc = document.getElementById("frame")?.contentDocument;
+            const noticeText = frameDoc?.querySelector(".notice")?.textContent || "";
+            const expectedOrderRefs = window.selectedOrderRefs || [];
+            const calledRefs = lastCall?.arguments?.bid_refs || [];
+            const orderMatches = expectedOrderRefs.length === 11 &&
+              expectedOrderRefs.every((r, i) => calledRefs[i] === r);
+            return JSON.stringify({
+              clicked: window.actionClicked,
+              toolName: lastCall?.name,
+              refsCount: calledRefs.length,
+              rankedCount: lastCall?.response?.rankedCount,
+              hasPolicy: Boolean(lastCall?.response?.scoringPolicy?.version),
+              orderMatches,
+              noticeText,
+              error: window.actionClickError,
+            });
+          })()`,
+          returnByValue: true,
+        },
+        sessionId,
+      );
+      const status = JSON.parse(String(evalRes.result?.value ?? "{}"));
+      if (status.error) throw new Error(`Assertion failed for ${shot.file}: ${status.error}`);
+      if (!status.clicked) throw new Error(`Assertion failed for ${shot.file}: button not clicked`);
+      if (status.toolName !== "rank_bids")
+        throw new Error(
+          `Assertion failed for ${shot.file}: expected rank_bids, got ${status.toolName}`,
+        );
+      if (status.refsCount !== 11)
+        throw new Error(
+          `Assertion failed for ${shot.file}: expected 11 refs, got ${status.refsCount}`,
+        );
+      if (status.rankedCount !== 11)
+        throw new Error(
+          `Assertion failed for ${shot.file}: expected 11 ranked bids, got ${status.rankedCount}`,
+        );
+      if (!status.orderMatches)
+        throw new Error(
+          `Assertion failed for ${shot.file}: bid_refs order did not match selected order`,
+        );
+      if (!status.hasPolicy)
+        throw new Error(`Assertion failed for ${shot.file}: scoringPolicy missing in response`);
+      if (!status.noticeText.includes("比較採点しました"))
+        throw new Error(
+          `Assertion failed for ${shot.file}: notice missing expected text, got: "${status.noticeText}"`,
+        );
+      await sleep(400);
+    } else if (shot.file === "08-export.png") {
+      const evalRes = await browser.send<{ result: { value: unknown } }>(
+        "Runtime.evaluate",
+        {
+          expression: `(() => {
+            const lastCall = window.lastToolCall;
+            const expectedOrderRefs = window.selectedOrderRefs || [];
+            const calledRefs = lastCall?.arguments?.bid_refs || [];
+            const orderMatches = expectedOrderRefs.length === 11 &&
+              expectedOrderRefs.every((r, i) => calledRefs[i] === r);
+            const csv = lastCall?.response?.csv || "";
+            const rows = csv.split("\\n").slice(1).filter(Boolean);
+            const allUrlsPresent = rows.length === 11 && rows.every(r => r.includes("https://"));
+            const downloadContents = window.lastDownloadFile;
+            return JSON.stringify({
+              clicked: window.actionClicked,
+              toolName: lastCall?.name,
+              refsCount: calledRefs.length,
+              format: lastCall?.arguments?.format,
+              rankedCount: lastCall?.response?.rankedCount,
+              orderMatches,
+              rowsCount: rows.length,
+              allUrlsPresent,
+              hasDownload: Boolean(downloadContents && downloadContents.length > 0),
+              error: window.actionClickError,
+            });
+          })()`,
+          returnByValue: true,
+        },
+        sessionId,
+      );
+      const status = JSON.parse(String(evalRes.result?.value ?? "{}"));
+      if (status.error) throw new Error(`Assertion failed for ${shot.file}: ${status.error}`);
+      if (!status.clicked) throw new Error(`Assertion failed for ${shot.file}: button not clicked`);
+      if (status.toolName !== "export_bid_shortlist")
+        throw new Error(
+          `Assertion failed for ${shot.file}: expected export_bid_shortlist, got ${status.toolName}`,
+        );
+      if (status.refsCount !== 11)
+        throw new Error(
+          `Assertion failed for ${shot.file}: expected 11 refs, got ${status.refsCount}`,
+        );
+      if (status.format !== "csv")
+        throw new Error(
+          `Assertion failed for ${shot.file}: expected csv format, got ${status.format}`,
+        );
+      if (!status.orderMatches)
+        throw new Error(
+          `Assertion failed for ${shot.file}: CSV export refs order did not match selected order`,
+        );
+      if (status.rowsCount !== 11)
+        throw new Error(
+          `Assertion failed for ${shot.file}: expected 11 CSV rows, got ${status.rowsCount}`,
+        );
+      if (!status.allUrlsPresent)
+        throw new Error(
+          `Assertion failed for ${shot.file}: official URLs missing in some CSV rows`,
+        );
+      if (!status.hasDownload)
+        throw new Error(`Assertion failed for ${shot.file}: download was not requested`);
+      await sleep(400);
+    } else if (shot.file === "09-export-json.png") {
+      const evalRes = await browser.send<{ result: { value: unknown } }>(
+        "Runtime.evaluate",
+        {
+          expression: `(() => {
+            const lastCall = window.lastToolCall;
+            const expectedOrderRefs = window.selectedOrderRefs || [];
+            const expectedKeys = window.selectedOrderKeys || [];
+            const calledRefs = lastCall?.arguments?.bid_refs || [];
+            const orderMatches = expectedOrderRefs.length === 11 &&
+              expectedOrderRefs.every((r, i) => calledRefs[i] === r);
+            const jsonList = lastCall?.response?.jsonContent || [];
+            const keysMatch = jsonList.length === 11 &&
+              jsonList.every((item, i) => item.key === expectedKeys[i]);
+            const allUrlsPresent = jsonList.length === 11 &&
+              jsonList.every(item => Boolean(item.officialUrl && item.officialUrl.startsWith("https://")));
+            const downloadContents = window.lastDownloadFile;
+            return JSON.stringify({
+              clicked: window.actionClicked,
+              toolName: lastCall?.name,
+              refsCount: calledRefs.length,
+              format: lastCall?.arguments?.format,
+              rankedCount: lastCall?.response?.rankedCount,
+              orderMatches,
+              keysMatch,
+              allUrlsPresent,
+              hasDownload: Boolean(downloadContents && downloadContents.length > 0),
+              error: window.actionClickError,
+            });
+          })()`,
+          returnByValue: true,
+        },
+        sessionId,
+      );
+      const status = JSON.parse(String(evalRes.result?.value ?? "{}"));
+      if (status.error) throw new Error(`Assertion failed for ${shot.file}: ${status.error}`);
+      if (!status.clicked) throw new Error(`Assertion failed for ${shot.file}: button not clicked`);
+      if (status.toolName !== "export_bid_shortlist")
+        throw new Error(
+          `Assertion failed for ${shot.file}: expected export_bid_shortlist, got ${status.toolName}`,
+        );
+      if (status.refsCount !== 11)
+        throw new Error(
+          `Assertion failed for ${shot.file}: expected 11 refs, got ${status.refsCount}`,
+        );
+      if (status.format !== "json")
+        throw new Error(
+          `Assertion failed for ${shot.file}: expected json format, got ${status.format}`,
+        );
+      if (!status.orderMatches)
+        throw new Error(
+          `Assertion failed for ${shot.file}: JSON export refs order did not match selected order`,
+        );
+      if (!status.keysMatch)
+        throw new Error(
+          `Assertion failed for ${shot.file}: JSON items key order did not match selection order`,
+        );
+      if (!status.allUrlsPresent)
+        throw new Error(`Assertion failed for ${shot.file}: official URLs missing in JSON output`);
+      if (!status.hasDownload)
+        throw new Error(`Assertion failed for ${shot.file}: JSON download was not requested`);
+      await sleep(400);
+    }
 
     const { data } = await browser.send<{ data: string }>(
       "Page.captureScreenshot",
       { format: "png" },
       sessionId,
     );
-    await writeFile(new URL(shot.file, `file://${outDir}`), Buffer.from(data, "base64"));
+    await writeFile(join(outDir, shot.file), Buffer.from(data, "base64"));
     console.error(`captured ${shot.file} (${shot.width}x${shot.height}, ${shot.colorScheme})`);
   }
 
@@ -235,7 +454,7 @@ try {
     sessionId,
   );
   await writeFile(
-    new URL("01-workspace.png", `file://${investorOutDir}`),
+    join(investorOutDir, "01-workspace.png"),
     Buffer.from(investorShot.data, "base64"),
   );
   console.error("captured investor-radar 01-workspace.png");

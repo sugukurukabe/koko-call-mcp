@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { JquantsClient } from "../api/jquants-client.js";
 import type { KkjClient } from "../api/kkj-client.js";
-import type { Tier } from "../lib/auth.js";
+import type { ServerProfile } from "../lib/profile.js";
 import { registerAnalyzeAwardPriceImpact } from "./analyze-award-price-impact.js";
 import { registerAnalyzePastAwards } from "./analyze-past-awards.js";
 import { registerAssessBidQualification } from "./assess-bid-qualification.js";
@@ -21,24 +21,20 @@ import { registerSearchBids } from "./search-bids.js";
 import { registerSummarizeBidsByOrg } from "./summarize-bids-by-org.js";
 import { registerWatchListedAwards } from "./watch-listed-awards.js";
 
-// Freeティアで利用可能なツール: search, rank, list, detail のみ
-// Tools available in Free tier: only search, rank, list, detail
-// Alat yang tersedia di tier Free: hanya search, rank, list, detail
-const FREE_TIER_REGISTRATIONS = [
+// Public MVP 6 tools (7th is search_bids_app registered with the app resource)
+export const PUBLIC_MVP_TOOL_REGISTRATIONS = [
   registerSearchBids,
-  registerRankBids,
   registerListRecentBids,
   registerGetBidDetail,
-] as const;
-
-// Proティア専用ツール（AI分析・PDF抽出を含む）
-// Pro-tier exclusive tools (including AI analysis and PDF extraction)
-// Alat eksklusif tier Pro (termasuk analisis AI dan ekstraksi PDF)
-const PRO_ONLY_REGISTRATIONS = [
-  registerExplainBidFit,
-  registerAssessBidQualification,
+  registerRankBids,
   registerExtractBidRequirements,
   registerExportBidShortlist,
+] as const;
+
+// Additional tools registered only in full_local profile
+export const FULL_LOCAL_ONLY_TOOL_REGISTRATIONS = [
+  registerExplainBidFit,
+  registerAssessBidQualification,
   registerCreateBidCalendar,
   registerCreateBidReviewPacket,
   registerDraftBidQuestions,
@@ -50,19 +46,20 @@ const PRO_ONLY_REGISTRATIONS = [
 export function registerTools(
   server: McpServer,
   client: KkjClient,
-  tier: Tier = "pro",
-  jquants: JquantsClient = new JquantsClient(),
+  profile: ServerProfile = "public_mvp",
+  jquants?: JquantsClient,
 ): void {
-  for (const register of FREE_TIER_REGISTRATIONS) {
-    register(server, client);
+  for (const register of PUBLIC_MVP_TOOL_REGISTRATIONS) {
+    (register as (s: McpServer, c: KkjClient, p?: ServerProfile) => void)(server, client, profile);
   }
-  if (tier === "pro") {
-    for (const register of PRO_ONLY_REGISTRATIONS) {
+  if (profile === "full_local") {
+    for (const register of FULL_LOCAL_ONLY_TOOL_REGISTRATIONS) {
       register(server, client);
     }
-    registerMapAwardsToListed(server, client, jquants);
-    registerGetListedAwardHistory(server, client, jquants);
-    registerAnalyzeAwardPriceImpact(server, client, jquants);
-    registerWatchListedAwards(server, client, jquants);
+    const jq = jquants ?? new JquantsClient();
+    registerMapAwardsToListed(server, client, jq);
+    registerGetListedAwardHistory(server, client, jq);
+    registerAnalyzeAwardPriceImpact(server, client, jq);
+    registerWatchListedAwards(server, client, jq);
   }
 }

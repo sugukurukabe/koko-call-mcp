@@ -29,8 +29,16 @@ export interface VertexGeminiClientOptions {
 let currentBudgetDate = new Date().toISOString().slice(0, 10);
 let estimatedSpendUsd = 0;
 
+export function resolveVertexProject(optionsProject?: string): string | undefined {
+  return optionsProject ?? process.env.GOOGLE_CLOUD_PROJECT ?? process.env.JP_BIDS_VERTEX_PROJECT;
+}
+
 export function isVertexAiEnabled(): boolean {
-  return process.env.JP_BIDS_VERTEX_AI === "1" || process.env.JP_BIDS_VERTEX_AI === "true";
+  return (
+    process.env.JP_BIDS_DOCUMENT_EXTRACTION === "vertex" ||
+    process.env.JP_BIDS_VERTEX_AI === "1" ||
+    process.env.JP_BIDS_VERTEX_AI === "true"
+  );
 }
 
 export class VertexGeminiClient {
@@ -40,7 +48,7 @@ export class VertexGeminiClient {
   private readonly estimatedCostPerCallUsd: number;
 
   constructor(options: VertexGeminiClientOptions = {}) {
-    const project = options.project ?? process.env.GOOGLE_CLOUD_PROJECT;
+    const project = resolveVertexProject(options.project);
     const location =
       options.location ??
       process.env.JP_BIDS_VERTEX_LOCATION ??
@@ -60,7 +68,7 @@ export class VertexGeminiClient {
     }
     if (!project) {
       throw new UpstreamError(
-        "Vertex AI direct mode requires GOOGLE_CLOUD_PROJECT or an injected GoogleGenAI client.",
+        "Vertex AI direct mode requires GOOGLE_CLOUD_PROJECT or JP_BIDS_VERTEX_PROJECT, or an injected GoogleGenAI client.",
       );
     }
     this.ai = new GoogleGenAI({

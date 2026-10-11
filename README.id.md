@@ -4,15 +4,32 @@
 
 ## Gambaran Umum / Overview / 概要
 
-JP Bids MCP adalah server MCP untuk mencari dan menganalisis pengumuman pengadaan pemerintah Jepang dari portal KKJ (Badan UKM). Investor Radar (v0.9.0) memetakan pengumuman ke ticker dan dapat menampilkan penutupan harian publik jika kunci J-Quants diberikan. Bukan nasihat investasi.
+JP Bids MCP adalah server MCP untuk mencari, memeringkat, mengekstrak persyaratan, dan mengekspor pengumuman pengadaan pemerintah Jepang dari portal KKJ. Sepenuhnya gratis, read-centric, 7 tools.
 
-JP Bids MCP is an MCP server for searching and AI-analyzing Japanese government procurement notices from the SME Agency's KKJ portal.
+JP Bids MCP is an MCP server for searching, ranking, extracting requirements, and exporting Japanese government procurement notices from the SME Agency's KKJ portal (free, read-centric, 7 tools).
 
-JP Bids MCP は、中小企業庁「官公需情報ポータルサイト」の入札情報をMCPで検索・AI分析するサーバーです。
+JP Bids MCP は、中小企業庁「官公需情報ポータルサイト」の入札情報をMCPで検索・順位付け・要件抽出・出力するサーバーです（完全無料・読み取り中心・7ツール）。
 
-> **Selama periode beta (sampai akhir September 2026), semua fitur tersedia gratis.**  
-> During beta (until end of September 2026), all features are free.  
-> ベータ期間（〜2026年9月末）は全機能を無料で利用できます。
+> **Sepenuhnya Gratis & Read-Centric / Free and Read-Centric**<br>
+> Semua 7 tools publik dapat digunakan gratis tanpa langganan berbayar. Tidak ada pemanggilan Stripe.<br>
+> All 7 public tools are free without subscription or paid tiers.
+
+## Status Saat Ini & Verifikasi
+
+> [!IMPORTANT]
+> **Status: Mock Lokal Tervalidasi (M1–M3-B) | Koneksi Langsung & Penerimaan Resmi Sedang Berlangsung**
+> - **Verifikasi Mock Claude Desktop (M1–M3-B)**: **LULUS (Terbukti)**. Diverifikasi di Claude Desktop menggunakan skrip peluncur stdio mock publik (`examples/mock-stdio-server.mjs`) yang menginjeksikan data uji XML offline (`tests/fixtures/kkj-search.xml`, `KKJ-TEST-001`):
+>   - **M1**: Pencarian tender lewat chat (`search_bids`) mengembalikan hasil terstruktur.
+>   - **M2**: Tampilan antarmuka AI Bid Workspace (`search_bids_app`) berbasis spesifikasi MCP Apps (`ui://jp-bids/search-results.html`).
+>   - **M3-A**: Perubahan status interaktif dalam antarmuka (pilihan baris tender, jumlah terpilih, aktivasi tombol ekspor CSV/JSON).
+>   - **M3-B**: Komunikasi alat dua arah dari UI ke server (pencarian dalam aplikasi memanggil `search_bids_app` dalam 2ms dan memperbarui UI).
+>   *(Catatan: Verifikasi M1–M3-B dilakukan melalui pencegatan mock tingkat aplikasi (`examples/mock-stdio-server.mjs`) yang menyelesaikan permintaan API KKJ menggunakan fixture XML lokal dan memblokir panggilan fetch tak terduga. Perhatikan bahwa ini adalah guard mock tingkat aplikasi dalam runtime Node.js, bukan isolasi firewall tingkat OS atau sandbox jaringan; tidak ada lalu lintas jaringan keluar ke KKJ yang teramati selama sesi verifikasi).*
+> - **Koneksi Data KKJ Langsung & Penerimaan Gate 1**: **DALAM PROSES (Belum Selesai・Transisi)**. Akses jaringan langsung ke API KKJ Badan UKM Jepang dan pengujian penerimaan resmi Gate 1 (35 kondisi) dijadwalkan pada tahap berikutnya (M4).
+>
+> **Pemisahan Lingkungan (Demo Mock vs. Jalur Runtime Standar / Produksi)**:
+> - **Demo Mock Publik (`examples/mock-stdio-server.mjs`)**: Untuk evaluasi UI, pengujian offline, dan mereproduksi M1–M3-B di Claude Desktop. Menggunakan fixture XML lokal (`tests/fixtures/kkj-search.xml`, `KKJ-TEST-001`) dengan pencegatan permintaan HTTP tingkat aplikasi (bukan isolasi jaringan tingkat OS).
+> - **Runtime Lokal Standar (`node dist/server.js`)**: Eksekusi runtime normal. Dapat melakukan kueri ke API KKJ portal resmi (`http://www.kkj.go.jp/api/`) bergantung pada konfigurasi, dengan pembatasan laju token bucket ketat (<= 1 req/dtk), tanpa penyimpanan lampiran PDF/XML, dan tanpa log stdout (hanya stderr).
+> - **Paket Publik (`npx -y jp-bids-mcp`) & MCP Jarak Jauh (`https://mcp.bid-jp.com/mcp`)**: Jalur produksi standar yang berkomunikasi dengan API KKJ resmi atau endpoint layanan jarak jauh.
 
 ## Cukup Bicara dengan AI
 
@@ -20,25 +37,21 @@ JP Bids MCP は、中小企業庁「官公需情報ポータルサイト」の�
 "Cari tender IT di Prefektur Kagoshima, urutkan yang paling cocok untuk kami"
 ```
 
-→ 14 hasil → Skor AI → Ringkasan 3 teratas → Daftar kalender → Semua dalam satu percakapan.
+→ 14 hasil → Pemeringkatan tender (`rank_bids`) → Lihat di UI workspace (`search_bids_app`).
 
 ```text
-"Atur persyaratan wajib dan kriteria evaluasi dari PDF spesifikasi ini"
+"Atur persyaratan wajib dan dokumen dari pengumuman ini"
 ```
 
-→ Ambil PDF otomatis → Ekstrak persyaratan → Cek kualifikasi → Panduan item yang kurang.
+→ Ekstrak daftar checklist persyaratan (`extract_bid_requirements`).
 
 ```text
-"Analisis tren pengadaan 3 tahun terakhir dari Kementerian Pertanian"
+"Ekspor 5 tender teratas ke format CSV"
 ```
 
-→ Ambil riwayat pemenang → Analisis anggaran, pesaing, rasio → Usulkan strategi tender.
+→ Ekspor ke CSV / JSON dengan mempertahankan urutan pilihan (`export_bid_shortlist`).
 
-```text
-"Tampilkan pengumuman KKJ untuk Fujitsu (6702) dan penutupan di sekitar tanggal pengumuman"
-```
-
-→ Pemetaan ke ticker → riwayat sebagai fakta → jendela penutupan publik jika kunci J-Quants ada. Bukan rekomendasi beli/jual. MCP data pasar di sesi yang sama memungkinkan perbandingan dengan bar harian.
+*(Catatan: Fitur tambahan seperti Investor Radar dan analisis riwayat pemenang hanya tersedia di profil pengembang `full_local`)*
 
 ## Mulai Cepat / Quick Start / クイックスタート
 
@@ -72,41 +85,110 @@ npx --yes jp-bids-mcp
 npx --yes jp-bids-export --prefecture 鹿児島県 --category 役務 --query システム > tenders.csv
 ```
 
+### Contoh Konfigurasi Claude Desktop
+
+#### 1. Stdio Lokal (`claude_desktop_config.json`)
+
+**A. Demo Mock Publik (Reproduksi Offline M1–M3-B):**
+> [!TIP]
+> Untuk mereproduksi demonstrasi M1–M3-B di Claude Desktop dengan aman tanpa akses jaringan langsung ke KKJ, build repositori secara lokal dan jalankan skrip mock publik:
+
+1. Clone repositori dan build proyek:
+   ```bash
+   git clone https://github.com/sugukurukabe/koko-call-mcp.git
+   cd koko-call-mcp
+   npm install
+   npm run build
+   ```
+2. Tambahkan konfigurasi ke `claude_desktop_config.json`:
+   ```json
+   {
+     "mcpServers": {
+       "jp-bids-mock": {
+         "command": "node",
+         "args": ["/path/to/koko-call-mcp/examples/mock-stdio-server.mjs"]
+       }
+     }
+   }
+   ```
+   *(Ganti `/path/to/koko-call-mcp` dengan path absolut lokal ke repositori hasil clone).*
+3. Muat ulang Claude Desktop dan tanyakan di obrolan:
+   ```text
+   「鹿児島県の入札案件を検索して」
+   ```
+   Server mock menyajikan data `KKJ-TEST-001` (鹿児島市システム保守業務委託) dari fixture lokal `tests/fixtures/kkj-search.xml`, menampilkan panel AI Bid Workspace interaktif lengkap dengan pemilihan dan komunikasi dua arah.
+   *(Catatan: Ini menggunakan pencegatan permintaan tingkat aplikasi untuk mengembalikan data fixture lokal, bukan isolasi sandbox tingkat OS).*
+
+**B. Runtime Lokal Standar (Build Node.js):**
+> [!NOTE]
+> `node dist/server.js` adalah jalur runtime server standar. Berbeda dengan skrip demo mock, runtime standar beroperasi dalam mode normal dan dapat melakukan kueri ke API KKJ langsung bergantung pada konfigurasi:
+
+```json
+{
+  "mcpServers": {
+    "jp-bids": {
+      "command": "node",
+      "args": ["/path/to/koko-call-mcp/dist/server.js"],
+      "env": {
+        "JP_BIDS_PROFILE": "public_mvp"
+      }
+    }
+  }
+}
+```
+
+**C. Paket Publik Standar via npx:**
+> [!WARNING]
+> `npx -y jp-bids-mcp` mengunduh paket dari registri npm publik dan berjalan dalam mode standar (bukan demo mock lokal). Paket ini berkomunikasi langsung dengan API KKJ resmi dan versinya mungkin berbeda dari salinan kerja lokal Anda:
+
+```json
+{
+  "mcpServers": {
+    "jp-bids": {
+      "command": "npx",
+      "args": ["-y", "jp-bids-mcp"],
+      "env": {
+        "JP_BIDS_PROFILE": "public_mvp"
+      }
+    }
+  }
+}
+```
+
+*(Catatan: Jangan mencantumkan path absolut Windows pribadi atau rahasia ke dalam file konfigurasi).*
+
+#### 2. Konektor Kustom Jarak Jauh (Claude.ai / Claude Desktop)
+
+Endpoint jarak jauh dikonfigurasi melalui antarmuka Konektor Kustom resmi Anthropic (bukan di `claude_desktop_config.json`):
+
+1. Buka Claude (Claude.ai atau Claude Desktop).
+2. Buka menu **Customize / Pengaturan → Connectors** (Konektor).
+3. Tambahkan Konektor Kustom dengan URL:
+   ```text
+   https://mcp.bid-jp.com/mcp
+   ```
+4. Selesaikan otorisasi via OAuth 2.0 (Dynamic Client Registration + PKCE S256).
+
 ## Daftar Alat / Tools / ツール一覧
 
-| Alat | Deskripsi | Tier |
+| Alat | Deskripsi | Profil |
 |---|---|---|
-| `search_bids` | Cari berdasarkan kata kunci, wilayah, kategori | Free |
-| `rank_bids` | Peringkat berdasarkan kriteria perusahaan | Free |
-| `list_recent_bids` | Daftar pengumuman terbaru | Free |
-| `get_bid_detail` | Detail tender | Free |
-| `search_bids_app` | Cari dengan UI panel MCP Apps | Pro |
-| `explain_bid_fit` | Penjelasan kesesuaian tender | Pro |
-| `assess_bid_qualification` | Verifikasi kualifikasi peserta | Pro |
-| `extract_bid_requirements` | Ekstraksi persyaratan PDF/HTML | Pro |
-| `export_bid_shortlist` | Ekspor CSV/JSON | Pro |
-| `create_bid_calendar` | Buat kalender ICS tenggat waktu | Pro |
-| `create_bid_review_packet` | Buat memo tinjauan internal | Pro |
-| `draft_bid_questions` | Buat draf pertanyaan klarifikasi | Pro |
-| `analyze_past_awards` | Analisis riwayat pemenang tender | Pro |
-| `summarize_bids_by_org` | Ringkasan per instansi | Pro |
-| `save_search` | Simpan kriteria pencarian | Pro |
-| `check_saved_search` | Periksa tender baru tersimpan | Pro |
-| `list_saved_searches` | Daftar pencarian tersimpan | Pro |
-| `map_awards_to_listed` | Petakan pengumuman ke ticker | Pro |
-| `get_listed_award_history` | Riwayat pengumuman perusahaan tercatat | Pro |
-| `analyze_award_price_impact` | Harga penutupan di sekitar tanggal pengumuman | Pro |
-| `watch_listed_awards` | Daftar pantauan ticker | Pro |
-| `search_investor_radar_app` | UI Investor Radar | Pro |
+| `search_bids` | Cari berdasarkan kata kunci, wilayah, kategori | Public MVP |
+| `list_recent_bids` | Daftar pengumuman terbaru (1–30 hari terakhir) | Public MVP |
+| `get_bid_detail` | Detail tender | Public MVP |
+| `rank_bids` | Peringkat berdasarkan kriteria perusahaan | Public MVP |
+| `extract_bid_requirements` | Ekstraksi persyaratan tender (ekstraksi dokumen eksternal default OFF) | Public MVP |
+| `export_bid_shortlist` | Ekspor shortlist CSV/JSON (urutan pemilihan dipertahankan) | Public MVP |
+| `search_bids_app` | Workspace pencarian interaktif dengan UI MCP Apps (`ui://jp-bids/search-results.html`, panel UI bundel HTML mandiri) | Public MVP |
 
 ## Harga / Pricing / 料金
 
 | Paket | Harga | Fitur |
 |---|---|---|
-| **Free** | Gratis | Pencarian, peringkat, detail |
-| **Pro** | ¥990/bulan | 22 alat + UI MCP Apps + ekstraksi PDF + pencarian tersimpan + Investor Radar |
+| **Public MVP** | Gratis (Free) | 7 alat publik (pencarian, pengumuman terbaru, detail, peringkat, ekstraksi persyaratan, ekspor shortlist, UI MCP Apps) |
 
-Selama beta (sampai akhir September 2026), Pro juga gratis. Tidak perlu API key.
+Semua fitur publik (7 alat) tersedia gratis tanpa langganan atau tingkatan berbayar. Tidak ada panggilan penagihan Stripe.<br>
+*(※ Tidak termasuk biaya token AI pihak ketiga atau infrastruktur cloud self-hosted)*
 
 ## Sumber Data
 
@@ -126,9 +208,19 @@ Detail integrasi teknis: [docs/integrations/jgrants.md](docs/integrations/jgrant
 
 JP Bids MCP juga terintegrasi dengan [freee MCP](https://www.npmjs.com/package/freee-mcp) (freee K.K.) untuk otomatisasi pengadaan-ke-akuntansi — pemeriksaan kesiapan keuangan, pencatatan transaksi pasca-kontrak, dan pembuatan faktur dari data tender. Lihat [examples/freee-integration/](examples/freee-integration/).
 
-Investor Radar dapat menampilkan penutupan harian publik di sekitar tanggal pengumuman jika kunci API J-Quants diteruskan. MCP data pasar di sesi Cursor / Claude yang sama memungkinkan perbandingan dengan bar harian. Bukan nasihat beli/jual. Lihat [docs/investor-radar.md](docs/investor-radar.md).
+*(Catatan: Fitur tambahan seperti Investor Radar dan analisis riwayat pemenang hanya tersedia di profil pengembang `full_local`. Tidak termasuk dalam public MVP. Lihat [docs/investor-radar.md](docs/investor-radar.md))*
 
 > JP Bids MCP, J-Grants MCP, dan freee MCP adalah server independen yang dioperasikan oleh organisasi berbeda. Hasil adalah informasi referensi; selalu verifikasi dengan dokumen resmi.
+
+## Spesifikasi Metadata & Registri
+
+JP Bids MCP memisahkan secara jelas antara manifes katalog registri resmi dan endpoint penemuan runtime:
+
+1. **Manifes MCP Registry Resmi (`server.json`)**:
+   - Mematuhi `$schema: "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json"`.
+   - Digunakan oleh registri paket resmi (`io.github.sugukurukabe/jp-bids`) untuk pendaftaran server, verifikasi repositori, dan interoperabilitas.
+2. **Endpoint Penemuan Server Card (`public/.well-known/mcp/server-card.json`)**:
+   - Disediakan di `/.well-known/mcp/server-card.json` untuk introspeksi skema alat yang lengkap dan binding `_meta.ui` MCP Apps.
 
 ## Kebijakan / Policies / ポリシー
 

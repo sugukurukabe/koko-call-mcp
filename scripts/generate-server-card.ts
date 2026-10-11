@@ -8,7 +8,7 @@ import { createJpBidsServer } from "../src/mcp.js";
 const outputPath = "public/.well-known/mcp/server-card.json";
 
 const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
-const server = createJpBidsServer();
+const server = createJpBidsServer({ profile: "public_mvp" });
 const client = new Client({ name: "server-card-generator", version: VERSION });
 
 await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
@@ -41,5 +41,10 @@ const card = {
 };
 
 await writeFile(outputPath, `${JSON.stringify(card, null, 2)}\n`, "utf8");
-execFileSync("biome", ["format", "--write", outputPath], { stdio: "inherit" });
+
+const npxCmd = process.platform === "win32" ? "npx.cmd" : "npx";
+execFileSync(npxCmd, ["biome", "format", "--write", outputPath], {
+  stdio: "inherit",
+  shell: process.platform === "win32",
+});
 console.error(`Generated ${outputPath}`);

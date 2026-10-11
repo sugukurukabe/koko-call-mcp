@@ -243,23 +243,43 @@ function normalizeBid(raw: XmlRecord): Bid {
     key: toStringValue(raw.Key) ?? "",
     projectName: toStringValue(raw.ProjectName) ?? "Untitled procurement",
   };
-  setOptional(bid, "externalDocumentUri", toStringValue(raw.ExternalDocumentURI));
+  setOptional(
+    bid,
+    "externalDocumentUri",
+    toStringValue(raw.ExternalDocumentURI) ?? toStringValue(raw.External_Document_URI),
+  );
   setOptional(bid, "date", toStringValue(raw.Date));
   setOptional(bid, "fileType", toStringValue(raw.FileType));
   setOptional(bid, "fileSize", toNumber(raw.FileSize));
-  setOptional(bid, "lgCode", toStringValue(raw.LgCode));
+  setOptional(bid, "lgCode", toStringValue(raw.LgCode) ?? toStringValue(raw.LG_Code));
   setOptional(bid, "prefectureName", toStringValue(raw.PrefectureName));
   setOptional(bid, "cityCode", toStringValue(raw.CityCode));
   setOptional(bid, "cityName", toStringValue(raw.CityName));
   setOptional(bid, "organizationName", toStringValue(raw.OrganizationName));
   setOptional(bid, "certification", toStringValue(raw.Certification));
-  setOptional(bid, "cftIssueDate", toStringValue(raw.CftIssueDate));
-  setOptional(bid, "periodEndTime", toStringValue(raw.PeriodEndTime));
+  setOptional(
+    bid,
+    "cftIssueDate",
+    toStringValue(raw.CftIssueDate) ?? toStringValue(raw.CFT_Issue_Date),
+  );
+  setOptional(
+    bid,
+    "periodEndTime",
+    toStringValue(raw.PeriodEndTime) ?? toStringValue(raw.Period_End_Time),
+  );
   setOptional(bid, "category", toStringValue(raw.Category));
   setOptional(bid, "procedureType", toStringValue(raw.ProcedureType));
   setOptional(bid, "location", toStringValue(raw.Location));
-  setOptional(bid, "tenderSubmissionDeadline", toStringValue(raw.TenderSubmissionDeadline));
-  setOptional(bid, "openingTendersEvent", toStringValue(raw.OpeningTendersEvent));
+  setOptional(
+    bid,
+    "tenderSubmissionDeadline",
+    toStringValue(raw.TenderSubmissionDeadline) ?? toStringValue(raw.Tender_Submission_Deadline),
+  );
+  setOptional(
+    bid,
+    "openingTendersEvent",
+    toStringValue(raw.OpeningTendersEvent) ?? toStringValue(raw.Opening_Tenders_Event),
+  );
   setOptional(bid, "itemCode", toStringValue(raw.ItemCode));
   setOptional(bid, "projectDescription", toStringValue(raw.ProjectDescription));
 

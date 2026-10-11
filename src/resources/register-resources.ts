@@ -3,6 +3,7 @@ import type { KkjClient } from "../api/kkj-client.js";
 import { createAttribution } from "../domain/attribution.js";
 import { daysAgoDate, formatKkjDateRange } from "../domain/date-range.js";
 import { prefectureCodeToName, prefectureEntries } from "../domain/prefectures.js";
+import type { ServerProfile } from "../lib/profile.js";
 import { jsonText } from "../lib/tool-result.js";
 
 // NOTE: agenticCloudRoadmapText and agenticSecurityStorageReadinessText below are intentionally
@@ -15,7 +16,11 @@ import { jsonText } from "../lib/tool-result.js";
 
 const resourceLastModified = "2026-05-02T00:00:00.000Z";
 
-export function registerResources(server: McpServer, client: KkjClient): void {
+export function registerResources(
+  server: McpServer,
+  client: KkjClient,
+  profile: ServerProfile = "public_mvp",
+): void {
   server.registerResource(
     "kkj_attribution",
     "attribution://kkj",
@@ -99,98 +104,6 @@ export function registerResources(server: McpServer, client: KkjClient): void {
   );
 
   server.registerResource(
-    "agentic_cloud_roadmap",
-    "docs://agentic-cloud-roadmap",
-    {
-      title: "Agentic Cloud Roadmap",
-      description:
-        "Google-managed MCP・Gemini Enterprise・Agentic Data Cloudに基づくAI Bid Radar拡張ロードマップ。AI Bid Radar expansion roadmap based on Google-managed MCP and Gemini Enterprise. Peta jalan perluasan AI Bid Radar berbasis Google-managed MCP dan Gemini Enterprise.",
-      mimeType: "text/markdown",
-      annotations: {
-        audience: ["assistant"],
-        priority: 0.8,
-        lastModified: resourceLastModified,
-      },
-    },
-    (uri) => ({
-      contents: [
-        {
-          uri: uri.href,
-          mimeType: "text/markdown",
-          text: agenticCloudRoadmapText,
-        },
-      ],
-    }),
-  );
-
-  server.registerResource(
-    "agentic_security_storage_readiness",
-    "docs://agentic-security-storage-readiness",
-    {
-      title: "Agentic Security & Storage Readiness",
-      description:
-        "Cloud Storage・Gemini Enterprise Agent Platform・Fraud Defenseに基づくAI Bid Radar readiness note。AI Bid Radar readiness note on agentic security, smart storage, and multicloud. Catatan kesiapan AI Bid Radar tentang keamanan agen, penyimpanan cerdas, dan multicloud.",
-      mimeType: "text/markdown",
-      annotations: {
-        audience: ["assistant"],
-        priority: 0.8,
-        lastModified: resourceLastModified,
-      },
-    },
-    (uri) => ({
-      contents: [
-        {
-          uri: uri.href,
-          mimeType: "text/markdown",
-          text: agenticSecurityStorageReadinessText,
-        },
-      ],
-    }),
-  );
-
-  server.registerResource(
-    "bid_detail_template",
-    new ResourceTemplate("bid://{bid_key}", {
-      list: undefined,
-      complete: {
-        bid_key: (value) => client.completeBidKeys(value),
-      },
-    }),
-    {
-      title: "Bid Detail Template",
-      description:
-        "直近検索済みのbid_keyを補完し、該当Keyの詳細を返す。Complete recent bid_key values and return cached bid details. Lengkapi nilai bid_key terbaru dan kembalikan detail tender yang di-cache.",
-      mimeType: "application/json",
-      annotations: {
-        audience: ["assistant"],
-        priority: 0.9,
-        lastModified: resourceLastModified,
-      },
-    },
-    (uri, variables) => {
-      const bidKey = String(variables.bid_key ?? "");
-      const cachedBid = client.getCachedBid(bidKey);
-      return {
-        contents: [
-          {
-            uri: uri.href,
-            mimeType: "application/json",
-            text: jsonText(
-              cachedBid
-                ? { bidKey, bid: cachedBid, attribution: createAttribution() }
-                : {
-                    bidKey,
-                    instruction:
-                      "Use get_bid_detail with this bid_key to fetch the current official detail.",
-                  },
-            ),
-          },
-        ],
-      };
-    },
-  );
-
-  server.registerResource(
     "prefecture_template",
     new ResourceTemplate("prefecture://{lg_code}", {
       list: undefined,
@@ -227,54 +140,148 @@ export function registerResources(server: McpServer, client: KkjClient): void {
     },
   );
 
-  server.registerResource(
-    "organization_summary_template",
-    new ResourceTemplate("org://{organization_name}", {
-      list: undefined,
-      complete: {
-        organization_name: (value) => client.completeOrganizationNames(value),
+  if (profile === "full_local") {
+    server.registerResource(
+      "agentic_cloud_roadmap",
+      "docs://agentic-cloud-roadmap",
+      {
+        title: "Agentic Cloud Roadmap",
+        description:
+          "Google-managed MCP・Gemini Enterprise・Agentic Data Cloudに基づくAI Bid Radar拡張ロードマップ。AI Bid Radar expansion roadmap based on Google-managed MCP and Gemini Enterprise. Peta jalan perluasan AI Bid Radar berbasis Google-managed MCP dan Gemini Enterprise.",
+        mimeType: "text/markdown",
+        annotations: {
+          audience: ["assistant"],
+          priority: 0.8,
+          lastModified: resourceLastModified,
+        },
       },
-    }),
-    {
-      title: "Organization Summary Template",
-      description:
-        "発注機関名から直近1年の入札傾向を読み取り専用コンテキストとして返す。Return past-year bid trends for a procurement organization as read-only context. Kembalikan tren tender setahun terakhir untuk instansi pengadaan sebagai konteks hanya-baca.",
-      mimeType: "application/json",
-      annotations: {
-        audience: ["assistant"],
-        priority: 0.8,
-        lastModified: resourceLastModified,
-      },
-    },
-    async (uri, variables) => {
-      const organizationName = decodeURIComponent(String(variables.organization_name ?? ""));
-      const since = daysAgoDate(365);
-      const issueRange = formatKkjDateRange(since, undefined);
-      const result = await client.search({
-        Organization_Name: organizationName,
-        Count: 200,
-        ...(issueRange ? { CFT_Issue_Date: issueRange } : {}),
-      });
-      return {
+      (uri) => ({
         contents: [
           {
             uri: uri.href,
-            mimeType: "application/json",
-            text: jsonText({
-              organizationName,
-              since,
-              totalHits: result.searchHits,
-              returnedCount: result.returnedCount,
-              categories: countBy(result.bids.map((bid) => bid.category ?? "不明")),
-              procedureTypes: countBy(result.bids.map((bid) => bid.procedureType ?? "不明")),
-              recentProjects: result.bids.slice(0, 20),
-              attribution: result.attribution,
-            }),
+            mimeType: "text/markdown",
+            text: agenticCloudRoadmapText,
           },
         ],
-      };
-    },
-  );
+      }),
+    );
+
+    server.registerResource(
+      "agentic_security_storage_readiness",
+      "docs://agentic-security-storage-readiness",
+      {
+        title: "Agentic Security & Storage Readiness",
+        description:
+          "Cloud Storage・Gemini Enterprise Agent Platform・Fraud Defenseに基づくAI Bid Radar readiness note。AI Bid Radar readiness note on agentic security, smart storage, and multicloud. Catatan kesiapan AI Bid Radar tentang keamanan agen, penyimpanan cerdas, dan multicloud.",
+        mimeType: "text/markdown",
+        annotations: {
+          audience: ["assistant"],
+          priority: 0.8,
+          lastModified: resourceLastModified,
+        },
+      },
+      (uri) => ({
+        contents: [
+          {
+            uri: uri.href,
+            mimeType: "text/markdown",
+            text: agenticSecurityStorageReadinessText,
+          },
+        ],
+      }),
+    );
+
+    server.registerResource(
+      "bid_detail_template",
+      new ResourceTemplate("bid://{bid_key}", {
+        list: undefined,
+        complete: {
+          bid_key: (value) => client.completeBidKeys(value),
+        },
+      }),
+      {
+        title: "Bid Detail Template",
+        description:
+          "直近検索済みのbid_keyを補完し、該当Keyの詳細を返す。Complete recent bid_key values and return cached bid details. Lengkapi nilai bid_key terbaru dan kembalikan detail tender yang di-cache.",
+        mimeType: "application/json",
+        annotations: {
+          audience: ["assistant"],
+          priority: 0.9,
+          lastModified: resourceLastModified,
+        },
+      },
+      (uri, variables) => {
+        const bidKey = String(variables.bid_key ?? "");
+        const cachedBid = client.getCachedBid(bidKey);
+        return {
+          contents: [
+            {
+              uri: uri.href,
+              mimeType: "application/json",
+              text: jsonText(
+                cachedBid
+                  ? { bidKey, bid: cachedBid, attribution: createAttribution() }
+                  : {
+                      bidKey,
+                      instruction:
+                        "Use get_bid_detail with this bid_key to fetch the current official detail.",
+                    },
+              ),
+            },
+          ],
+        };
+      },
+    );
+
+    server.registerResource(
+      "organization_summary_template",
+      new ResourceTemplate("org://{organization_name}", {
+        list: undefined,
+        complete: {
+          organization_name: (value) => client.completeOrganizationNames(value),
+        },
+      }),
+      {
+        title: "Organization Summary Template",
+        description:
+          "発注機関名から直近1年の入札傾向を読み取り専用コンテキストとして返す。Return past-year bid trends for a procurement organization as read-only context. Kembalikan tren tender setahun terakhir untuk instansi pengadaan sebagai konteks hanya-baca.",
+        mimeType: "application/json",
+        annotations: {
+          audience: ["assistant"],
+          priority: 0.8,
+          lastModified: resourceLastModified,
+        },
+      },
+      async (uri, variables) => {
+        const organizationName = decodeURIComponent(String(variables.organization_name ?? ""));
+        const since = daysAgoDate(365);
+        const issueRange = formatKkjDateRange(since, undefined);
+        const result = await client.search({
+          Organization_Name: organizationName,
+          Count: 200,
+          ...(issueRange ? { CFT_Issue_Date: issueRange } : {}),
+        });
+        return {
+          contents: [
+            {
+              uri: uri.href,
+              mimeType: "application/json",
+              text: jsonText({
+                organizationName,
+                since,
+                totalHits: result.searchHits,
+                returnedCount: result.returnedCount,
+                categories: countBy(result.bids.map((bid) => bid.category ?? "不明")),
+                procedureTypes: countBy(result.bids.map((bid) => bid.procedureType ?? "不明")),
+                recentProjects: result.bids.slice(0, 20),
+                attribution: result.attribution,
+              }),
+            },
+          ],
+        };
+      },
+    );
+  }
 }
 
 const agenticCloudRoadmapText = [

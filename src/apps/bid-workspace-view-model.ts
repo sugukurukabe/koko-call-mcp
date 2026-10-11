@@ -1,5 +1,5 @@
 import type { Bid, BidSearchResult } from "../domain/bid.js";
-import { parseJapaneseDateToDate } from "../domain/date-range.js";
+import { parseJapaneseDateTime, todayDateJst } from "../domain/date-range.js";
 
 export interface BidCardViewModel {
   key: string;
@@ -17,6 +17,10 @@ export interface BidCardViewModel {
   quickScore: number;
   priorityLabel: "pursue" | "review" | "skip";
   actionState: "unread" | "pdf_extracted" | "qualified" | "memo_created";
+  bidRef?: string | undefined;
+  serverScore?: number | undefined;
+  serverReason?: string | undefined;
+  rawDeadline?: string | undefined;
 }
 
 export interface WorkspaceViewModel {
@@ -67,29 +71,55 @@ export function toBidCardViewModel(bid: Bid, now: Date = new Date()): BidCardVie
     quickScore,
     priorityLabel,
     actionState: "unread",
+    bidRef: bid.bidRef,
+    rawDeadline: bid.tenderSubmissionDeadline,
   };
 }
 
-// 表示用に日付を整形する（ISO日時は日付部分のみ、和暦/和文はそのまま）
-// Format dates for display (ISO datetime → date only; wareki/JP text kept as-is)
-// Format tanggal untuk tampilan (datetime ISO → tanggal saja; teks wareki/Jepang apa adanya)
+// 表示用に日付を整形する（時刻付きは日本時間 JST で日時表示、日付のみは日付のみ、不明はそのまま）
 function formatDisplayDate(value: string | undefined): string {
   if (!value) {
     return "-";
   }
-  const isoMatch = /^(\d{4})-(\d{2})-(\d{2})(?:[T\s].*)?$/.exec(value.trim());
-  if (isoMatch) {
-    return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
+  const parsed = parseJapaneseDateTime(value);
+  if (!parsed) {
+    return value;
   }
-  return value;
+  if (!parsed.hasTime) {
+    const y = parsed.year.toString().padStart(4, "0");
+    const m = parsed.month.toString().padStart(2, "0");
+    const d = parsed.day.toString().padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+  const jstDate = new Date(parsed.date.getTime() + 9 * 3600 * 1000);
+  const y = jstDate.getUTCFullYear().toString().padStart(4, "0");
+  const m = (jstDate.getUTCMonth() + 1).toString().padStart(2, "0");
+  const d = jstDate.getUTCDate().toString().padStart(2, "0");
+  const hh = jstDate.getUTCHours().toString().padStart(2, "0");
+  const mm = jstDate.getUTCMinutes().toString().padStart(2, "0");
+  return `${y}-${m}-${d} ${hh}:${mm} JST`;
 }
 
 function computeDaysUntilDeadline(deadline: string | undefined, now: Date): number | null {
-  const parsed = parseJapaneseDateToDate(deadline);
+  const parsed = parseJapaneseDateTime(deadline);
   if (!parsed) {
     return null;
   }
-  return Math.ceil((parsed.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
+  if (parsed.hasTime && now.getTime() > parsed.date.getTime()) {
+    return -1;
+  }
+  const deadlineStr = parsed.hasTime
+    ? new Date(parsed.date.getTime() + 9 * 3600 * 1000).toISOString().slice(0, 10)
+    : `${parsed.year.toString().padStart(4, "0")}-${parsed.month.toString().padStart(2, "0")}-${parsed.day.toString().padStart(2, "0")}`;
+  const todayJst = todayDateJst(now);
+  const diffDays = Math.round(
+    (new Date(`${deadlineStr}T00:00:00Z`).getTime() - new Date(`${todayJst}T00:00:00Z`).getTime()) /
+      86_400_000,
+  );
+  if (diffDays < 0) {
+    return -1;
+  }
+  return diffDays;
 }
 
 function computeDeadlineUrgency(

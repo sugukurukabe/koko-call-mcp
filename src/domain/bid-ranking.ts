@@ -1,18 +1,41 @@
+import { createAttribution } from "./attribution.js";
 import type { Bid, BidRankingResult, BidSearchResult, RankedBid } from "./bid.js";
-import { parseJapaneseDateToDate } from "./date-range.js";
+import { parseJapaneseDateTime, todayDateJst } from "./date-range.js";
+
+export type DeadlineStatus = "unknown" | "passed" | "today" | "upcoming";
+
+export interface RankingInputBid {
+  key: string;
+  projectName: string;
+  organizationName?: string | undefined;
+  prefectureName?: string | undefined;
+  cityName?: string | undefined;
+  category?: string | undefined;
+  procedureType?: string | undefined;
+  certification?: string | undefined;
+  cftIssueDate?: string | undefined;
+  tenderSubmissionDeadline?: string | undefined;
+  openingTendersEvent?: string | undefined;
+  periodEndTime?: string | undefined;
+  externalDocumentUri?: string | undefined;
+  attachments?: Array<{ name: string; uri: string }> | undefined;
+  resultId?: number | undefined;
+  bidRef?: string | undefined;
+}
 
 export interface BidRankingOptions {
-  preferredKeywords?: string[];
-  avoidKeywords?: string[];
-  dueWithinDays?: number;
-  now?: Date;
-  shortlistLimit?: number;
+  preferredKeywords?: string[] | undefined;
+  avoidKeywords?: string[] | undefined;
+  dueWithinDays?: number | undefined;
+  now?: Date | undefined;
+  shortlistLimit?: number | undefined;
+  selectionIndex?: number | undefined;
 }
 
 export const bidRankingScoringPolicy = {
-  version: "ai-bid-radar-0.1",
+  version: "ai-bid-radar-0.2-public-mvp",
   summary:
-    "Rules-based MVP ranking for public bid discovery. Scores prioritize deadline clarity, practical next actions, keyword fit, and missing-information risks.",
+    "Rules-based MVP ranking for public bid discovery. Evaluates public notice metadata and deadlines in JST. Excludes project body text from keyword scoring to ensure consistency across search and signed snapshots.",
 };
 
 export function rankBidSearchResult(
@@ -35,7 +58,36 @@ export function rankBidSearchResult(
   };
 }
 
-export function rankBid(bid: Bid, options: BidRankingOptions = {}): RankedBid {
+export function rankSelectionBids(
+  bids: RankingInputBid[],
+  options: BidRankingOptions = {},
+): BidRankingResult {
+  const rankedBids = bids
+    .map((bid, index) => rankBid(bid, { ...options, selectionIndex: index }))
+    .sort(
+      (left, right) =>
+        right.score - left.score || (left.selectionIndex ?? 0) - (right.selectionIndex ?? 0),
+    )
+    .slice(0, options.shortlistLimit ?? bids.length);
+
+  return {
+    searchHits: bids.length,
+    returnedCount: bids.length,
+    rankedCount: rankedBids.length,
+    rankedBids,
+    query: {
+      selection_count: bids.length,
+      keys: bids
+        .map((b) => b.key)
+        .slice(0, 10)
+        .join(","),
+    },
+    attribution: createAttribution(),
+    scoringPolicy: bidRankingScoringPolicy,
+  };
+}
+
+export function rankBid(bid: RankingInputBid, options: BidRankingOptions = {}): RankedBid {
   const reasons: string[] = [];
   const risks: string[] = [];
   const nextActions = [
@@ -75,39 +127,63 @@ export function rankBid(bid: Bid, options: BidRankingOptions = {}): RankedBid {
   applyKeywordFit(bid, options, reasons, risks, (delta) => {
     score += delta;
   });
-  score += scoreDeadline(bid, options, reasons, risks);
+
+  const deadlineResult = scoreDeadline(bid, options, reasons, risks);
+  score += deadlineResult.delta;
   score += scoreProcedure(bid, reasons);
 
-  if (!bid.tenderSubmissionDeadline) {
-    risks.push("提出期限が不明のため、公式書類で早急に確認が必要");
-    score -= 10;
-  }
-
   const normalizedScore = clampScore(score);
-  return {
-    bid,
+  const priority = toPriority(normalizedScore, risks, deadlineResult.status);
+
+  // Re-cast as Bid for the RankedBid output
+  const fullBid: Bid = {
+    resultId: bid.resultId ?? 0,
+    key: bid.key,
+    projectName: bid.projectName,
+    organizationName: bid.organizationName,
+    prefectureName: bid.prefectureName,
+    cityName: bid.cityName,
+    category: bid.category,
+    procedureType: bid.procedureType,
+    certification: bid.certification,
+    cftIssueDate: bid.cftIssueDate,
+    tenderSubmissionDeadline: bid.tenderSubmissionDeadline,
+    openingTendersEvent: bid.openingTendersEvent,
+    periodEndTime: bid.periodEndTime,
+    externalDocumentUri: bid.externalDocumentUri,
+    attachments: bid.attachments,
+    bidRef: bid.bidRef,
+  };
+
+  const ranked: RankedBid = {
+    bid: fullBid,
     score: normalizedScore,
-    priority: toPriority(normalizedScore, risks),
+    priority,
     reasons: reasons.slice(0, 6),
     risks: risks.slice(0, 6),
     nextActions,
+    deadlineStatus: deadlineResult.status,
   };
+
+  if (options.selectionIndex !== undefined) {
+    ranked.selectionIndex = options.selectionIndex;
+  }
+
+  return ranked;
 }
 
+/**
+ * Evaluates keyword match against public metadata (projectName, organizationName, category, procedureType).
+ * Excludes projectDescription body text to guarantee scoring parity between search and bid_ref snapshots.
+ */
 function applyKeywordFit(
-  bid: Bid,
+  bid: RankingInputBid,
   options: BidRankingOptions,
   reasons: string[],
   risks: string[],
   addScore: (delta: number) => void,
 ): void {
-  const haystack = [
-    bid.projectName,
-    bid.projectDescription,
-    bid.organizationName,
-    bid.category,
-    bid.procedureType,
-  ]
+  const haystack = [bid.projectName, bid.organizationName, bid.category, bid.procedureType]
     .filter((value): value is string => typeof value === "string")
     .join(" ")
     .toLowerCase();
@@ -128,37 +204,70 @@ function applyKeywordFit(
 }
 
 function scoreDeadline(
-  bid: Bid,
+  bid: RankingInputBid,
   options: BidRankingOptions,
   reasons: string[],
   risks: string[],
-): number {
-  const deadline = parseKkjDate(bid.tenderSubmissionDeadline);
-  if (!deadline) {
-    return 0;
+): { delta: number; status: DeadlineStatus } {
+  if (!bid.tenderSubmissionDeadline) {
+    risks.push("提出期限が不明のため、公式書類で早急に確認が必要");
+    return { delta: -10, status: "unknown" };
   }
+
+  const parsed = parseJapaneseDateTime(bid.tenderSubmissionDeadline);
+  if (!parsed) {
+    risks.push("提出期限の日付を解析できませんでした");
+    return { delta: -10, status: "unknown" };
+  }
+
   const now = options.now ?? new Date();
-  const daysUntilDeadline = Math.ceil(
-    (startOfDay(deadline).getTime() - startOfDay(now).getTime()) / 86_400_000,
+  const todayJst = todayDateJst(now);
+  const deadlineStr = parsed.hasTime
+    ? new Date(parsed.date.getTime() + 9 * 3600 * 1000).toISOString().slice(0, 10)
+    : `${parsed.year.toString().padStart(4, "0")}-${parsed.month.toString().padStart(2, "0")}-${parsed.day.toString().padStart(2, "0")}`;
+  const daysUntilDeadline = Math.round(
+    (new Date(`${deadlineStr}T00:00:00Z`).getTime() - new Date(`${todayJst}T00:00:00Z`).getTime()) /
+      86_400_000,
   );
-  if (daysUntilDeadline < 0) {
-    risks.push("提出期限を過ぎている可能性がある");
-    return -35;
+
+  // If time was explicitly present (e.g. 17:00:00 JST), use timestamp comparison
+  if (parsed.hasTime) {
+    if (now.getTime() > parsed.date.getTime()) {
+      risks.push("掲載期限を経過（要公式確認）");
+      return { delta: -35, status: "passed" };
+    }
+    if (daysUntilDeadline === 0) {
+      risks.push("提出期限は本日です。即時確認が必要です");
+      reasons.push("本日締切の案件");
+      return { delta: -5, status: "today" };
+    }
+  } else {
+    // Date only
+    if (daysUntilDeadline < 0) {
+      risks.push("掲載期限を経過（要公式確認）");
+      return { delta: -35, status: "passed" };
+    }
+    if (daysUntilDeadline === 0) {
+      risks.push("提出期限は本日です。即時確認が必要です");
+      reasons.push("本日締切の案件");
+      return { delta: -5, status: "today" };
+    }
   }
+
   if (daysUntilDeadline <= 3) {
     risks.push(`提出期限まで${daysUntilDeadline}日で、対応時間が短い`);
-    return -12;
+    return { delta: -12, status: "upcoming" };
   }
   const dueWithinDays = options.dueWithinDays ?? 30;
   if (daysUntilDeadline <= dueWithinDays) {
     reasons.push(`提出期限まで${daysUntilDeadline}日で検討対象に入る`);
-    return 12;
+    return { delta: 12, status: "upcoming" };
   }
   risks.push(`提出期限まで${daysUntilDeadline}日あり、優先度は下げてもよい`);
-  return -2;
+  return { delta: -2, status: "upcoming" };
 }
 
-function scoreProcedure(bid: Bid, reasons: string[]): number {
+function scoreProcedure(bid: RankingInputBid, reasons: string[]): number {
   const procedure = bid.procedureType ?? "";
   if (procedure.includes("一般競争")) {
     reasons.push("一般競争入札で新規参加の検討対象になりやすい");
@@ -170,19 +279,20 @@ function scoreProcedure(bid: Bid, reasons: string[]): number {
   return 0;
 }
 
-function parseKkjDate(value: string | undefined): Date | null {
-  return parseJapaneseDateToDate(value);
-}
-
-function startOfDay(value: Date): Date {
-  return new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate()));
-}
-
 function clampScore(score: number): number {
   return Math.max(0, Math.min(100, Math.round(score)));
 }
 
-function toPriority(score: number, risks: string[]): RankedBid["priority"] {
+function toPriority(
+  score: number,
+  risks: string[],
+  deadlineStatus: DeadlineStatus,
+): RankedBid["priority"] {
+  // If deadline has already passed, it can NEVER be pursue
+  if (deadlineStatus === "passed") {
+    return score >= 60 ? "review" : "skip";
+  }
+
   if (score >= 72 && risks.length <= 2) {
     return "pursue";
   }
