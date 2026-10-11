@@ -27,3 +27,11 @@ docs/outreach/
 # script prints the git clone command when they are missing.
 jgrants-mcp-server/
 japan-real-estate-intel-mcp/
+
+# local review archives, evidence packets & draft artifacts (internal only)
+*.zip
+evidence/
+docs/drafts/
+JP_BIDS_*.md
+JP_BIDS_*.json
+ANTIGRAVITY_*.md

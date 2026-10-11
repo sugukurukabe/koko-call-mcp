@@ -31,6 +31,9 @@ export const BidSchema = z.object({
   itemCode: z.string().optional(),
   projectDescription: z.string().optional(),
   attachments: z.array(AttachmentSchema).optional(),
+  bidRef: z.string().optional(),
+  attachmentsTruncated: z.boolean().optional(),
+  truncatedReason: z.string().optional(),
 });
 
 export type Bid = z.infer<typeof BidSchema>;
@@ -48,6 +51,7 @@ export const BidSearchResultSchema = z.object({
   query: z.record(z.string(), z.union([z.string(), z.number()])),
   attribution: AttributionSchema,
   pagination: PaginationMetadataSchema.optional(),
+  searchCriteria: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type BidSearchResult = z.infer<typeof BidSearchResultSchema>;
@@ -61,6 +65,8 @@ export const RankedBidSchema = z.object({
   reasons: z.array(z.string()),
   risks: z.array(z.string()),
   nextActions: z.array(z.string()),
+  deadlineStatus: z.enum(["unknown", "passed", "today", "upcoming"]).optional(),
+  selectionIndex: z.number().int().nonnegative().optional(),
 });
 
 export type RankedBid = z.infer<typeof RankedBidSchema>;
@@ -94,11 +100,12 @@ export const BidFitExplanationSchema = z.object({
 export type BidFitExplanation = z.infer<typeof BidFitExplanationSchema>;
 
 export const BidShortlistExportSchema = z.object({
-  format: z.literal("csv"),
+  format: z.enum(["csv", "json"]),
   filename: z.string(),
   rankedCount: z.number().int().nonnegative(),
-  csv: z.string(),
+  csv: z.string().optional(),
   columns: z.array(z.string()),
+  jsonContent: z.array(z.record(z.string(), z.unknown())).optional(),
   attribution: AttributionSchema,
   scoringPolicy: z.object({
     version: z.string(),
@@ -174,6 +181,7 @@ export const BidRequirementExtractionSchema = z.object({
   extractedRequirements: ExtractedBidRequirementsSchema.optional(),
   extractionWarnings: z.array(z.string()).default([]),
   rawExtractionText: z.string().optional(),
+  extractionStatus: z.enum(["disabled", "partial", "success", "failed"]).optional(),
   attribution: AttributionSchema,
 });
 

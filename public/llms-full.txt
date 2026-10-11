@@ -1,7 +1,7 @@
 # JP Bids MCP — 完全版コンテキスト / Full context for AI ingestion
 
-> 中小企業庁の官公需情報ポータルサイト（KKJ）が公開する入札公示データを、AI アシスタントから検索・分析・要件抽出できる読み取り専用 MCP サーバー。v0.9.0 Investor Radar は公告を上場銘柄へ名寄せし、J-Quants キーがあれば公開終値も返す（投資助言ではない）。
-> A read-only Model Context Protocol server exposing Japan's SME Agency procurement portal as 22 AI tools, including listed-company ticker mapping. Not investment advice.
+> 中小企業庁の官公需情報ポータルサイト（KKJ）が公開する入札公示データを、AI アシスタントから検索・順位付け・要件抽出・エクスポートできる読み取り専用 MCP サーバー。完全無料・7ツール。
+> A read-only Model Context Protocol server exposing Japan's SME Agency procurement portal as 7 AI tools for search, ranking, requirement extraction, and shortlist export (free, read-centric).
 
 このファイルは、AI 検索クローラー（GPTBot, ClaudeBot, PerplexityBot, Google-Extended など）が JP Bids MCP を理解するための主要情報を一つにまとめたものです。リンクを辿らないクローラーでも、この一枚で全体像を把握できます。
 
@@ -9,7 +9,7 @@
 
 ## 1. 定義 / Definition
 
-JP Bids MCP は、中小企業庁の官公需情報ポータルサイト（KKJ）が公開する入札公示データを Model Context Protocol (MCP) 2025-11-25 仕様で AI に提供する読み取り専用サーバーです。Claude Desktop / Cursor / ChatGPT などの MCP 対応クライアントから、自然言語で入札公告を検索・分析・要件抽出できます。v0.9.0 の Investor Radar は公告を上場企業の銘柄コードへ名寄せし、J-Quants API キーのパススルーがあれば公告日前後の公開終値を返せます。売買の推奨はしません。市場データ MCP を同じクライアントに並べると日足と突き合わせできます。
+JP Bids MCP は、中小企業庁の官公需情報ポータルサイト（KKJ）が公開する入札公示データを Model Context Protocol (MCP) 2025-11-25 仕様で AI に提供する読み取り専用サーバーです。Claude Desktop / Cursor / ChatGPT などの MCP 対応クライアントから、自然言語で入札公告を検索・順位付け・要件チェックリスト抽出・CSV/JSON出力できます。完全無料・読み取り中心で動作し、Stripe等の課金呼出しは行いません。
 
 - 公式エンドポイント: `https://mcp.bid-jp.com/mcp`
 - トランスポート: Streamable HTTP（MCP 2025-11-25 仕様）
@@ -18,7 +18,7 @@ JP Bids MCP は、中小企業庁の官公需情報ポータルサイト（KKJ�
 - データ出典: 中小企業庁 官公需情報ポータルサイト（KKJ, https://kkj.go.jp ）
 - MCP Registry metadata name: `io.github.sugukurukabe/jp-bids`
 
-## 2. 22 のツール / 22 Tools
+## 2. 公開 7 ツール / 7 Public Tools
 
 ### 検索・発見 / Discovery
 
@@ -27,38 +27,13 @@ JP Bids MCP は、中小企業庁の官公需情報ポータルサイト（KKJ�
 - `list_recent_bids(limit, ...)` — 直近の新着公告を一覧 / List recent notices
 - `get_bid_detail(bid_key)` — 1 件の詳細取得 / Get a single bid detail
 
-### 分析・判断 / Analysis
+### 比較・抽出・出力 / Comparison, Extraction, Export
 
-- `rank_bids(query, profile, preferred_keywords, ...)` — 自社プロファイルに基づく AI スコアリング / AI ranking by company profile
-- `explain_bid_fit(bid_key, profile)` — 追うべきか・見送るかを理由付きで説明 / Explain pursue/skip with reasoning
-- `analyze_past_awards(organization_name)` — 発注機関の落札傾向を分析 / Analyze procuring agency's award patterns
-- `summarize_bids_by_org(...)` — 機関別サマリー / Per-agency summary
+- `rank_bids(bid_refs, query, profile, preferred_keywords, ...)` — 複数案件（最大50件）の適合度・期限を比較採点 / Compare and rank bids
+- `extract_bid_requirements(bid_key)` — 案件の参加資格・提出要件チェックリストを生成 / Structured requirement checklist extraction
+- `export_bid_shortlist(bid_refs, format)` — 選択した案件群（最大50件）を CSV または JSON で出力（選択順序保持） / Export shortlist as CSV or JSON
 
-### 書類・資格 / Documents and Qualification
-
-- `extract_bid_requirements(bid_key)` — PDF 仕様書から要件を構造化抽出（Vertex AI Gemini）/ Structured requirement extraction from PDF spec sheets
-- `assess_bid_qualification(bid_key, qualifications)` — 参加資格チェック / Qualification eligibility check
-- `draft_bid_questions(bid_key)` — 質問書ドラフト生成 / Draft inquiry sheets
-
-### アクション / Action
-
-- `create_bid_calendar(bid_keys[])` — 締切日を ICS カレンダーで出力 / Export bid deadlines as ICS
-- `create_bid_review_packet(bid_key)` — 社内検討メモ（Markdown）生成 / Generate internal review packet
-- `export_bid_shortlist(bid_keys[])` — CSV 出力 / Export shortlist as CSV
-
-### アラート / Alerts
-
-- `save_search(name, query)` — 検索条件を保存 / Save a search condition
-- `check_saved_search(name)` — 新着確認 / Check saved search for new notices
-- `list_saved_searches()` — 保存検索の一覧 / List all saved searches
-
-### Investor Radar（投資助言ではない / not investment advice）
-
-- `map_awards_to_listed(...)` — 公告を上場企業へ名寄せ / Map notices to listed tickers
-- `get_listed_award_history(query)` — 上場企業の公告履歴 / Listed-company notice history
-- `analyze_award_price_impact(query, event_date)` — 公告日前後の公開終値 / Public closes around a notice date
-- `watch_listed_awards(action, name, query)` — 銘柄ウォッチ / Ticker watchlist
-- `search_investor_radar_app(...)` — Investor Radar MCP Apps UI
+*(注: Investor Radar、落札傾向分析、保存検索などの追加ツールはローカル開発用 `full_local` プロファイル限定の機能です)*
 
 ## 3. MCP 仕様対応 / MCP Spec Support
 
@@ -66,10 +41,10 @@ JP Bids MCP は MCP 2025-11-25 仕様に基づき、入札検索に必要な主�
 
 | プリミティブ | 実装 |
 |---|---|
-| Tools | 22 ツール、すべてに `inputSchema`, `outputSchema`, `annotations` を付与 |
-| Resources | KKJ 出典、API リファレンス、都道府県コード、Search Results App |
-| Resource Templates | `bid://{key}` の動的解決 |
-| Prompts | morning briefing / competitor radar / deadline alert（tier により一部非表示） |
+| Tools | 公開 7 ツール、すべてに `inputSchema`, `outputSchema`, `annotations` を付与 |
+| Resources | KKJ 出典、API リファレンス、都道府県コード、Search Results App (`ui://jp-bids/search-results.html`) |
+| Resource Templates | `prefecture://{lg_code}` |
+| Prompts | morning briefing / bid discovery / deadline alert |
 | Completion | 都道府県名・カテゴリ名のオートコンプリート |
 
 ## 4. セットアップ / Setup
@@ -111,23 +86,16 @@ npx jp-bids-mcp
 
 ## 5. ユースケース / Use Cases
 
-入札担当者の従来の作業時間（出典: スグクル株式会社による顧客ヒアリング, n=12, 2025）:
+公開MVPは、公告検索、同じ候補の比較、公告メタデータの整理、選択した候補のCSV/JSON出力を支援します。受付可否や参加資格の最終判断は、発注機関の公式資料で確認してください。
 
-| 工程 | 手作業の所要時間 | JP Bids MCP 利用時 |
-|------|------------------|---------------------|
-| 案件検索 | 30分 | 約 1 分 |
-| 仕様書 PDF 読込 | 1 時間 | 約 30 秒 |
-| 参加資格確認 | 30 分 | 約 10 秒 |
-| 締切管理登録 | 15 分 | 約 5 秒 |
-| **合計（1 件あたり）** | **2 時間 15 分** | **約 2 分** |
+外部資料の本文抽出は既定OFFです。OFF時はPDF/HTML本文を読んでおらず、メタデータから確認できない項目は要確認として扱います。
 
 ### よくある会話例 / Example prompts
 
-- 「鹿児島県の IT 系入札を探して、うちに合う順にランク付けして」
-- 「この入札公告の要件を整理して、必要な書類を一覧にして」
-- 「今週締切の案件を Google カレンダーに入れて」
-- 「農林水産省の過去 1 年の発注傾向を教えて」
-- 「うちの会社（資格 A 等級, 売上 5 億）でこの入札に参加できる？」
+- 「鹿児島県のIT系入札を探して、件名・発注機関・提出期限・公式URLを一覧にして」
+- 「この中から選んだ案件だけを、同じ条件で比較して。優先する理由と要確認事項を教えて」
+- 「選択した候補を、その順序のままCSVまたはJSONで出力して」
+- 「この公告のメタデータで確認できる要件を整理して。本文を確認できていない項目は要確認にして」
 
 ## 6. エコシステム連携 / Ecosystem
 
@@ -143,13 +111,15 @@ npx jp-bids-mcp
 - 機能: 会計・請求書・取引登録 / Accounting, invoicing, transactions
 - 連携例: 落札後の売上を freee に自動登録、入札関連経費の費用対効果分析
 
-### Investor Radar × 市場データ MCP
+### ローカル開発用の参考実装 / Local-development reference
+
+以下のInvestor Radar関連機能は`full_local`限定であり、公開MVPの7ツールには含まれません。
 
 - ドキュメント: https://github.com/sugukurukabe/koko-call-mcp/blob/main/docs/investor-radar.md
 - 機能: KKJ 公告を上場銘柄へ名寄せ。J-Quants キーがあれば公開終値。市場データ MCP を同じ会話に並べると日足と突き合わせ
 - 制約: 投資助言ではない。KKJ は公告であり公式落札結果ではない
 
-3 つの独立 MCP サーバーを組み合わせて、入札 → 補助金 → 会計を一つの AI 会話でカバーできます。官公需と公開株価は Investor Radar と市場データ MCP で同じ会話に載せられます。
+外部サービスとの連携例は、それぞれ別のサーバー・認証・利用条件を前提とする参考構成です。JP Bids MCPの公開7ツールに会計への書込みやInvestor Radarの機能は含まれません。
 
 ## 7. データ出典とライセンス / Attribution and License
 
@@ -165,7 +135,7 @@ npx jp-bids-mcp
 - 「無形資産の4SからみたMCP — 小さなプロトコルが、なぜ新しい価値を生むのか」 https://github.com/sugukurukabe/koko-call-mcp/blob/main/articles/mcp-intangible-assets-4s.md
 - 「会話の中に画面を置く — MCP Apps で入札ワークスペースを実装する」 https://github.com/sugukurukabe/koko-call-mcp/blob/main/articles/mcp-apps-bid-workspace.md
 - 「官公需の公告に、銘柄コードを付ける — Investor Radar」 https://github.com/sugukurukabe/koko-call-mcp/blob/main/articles/investor-radar.md
-  MCP Apps UI「AI Bid Workspace」の実装解説。`ui://` リソースを `text/html;profile=mcp-app` で返し単一HTML（558,006 bytes / gzip 149.38 KiB / 162 modules）として配信する理由、CSP の `connectDomains: []` によりデータ経路が tool result だけになること、ホストアクション7種それぞれの拒否時フォールバック、`sendMessage` がツールを呼ばず整形された発話を送る設計、view-model 分離によるテスト、モックホストによる決定的スクリーンショット取得手順を扱う。
+  過去版の実装解説（現在の配布物・受入結果とは区別）。MCP Apps UI「AI Bid Workspace」の実装解説。`ui://` リソースを `text/html;profile=mcp-app` で返し単一HTML（558,006 bytes / gzip 149.38 KiB / 162 modules）として配信する理由、CSP の `connectDomains: []` によりデータ経路が tool result だけになること、ホストアクション7種それぞれの拒否時フォールバック、`sendMessage` がツールを呼ばず整形された発話を送る設計、view-model 分離によるテスト、モックホストによる決定的スクリーンショット取得手順を扱う。
 
 ## 9. 著者 / Author
 
@@ -181,7 +151,7 @@ npx jp-bids-mcp
 A. 日本の官公需入札情報を AI から検索・分析するための、読み取り専用の MCP サーバーです。中小企業庁の公開データを AI が直接扱える形に変換します。
 
 ### Q. 利用は無料ですか？
-A. 2026 年 9 月末までのベータ期間中は全機能無料です。それ以降は Free（4 ツール）と Pro（全 22 ツール、月額 ¥990）の二段構成を予定しています。
+A. はい、完全無料です。公開プロファイル（Public MVP, 7ツール）において月額料金や有料プラン、Stripe等の課金呼出しは一切ありません。（※Claude等のAIクライアント利用料や自己ホスト時のインフラ費用は除きます）
 
 ### Q. Cursor / Claude Desktop で使えますか？
 A. はい。Cursor / Claude Desktop / ChatGPT / その他の MCP 対応クライアントすべてで使えます。リモート URL `https://mcp.bid-jp.com/mcp` を設定するだけです。

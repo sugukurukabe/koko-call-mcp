@@ -18,6 +18,7 @@ if (args.has("--help") || args.has("-h")) {
       "Environment:",
       "  PORT                         HTTP port, default 8080",
       "  HTTP_HOST                    HTTP bind host; defaults to 127.0.0.1 locally and 0.0.0.0 on Cloud Run",
+      "  JP_BIDS_PROFILE              Server profile: public_mvp (default) or full_local (local dev only)",
       "  ALLOWED_ORIGINS              Comma-separated allowed Origin values for HTTP transport",
       "  JP_BIDS_RATE_LIMIT_PER_SECOND Upstream KKJ request limit, default 1",
       "  JP_BIDS_PDF_MAX_BYTES        PDF/HTML fetch size limit, default 20971520",

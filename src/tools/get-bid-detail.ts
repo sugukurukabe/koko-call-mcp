@@ -3,13 +3,19 @@ import { z } from "zod";
 import type { KkjClient } from "../api/kkj-client.js";
 import { createAttribution } from "../domain/attribution.js";
 import { type Bid, BidSearchResultSchema } from "../domain/bid.js";
-import { UserInputError } from "../lib/errors.js";
+import { resolveBid } from "../domain/bid-resolver.js";
 import { resourceLink, toolError } from "../lib/tool-result.js";
 
 const inputSchema = {
+  bid_ref: z
+    .string()
+    .min(1)
+    .optional()
+    .describe("search_bids または list_recent_bids が返した bid_ref トークン（優先）"),
   bid_key: z
     .string()
     .min(1)
+    .optional()
     .describe("search_bids または list_recent_bids が返した Key フィールド"),
 };
 
@@ -19,7 +25,7 @@ export function registerGetBidDetail(server: McpServer, client: KkjClient): void
     {
       title: "官公需入札詳細",
       description:
-        "入札Keyから1件の詳細を取得する。添付資料は保存せず公式サイトのURIのみ返す。USE THIS WHEN: search_bids/list_recent_bids が返した Key から公式公告ページ・添付URI・機関情報を確認したいとき。DO NOT USE WHEN: Key がまだ無いとき（search_bids を先に使う）。Fetch full details for one bid by key without storing attachments. Ambil detail lengkap satu tender berdasarkan kunci tanpa menyimpan lampiran.",
+        "入札Keyまたはbid_refから1件の詳細を取得する。添付資料は保存せず公式サイトのURIのみ返す。USE THIS WHEN: search_bids/list_recent_bids が返した bid_ref や Key から公式公告ページ・添付URI・機関情報を確認したいとき。DO NOT USE WHEN: Key や bid_ref がまだ無いとき（search_bids を先に使う）。Fetch full details for one bid by bid_ref or key without storing attachments. Ambil detail lengkap satu tender berdasarkan bid_ref atau kunci tanpa menyimpan lampiran.",
       inputSchema,
       outputSchema: BidSearchResultSchema.shape,
       annotations: {
@@ -31,34 +37,44 @@ export function registerGetBidDetail(server: McpServer, client: KkjClient): void
     },
     async (args) => {
       try {
-        const cached = client.getCachedBid(args.bid_key);
-        const result = cached
-          ? {
-              searchHits: 1,
-              returnedCount: 1,
-              bids: [cached],
-              query: { bid_key: args.bid_key },
-              attribution: createAttribution(),
-            }
-          : await client.search({ Query: args.bid_key, Count: 10 });
-        const exact = result.bids.find((bid) => bid.key === args.bid_key);
-        if (!exact) {
-          throw new UserInputError(
-            "指定された bid_key の入札を確認できませんでした。search_bids で取得した最新の Key を指定してください。",
-          );
-        }
+        const resolved = await resolveBid({
+          client,
+          bid_ref: args.bid_ref,
+          bid_key: args.bid_key,
+        });
+        const exact = resolved.bid;
+        const resolutionLabel =
+          resolved.resolution === "snapshot"
+            ? "署名付きスナップショット (改ざん検証・即時復元)"
+            : resolved.resolution === "cache"
+              ? "ローカルキャッシュ"
+              : "上流検索取得";
+
         const detail = {
-          ...result,
           searchHits: 1,
           returnedCount: 1,
           bids: [exact],
+          query: {
+            ...(exact.key ? { bid_key: exact.key } : {}),
+            ...(args.bid_ref ? { bid_ref: args.bid_ref } : {}),
+            resolution: resolved.resolution,
+            ...(resolved.fetchedAt ? { fetched_at: resolved.fetchedAt } : {}),
+          },
+          attribution: createAttribution(),
         };
         const officialLinks = buildOfficialLinks(exact);
         return {
           content: [
             {
               type: "text" as const,
-              text: `■ ${exact.projectName}\n機関: ${exact.organizationName ?? "不明"}\nKey: ${exact.key}\n出典: ${detail.attribution.dataSource}`,
+              text: [
+                `■ ${exact.projectName}`,
+                `機関: ${exact.organizationName ?? "不明"}`,
+                `Key: ${exact.key}`,
+                `取得方式: ${resolutionLabel}`,
+                ...(resolved.fetchedAt ? [`取得日時: ${resolved.fetchedAt}`] : []),
+                `出典: ${detail.attribution.dataSource}`,
+              ].join("\n"),
             },
             ...officialLinks,
           ],

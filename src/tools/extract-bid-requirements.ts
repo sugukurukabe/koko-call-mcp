@@ -4,14 +4,21 @@ import type { KkjClient } from "../api/kkj-client.js";
 import { createAttribution } from "../domain/attribution.js";
 import { BidRequirementExtractionSchema } from "../domain/bid.js";
 import { extractBidRequirements } from "../domain/bid-requirements.js";
-import { UserInputError } from "../lib/errors.js";
+import { resolveBid } from "../domain/bid-resolver.js";
+import type { ServerProfile } from "../lib/profile.js";
 import { toolError } from "../lib/tool-result.js";
 import { enrichWithDocumentExtraction } from "./document-extraction.js";
 
 const inputSchema = {
+  bid_ref: z
+    .string()
+    .min(1)
+    .optional()
+    .describe("search_bids、rank_bids、またはlist_recent_bidsが返したbid_refトークン（優先）"),
   bid_key: z
     .string()
     .min(1)
+    .optional()
     .describe("search_bids、rank_bids、またはlist_recent_bidsが返したKeyフィールド"),
   fetch_documents: z
     .boolean()
@@ -24,13 +31,17 @@ const inputSchema = {
     .describe("抽出対象URL。省略時は検索結果の公式公告ページ・添付資料URLから最大3件を使う。"),
 };
 
-export function registerExtractBidRequirements(server: McpServer, client: KkjClient): void {
+export function registerExtractBidRequirements(
+  server: McpServer,
+  client: KkjClient,
+  profile: ServerProfile = "public_mvp",
+): void {
   server.registerTool(
     "extract_bid_requirements",
     {
       title: "入札要件抽出MVP",
       description:
-        "1件の入札の参加条件・期限・確認すべきPDFを構造化する。PDFは保存しない。USE THIS WHEN: Key がある案件の参加条件、提出期限、確認対象資料をレビュー用に整理したいとき。DO NOT USE WHEN: 入札検索だけで十分なとき、または公式PDFの最終解釈を人間レビューなしで確定したいとき。Extract bid requirements, deadlines, and PDF checklist from metadata and attachments without storing files. Ekstrak persyaratan tender, tenggat waktu, dan daftar PDF tanpa menyimpan berkas.",
+        "1件の入札の参加条件・期限・確認すべきPDFを構造化する。PDFは保存しない。USE THIS WHEN: bid_ref または Key がある案件の参加条件、提出期限、確認対象資料をレビュー用に整理したいとき。DO NOT USE WHEN: 入札検索だけで十分なとき、または公式PDFの最終解釈を人間レビューなしで確定したいとき。Extract bid requirements, deadlines, and PDF checklist from metadata and attachments without storing files. Ekstrak persyaratan tender, tenggat waktu, dan daftar PDF tanpa menyimpan berkas.",
       inputSchema,
       outputSchema: BidRequirementExtractionSchema.shape,
       annotations: {
@@ -42,13 +53,20 @@ export function registerExtractBidRequirements(server: McpServer, client: KkjCli
     },
     async (args) => {
       try {
-        const cached = client.getCachedBid(args.bid_key);
-        const result = cached
-          ? { bid: cached, attribution: createAttribution() }
-          : await findBidByKey(client, args.bid_key);
-        const baseExtraction = extractBidRequirements(result.bid, result.attribution);
+        const resolved = await resolveBid({
+          client,
+          bid_ref: args.bid_ref,
+          bid_key: args.bid_key,
+        });
+        const baseExtraction = extractBidRequirements(resolved.bid, createAttribution());
         const extracted = args.fetch_documents
-          ? await enrichWithDocumentExtraction(server, baseExtraction, args.target_uris)
+          ? await enrichWithDocumentExtraction(
+              server,
+              baseExtraction,
+              args.target_uris,
+              undefined,
+              profile,
+            )
           : baseExtraction;
         return {
           content: [{ type: "text" as const, text: formatRequirementText(extracted) }],
@@ -57,22 +75,11 @@ export function registerExtractBidRequirements(server: McpServer, client: KkjCli
       } catch (error) {
         return toolError(
           error,
-          "入札要件抽出で一時的なエラーが発生しました。rank_bids または search_bids で取得した最新のbid_keyを指定してください。",
+          "入札要件抽出で一時的なエラーが発生しました。rank_bids または search_bids で取得した最新のbid_refまたはKeyを指定してください。",
         );
       }
     },
   );
-}
-
-async function findBidByKey(client: KkjClient, bidKey: string) {
-  const searchResult = await client.search({ Query: bidKey, Count: 10 });
-  const bid = searchResult.bids.find((candidate) => candidate.key === bidKey);
-  if (!bid) {
-    throw new UserInputError(
-      "指定された bid_key の入札を確認できませんでした。rank_bids または search_bids で取得した最新の Key を指定してください。",
-    );
-  }
-  return { bid, attribution: searchResult.attribution };
 }
 
 function formatRequirementText(extracted: z.infer<typeof BidRequirementExtractionSchema>): string {

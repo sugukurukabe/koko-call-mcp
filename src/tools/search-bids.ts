@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { KkjClient, KkjSearchParams } from "../api/kkj-client.js";
 import { BidSearchResultSchema } from "../domain/bid.js";
+import { signBidRef } from "../domain/bid-ref.js";
 import {
   CategorySchema,
   CertificationSchema,
@@ -76,7 +77,20 @@ export function registerSearchBids(server: McpServer, client: KkjClient): void {
       try {
         const params = buildSearchBidsParams(args);
         const result = await client.search(params);
-        const capped = capSearchResult(result);
+        const bidsWithRef = result.bids.map((bid) => ({
+          ...bid,
+          bidRef:
+            bid.bidRef ??
+            signBidRef(bid, {
+              fetchedAt:
+                (bid as { fetchedAt?: string }).fetchedAt ?? result.attribution?.accessedAt,
+            }),
+        }));
+        const capped = capSearchResult({
+          ...result,
+          bids: bidsWithRef,
+          searchCriteria: args as Record<string, unknown>,
+        });
         return {
           content: [{ type: "text" as const, text: formatSearchSummary(capped) }],
           structuredContent: capped,
@@ -146,11 +160,14 @@ export function formatSearchSummary(result: z.infer<typeof BidSearchResultSchema
     lines.push(
       `■ ${bid.projectName}`,
       `  機関: ${bid.organizationName ?? "不明"} | 地域: ${bid.prefectureName ?? "不明"}`,
-      `  公告日: ${bid.cftIssueDate ?? "不明"} | 入札開始: ${bid.tenderSubmissionDeadline ?? "不明"} | 開札: ${bid.openingTendersEvent ?? "不明"}`,
+      `  公告日: ${bid.cftIssueDate ?? "不明"} | 提出期限: ${bid.tenderSubmissionDeadline ?? "不明"} | 開札: ${bid.openingTendersEvent ?? "不明"}`,
       `  区分: ${bid.category ?? "不明"} | 種別: ${bid.procedureType ?? "不明"} | 資格: ${bid.certification ?? "不明"}`,
       `  Key: ${bid.key}`,
-      "",
     );
+    if (bid.bidRef) {
+      lines.push(`  bid_ref: ${bid.bidRef}`);
+    }
+    lines.push("");
   }
   if (result.bids.length > 10) {
     lines.push(`他 ${result.bids.length - 10}件は structuredContent を参照してください。`);

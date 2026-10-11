@@ -69,11 +69,17 @@ function aggregateOrganizations(bids: Bid[]): PastAwardSummary["topOrganizations
   }
 
   return [...buckets.values()]
-    .sort(
-      (left, right) =>
-        right.bidCount - left.bidCount ||
-        left.organizationName.localeCompare(right.organizationName),
-    )
+    .sort((left, right) => {
+      if (right.bidCount !== left.bidCount) {
+        return right.bidCount - left.bidCount;
+      }
+      const leftDate = (left.recentBid?.cftIssueDate ?? left.recentBid?.date ?? "").slice(0, 10);
+      const rightDate = (right.recentBid?.cftIssueDate ?? right.recentBid?.date ?? "").slice(0, 10);
+      if (leftDate !== rightDate) {
+        return rightDate.localeCompare(leftDate);
+      }
+      return left.organizationName.localeCompare(right.organizationName);
+    })
     .slice(0, TOP_ORG_LIMIT)
     .map((bucket) => {
       const recentBidDate = bucket.recentBid?.cftIssueDate ?? bucket.recentBid?.date;

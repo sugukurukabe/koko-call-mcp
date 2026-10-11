@@ -5,6 +5,7 @@ import { registerInvestorRadarApp } from "./apps/register-investor-app.js";
 import { registerSearchResultsApp } from "./apps/register-search-app.js";
 import type { Tier } from "./lib/auth.js";
 import { getBranding } from "./lib/branding.js";
+import { assertValidProfile, resolveServerProfile, type ServerProfile } from "./lib/profile.js";
 import { VERSION } from "./lib/version.js";
 import { registerPrompts } from "./prompts/register-prompts.js";
 import { registerResources } from "./resources/register-resources.js";
@@ -14,14 +15,24 @@ export interface CreateJpBidsServerOptions {
   kkjClient?: KkjClient;
   kkjClientOptions?: KkjClientOptions;
   jquantsClient?: JquantsClient;
-  // リクエストごとのティア（Free/Pro）。省略時はPro（stdio・開発環境）
-  // Per-request tier (Free/Pro). Defaults to Pro (stdio / dev environments)
-  // Tier per permintaan (Free/Pro). Default Pro (stdio / lingkungan pengembangan)
+  profile?: ServerProfile;
+  /**
+   * @deprecated Legacy parameter. Use `profile` instead.
+   */
   tier?: Tier;
 }
 
 export function createJpBidsServer(options: CreateJpBidsServerOptions = {}): McpServer {
-  const tier: Tier = options.tier ?? "pro";
+  const profile: ServerProfile =
+    options.profile ??
+    (options.tier
+      ? options.tier === "free"
+        ? "public_mvp"
+        : "full_local"
+      : resolveServerProfile());
+
+  assertValidProfile(profile);
+
   const branding = getBranding();
   const server = new McpServer(
     {
@@ -29,7 +40,7 @@ export function createJpBidsServer(options: CreateJpBidsServerOptions = {}): Mcp
       title: branding.serviceName,
       version: VERSION,
       description:
-        "Japan KKJ procurement notices through MCP, with Investor Radar ticker mapping. Not investment advice.",
+        "Japan KKJ government procurement notices search, ranking, and requirements extraction. Free and read-centric.",
     },
     {
       capabilities: {
@@ -39,26 +50,32 @@ export function createJpBidsServer(options: CreateJpBidsServerOptions = {}): Mcp
         completions: {},
       },
       instructions:
-        tier === "pro"
-          ? "Use JP Bids to search public Japanese government procurement notices. Investor Radar tools map notices to listed-company tickers and can overlay public daily closes when a J-Quants API key is provided. Never give buy/sell advice. Always show the KKJ attribution included in tool results."
-          : "Use JP Bids (Free tier) to search public Japanese government procurement bid information. Available tools: search_bids, rank_bids, list_recent_bids, get_bid_detail. Upgrade to Pro (990 JPY/month) for AI analysis and PDF extraction tools. Always show the KKJ attribution included in tool results.",
+        profile === "public_mvp"
+          ? "Use JP Bids to search public Japanese government procurement notices, rank bid opportunities, extract requirements, and export shortlists. Free and read-centric. Always show the KKJ attribution included in tool results."
+          : "Use JP Bids (full local development profile) to search public Japanese government procurement notices. Investor Radar tools map notices to listed-company tickers and can overlay public daily closes when a J-Quants API key is provided. Never give buy/sell advice. Always show the KKJ attribution included in tool results.",
     },
   );
+
   const client = options.kkjClient ?? new KkjClient(options.kkjClientOptions);
-  const jquants = options.jquantsClient ?? new JquantsClient();
-  registerTools(server, client, tier, jquants);
-  if (tier === "pro") {
+
+  if (profile === "public_mvp") {
+    registerTools(server, client, profile);
+    registerSearchResultsApp(server, client);
+    registerPrompts(server, profile);
+    registerResources(server, client, profile);
+  } else {
+    const jquants = options.jquantsClient ?? new JquantsClient();
+    registerTools(server, client, profile, jquants);
     registerSearchResultsApp(server, client);
     registerInvestorRadarApp(server, client, jquants);
+    registerPrompts(server, profile);
+    registerResources(server, client, profile);
   }
-  registerPrompts(server, tier);
-  registerResources(server, client);
+
   return server;
 }
 
-// Smithery ディレクトリ掲載用サンドボックスサーバー
-// Sandbox server for Smithery directory scanning
-// Server sandbox untuk pemindaian direktori Smithery
+// Smithery / directory scanning sandbox server (defaults to public_mvp)
 export function createSandboxServer(): McpServer {
-  return createJpBidsServer();
+  return createJpBidsServer({ profile: "public_mvp" });
 }

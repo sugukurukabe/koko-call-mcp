@@ -13,7 +13,8 @@
       "!japan-real-estate-intel-mcp",
       "!jgrants-mcp-server",
       "!bom.json",
-      "!.smithery"
+      "!.smithery",
+      "!evidence"
     ]
   },
   "formatter": {

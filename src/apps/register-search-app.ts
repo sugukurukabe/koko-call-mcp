@@ -7,6 +7,7 @@ import {
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { KkjClient } from "../api/kkj-client.js";
 import { BidSearchResultSchema } from "../domain/bid.js";
+import { signBidRef } from "../domain/bid-ref.js";
 import { toolError } from "../lib/tool-result.js";
 import {
   buildSearchBidsParams,
@@ -42,7 +43,19 @@ export function registerSearchResultsApp(server: McpServer, client: KkjClient): 
     async (args) => {
       try {
         const raw = await client.search(buildSearchBidsParams(args));
-        const result = capSearchResult(raw);
+        const bidsWithRef = raw.bids.map((bid) => ({
+          ...bid,
+          bidRef:
+            bid.bidRef ??
+            signBidRef(bid, {
+              fetchedAt: (bid as { fetchedAt?: string }).fetchedAt ?? raw.attribution?.accessedAt,
+            }),
+        }));
+        const result = capSearchResult({
+          ...raw,
+          bids: bidsWithRef,
+          searchCriteria: args as Record<string, unknown>,
+        });
         return {
           content: [{ type: "text" as const, text: formatSearchSummary(result) }],
           structuredContent: result,

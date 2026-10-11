@@ -186,6 +186,59 @@ h2 {
   border-top: 1px solid var(--border);
 }
 
+.lane-selection-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+.selection-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0;
+  text-decoration: underline;
+}
+.selection-count {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+.selection-buttons {
+  display: flex;
+  gap: 6px;
+}
+.btn-batch {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+  flex: 1;
+  text-align: center;
+}
+.btn-batch.primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.btn-batch:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
 .bid-card {
   display: block;
   width: 100%;
@@ -208,11 +261,29 @@ h2 {
   background: var(--bg-selected);
 }
 
+.bid-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.card-checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 2px 4px 2px 0;
+}
+.card-checkbox {
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
 .card-priority {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
+  gap: 6px;
 }
 .priority-badge {
   font-size: 11px;
@@ -233,6 +304,10 @@ h2 {
 .priority-badge.skip {
   background: #fee4e2;
   color: #912018;
+}
+.priority-badge.unranked {
+  background: var(--border);
+  color: var(--text-secondary);
 }
 .card-score {
   color: var(--text-secondary);
