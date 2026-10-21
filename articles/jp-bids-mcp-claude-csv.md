@@ -3,7 +3,8 @@ title: "Claudeで公共調達・入札公告を検索・整理する「JP Bids M
 emoji: "🏛️"
 type: "tech"
 topics: ["mcp", "claude", "aiagent", "公共調達", "dx"]
-published: false
+published: true
+published_at: "2026-10-22 15:00"
 ---
 
 **案内予定日時：2026年10月22日 15:00 JST**
