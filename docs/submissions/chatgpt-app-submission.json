@@ -1,10 +1,11 @@
 {
-  "$schema": "https://developers.openai.com/apps-sdk/schemas/chatgpt-app-submission.v1.json",
   "schema_version": 1,
+  "status": "LOCAL_DRAFT_ORGANIZATION_MATERIAL",
+  "notes": "Aligned with docs/submissions/chatgpt-app-submission-draft-20261021.json (7 Public MVP tools). Canonical OpenAI plugin package candidate is plugins/jp-bids-mcp/ (validated by scripts/build-openai-package.mjs). No official OpenAI schema URL affiliation.",
   "app_info": {
     "display_name": "JP Bids",
-    "subtitle": "Japan government bid search",
-    "description": "JP Bids helps users search and monitor Japanese public-sector procurement notices (government tenders) published on the official Small and Medium Enterprise Agency KKJ portal. Users can search by keyword, project name, organization, prefecture, category, or date range; get a scored, prioritized shortlist of bids worth pursuing; and check a daily digest of newly published notices for a region or category. All data is read-only public government information; the app never submits bids, applications, or any data on the user's behalf.",
+    "subtitle": "Japan government procurement & bid intelligence",
+    "description": "JP Bids helps users search, evaluate, and monitor Japanese public-sector procurement notices (government tenders) published on the official Small and Medium Enterprise Agency KKJ portal. Users can search by keyword, project name, organization, prefecture, category, or date range; prioritize opportunities using AI Bid Radar scoring (pursue/review/skip); attempt structured extraction of qualification requirements and document checklists; and export shortlisted tenders to spreadsheet-compatible CSV or JSON (16 columns). All data is read-only public government information; the app never submits bids, applications, or any data on the user's behalf.",
     "category": "BUSINESS"
   },
   "tools": {
@@ -12,116 +13,174 @@
       "annotations": {
         "readOnlyHint": true,
         "openWorldHint": true,
-        "destructiveHint": false
+        "destructiveHint": false,
+        "idempotentHint": true
       },
       "justifications": {
-        "read_only_justification": "Only queries the public KKJ procurement search API and returns matching notices; it never creates, updates, or deletes anything.",
+        "read_only_justification": "Queries the public KKJ procurement search API and returns matching notices; it never creates, updates, or deletes anything.",
         "open_world_justification": "Queries an unpredictable, continuously-updated public data set (like a web search) but does not write, publish, or otherwise change any public-facing state; results are returned only to the requesting user.",
-        "destructive_justification": "Read-only search with no delete, overwrite, or irreversible side effects of any kind."
-      }
-    },
-    "rank_bids": {
-      "annotations": {
-        "readOnlyHint": true,
-        "openWorldHint": true,
-        "destructiveHint": false
-      },
-      "justifications": {
-        "read_only_justification": "Runs the same read-only KKJ search as search_bids and scores the results locally in memory; no data is created, updated, or deleted anywhere.",
-        "open_world_justification": "Reads from the same unpredictable public procurement data set as search_bids but does not write or publish anything.",
-        "destructive_justification": "Read-only scoring with no delete, overwrite, or irreversible side effects."
+        "destructive_justification": "Read-only search with no delete, overwrite, or irreversible side effects of any kind.",
+        "idempotent_justification": "Has no side effects on external state."
       }
     },
     "list_recent_bids": {
       "annotations": {
         "readOnlyHint": true,
         "openWorldHint": true,
-        "destructiveHint": false
+        "destructiveHint": false,
+        "idempotentHint": true
       },
       "justifications": {
-        "read_only_justification": "Lists recently published KKJ notices for a date window; it only retrieves data and never modifies anything.",
+        "read_only_justification": "Lists recently published KKJ notices for a 1-30 day announcement window; it only retrieves public data and never modifies anything.",
         "open_world_justification": "Reads from the public, continuously-updated KKJ notice feed but does not write or publish anything.",
-        "destructive_justification": "Read-only listing with no delete, overwrite, or irreversible side effects."
+        "destructive_justification": "Read-only listing with no delete, overwrite, or irreversible side effects.",
+        "idempotent_justification": "Has no side effects on external state."
       }
     },
     "get_bid_detail": {
       "annotations": {
         "readOnlyHint": true,
         "openWorldHint": true,
-        "destructiveHint": false
+        "destructiveHint": false,
+        "idempotentHint": true
       },
       "justifications": {
-        "read_only_justification": "Fetches full detail for a single bid by key and returns official links; it never modifies data and never stores attachments server-side.",
+        "read_only_justification": "Fetches full detail for a single bid by signed bid_ref or bid_key and returns official links; it never modifies data and never stores attachments server-side.",
         "open_world_justification": "Returns links to official public KKJ pages and attachments (external resources) but does not write, publish, or change any public-facing state itself.",
-        "destructive_justification": "Read-only detail lookup with no delete, overwrite, or irreversible side effects."
+        "destructive_justification": "Read-only detail lookup with no delete, overwrite, or irreversible side effects.",
+        "idempotent_justification": "Has no side effects on external state."
+      }
+    },
+    "rank_bids": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Runs search or scores user-selected bid_refs in memory using the AI Bid Radar algorithm; no data is created, updated, or deleted anywhere.",
+        "open_world_justification": "Reads from the public procurement data set but does not write, broadcast, or publish anything.",
+        "destructive_justification": "Read-only scoring with no delete, overwrite, or irreversible side effects.",
+        "idempotent_justification": "Has no side effects on external state."
+      }
+    },
+    "extract_bid_requirements": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Parses metadata and announcement text to attempt structured extraction of eligibility grades, submission deadlines, and document checklists without storing files.",
+        "open_world_justification": "May fetch external public document URLs (when explicitly enabled) without changing any external system state.",
+        "destructive_justification": "Pure analysis tool with zero data modification or deletion capability.",
+        "idempotent_justification": "Declared as false in implementation annotations; operates without write side effects on system state."
+      }
+    },
+    "export_bid_shortlist": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Generates 16-column CSV or JSON text for selected bid_refs or search results in memory without storing files.",
+        "open_world_justification": "Operates over current public bid data and user-provided selections without external publishing.",
+        "destructive_justification": "Generates in-memory CSV/JSON text; does not overwrite local or remote files.",
+        "idempotent_justification": "Declared as false in implementation annotations; operates without write side effects on system state."
+      }
+    },
+    "search_bids_app": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Executes public procurement searches and renders an interactive UI workspace on supported MCP Apps hosts, falling back to text and structuredContent on unsupported hosts, with zero backend write actions.",
+        "open_world_justification": "Queries the public KKJ dataset and renders cards inside the client's sandboxed canvas; no external state is modified.",
+        "destructive_justification": "Sandboxed UI rendering with clipboard copy support; has no delete, overwrite, or persistent storage operations.",
+        "idempotent_justification": "Has no side effects on external state."
       }
     }
   },
   "test_cases": [
     {
-      "description": "Search for bids by keyword and prefecture.",
-      "user_prompt": "鹿児島県でIT関連の官公需入札を探して。",
+      "id": "TC-01",
+      "description": "Keyword search and detailed view retrieval using signed bid_ref or key.",
+      "user_prompt": "鹿児島県でIT関連の官公需入札を検索し、その中の1件の詳細と公式URLを確認して。",
       "file_attachment_urls": null,
-      "tools_triggered": "search_bids",
-      "expected_output": "Returns a list of matching Kagoshima IT-related procurement notices with organization, prefecture, submission deadline, and a Key for each, plus the official KKJ attribution.",
+      "tools_triggered": "search_bids, get_bid_detail",
+      "expected_output": "search_bids returns matching tender notices (bidRef, key, organization, due date). get_bid_detail restores the selected notice detail and official KKJ announcement link without storing files.",
       "expected_output_url": null
     },
     {
-      "description": "Search for bids from a specific organization and category.",
-      "user_prompt": "農林水産省が発注した役務の入札を検索して。",
+      "id": "TC-02",
+      "description": "Recent notices listing by region and category with procuring agency narrowing.",
+      "user_prompt": "東京都で直近7日間に公告された役務入札を一覧表示し、農林水産省の案件に絞り込んで。",
       "file_attachment_urls": null,
-      "tools_triggered": "search_bids",
-      "expected_output": "Returns notices filtered to the Ministry of Agriculture, Forestry and Fisheries in the services (役務) category, with the same KKJ attribution shown.",
+      "tools_triggered": "list_recent_bids, search_bids",
+      "expected_output": "list_recent_bids returns notices published within days=7. search_bids narrows by organization_name='農林水産省'. Attribution metadata is included in all outputs.",
       "expected_output_url": null
     },
     {
-      "description": "Rank search results by follow-up priority using preferred keywords.",
-      "user_prompt": "クラウドや保守に関わる入札を、追うべき順にランク付けして。",
+      "id": "TC-03",
+      "description": "Prioritize candidate bids using keyword matching and deadline constraints.",
+      "user_prompt": "クラウドや保守に関わる入札を、締切30日以内で追うべき順に評価して。",
       "file_attachment_urls": null,
       "tools_triggered": "rank_bids",
-      "expected_output": "Returns a scored, prioritized shortlist (pursue/review/skip) with a short reason for each ranked bid, based on the preferred keywords.",
+      "expected_output": "Returns rankedBids with score (0-100), priority ('pursue', 'review', or 'skip'), reasons, risks, and nextActions.",
       "expected_output_url": null
     },
     {
-      "description": "List recently published notices for a region as a daily check.",
-      "user_prompt": "東京都で直近7日間に公告された新着の入札を教えて。",
+      "id": "TC-04",
+      "description": "Requirement structured extraction and 16-column shortlist CSV export.",
+      "user_prompt": "事前検索で選んだ2件の検討案件（有効なbid_ref）について、参加資格・提出期限・必要書類を整理し、検討用CSV形式で出力して。",
       "file_attachment_urls": null,
-      "tools_triggered": "list_recent_bids",
-      "expected_output": "Returns notices published in Tokyo over the last 7 days with a count and the KKJ attribution.",
+      "tools_triggered": "extract_bid_requirements, export_bid_shortlist",
+      "expected_output": "extract_bid_requirements organizes metadata requirements and marks unverified items in missingRequirements. export_bid_shortlist returns 16-column CSV text and rankedCount=2.",
       "expected_output_url": null
     },
     {
-      "description": "Get full detail for one bid using the key returned by an earlier search.",
-      "user_prompt": "さっき出てきた最初の案件の詳細と公式ページのリンクを教えて。",
+      "id": "TC-05",
+      "description": "Interactive UI workspace display test (limit 3).",
+      "user_prompt": "東京都のIT関連入札をUIワークスペースで最大3件表示して。",
       "file_attachment_urls": null,
-      "tools_triggered": "get_bid_detail",
-      "expected_output": "Returns the project name, organization, and Key for the specified bid, plus a link to the official KKJ announcement page (and any attachment links, without storing the files).",
+      "tools_triggered": "search_bids_app",
+      "expected_output": "Renders interactive AI Bid Workspace ('ui://jp-bids/search-results.html') on supported hosts (or structured text fallback on text-only hosts) with up to 3 cards.",
       "expected_output_url": null
     }
   ],
   "negative_test_cases": [
     {
+      "id": "NC-01",
       "description": "Do not trigger for unrelated private-sector job listings.",
       "user_prompt": "民間企業のエンジニア求人を探して。",
       "file_attachment_urls": null,
       "tools_triggered": null,
-      "expected_output": "The app should not be invoked because private-sector job listings are outside its scope, which is limited to public Japanese government procurement notices.",
+      "expected_output": "The app should not be invoked because private-sector job listings are outside its scope.",
       "expected_output_url": null
     },
     {
+      "id": "NC-02",
       "description": "Do not attempt to submit or apply for a bid on the user's behalf.",
       "user_prompt": "この入札に代わりに応募しておいて。",
       "file_attachment_urls": null,
       "tools_triggered": null,
-      "expected_output": "The app has no write or submission capability; it should explain that it can only search and analyze public bid information, and direct the user to the official KKJ announcement page to apply themselves.",
+      "expected_output": "The app has no write or submission capability and directs the user to apply via official agency channels.",
       "expected_output_url": null
     },
     {
-      "description": "Do not guess a bid detail without a valid key or prior search context.",
-      "user_prompt": "この入札の詳細をもっとください。",
+      "id": "NC-03",
+      "description": "Do not guess a bid detail without a valid bid_ref/key or prior search context.",
+      "user_prompt": "案件の詳細を教えて（検索やキーの提示なし）。",
       "file_attachment_urls": null,
       "tools_triggered": null,
-      "expected_output": "Without a prior search result or an explicit bid key in the conversation, the app should ask the user to search first (or provide a key) rather than calling get_bid_detail with a guessed or empty key.",
+      "expected_output": "Prompts the user to search or provide a valid bid key/bid_ref first rather than calling get_bid_detail with guessed identifiers.",
       "expected_output_url": null
     }
   ]

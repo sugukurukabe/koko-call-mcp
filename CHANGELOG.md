@@ -4,6 +4,13 @@
 
 ### Unreleased
 
+### 0.10.0
+
+- **Public MVP (7ツール・完全無料) バージョン統一**: パッケージ・レジストリ・`.well-known`・OpenAI プラグイン・Smithery マニフェストの公開バージョンを `0.10.0` に統一し、`server.json` の独自拡張情報を `2025-12-11/server.schema.json` 準拠の `_meta["io.github.sugukurukabe/jp-bids"]` 配下へ移動。
+- **MCP / OAuth 仕様セキュリティ強化**: `/oauth/token` レスポンスに RFC 6749 §5.1 / OAuth 2.1 必須の `Cache-Control: no-store` と `Pragma: no-cache` を付与。`Mcp-Method` / `Mcp-Name` ヘッダーの厳格検証、`DELETE /mcp` の `405` 応答、ローカルホスト起動時の DNS rebinding 防止 `Host` ヘッダー検証、状態トークン用 HMAC サブキー導出を追加。
+- **依存関係と脆弱性ゼロ化**: `@modelcontextprotocol/sdk` を `^1.32.1`、`zod` を `^4.6.7`、`express` を `^5.3.0`、`fast-xml-parser` を `^5.12.1` へ更新し、`npm audit --omit=dev` の脆弱性を 0 件に解消。
+- **MCP Apps UI 改善**: 3段階エクスポートフォールバック（`downloadFile` → クリップボード → `ManualExportPanel` 手動取得欄）の非同期競合保護、ワンクリック検索プロンプトチップ、ダークテーマ連携を追加。
+
 ### 0.9.0
 
 - **Investor Radar**: 官公需公告を上場企業の銘柄コードへ名寄せする Pro ツール 5本（`map_awards_to_listed` / `get_listed_award_history` / `analyze_award_price_impact` / `watch_listed_awards` / `search_investor_radar_app`）。売買推奨は出さない。株価は J-Quants API キーのパススルー（ADR-0025 / ADR-0026）。
@@ -178,6 +185,13 @@
 
 ### Unreleased
 
+### 0.10.0
+
+- **Public MVP (7 tools, completely free) version unification**: Unified the release version to `0.10.0` across npm, MCP Registry, `.well-known` discovery files, the OpenAI plugin bundle, and the Smithery manifest, and moved custom interoperability metadata in `server.json` under `_meta["io.github.sugukurukabe/jp-bids"]` per `2025-12-11/server.schema.json`.
+- **MCP & OAuth specification hardening**: Added RFC 6749 §5.1 / OAuth 2.1 `Cache-Control: no-store` and `Pragma: no-cache` headers on `/oauth/token`, strict `Mcp-Method` / `Mcp-Name` validation, `405` on `DELETE /mcp`, localhost `Host` header DNS-rebinding defense, and domain-separated HMAC subkey derivation for state tokens.
+- **Dependency & vulnerability closure**: Upgraded `@modelcontextprotocol/sdk` to `^1.32.1`, `zod` to `^4.6.7`, `express` to `^5.3.0`, and `fast-xml-parser` to `^5.12.1`, achieving `0` vulnerabilities in `npm audit --omit=dev`.
+- **MCP Apps UI polish**: Added async race protection for the 3-tier export fallback (`downloadFile` -> clipboard -> `ManualExportPanel`), interactive 1-click example prompt chips, and host theme parity.
+
 ### 0.9.0
 
 - **Investor Radar**: five Pro tools that map KKJ notices to listed-company tickers. No buy/sell advice. Prices use J-Quants API key passthrough (ADR-0025 / ADR-0026).
@@ -351,6 +365,13 @@
 ## Bahasa Indonesia
 
 ### Unreleased
+
+### 0.10.0
+
+- **Penyatuan versi Public MVP (7 alat, sepenuhnya gratis)**: Menyeragamkan versi rilis ke `0.10.0` di npm, MCP Registry, berkas `.well-known`, bundel plugin OpenAI, dan manifes Smithery, serta memindahkan metadata interoperabilitas di `server.json` ke bawah `_meta["io.github.sugukurukabe/jp-bids"]` sesuai `2025-12-11/server.schema.json`.
+- **Penguatan spesifikasi MCP & OAuth**: Menambahkan header `Cache-Control: no-store` dan `Pragma: no-cache` (RFC 6749 §5.1 / OAuth 2.1) pada `/oauth/token`, validasi ketat `Mcp-Method` / `Mcp-Name`, respons `405` pada `DELETE /mcp`, validasi header `Host` localhost untuk pencegahan DNS rebinding, serta subkunci HMAC terpisah untuk token status.
+- **Pembaruan dependensi & nol kerentanan**: Memperbarui `@modelcontextprotocol/sdk` ke `^1.32.1`, `zod` ke `^4.6.7`, `express` ke `^5.3.0`, dan `fast-xml-parser` ke `^5.12.1` hingga `npm audit --omit=dev` melaporkan `0` kerentanan.
+- **Peningkatan UI MCP Apps**: Menambahkan perlindungan kondisi balapan asinkron pada fallback ekspor 3 tingkat, tombol contoh prompt 1-klik interaktif, dan paritas tema host.
 
 ### 0.9.0
 

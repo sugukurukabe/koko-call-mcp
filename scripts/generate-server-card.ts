@@ -42,9 +42,9 @@ const card = {
 
 await writeFile(outputPath, `${JSON.stringify(card, null, 2)}\n`, "utf8");
 
-const npxCmd = process.platform === "win32" ? "npx.cmd" : "npx";
-execFileSync(npxCmd, ["biome", "format", "--write", outputPath], {
-  stdio: "inherit",
-  shell: process.platform === "win32",
-});
+execFileSync(
+  process.execPath,
+  ["node_modules/@biomejs/biome/bin/biome", "format", "--write", outputPath],
+  { stdio: "inherit" },
+);
 console.error(`Generated ${outputPath}`);

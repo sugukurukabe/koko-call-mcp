@@ -167,7 +167,10 @@ describe("U2-R: Public MVP Profile & Zero Billing Acceptance (S01, S02, S03, S04
       expect(toolNames.has(excluded)).toBe(false);
       const res = await client.callTool({ name: excluded, arguments: {} });
       expect(res.isError).toBe(true);
-      expect((res.content[0] as { text: string }).text).toContain(`Tool ${excluded} not found`);
+      const firstBlock = Array.isArray(res.content)
+        ? (res.content[0] as { text?: string } | undefined)
+        : undefined;
+      expect(firstBlock?.text).toContain(`Tool ${excluded} not found`);
     }
 
     await client.close();
@@ -310,7 +313,14 @@ describe("U2-R: Public MVP Profile & Zero Billing Acceptance (S01, S02, S03, S04
     const extraction = {
       bid: mockSampleBid,
       knownRequirements: {},
-      documentTargets: [{ name: "仕様書", uri: "https://example.go.jp/spec.pdf" }],
+      documentTargets: [
+        {
+          label: "仕様書",
+          uri: "https://example.go.jp/spec.pdf",
+          kind: "attachment" as const,
+          recommendedProcessor: "gemini_document_understanding" as const,
+        },
+      ],
       missingRequirements: [],
       extractionPlan: [],
       safetyNotes: [],
@@ -367,7 +377,14 @@ describe("U2-R: Public MVP Profile & Zero Billing Acceptance (S01, S02, S03, S04
     const extraction = {
       bid: mockSampleBid,
       knownRequirements: {},
-      documentTargets: [{ name: "仕様書", uri: "https://example.go.jp/spec.pdf" }],
+      documentTargets: [
+        {
+          label: "仕様書",
+          uri: "https://example.go.jp/spec.pdf",
+          kind: "attachment" as const,
+          recommendedProcessor: "gemini_document_understanding" as const,
+        },
+      ],
       missingRequirements: [],
       extractionPlan: [],
       safetyNotes: [],

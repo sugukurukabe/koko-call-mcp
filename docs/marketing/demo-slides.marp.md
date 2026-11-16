@@ -226,5 +226,5 @@ Jグランツ MCP（補助金）  ↔  freee MCP（会計）
 
 スグクル株式会社 / 壁
 
-`https://sugukuru.co.jp`
+`https://sugu-kuru.co.jp`
 `https://mcp.bid-jp.com`

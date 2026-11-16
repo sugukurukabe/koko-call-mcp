@@ -12,7 +12,7 @@ Dua server MCP yang saling melengkapi ini memungkinkan LLM host menangani kedua 
 | [JP Bids MCP](https://github.com/sugukurukabe/koko-call-mcp) | KKJ (中小企業庁) | Sugukuru Inc. | "Tender pemerintah mana yang harus diikuti?" |
 | [J-Grants MCP](https://github.com/digital-go-jp/jgrants-mcp-server) | J-Grants (デジタル庁) | Badan Digital Jepang | "Subsidi apa yang tersedia untuk mendanai pekerjaan?" |
 
-Lisensi data berbeda: Data KKJ tunduk pada [Syarat API KKJ](https://kkj.go.jp), dan data J-Grants tunduk pada [Syarat Open API J-Grants](https://www.jgrants-portal.go.jp/open-api). Baca keduanya sebelum membangun produk hilir apa pun.
+Lisensi data berbeda: Data KKJ tunduk pada [Catatan Portal KKJ](https://www.kkj.go.jp/s/help/notes/), dan data J-Grants tunduk pada [Syarat Open API J-Grants](https://www.jgrants-portal.go.jp/open-api). Baca keduanya sebelum membangun produk hilir apa pun.
 
 ---
 
@@ -34,13 +34,15 @@ python -m jgrants_mcp_server.core
 # Mendengarkan di http://127.0.0.1:8000/mcp (Streamable HTTP)
 ```
 
-### 2. Hubungkan JP Bids MCP (remote, tidak perlu instalasi)
+### 2. Hubungkan JP Bids MCP (remote Public MVP, atau lokal `full_local`)
 
-JP Bids MCP di-host di `https://mcp.bid-jp.com/mcp` dan tidak memerlukan pengaturan lokal. Gunakan `npx mcp-remote` sebagai jembatan stdio jika klien Anda tidak mendukung Streamable HTTP secara native:
+JP Bids MCP di-host di `https://mcp.bid-jp.com/mcp` (`public_mvp`, 7 alat gratis melalui OAuth 2.0) dan tidak memerlukan pengaturan lokal. Gunakan `npx mcp-remote` sebagai jembatan stdio jika klien Anda tidak mendukung Streamable HTTP secara native:
 
 ```bash
 npx --yes mcp-remote https://mcp.bid-jp.com/mcp
 ```
+
+Untuk mengaktifkan alat pengembangan lokal tambahan (`create_bid_review_packet`, `analyze_past_awards`), jalankan `JP_BIDS_PROFILE=full_local npx jp-bids-mcp` secara lokal.
 
 ### 3. Daftarkan kedua server di klien Anda
 
@@ -74,7 +76,7 @@ Alur percakapan yang diharapkan:
 
 **Tujuan**: Identifikasi subsidi yang dapat mensubsidi biaya persiapan atau pelaksanaan kontrak pemerintah.
 
-**Alat yang digunakan**: `search_subsidies` → `rank_bids` → `create_bid_review_packet`
+**Alat yang digunakan**: `search_subsidies` → `rank_bids` → `extract_bid_requirements` / `export_bid_shortlist` (atau `create_bid_review_packet` saat menggunakan `JP_BIDS_PROFILE=full_local` lokal)
 
 **Contoh prompt**:
 
@@ -85,25 +87,25 @@ Sarankan kombinasi di mana tenggat subsidi dan tender tidak bertabrakan.
 
 Alur yang diharapkan:
 1. `search_subsidies keyword="AI" acceptance=1` — temukan subsidi yang sedang dibuka
-2. `search_bids query="AI システム開発"` + `rank_bids` — peringkatkan tender berdasarkan profil
-3. `create_bid_review_packet` — buat memo tinjauan internal yang mencakup subsidi yang cocok sebagai opsi pembiayaan
+2. `rank_bids query="AI システム開発"` — peringkatkan tender berdasarkan profil
+3. `extract_bid_requirements` / `export_bid_shortlist` (atau `create_bid_review_packet(bid_key=...)` di `full_local`) — susun tautan spesifikasi dan catatan tinjauan bersama subsidi yang cocok
 
 ---
 
-### Alur Kerja 3 — Analisis silang riwayat pemenang tender dengan penggunaan subsidi
+### Alur Kerja 3 — Analisis silang tren pengumuman historis dengan subsidi (lokal `full_local`)
 
-**Tujuan**: Tentukan pola pembiayaan realistis dengan menggabungkan data pemenang tender historis dan statistik subsidi.
+**Tujuan**: Gabungkan tren pengumuman pengadaan historis dan statistik subsidi di kategori layanan yang sama.
 
-**Alat yang digunakan**: `analyze_past_awards` (JP Bids) + `get_subsidy_overview` (J-Grants)
+**Alat yang digunakan**: `analyze_past_awards` (JP Bids, lokal `JP_BIDS_PROFILE=full_local`) + `get_subsidy_overview` (J-Grants)
 
 **Contoh prompt**:
 
 ```
-Analisis riwayat pemenang tender layanan kebersihan, dan tunjukkan kombinasinya dengan subsidi yang tersedia di kategori yang sama.
+Analisis tren pengumuman historis layanan kebersihan, dan tunjukkan kombinasinya dengan subsidi yang tersedia di kategori yang sama.
 ```
 
 Alur yang diharapkan:
-1. `analyze_past_awards category="清掃"` — distribusi nilai kontrak historis
+1. `analyze_past_awards query="清掃" category="役務"` — frekuensi pengumuman historis dan instansi pengadaan utama
 2. `get_subsidy_overview keyword="清掃"` — jumlah subsidi yang tersedia berdasarkan rentang tenggat dan jumlah
 3. LLM menyajikan gambaran umum lanskap pendanaan untuk kategori layanan kebersihan
 
@@ -113,12 +115,14 @@ Alur yang diharapkan:
 
 ### Alat JP Bids MCP yang digunakan dalam alur kerja ini
 
-| Alat | Deskripsi | Tier |
+| Alat | Deskripsi | Profil |
 |---|---|---|
-| `search_bids` | Pencarian pengumuman KKJ berdasarkan kata kunci/wilayah/kategori | Free |
-| `rank_bids` | Nilai tender berdasarkan profil perusahaan | Free |
-| `analyze_past_awards` | Analisis riwayat pemenang tender | Pro |
-| `create_bid_review_packet` | Pembuatan memo tinjauan internal | Pro |
+| `search_bids` | Pencarian pengumuman KKJ berdasarkan kata kunci/wilayah/kategori | `public_mvp` (publik & lokal, gratis) |
+| `rank_bids` | Nilai tender berdasarkan profil perusahaan | `public_mvp` (publik & lokal, gratis) |
+| `extract_bid_requirements` | Periksa tautan lampiran spesifikasi resmi | `public_mvp` (publik & lokal, gratis) |
+| `export_bid_shortlist` | Ekspor daftar kandidat ke CSV atau JSON | `public_mvp` (publik & lokal, gratis) |
+| `analyze_past_awards` | Analisis tren pengumuman historis | `full_local` (lokal `JP_BIDS_PROFILE=full_local`) |
+| `create_bid_review_packet` | Pembuatan memo tinjauan internal | `full_local` (lokal `JP_BIDS_PROFILE=full_local`) |
 
 ### Alat J-Grants MCP yang digunakan dalam alur kerja ini
 

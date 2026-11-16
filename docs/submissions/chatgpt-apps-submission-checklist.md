@@ -4,26 +4,25 @@
 
 > 申請ポータル: `platform.openai.com` → Dashboard → Apps  
 > 対象タイプ: Universal MCP server（単一の公開エンドポイント）  
-> 参照元: `https://developers.openai.com/apps-sdk/deploy/submission`、`https://developers.openai.com/apps-sdk/app-submission-guidelines`（2026-07-06 時点で確認）  
+> 参照元: `https://developers.openai.com/apps-sdk/deploy/submission`、`https://developers.openai.com/apps-sdk/app-submission-guidelines`  
+> 最新のローカル準備状況・残課題正本: [`OPENAI_SUBMISSION_LOCAL_PREPARATION_20261021.md`](./OPENAI_SUBMISSION_LOCAL_PREPARATION_20261021.md)  
 > 申請日: TBD  
-> バージョン: v0.7.x+
+> バージョン: Public MVP (`0.9.0` / 公開版 `0.10.0`)
 
-> **公式ドキュメントに載っていない実務上の要点**（2026年6月以降のコミュニティ報告に基づく）は「⚠️ 未文書化」と明記する。ダッシュボードのUIは変わりうるため、実際の画面表示を優先すること。
+> **公式ドキュメントに載っていない実務上の要点**（コミュニティ報告に基づく）は「⚠️ 未文書化」と明記する。ダッシュボードのUIは変わりうるため、実際の画面表示を優先すること。
 
 ---
 
-## 0. スコープの決定（重要・すでに壁さんと合意済み）
+## 0. スコープの決定（現行 Public MVP 公開7ツール）
 
-**今回のChatGPT App提出は Free ティアの4ツールのみを対象とする。**
+**今回のChatGPT App提出は `public_mvp` プロファイルの公開7ツール（完全無料・読み取り専用・課金導線ゼロ）を対象とする。**
 
-理由: OpenAIの App Submission Guidelines は「デジタル商品・サブスクリプションの販売は、直接であれ間接的なフリーミアム誘導であれ禁止」と明記している。現状の `src/mcp.ts` の Free tier `instructions` には `"Upgrade to Pro (990 JPY/month)..."` という文言があり、Pro分の17ツール＋MCP Appを丸ごと申請すると審査リジェクトの火種になる。Free4ツールは無料・読み取り専用・アップグレード誘導文言なしで完結するため、リジェクトリスクを最小化できる。
+理由: v0.9.0 以降、Stripe 課金・Pro API キー・アップグレード誘導文言をコードベースから完全に撤廃し、公開エンドポイント `https://mcp.bid-jp.com/mcp` は **無料・読み取り専用の公開7ツール（`public_mvp`）のみ** を公開する構成へ移行済み。これにより OpenAI App Submission Guidelines の「サブスクリプション販売・フリーミアム誘導の禁止」に完全準拠しつつ、`AI Bid Workspace`（MCP Apps UI）と16列CSV/JSON出力まで審査対象に含められる。
 
-| 対象 | ツール |
+| 区分 | ツール |
 |---|---|
-| **提出する（Free, 4ツール）** | `search_bids`, `rank_bids`, `list_recent_bids`, `get_bid_detail` |
-| **今回は提出しない（Pro, 13ツール＋MCP App）** | `search_bids_app`, `explain_bid_fit`, `assess_bid_qualification`, `extract_bid_requirements`, `export_bid_shortlist`, `create_bid_calendar`, `create_bid_review_packet`, `draft_bid_questions`, `analyze_past_awards`, `summarize_bids_by_org`, `save_search`, `check_saved_search`, `list_saved_searches` |
-
-Pro機能をChatGPTに出す場合は、別途「フリーミアム誘導文言をChatGPT向けにゼロにする」設計・法務確認をしてから再検討する（本チェックリストの範囲外）。
+| **提出する（`public_mvp`, 公開7ツール・無料）** | `search_bids`, `list_recent_bids`, `get_bid_detail`, `search_bids_app`（UI: `ui://jp-bids/search-results.html`）, `rank_bids`, `extract_bid_requirements`, `export_bid_shortlist` |
+| **公開エンドポイント非公開（ローカル `JP_BIDS_PROFILE=full_local` 専用 15ツール）** | `explain_bid_fit`, `assess_bid_qualification`, `create_bid_calendar`, `create_bid_review_packet`, `draft_bid_questions`, `analyze_past_awards`, `summarize_bids_by_org`, `save_search`, `check_saved_search`, `list_saved_searches`, および Investor Radar 5ツール |
 
 ---
 
@@ -33,14 +32,15 @@ Pro機能をChatGPTに出す場合は、別途「フリーミアム誘導文言�
 |---|---|---|
 | MCPサーバーが公開HTTPSドメインで稼働 | ✅ | `https://mcp.bid-jp.com/mcp` |
 | localhost/テスト用エンドポイントでない | ✅ | 本番Cloud Runエンドポイント |
-| Free4ツールに `readOnlyHint`/`destructiveHint`/`openWorldHint` が明示されている | ✅ | 全てtrue/false明示、nullなし（`src/tools/search-bids.ts` 等） |
-| 4ツール全てに `outputSchema` がある | ✅ | `BidSearchResultSchema` / `BidRankingResultSchema` |
+| 公開7ツールに `readOnlyHint`/`destructiveHint`/`idempotentHint`/`openWorldHint` が明示されている | ✅ | 全てtrue/false明示、nullなし（`src/tools/*.ts`） |
+| 公開7ツール全てに `outputSchema` がある | ✅ | `BidSearchResultSchema` / `BidRankingResultSchema` / `BidShortlistExportSchema` 等 |
 | プライバシーポリシー・利用規約が公開URL | ✅ | `https://mcp.bid-jp.com/privacy` / `/terms` |
 | サポート連絡先 | ✅ | `mcp@bid-jp.com`（またはGitHub Issues） |
-| OpenAI Organization データレジデンシー = Global（EUではない） | ⚠️ 要確認 | 壁さんがDashboardで確認。EUだと提出不可 |
+| KKJ 二次利用・第三者提供条件の事前確認（OAI-01） | ⚠️ 要確認（壁さん） | `OPENAI_SUBMISSION_LOCAL_PREPARATION_20261021.md` §OAI-01 参照 |
+| OpenAI Organization データレジデンシー = Global（EUではない） | ⚠️ 要確認（壁さん） | 壁さんがDashboardで確認。EUだと提出不可 |
 | Organization/個人 verification 完了 | ⚠️ 要対応（壁さん） | §2参照 |
-| ドメイン所有確認エンドポイント実装済み | ✅ | `GET /.well-known/openai-apps-challenge`（本チェックリスト作成時にコード実装済み、`OPENAI_APPS_CHALLENGE_TOKEN` 環境変数） |
-| Free4ツールの認証方式の決定 | ⚠️ 要確認 | §4参照 |
+| ドメイン所有確認エンドポイント実装済み | ✅ | `GET /.well-known/openai-apps-challenge`（`OPENAI_APPS_CHALLENGE_TOKEN` 環境変数） |
+| OAuth 2.0（PKCE + DCR, 1クリック同意）稼働確認 | ✅ | §4参照（ChatGPT Developer Mode 実機接続実績あり） |
 
 ---
 
@@ -67,25 +67,18 @@ OpenAIはAPIやブラウザ自動操作からの本人確認を許可してい�
 | MCP Server URL（審査用の実エンドポイント） | `https://mcp.bid-jp.com/mcp` |
 | Template MCP Server URL | 不要（全ユーザー同一エンドポイントのUniversal URL） |
 | Transport | Streamable HTTP |
-| CSP（Content Security Policy） | Free4ツールはUIリソース（iframe）を持たないため `_meta.ui.csp` は該当なし。widget CSPを聞かれた場合は「N/A — no UI resource for the submitted tool set」と回答する |
+| UI Resource (`search_bids_app`) | `ui://jp-bids/search-results.html` |
+| CSP（Content Security Policy） | `_meta.ui.csp` = `{ connectDomains: [], resourceDomains: [], frameDomains: [] }`（単一HTML自己完結バンドル、外部通信・外部アセット読み込みゼロ） |
 
 ---
 
-## 4. 認証方式（★要ライブ確認・審査当日に決める）
+## 4. 認証方式（OAuth 2.0 1クリック同意）
 
-Free4ツールにはPro向け課金・OAuth誘導を一切見せない設計にしたいが、本サーバーは本番で常時 `JP_BIDS_OAUTH_SECRET` を要求するため、認証ヘッダーなしのリクエストは401を返す。ChatGPT側に伝えるべき接続方法は以下のいずれか。ダッシュボードのUIを見てから選ぶこと。
+本番サーバー（`JP_BIDS_PROFILE=public_mvp`）は OAuth 2.0（Authorization Code + PKCE + Dynamic Client Registration）を提供する。
 
-### オプションA（推奨）: OAuthを選ばず、固定のBearerトークンで接続
-本サーバーの `parseTier()` は、ベータ期間（`src/lib/auth.ts` の `BETA_UNTIL`、現在は 2026-10-01）後は「`JP_BIDS_PRO_API_KEYS` に含まれないBearerトークン = Free tier」として扱う。したがって：
-- OpenAIの提出フォームで「API key / custom header」認証方式が選べる場合、ヘッダー `Authorization: Bearer <任意の非公開文字列、例: chatgpt-reviewer-demo>` を設定する。
-- このトークンは `JP_BIDS_PRO_API_KEYS` に**登録しない**（登録するとPro扱いになってしまう）。
-- ログイン・パスワード不要、アカウント作成不要で即座に動作するため、OpenAIの「デモアカウントは追加ステップなしで即利用可能」要件を満たす。
-
-### オプションB: OAuthフローを使う（フォームがAPI keyをサポートしない場合）
-本サーバーのOAuthは `/oauth/authorize` で「許可する/拒否」ボタンを押すだけの1クリック同意画面（ログインフォームなし、アカウント作成不要）。ただし **現状のコードでは、OAuthで認証されたリクエストは常にPro tierとして扱われる**（`src/transports/http.ts` の `isOAuthAuthenticated ? "pro" : parseTier(...)`）。これはFree限定提出の方針と矛盾するため、オプションBを使う場合は事前に次のいずれかを実施する:
-   1. 審査中だけ一時的にPro相当の全ツールが見えることを許容する（非推奨、スコープ決定と矛盾）。
-   2. コード側でOAuthクライアントごとにtierを分岐できるようにする（要追加実装、本チェックリスト作成時点では未着手）。
-   → **オプションAが使えるなら、Bの実装変更は不要。まずAを試すこと。**
+- `/oauth/authorize` はアカウント作成・パスワード入力・課金登録を一切求めない **1クリック同意画面**（「許可する / 拒否」のみ）であり、OpenAI審査員も追加の資格情報なしで即座に検証可能。
+- OAuth 認証後もサーバープロファイルは `public_mvp` 固定のため、公開7ツールのみが表示され、非公開15ツールや有料プラン案内が露出することはない。
+- 審査フォームで「Authentication」を選択する際は **OAuth 2.0（Dynamic Client Registration 対応）** を指定する（ChatGPT Developer Mode での接続手順と同様）。万一フォームが静的クライアントID入力を必須とする場合は `/oauth/register` で事前発行した `client_id` を使用する。
 
 ---
 
@@ -93,32 +86,34 @@ Free4ツールにはPro向け課金・OAuth誘導を一切見せない設計に�
 
 `docs/submissions/chatgpt-app-submission.json` に機械可読な形でまとめ済み。フォームの「Tool justification」欄にはそこに書いた1文ずつをそのまま貼る。
 
-| ツール | readOnlyHint | destructiveHint | openWorldHint |
-|---|---|---|---|
-| `search_bids` | true | false | true |
-| `rank_bids` | true | false | true |
-| `list_recent_bids` | true | false | true |
-| `get_bid_detail` | true | false | true |
+| ツール | readOnlyHint | destructiveHint | idempotentHint | openWorldHint |
+|---|---|---|---|---|
+| `search_bids` | true | false | true | true |
+| `list_recent_bids` | true | false | true | true |
+| `get_bid_detail` | true | false | true | true |
+| `rank_bids` | true | false | true | true |
+| `extract_bid_requirements` | true | false | false | true |
+| `export_bid_shortlist` | true | false | false | true |
+| `search_bids_app` | true | false | true | true |
 
 ### ⚠️ 既知のリスク: `openWorldHint` の定義の違い
 
 - **MCP公式仕様**の定義: 「予測不能な"open world"の外部エンティティと相互作用するか」（Web検索ツール＝true、メモリツール＝false）。本サーバーはこの定義に従い、KKJという外部の公開データソースを検索するため `true` としている。Anthropic Connectors Directoryはこの定義で申請・承認済み。
-- **OpenAI ChatGPT Apps** の定義（`app-submission-guidelines`より）: 「公開インターネット上の状態を書き込み・変更できる場合のみtrue。それ以外（閉じた系での読み取りを含む）はfalse」。この定義に厳密に従うなら、4ツールはいずれも書き込みを一切行わないため `false` が正しい。
+- **OpenAI ChatGPT Apps** の定義（`app-submission-guidelines`より）: 「公開インターネット上の状態を書き込み・変更できる場合のみtrue。それ以外（閉じた系での読み取りを含む）はfalse」。この定義に厳密に従うなら、公開7ツールはいずれも書き込みを一切行わないため `false` が正しい。
 - **対処方針**: 今回は `chatgpt-app-submission.json` に「外部の予測不能な公開データを検索するが、公開状態への書き込み・公開は一切行わない」という趣旨のjustificationを付けて `true` のまま提出する（サーバー側の値はフォームが直接スキャンして読み取るため、こちらで`false`と偽って書くことはできない）。
-- もし審査で「annotation does not match behavior」の指摘を受けた場合は、`src/tools/search-bids.ts` / `rank-bids.ts` / `list-recent-bids.ts` / `get-bid-detail.ts` の4ツールの `openWorldHint` を `false` に変更して再スキャン・再提出する（Claude Directory等、他クライアントへの実害はない。単なるヒント値の変更）。
+- もし審査で「annotation does not match behavior」の指摘を受けた場合は、公開7ツールの `openWorldHint` を `false` に変更して再デプロイ・再スキャンする。
 
 ---
 
-## 6. App Info（`chatgpt-app-submission.json` の `app_info` を参照）
+## 6. App Info（`chatgpt-app-submission.json` の `app_info` および `plugins/jp-bids-mcp/` を参照）
 
 | フィールド | 値 |
 |---|---|
 | Display name | `JP Bids` |
-| Subtitle（30字以内） | `Japan government bid search` |
+| Subtitle | `Japan government procurement & bid intelligence`（※30字制限がある場合は `Japan government bid search`） |
 | Category | `BUSINESS` |
 | Description | `docs/submissions/chatgpt-app-submission.json` の `app_info.description` を貼る |
-| Logo | 64×64 SVG、5KB未満（⚠️ 未文書化の実務要件。`public/favicon.png` をSVG化して用意する） |
-| Light/Dark mode アイコン | 両方用意する（⚠️ 未文書化） |
+| Logo / Icons | `plugins/jp-bids-mcp/assets/` 内の検証済みPNG（および必要に応じ64×64 SVG）を使用（`node scripts/build-openai-package.mjs` で検証済み） |
 | Privacy Policy URL | `https://mcp.bid-jp.com/privacy` |
 | Terms of Service URL | `https://mcp.bid-jp.com/terms` |
 | Support contact | `mcp@bid-jp.com` |
@@ -128,18 +123,16 @@ Free4ツールにはPro向け課金・OAuth誘導を一切見せない設計に�
 
 ## 7. スクリーンショット / Screenshots
 
-⚠️ 公式ドキュメントに寸法の明記なし。コミュニティ報告値: **幅706px、高さ400〜860px**、ChatGPT上での実際の会話＋ツール応答を含む。
-
-Free4ツールはMCP Apps UI（iframe widget）を持たないため、Claude提出時のような専用UIスクリーンショットは使えない。代わりに、実際のChatGPT会話でツール呼び出し結果がテキスト表示された画面をキャプチャする。
+⚠️ 公式ドキュメントに寸法の明記なし。コミュニティ報告値: **幅706px、高さ400〜860px**、ChatGPT上での実際の会話＋ツール応答（UIワークスペース含む）をキャプチャする。
 
 準備するスクリーンショット（4〜5枚を推奨）:
-1. `search_bids` 実行結果（都道府県・キーワード検索の会話）
-2. `rank_bids` 実行結果（スコアリング・優先度付き一覧）
-3. `list_recent_bids` 実行結果（直近7日間の新着一覧）
-4. `get_bid_detail` 実行結果（公式リンク付き詳細）
+1. `search_bids_app` 実行結果（ChatGPT上の `AI Bid Workspace` カード一覧・詳細表示）
+2. `search_bids` / `get_bid_detail` 実行結果（都道府県・キーワード検索と公式リンク付き詳細）
+3. `rank_bids` 実行結果（スコアリング・優先度付き一覧）
+4. `extract_bid_requirements` / `export_bid_shortlist` 実行結果（要件整理と16列CSV/手動取得欄）
 5. （任意）モバイルアプリでの表示
 
-→ ChatGPT Developer Mode でこのMCPサーバーを接続し、実際に上記プロンプトを実行してスクリーンショットを撮る。手順は `docs/submissions/chatgpt-app-submission-instructions.md` の該当セクション参照。
+→ ChatGPT Developer Mode で `https://mcp.bid-jp.com/mcp` を接続し、実際に上記プロンプトを実行してスクリーンショットを撮る。
 
 ---
 
@@ -148,28 +141,27 @@ Free4ツールはMCP Apps UI（iframe widget）を持たないため、Claude提
 ⚠️ 公式ドキュメントに明記なし。コミュニティ報告: YouTube/Google Drive等の公開URLで、ChatGPT web版とモバイル版の両方での実際の利用シーンを録画する必要がある。
 
 **準備するスクリプト（1〜2分想定）**:
-1. ChatGPTでJP Bids Appを開く（Developer Mode接続画面）
-2. 「鹿児島県のIT関連の入札を探して」→ `search_bids` が呼ばれ結果が表示される
-3. 「クラウド保守に強い順にランク付けして」→ `rank_bids` が呼ばれる
-4. 「一番上の案件の詳細と公式ページのリンクを教えて」→ `get_bid_detail` が呼ばれる
-5. モバイルアプリでも同じ操作を繰り返す（ChatGPTモバイルアプリで同一MCP接続を使う）
-6. YouTube（限定公開）またはGoogle Driveにアップロードし、共有リンクをフォームに貼る
+1. ChatGPTでJP Bids Appを開く（Developer Mode接続・OAuth 1クリック同意）
+2. 「東京都のIT関連入札をUIワークスペースで最大3件表示して」→ `search_bids_app` が呼ばれ `AI Bid Workspace` が表示される
+3. ワークスペース上で案件を選択し「選択CSV」を実行（またはチャットで `rank_bids` → `get_bid_detail` を実行）
+4. モバイルアプリでも同じ検索・詳細確認を実行する
+5. YouTube（限定公開）またはGoogle Driveにアップロードし、共有リンクをフォームに貼る
 
 ---
 
 ## 9. Test cases（フォームの Testing セクション）
 
-`docs/submissions/chatgpt-app-submission.json` の `test_cases`（5件）・`negative_test_cases`（3件）をそのまま転記する。実行して実際の出力を確認してから提出すること（プロンプトを流し、期待通りの動作か目視確認）。
+`docs/submissions/chatgpt-app-submission.json`（および `docs/submissions/chatgpt-app-submission-draft-20261021.json`）の公開7ツール対応テストケース（positive 5件 `TC-01`〜`TC-05`・negative 3件 `NC-01`〜`NC-03`）を参照する。実行して実際の出力を確認してから提出すること。最新の未解決確認項目は `docs/submissions/OPENAI_SUBMISSION_LOCAL_PREPARATION_20261021.md` を優先すること。
 
 ---
 
 ## 10. Compliance チェックボックス（想定される確認事項）
 
 - [ ] App Submission Guidelines を遵守している
-- [ ] 商用取引（決済・サブスクリプション販売）を行わない — **Free4ツールのみの提出なので該当なし**
+- [ ] 商用取引（決済・サブスクリプション販売）を行わない — **公開7ツール（Public MVP）は完全無料で課金機能なし**
 - [ ] 成人向け・賭博・規制物品等の禁止カテゴリに該当しない
 - [ ] 広告を表示しない・広告目的のアプリではない
-- [ ] 第三者APIの利用規約を遵守している（KKJは中小企業庁が一般公開する政府標準利用規約 第2.0版のデータ）
+- [ ] 第三者APIの利用条件を確認・遵守している（出典: 中小企業庁 官公需情報ポータルサイト `https://www.kkj.go.jp/s/help/notes/` ※二次利用条件の公式根拠確認は `OPENAI_SUBMISSION_LOCAL_PREPARATION_20261021.md` を参照し、未確認の規約名を断定しない）
 - [ ] 個人情報・機密情報（PHI/PCI/政府ID/認証情報）を要求・収集しない
 - [ ] モデルの選択を誘導する記述（"prefer this app"等）がツール名・descriptionに含まれない
 
@@ -177,13 +169,13 @@ Free4ツールはMCP Apps UI（iframe widget）を持たないため、Claude提
 
 ## 11. 最終提出手順 / Final Submission Steps
 
-1. `npm run build && npm test && npm run lint` が通ることを確認
-2. `npm run remote:mcp` で本番エンドポイントの `search_bids` / `rank_bids` / `list_recent_bids` / `get_bid_detail` を実行確認
+1. `npm run build && npm test && npm run lint` および `node scripts/build-openai-package.mjs` が通ることを確認
+2. 本番エンドポイントの公開7ツール（`search_bids` / `list_recent_bids` / `get_bid_detail` / `rank_bids` / `extract_bid_requirements` / `export_bid_shortlist` / `search_bids_app`）を過剰アクセスにならない最小回数で確認
 3. §2 の Organization Verification を完了させる（壁さん）
 4. §4 で認証方式を決定し、実際にダッシュボードから接続テストする
-5. ダッシュボードで「Add MCP server」→ Scan Tools を実行し、4ツールの `readOnlyHint`/`destructiveHint`/`openWorldHint` が期待通り読み取られるか確認
+5. ダッシュボードで「Add MCP server」→ Scan Tools を実行し、公開7ツールの `readOnlyHint`/`destructiveHint`/`idempotentHint`/`openWorldHint` が期待通り読み取られるか確認
 6. §5 のjustificationを貼る。`openWorldHint: true` に対する指摘が来た場合は §5 の対処方針に従う
 7. §6〜9 のApp Info・スクリーンショット・動画・テストケースを入力
 8. 全チェックボックスを確認しSubmit for review
 9. 確認メールのCase IDを `docs/submissions/mcp-directories.md` に記録
-10. 審査中はサーバーのライブ挙動を変えない（`instructions` にPro誘導文言が残っているため、承認後にPro/17ツール版を別途申請する際は必ずChatGPT向けの誘導文言除去を先に行う）
+10. 審査中はサーバーのライブ挙動（ツール名・スキーマ・OAuth構成）を変えない

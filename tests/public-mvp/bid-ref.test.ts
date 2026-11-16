@@ -123,7 +123,7 @@ describe("U2-R: Bid Reference (bid_ref) Continuity & Tamper Defense (B03, B04, R
         baseUrl: BASE_URL,
       });
       const parts = token.split(".");
-      const payload = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf8"));
+      const payload = JSON.parse(Buffer.from(parts[1] ?? "", "base64url").toString("utf8"));
       payload.bid.projectName = "改ざんされた案件名";
       const tamperedPayload = Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
       const tamperedToken = `${parts[0]}.${tamperedPayload}.${parts[2]}`;
@@ -208,7 +208,7 @@ describe("U2-R: Bid Reference (bid_ref) Continuity & Tamper Defense (B03, B04, R
       });
 
       const verified = verifyBidRef(token, TEST_SECRET, {
-        expectedIssuer: BASE_URL,
+        expectedBaseUrl: BASE_URL,
       });
       expect(verified.valid).toBe(false);
       if (!verified.valid) {
@@ -253,10 +253,10 @@ describe("U2-R: Bid Reference (bid_ref) Continuity & Tamper Defense (B03, B04, R
       const parts = token.split(".");
       expect(parts.length).toBe(3);
 
-      const header = JSON.parse(Buffer.from(parts[0], "base64url").toString("utf8"));
+      const header = JSON.parse(Buffer.from(parts[0] ?? "", "base64url").toString("utf8"));
       expect(header).toEqual({ alg: "HS256", typ: BID_REF_TYP });
 
-      const payload = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf8"));
+      const payload = JSON.parse(Buffer.from(parts[1] ?? "", "base64url").toString("utf8"));
       expect(payload.purpose).toBe(BID_REF_PURPOSE);
       expect(payload.iss).toBe(BASE_URL);
       expect(payload.aud).toBe(BID_REF_AUDIENCE);
@@ -266,8 +266,8 @@ describe("U2-R: Bid Reference (bid_ref) Continuity & Tamper Defense (B03, B04, R
     it("strictly excludes projectDescription and internal fields from snapshot", () => {
       const bidWithBody: Bid = {
         ...sampleBid,
-        // @ts-expect-error projectDescription is excluded from Bid type
         projectDescription: "秘密の入札仕様書本文",
+        // @ts-expect-error internalCompanyNotes is excluded from Bid type
         internalCompanyNotes: "非公開メモ",
       };
 
@@ -278,7 +278,7 @@ describe("U2-R: Bid Reference (bid_ref) Continuity & Tamper Defense (B03, B04, R
       const verified = verifyBidRef(token, TEST_SECRET);
       expect(verified.valid).toBe(true);
       if (verified.valid) {
-        const bidData = verified.payload.bid as Record<string, unknown>;
+        const bidData = verified.payload.bid as unknown as Record<string, unknown>;
         expect(bidData.projectDescription).toBeUndefined();
         expect(bidData.internalCompanyNotes).toBeUndefined();
       }

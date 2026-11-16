@@ -112,4 +112,4 @@ MCP の `readOnlyHint` や `destructiveHint` のようなアノテーション�
 
 ---
 
-*JP Bids MCP と Public MCP JP Gateway は[スグクル株式会社](https://sugukuru.co.jp)が開発しています。J-Grants MCP はデジタル庁の公式OSS、法人番号 MCP は国税庁 法人番号公表サイト Web-API を利用したコネクタです。それぞれ独立した運営であり、本記事の内容は参考情報です。実際の入札・補助金・法人確認は必ず公式サイトと一次情報源を確認してください。*
+*JP Bids MCP と Public MCP JP Gateway は[スグクル株式会社](https://sugu-kuru.co.jp)が開発しています。J-Grants MCP はデジタル庁の公式OSS、法人番号 MCP は国税庁 法人番号公表サイト Web-API を利用したコネクタです。それぞれ独立した運営であり、本記事の内容は参考情報です。実際の入札・補助金・法人確認は必ず公式サイトと一次情報源を確認してください。*

@@ -54,7 +54,9 @@ describe("VertexGeminiClient", () => {
             };
           },
         },
-      },
+      } as unknown as NonNullable<
+        NonNullable<ConstructorParameters<typeof VertexGeminiClient>[0]>["ai"]
+      >,
       model: "gemini-3-flash-preview",
     });
 
@@ -71,7 +73,9 @@ describe("VertexGeminiClient", () => {
         models: {
           generateContent: async () => ({ text: "not json" }),
         },
-      },
+      } as unknown as NonNullable<
+        NonNullable<ConstructorParameters<typeof VertexGeminiClient>[0]>["ai"]
+      >,
     });
 
     const result = await client.extractBidRequirements({ bid, documents: [pdfDocument] });
@@ -88,7 +92,9 @@ describe("VertexGeminiClient", () => {
         models: {
           generateContent: async () => ({ text: "{}" }),
         },
-      },
+      } as unknown as NonNullable<
+        NonNullable<ConstructorParameters<typeof VertexGeminiClient>[0]>["ai"]
+      >,
     });
 
     await expect(

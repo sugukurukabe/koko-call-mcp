@@ -3,6 +3,7 @@ import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { KkjClient } from "../../src/api/kkj-client.js";
+import { createAttribution } from "../../src/domain/attribution.js";
 import { type Bid, RankedBidSchema } from "../../src/domain/bid.js";
 import {
   type BidRankingOptions,
@@ -79,10 +80,10 @@ describe("U2-R: Selection Ranking, Shortlist Export & CSV Defense (B05, B07, B08
       const result = rankSelectionBids(inputBids, options);
 
       expect(result.rankedCount).toBe(2);
-      expect(result.rankedBids[0].bid.key).toBe(sampleBid1.key);
-      expect(result.rankedBids[0].selectionIndex).toBe(1); // was index 1 in input
-      expect(result.rankedBids[1].bid.key).toBe(sampleBid2.key);
-      expect(result.rankedBids[1].selectionIndex).toBe(0); // was index 0 in input
+      expect(result.rankedBids[0]?.bid.key).toBe(sampleBid1.key);
+      expect(result.rankedBids[0]?.selectionIndex).toBe(1); // was index 1 in input
+      expect(result.rankedBids[1]?.bid.key).toBe(sampleBid2.key);
+      expect(result.rankedBids[1]?.selectionIndex).toBe(0); // was index 0 in input
     });
 
     it("B05-02: guarantees exact score, priority, and reason parity between search ranking and bid_ref snapshot ranking at same asOf", () => {
@@ -104,11 +105,11 @@ describe("U2-R: Selection Ranking, Shortlist Export & CSV Defense (B05, B07, B08
       });
       const snapshotRanked = rankSelectionBids([{ ...sampleBid1, bidRef: ref1 }], options);
 
-      expect(snapshotRanked.rankedBids[0].score).toBe(directRanked.score);
-      expect(snapshotRanked.rankedBids[0].priority).toBe(directRanked.priority);
-      expect(snapshotRanked.rankedBids[0].reasons).toEqual(directRanked.reasons);
-      expect(snapshotRanked.rankedBids[0].risks).toEqual(directRanked.risks);
-      expect(snapshotRanked.rankedBids[0].deadlineStatus).toBe(directRanked.deadlineStatus);
+      expect(snapshotRanked.rankedBids[0]?.score).toBe(directRanked.score);
+      expect(snapshotRanked.rankedBids[0]?.priority).toBe(directRanked.priority);
+      expect(snapshotRanked.rankedBids[0]?.reasons).toEqual(directRanked.reasons);
+      expect(snapshotRanked.rankedBids[0]?.risks).toEqual(directRanked.risks);
+      expect(snapshotRanked.rankedBids[0]?.deadlineStatus).toBe(directRanked.deadlineStatus);
     });
 
     it("B05-03: RankedBidSchema validates selectionIndex: 0 without schema violation", () => {
@@ -199,6 +200,8 @@ describe("U2-R: Selection Ranking, Shortlist Export & CSV Defense (B05, B07, B08
       };
 
       const rankingResult = {
+        searchHits: 2,
+        returnedCount: 2,
         rankedBids: [
           {
             bid: highScoreBid,
@@ -221,9 +224,8 @@ describe("U2-R: Selection Ranking, Shortlist Export & CSV Defense (B05, B07, B08
         ],
         query: {},
         rankedCount: 2,
-        unrankedCount: 0,
-        options: {},
-        attribution: { dataSource: "KKJ" },
+        scoringPolicy: { version: "ai-bid-radar-1.0", summary: "test" },
+        attribution: createAttribution(),
       };
 
       const exported = exportBidShortlist(rankingResult, undefined, "json");

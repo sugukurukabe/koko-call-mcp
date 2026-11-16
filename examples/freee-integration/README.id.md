@@ -43,30 +43,30 @@ lalu tentukan apakah kami memiliki kapasitas keuangan untuk mengikuti tender.
 
 ### Alur Kerja 2: Pencatatan transaksi otomatis setelah memenangkan tender
 
-**Tujuan**: Setelah memenangkan kontrak, buat entri penjualan di freee.
+**Tujuan**: Setelah memenangkan kontrak, buat entri penjualan di freee berdasarkan metadata pengumuman KKJ dan nilai kontrak yang telah dikonfirmasi.
 
 ```
-Ambil detail tender "2026-KKJ-12345" dan
-buat transaksi penjualan di freee berdasarkan jumlah kontrak dan nama instansi.
+Ambil detail tender "2026-KKJ-12345" untuk nama instansi dan judul tender, lalu
+buat transaksi penjualan sebesar 5.500.000 JPY di freee.
 ```
 
 ### Alur Kerja 3: Pembuatan faktur otomatis dari data tender
 
-**Tujuan**: Buat faktur di freee dari metadata tender yang dimenangkan.
+**Tujuan**: Buat faktur di freee dari metadata tender dan nilai kontrak yang dikonfirmasi.
 
 ```
 Berdasarkan tender "2026-KKJ-12345",
 buat faktur di freee dengan nama barang = judul tender,
-jumlah = nilai kontrak, jatuh tempo = 30 hari setelah pengiriman.
+jumlah = 5.500.000 JPY, jatuh tempo = 30 hari setelah pengiriman.
 ```
 
-### Alur Kerja 4: Analisis biaya-manfaat tender
+### Alur Kerja 4: Tinjauan biaya persiapan tender (profil lokal `full_local`)
 
-**Tujuan**: Lacak biaya persiapan tender vs. kontrak yang dimenangkan.
+**Tujuan**: Lacak biaya persiapan tender di freee bersama tren pengumuman historis (`analyze_past_awards` memerlukan `JP_BIDS_PROFILE=full_local` lokal).
 
 ```
 Kumpulkan biaya terkait tender bulan lalu dari freee
-dan analisis rasio biaya-manfaat terhadap kontrak yang dimenangkan.
+dan rangkum bersama tren pengumuman pengadaan bulan lalu.
 ```
 
 ---

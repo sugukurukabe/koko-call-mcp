@@ -1,3 +1,4 @@
+import { createHmac } from "node:crypto";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { KkjClient } from "../api/kkj-client.js";
@@ -200,10 +201,10 @@ export function registerSavedSearchAlert(server: McpServer, client: KkjClient): 
           newBidsCount: returnedBids.length,
           bids: returnedBids.map((bid) => ({
             projectName: bid.projectName,
-            organizationName: bid.organizationName,
-            prefectureName: bid.prefectureName,
-            cftIssueDate: bid.cftIssueDate,
-            tenderSubmissionDeadline: bid.tenderSubmissionDeadline,
+            organizationName: bid.organizationName ?? null,
+            prefectureName: bid.prefectureName ?? null,
+            cftIssueDate: bid.cftIssueDate ?? null,
+            tenderSubmissionDeadline: bid.tenderSubmissionDeadline ?? null,
             key: bid.key,
           })),
           checkedAt: now,
@@ -324,8 +325,14 @@ function dedupeSavedSearches(entries: SavedSearchEntry[]): SavedSearchEntry[] {
 }
 
 function resolveStateTokenSecret(): string {
-  const secret = process.env.JP_BIDS_STATE_TOKEN_SECRET ?? process.env.JP_BIDS_OAUTH_SECRET;
-  if (secret) return secret;
+  if (process.env.JP_BIDS_STATE_TOKEN_SECRET) {
+    return process.env.JP_BIDS_STATE_TOKEN_SECRET;
+  }
+  if (process.env.JP_BIDS_OAUTH_SECRET) {
+    return createHmac("sha256", process.env.JP_BIDS_OAUTH_SECRET)
+      .update("jp-bids-state-token-v1")
+      .digest("hex");
+  }
   if (process.env.K_SERVICE) {
     throw new Error("JP_BIDS_STATE_TOKEN_SECRET is required in production.");
   }

@@ -1,145 +1,132 @@
-# JP Bids MCP — 日本語ガイド
+# JP Bids MCP — 日本語ガイド (v0.10.0)
 
 [![Smithery](https://smithery.ai/badge/a-kabe-1qio/jp-bids-mcp)](https://smithery.ai/servers/a-kabe-1qio/jp-bids-mcp)
 
 ## 概要 / Overview / Gambaran Umum
 
-JP Bids MCP は、中小企業庁「官公需情報ポータルサイト」の入札情報をModel Context Protocolで検索・順位付け・要件抽出・出力するサーバーです。完全無料・読み取り中心で7ツールを提供します。
+**JP Bids MCP (v0.10.0)** は、中小企業庁「官公需情報ポータルサイト（KKJ）」の公開入札公告を、普段お使いのAI（Claude / ChatGPT など）との会話だけで**検索・比較・公式資料URL確認・検討用CSV出力**できるサービスです。**インストール不要・会員登録不要・完全無料（公開7ツール）**で今すぐ利用できます。
 
-JP Bids MCP is an MCP server for searching, ranking, extracting requirements, and exporting Japanese government procurement notices from the SME Agency's KKJ portal (free, read-centric, 7 tools).
+JP Bids MCP (`v0.10.0`) connects Claude, ChatGPT, and MCP clients to Japan's SME Agency public procurement portal (KKJ) with **7 free, read-centric tools** and an interactive **AI Bid Workspace** UI.
 
-JP Bids MCP adalah server MCP untuk mencari, memeringkat, mengekstrak persyaratan, dan mengekspor pengumuman pengadaan pemerintah Jepang dari portal KKJ (gratis, read-centric, 7 tools).
+JP Bids MCP (`v0.10.0`) menghubungkan Claude, ChatGPT, dan klien MCP ke portal pengadaan pemerintah Jepang (KKJ) dengan **7 alat gratis & read-centric** serta antarmuka **AI Bid Workspace**.
 
-> **完全無料・読み取り中心 / Free and Read-Centric**<br>
-> 会員登録・有料プランなしで全公開機能（7ツール）を無料で利用できます。Stripe等の課金呼出しは行いません。<br>
-> All 7 public tools are available for free without subscription or paid tiers.
+> **完全無料・読み取り専用 / Free & Read-Only**<br>
+> アカウント作成・クレジットカード登録・有料プランなしで、公開7ツールすべてを無料で利用できます。Stripe等の課金処理や代理入札・外部書き込みは一切行いません（※AIクライアント自体の利用料は除きます）。
 
-## 現在のステータスと検証状況
+---
 
-> [!IMPORTANT]
-> **ステータス: ローカルモック実証完了 (M1〜M3-B) | 実データ接続・正式受入は未完了（移行中）**
-> - **Claude Desktopでのモック実証 (M1〜M3-B)**: **合格（実証完了）**。公開モックstdio起動スクリプト (`examples/mock-stdio-server.mjs`) を用いてローカルXMLフィクスチャ (`tests/fixtures/kkj-search.xml`、`KKJ-TEST-001`) を注入し、Claude Desktop 内での動作を検証済み：
->   - **M1**: チャットからの入札検索 (`search_bids`) による構造化結果取得。
->   - **M2**: MCP Apps仕様 (`ui://jp-bids/search-results.html`) に基づくAI Bid Workspaceパネル画面の描画 (`search_bids_app`)。
->   - **M3-A**: 画面内での動的状態変化（案件選択チェックボックス、選択件数カウント、CSV/JSONエクスポートボタンの有効化）。
->   - **M3-B**: 画面からサーバーへの双方向ツール呼び出し（画面内検索実行による `search_bids_app` 呼び出し、2ms応答、画面再描画）。
->   *(※M1〜M3-Bの実証は、アプリケーション内のモック処理（`examples/mock-stdio-server.mjs`）によりKKJ APIリクエストをローカルXMLフィクスチャ応答に差し替え、未承認fetchを例外として遮断するガード下で実施されました。これはNode.jsランタイム内のアプリケーションレベルのモック・傍受処理であり、OSレベルのサンドボックスやネットワークファイアウォールによる通信遮断ではありません。検証期間中に外部KKJへの通信は観測されませんでした)*
-> - **実KKJ API接続・Gate 1正式受入**: **未完了・移行中**。中小企業庁KKJ APIへの直接通信およびGate 1（35条件）の受入試験は、次フェーズ（M4）で実施予定です。
->
-> **モックデモと通常起動経路の区別**:
-> - **公開モックデモ (`examples/mock-stdio-server.mjs`)**: M1〜M3-Bの実証再現・UI動作確認・オフライン検証用。ローカルXMLフィクスチャ (`tests/fixtures/kkj-search.xml`、`KKJ-TEST-001`) を注入し、外部通信を行わずにMCP Apps UIを操作可能。（アプリケーションレベルのモック処理。OSレベルの通信遮断ではありません）。
-> - **通常ローカル起動 (`node dist/server.js`)**: 通常実行モード。設定に応じて中小企業庁KKJ API (`http://www.kkj.go.jp/api/`) へアクセスします。厳格なトークンバケット型レート制限 (<= 1 req/sec)、PDF/XML添付ファイルの未保存、stdoutへのログ出力完全排除（stderrのみ）を徹底します。
-> - **公開npmパッケージ (`npx -y jp-bids-mcp`) / リモートMCP (`https://mcp.bid-jp.com/mcp`)**: 公開通常経路。
+## 60秒で始める 1クリック接続（インストール不要・無料）
 
-## AIに話しかけるだけ
-
-```text
-「鹿児島県のIT系入札を探して、うちに合う順にランク付けして」
-```
-
-→ 14件ヒット → 複数案件の適合度・期限を比較採点 (`rank_bids`) → ワークスペース画面で確認 (`search_bids_app`)。
-
-```text
-「この案件の参加資格と提出書類のチェックリストを作って」
-```
-
-→ 公告メタデータから要件チェックリストを自動抽出 (`extract_bid_requirements`)。
-
-```text
-「上位5件をCSVで出力して」
-```
-
-→ 選択した順序を保ったままCSV / JSONでエクスポート (`export_bid_shortlist`)。
-
-*(注: Investor Radarや過去落札傾向分析等の追加機能はローカル開発用 `full_local` プロファイル限定です)*
-
-## クイックスタート / Quick Start / Mulai Cepat
-
-```text
-リモートMCP: https://mcp.bid-jp.com/mcp
-npm:         jp-bids-mcp
-Registry metadata name: io.github.sugukurukabe/jp-bids
-```
-
-### Claude.ai / ChatGPT / MCP対応クライアント
+プログラミングやアプリのインストールは不要です。以下の公開URLを **Claude** または **ChatGPT** に追加するだけで始められます。
 
 ```text
 https://mcp.bid-jp.com/mcp
 ```
 
-リモートエンドポイントは OAuth 2.0 必須です。`Authorization` ヘッダーなしのリクエストには `401` と `WWW-Authenticate: Bearer resource_metadata="https://mcp.bid-jp.com/.well-known/oauth-protected-resource/mcp"` が返ります。Claude.ai / ChatGPT / MCP Inspector は Dynamic Client Registration と PKCE(S256) で認可フローを自動的に処理するため、承認ボタンを押すだけで接続できます。`curl` で直接叩く場合はトークンが必要です。認証なしで試したいときは下のローカル stdio を使ってください。
+### 1. Claude（Claude.ai / Claude Desktop）で接続する（3ステップ）
+1. Claudeを開き、**「設定（またはカスタマイズ） → コネクタ（Connectors）」** を開きます。
+2. **「カスタムコネクタを追加」** を押し、名前に `JP Bids`、URLに `https://mcp.bid-jp.com/mcp` を入力します。
+3. 表示される同意画面で **「許可する / Allow」** を1クリックすれば接続完了です（パスワード登録不要・OAuth 2.0 PKCE自動認可）。
 
-The remote endpoint requires OAuth 2.0; MCP clients run the flow automatically. Use local stdio below to try without authentication.
+### 2. ChatGPT（Apps / コネクタ対応プラン）で接続する（3ステップ）
+1. ChatGPTの **「設定（Settings） → アプリ / コネクタ（Apps / Connectors）」** を開きます。
+2. MCPサーバーURLに `https://mcp.bid-jp.com/mcp` を入力し、認証方式に **OAuth 2.0** を選択します。
+3. 同意画面で **「許可する / Allow」** を1クリックすると、7つの入札調査ツールと対話型画面（AI Bid Workspace）が有効になります。
 
-Endpoint jarak jauh memerlukan OAuth 2.0; klien MCP menjalankan alurnya secara otomatis. Gunakan stdio lokal di bawah untuk mencoba tanpa autentikasi.
+>詳しい画面操作やトラブル対処は **[使用説明書 (USER_GUIDE.ja.md)](docs/USER_GUIDE.ja.md)** をご覧ください。
 
-### ローカル stdio（認証不要）
+---
 
-```bash
-npx --yes jp-bids-mcp
+## そのままコピーして使える質問例（検索 → 比較 → 公式URL確認 → 16列CSV出力）
+
+接続後、チャット欄にそのまま貼り付けて話しかけてください。
+
+### ① 案件を探して画面（AI Bid Workspace）で一覧表示する
+```text
+東京都・役務で、件名に「システム」を含む入札公告を最大5件検索して、AI Bid Workspaceを表示してください。
+```
+→ 対話型パネル（`search_bids_app`）が開き、優先度バッジ・締切日・発注機関を一覧で確認できます。
+
+### ② 気になる候補だけを選んで比較・優先度付けする
+```text
+今の検索結果から選んだ案件を、「クラウド」「保守」を重視して比較・ランク付けしてください。別の案件へ入れ替えないでください。
+```
+→ 署名付き参照（`bid_ref`）により選んだ案件だけを0〜100点で比較し、検討理由と確認リスクを整理します（`rank_bids`）。
+
+### ③ 公式公告URL・添付資料リンクと要件を確認する
+```text
+最初の案件の詳細と公式公告URL、確認すべき参加資格・提出期限のチェックリストを出してください。
+```
+→ 公式ポータル・発注機関のURLとメタデータ要件を整理します（`get_bid_detail` / `extract_bid_requirements`）。
+
+### ④ 社内共有・Excel管理用に16列CSVで出力する
+```text
+選んだ案件の順序を保ったまま、16列の検討用CSVに出力してください。
+```
+→ 画面の **「選択CSV」** ボタン（または `export_bid_shortlist`）で、ファイル保存・クリップボードコピー・手動取得欄の3段階フォールバックにより確実にCSV / JSONを受け取れます。
+
+---
+
+## Claude用「入札調査スキル」を1クリックで追加する（任意）
+
+Claudeが日本の都道府県名・調達区分（`物品` / `工事` / `役務`）・署名付き `bid_ref` の引き継ぎをより的確に行えるよう、公式スキルパックを用意しています。
+
+1. リリース配布物の **`searching-japanese-bids.zip`** を取得します（または [`skills/searching-japanese-bids/`](skills/searching-japanese-bids/) フォルダをZIP圧縮します）。
+2. **Claude.ai → 設定（Settings） → 機能（Features） → スキル（Skills） → 「スキルをアップロード（Upload skill）」** を開きます。
+3. `searching-japanese-bids.zip` を選択するだけで設定完了です。
+
+---
+
+## 公開7ツール一覧（Public MVP `v0.10.0`）
+
+| ツール | できること | プロファイル |
+|---|---|---|
+| `search_bids` | キーワード・都道府県・調達区分（物品/工事/役務）・期間で公告を検索 | Public MVP（無料） |
+| `list_recent_bids` | 直近1〜30日間に公告された新着案件の一覧を取得 | Public MVP（無料） |
+| `get_bid_detail` | 案件の詳細情報と公式公告ページ・仕様書リンクを取得（`bid_ref` 対応） | Public MVP（無料） |
+| `rank_bids` | 選択案件または検索結果を自社キーワード・期限余裕で比較採点 | Public MVP（無料） |
+| `extract_bid_requirements` | 公告メタデータから参加資格・期限・確認資料URLを整理（外部本文取得は既定OFF） | Public MVP（無料） |
+| `export_bid_shortlist` | 選択順序を保持した16列CSVまたはJSONで候補リストを出力 | Public MVP（無料） |
+| `search_bids_app` | 対話型UIパネル **AI Bid Workspace** (`ui://jp-bids/search-results.html`) で検索・選択・CSV出力 | Public MVP（無料） |
+
+## 料金 / Pricing / Harga
+
+| プラン | 料金 | 内容 |
+|---|---|---|
+| **Public MVP (`v0.10.0`)** | **無料 (Free)** | 公開7ツールすべて＋AI Bid Workspace UI（会員登録・有料プラン・Stripe課金なし） |
+
+---
+
+## 相互運用（補助金・会計との組み合わせ）
+
+- **[Jグランツ MCP](https://github.com/digital-go-jp/jgrants-mcp-server)（デジタル庁）との併用**: 「鹿児島県のIT調達案件と、中小企業向けDX補助金を同時に探して」のように入札と補助金を1つの会話で横断調査できます。設定例: [`examples/jgrants-integration/`](examples/jgrants-integration/) ／ 詳細: [`docs/integrations/jgrants.md`](docs/integrations/jgrants.md)
+- **[freee MCP](https://www.npmjs.com/package/freee-mcp)（freee株式会社）との併用**: 入札調査から落札後の取引・請求管理まで連携できます。設定例: [`examples/freee-integration/`](examples/freee-integration/)
+
+> JP Bids MCP・Jグランツ MCP・freee MCPはそれぞれ独立した運営主体のサービスです。
+
+---
+
+## 開発者・ローカル環境向けセットアップ（Developer / Local Setup）
+
+```text
+リモートMCP: https://mcp.bid-jp.com/mcp
+npmパッケージ: jp-bids-mcp (v0.10.0)
+MCP Registry名: io.github.sugukurukabe/jp-bids
 ```
 
-### CSVエクスポート
+> リモートエンドポイント（`https://mcp.bid-jp.com/mcp`）は OAuth 2.0 必須です（未認証リクエストには `401` と `WWW-Authenticate` メタデータURLを返却）。ローカル開発やCLIから認証なしで利用する場合は、以下のローカル `stdio` 経路を使用してください。
+
+### 1. `npx` によるローカル stdio 起動・CLI出力（認証不要）
 
 ```bash
+# MCP stdio サーバー起動（既定プロファイル: public_mvp 7ツール）
+npx --yes jp-bids-mcp
+
+# CLIから直接CSVエクスポート
 npx --yes jp-bids-export --prefecture 鹿児島県 --category 役務 --query システム > bids.csv
 ```
 
-### Claude Desktop 設定例
-
-#### 1. ローカル stdio（`claude_desktop_config.json`）
-
-**A. 公開モックデモ（M1〜M3-Bのオフライン再現・検証用）:**
-> [!TIP]
-> 外部KKJ通信を行わずに Claude Desktop 内での M1〜M3-B（MCP Apps UIと双方向通信）の実証を安全に再現するには、リポジトリをビルドし公開モック起動スクリプトを使用します：
-
-1. リポジトリをクローンしてビルド:
-   ```bash
-   git clone https://github.com/sugukurukabe/koko-call-mcp.git
-   cd koko-call-mcp
-   npm install
-   npm run build
-   ```
-2. `claude_desktop_config.json` に設定を追加:
-   ```json
-   {
-     "mcpServers": {
-       "jp-bids-mock": {
-         "command": "node",
-         "args": ["/path/to/koko-call-mcp/examples/mock-stdio-server.mjs"]
-       }
-     }
-   }
-   ```
-   *(※ `/path/to/koko-call-mcp` は実際のローカル絶対パスに置き換えてください)*
-3. Claude Desktopを再起動し、チャットで以下のように話しかけます：
-   ```text
-   「鹿児島県の入札案件を検索して」
-   ```
-   モックサーバーがローカルフィクスチャ (`tests/fixtures/kkj-search.xml`) から案件 `KKJ-TEST-001`（鹿児島市システム保守業務委託）を返し、対話型 AI Bid Workspace パネルが描画されます。画面内での案件選択や再検索もモック内で双方向動作します。
-   *(※これはアプリケーションレベルでリクエストを傍受しローカルデータを返すモック処理であり、OSレベルのサンドボックスではありません)*
-
-**B. 通常ローカル起動（Node.jsビルド）:**
-> [!NOTE]
-> `node dist/server.js` はサーバーの通常起動経路です。モックデモ用スクリプトとは異なり、設定に応じて実KKJ APIへのアクセスを伴い得る通常モードで動作します：
-
-```json
-{
-  "mcpServers": {
-    "jp-bids": {
-      "command": "node",
-      "args": ["/path/to/koko-call-mcp/dist/server.js"],
-      "env": {
-        "JP_BIDS_PROFILE": "public_mvp"
-      }
-    }
-  }
-}
-```
-
-**C. 通常公開パッケージ（npx起動）:**
-> [!WARNING]
-> `npx -y jp-bids-mcp` はモックデモではなく、公開レジストリ上のnpmパッケージを通常モードで起動します（実KKJアクセスを伴い得ます）。また、ローカルの未コミットPublic MVP作業コピーともバージョンが異なる場合があります：
+`claude_desktop_config.json` で公開npmパッケージを使う場合：
 
 ```json
 {
@@ -155,74 +142,50 @@ npx --yes jp-bids-export --prefecture 鹿児島県 --category 役務 --query シ
 }
 ```
 
-*(注: 設定ファイルに個人のWindows絶対パスや秘密情報を直接記述しないでください)*
+### 2. ソースビルドとローカル開発プロファイル（`full_local`）
 
-#### 2. リモートカスタムコネクタ（Claude.ai / Claude Desktop）
+リポジトリをクローンしてビルドする場合：
 
-リモートエンドポイントは、`claude_desktop_config.json` ではなくAnthropic公式のカスタムコネクタ機能から設定します：
-
-1. Claude（Claude.ai または Claude Desktop）を開きます。
-2. **設定（Customize） → コネクタ（Connectors）** を選択します。
-3. **カスタムコネクタを追加** を押し、URLを入力します：
-   ```text
-   https://mcp.bid-jp.com/mcp
-   ```
-4. OAuth 2.0 で認可を完了します（Dynamic Client Registration + PKCE S256）。
-
-## ツール一覧 / Tools / Daftar Alat
-
-| ツール | 説明 | プロファイル |
-|---|---|---|
-| `search_bids` | キーワード・地域・業種で検索 | Public MVP |
-| `list_recent_bids` | 直近の公告一覧（過去1〜30日） | Public MVP |
-| `get_bid_detail` | 案件詳細取得 | Public MVP |
-| `rank_bids` | 自社条件でスコアリング・順位付け | Public MVP |
-| `extract_bid_requirements` | 要件・提出書類・資格の抽出（外部抽出既定OFF） | Public MVP |
-| `export_bid_shortlist` | CSV/JSONエクスポート（選択順序保持） | Public MVP |
-| `search_bids_app` | MCP Apps UI付き検索ワークスペース (`ui://jp-bids/search-results.html`、単一HTMLバンドルUI) | Public MVP |
-
-## 料金 / Pricing / Harga
-
-| プラン | 料金 | 機能 |
-|---|---|---|
-| **公開MVP (Public MVP)** | 無料 (Free) | 公開7ツール（検索・新着一覧・詳細・ランキング・要件抽出・CSV/JSON出力・検索App） |
-
-会員登録・有料プランなしで全公開機能（7ツール）を無料で利用できます。Stripe等の課金呼出しは行いません。<br>
-*(※外部AIクライアント利用料や自己ホスト時のクラウド費用は除きます)*
-
-## データ出典
-
-中小企業庁 官公需情報ポータルサイト 検索API。このサーバーは入札情報の添付ファイルを保存しません。入札決定前に必ず公式調達書類を確認してください。
-
-## 相互運用 / Interoperability / Interoperabilitas
-
-JP Bids MCPは[Jグランツ MCP](https://github.com/digital-go-jp/jgrants-mcp-server)（デジタル庁）と連携することで、入札と補助金をひとつの会話で扱えます。
-
-```
-# 入札（JP Bids MCP）と補助金（Jグランツ MCP）を同時に探す
-"鹿児島県のITシステム調達案件と、中小企業向けDX補助金を同時に探してください。"
+```bash
+git clone https://github.com/sugukurukabe/koko-call-mcp.git
+cd koko-call-mcp
+npm install
+npm run build
 ```
 
-Claude Desktop・Cursor用の設定ファイルと3つのエンドツーエンドワークフロー例：[examples/jgrants-integration/](examples/jgrants-integration/)  
-技術的な連携詳細：[docs/integrations/jgrants.md](docs/integrations/jgrants.md)
+- **通常ローカル起動 (`node dist/server.js`)**: `TokenBucketRateLimiter`（既定 `<= 1 req/sec`）、添付PDF非保存、`stderr` 専用ログでKKJ検索APIへ接続します。
+- **開発者用フルプロファイル (`JP_BIDS_PROFILE=full_local`)**: 自己ホスト・ローカル検証限定で、ICSカレンダー出力・社内検討パック・質問書ドラフト・保存検索・Investor Radar（上場銘柄名寄せ）を含む全22ツールが有効になります（詳細: [`docs/investor-radar.md`](docs/investor-radar.md)）。
 
-JP Bids MCPは[freee MCP](https://www.npmjs.com/package/freee-mcp)（freee株式会社）とも連携でき、入札→会計処理の自動化（資金余力確認、落札後の売上取引登録、請求書生成）が可能です。設定例：[examples/freee-integration/](examples/freee-integration/)
+### 3. オフラインモック検証・受入試験（M1〜M3-B / Gate 1）
 
-*(注: Investor Radar（上場銘柄への名寄せ・J-Quants終値連携）や過去落札分析などの追加モジュールは、開発者向けのローカル開発用プロファイル `full_local` の参考実装です。公開MVPには含まれません。詳細: [docs/investor-radar.md](docs/investor-radar.md))*
+外部KKJ APIへ一切通信せずに Claude Desktop 上の UI 描画・双方向通信（M1〜M3-B）や Gate 1 ローカル受入試験（35条件）を再現できます（本番Claude・ChatGPTでの検証記録は [`docs/VERIFICATION_STATUS.md`](docs/VERIFICATION_STATUS.md) を参照）：
 
-> JP Bids MCP・Jグランツ MCP・freee MCPはそれぞれ別組織が運営する独立サーバーです。結果は参考情報であり、必ず公式書類で確認してください。
+```json
+{
+  "mcpServers": {
+    "jp-bids-mock": {
+      "command": "node",
+      "args": ["/path/to/koko-call-mcp/examples/mock-stdio-server.mjs"]
+    }
+  }
+}
+```
 
-## メタデータと仕様準拠
+```bash
+# ネットワーク遮断ガード下での Gate 1 受入ランナー実行（全35条件・外部通信0件）
+node --import ./evidence/q02_batch2/net-guard.batch2.path-null-fix.mjs tests/acceptance/gate1-runner.mjs
+```
 
-JP Bids MCP は、公式レジストリ向けカタログ定義と、サーバー自身のディスカバリ用エンドポイントを明確に区別しています：
+### 4. メタデータと仕様準拠 (`v0.10.0`)
 
-1. **公式 MCP Registry 定義 (`server.json`)**:
-   - 公式スキーマ `$schema: "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json"` に準拠。
-   - パッケージレジストリ登録 (`io.github.sugukurukabe/jp-bids`)、リポジトリ検証、stdioパッケージ指定、相互運用情報を提供。
-2. **Server Card ディスカバリ定義 (`public/.well-known/mcp/server-card.json`)**:
-   - `/.well-known/mcp/server-card.json` に配置され、クライアントによるツールスキーマ詳細取得・認証方式確認・`_meta.ui` バインディング（MCP Apps対応）を提供。
+1. **MCPプロトコル準拠**: `2025-11-25` 安定版仕様および MCP Apps (`2026-01-26` / `@modelcontextprotocol/ext-apps`) に完全準拠し、`2026-07-28` ルーティングヘッダー（`Mcp-Method` / `Mcp-Name`）および RFC 9207 `iss` にも対応。
+2. **公式 MCP Registry 定義 (`server.json`)**: `$schema: "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json"` に準拠（`io.github.sugukurukabe/jp-bids`）。
+3. **Server Card ディスカバリ (`public/.well-known/mcp/server-card.json`)**: 公開7ツールのスキーマ・OAuth設定・`_meta.ui` バインディングを提供。
 
-## ポリシー / Policies / Kebijakan
+---
 
-- [プライバシーポリシー / Privacy Policy](https://mcp.bid-jp.com/privacy)
-- [利用規約 / Terms of Service](https://mcp.bid-jp.com/terms)
+## データ出典・免責事項・ポリシー
+
+- **データ出典**: 中小企業庁 官公需情報ポータルサイト 検索API（`https://www.kkj.go.jp/s/help/notes/`）。
+- **サービス提供者**: スグクル株式会社（政府機関・中小企業庁の公式製品ではありません）。本サーバーは添付PDF原本を保存せず、代理応募・入札手続きも行いません。応札判断の前に必ず発注機関の公式調達書類原本をご確認ください。
+- [機能仕様書](docs/FUNCTIONAL_SPEC.md) · [検証状況](docs/VERIFICATION_STATUS.md) · [プライバシーポリシー](https://mcp.bid-jp.com/privacy) · [利用規約](https://mcp.bid-jp.com/terms)

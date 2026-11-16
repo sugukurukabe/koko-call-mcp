@@ -8,11 +8,11 @@ published: true
 
 ## Investor Radar の定義 — 公告と銘柄を結ぶ橋
 
-Investor Radar（インベスター・レーダー）は、JP Bids MCP v0.9.0 が追加した Pro 機能で、中小企業庁 官公需情報ポータルサイト（KKJ）の公告テキストを上場企業の銘柄コードへ名寄せする。売買の推奨は出さない。KKJ が返すのは公告であり、公式の落札者・落札金額ではない。
+Investor Radar（インベスター・レーダー）は、JP Bids MCP v0.9.0 のローカル開発・研究用プロファイル（`JP_BIDS_PROFILE=full_local`）に含まれる参考機能で、中小企業庁 官公需情報ポータルサイト（KKJ）の公告テキストを上場企業の銘柄コードへ名寄せする。売買の推奨は出さない。KKJ が返すのは公告であり、公式の落札者・落札金額ではない。
 
-件名に「富士通」と書いてある行は、長いあいだ検索結果の一行で終わっていた。住所も、提出期限も、添付 PDF の URI もある。ないのは、その名前が市場で何と呼ばれているかという対応表だった。Investor Radar はその対応表を、Model Context Protocol（MCP）のツールとして公開した。
+件名に「富士通」と書いてある行は、長いあいだ検索結果の一行で終わっていた。住所も、提出期限も、添付 PDF の URI もある。ないのは、その名前が市場で何と呼ばれているかという対応表だった。Investor Radar はその対応表を、Model Context Protocol（MCP）のツールとして実装した。
 
-リモートは `https://mcp.bid-jp.com/mcp`。npm は `jp-bids-mcp@0.9.0`。出典は常に KKJ（政府標準利用規約 第2.0版）を返す。
+npm パッケージは `jp-bids-mcp@0.9.0`。公開リモート（`https://mcp.bid-jp.com/mcp`）は入札実務向けの公開MVP 7ツールに絞られており、Investor Radar を試す場合はローカルで `JP_BIDS_PROFILE=full_local` を指定して起動する。出典は常に中小企業庁 官公需情報ポータルサイト（`https://www.kkj.go.jp/s/help/notes/`）を返す。
 
 ## 同じ会話に株価を置く
 
@@ -40,10 +40,10 @@ KKJ 由来の名寄せはコアに置いた。株価はパススルーにした�
 
 知っているだけでは足りない。schema に落ち、test に通り、`jp-bids-mcp@0.9.0` として release されて初めて、この橋は実在する。
 
-接続は MCP 対応クライアントにこの URL を登録するだけである。
+ローカルの MCP 対応クライアントからは、環境変数 `JP_BIDS_PROFILE=full_local` を添えて stdio 起動するだけで利用できる。
 
-```text
-https://mcp.bid-jp.com/mcp
+```bash
+JP_BIDS_PROFILE=full_local npx -y jp-bids-mcp
 ```
 
 仕様書は古びた紙ではない。機械に制度の壁を教えるための地図である。官公需の一行に銘柄コードを付けることは、相場を語ることではない。公的な事実が、どの会社の名前で書かれているかを、省略せずに返すことだ。

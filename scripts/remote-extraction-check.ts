@@ -1,5 +1,6 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 
 const remoteMcpUrl = process.env.JP_BIDS_REMOTE_MCP_URL ?? "https://mcp.bid-jp.com/mcp";
 const runDocumentFetch =
@@ -25,7 +26,7 @@ const transport = new StreamableHTTPClientTransport(new URL(remoteMcpUrl), {
 });
 
 try {
-  await client.connect(transport);
+  await client.connect(transport as unknown as Transport);
 
   const searchResult = await client.callTool({
     name: "search_bids",

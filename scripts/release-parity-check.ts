@@ -1,5 +1,28 @@
 import { execFileSync } from "node:child_process";
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
+
+function execNpmStdout(args: readonly string[]): string {
+  const npmExecPath = process.env.npm_execpath;
+  if (npmExecPath && existsSync(npmExecPath)) {
+    return execFileSync(process.execPath, [npmExecPath, ...args], { encoding: "utf8" });
+  }
+  if (process.platform === "win32") {
+    const bundledNpmCli = join(
+      dirname(process.execPath),
+      "node_modules",
+      "npm",
+      "bin",
+      "npm-cli.js",
+    );
+    if (existsSync(bundledNpmCli)) {
+      return execFileSync(process.execPath, [bundledNpmCli, ...args], { encoding: "utf8" });
+    }
+    return execFileSync("npm.cmd", [...args], { encoding: "utf8", shell: true });
+  }
+  return execFileSync("npm", [...args], { encoding: "utf8" });
+}
 
 const packageJson = JSON.parse(await readFile("package.json", "utf8")) as PackageJson;
 const packageLock = JSON.parse(await readFile("package-lock.json", "utf8")) as PackageLockJson;
@@ -36,9 +59,7 @@ if (process.env.REQUIRE_RELEASE_TAG === "1") {
 }
 
 if (process.env.REQUIRE_NPM_UNPUBLISHED === "1") {
-  const published = execFileSync("npm", ["view", packageJson.name, "version", "--json"], {
-    encoding: "utf8",
-  }).trim();
+  const published = execNpmStdout(["view", packageJson.name, "version", "--json"]).trim();
   assert(
     published !== JSON.stringify(version),
     `${packageJson.name}@${version} is already published`,

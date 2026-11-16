@@ -22,3 +22,10 @@ bom.json
 .env.*
 !.env.example
 .cookbook-candidates/
+*.zip
+artifacts/
+evidence/
+plugins/
+schemas/
+skills/
+scratch/

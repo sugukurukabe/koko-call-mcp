@@ -4,12 +4,13 @@
 Search and AI-analyze Japanese government procurement bids via MCP.
 
 ## Description
-JP Bids MCP connects LLM-powered clients to Japan's official government procurement portal (官公需情報ポータルサイト, operated by the SME Agency). It provides real-time bid search, AI-driven scoring and ranking, PDF/HTML requirement extraction via Vertex AI Gemini, calendar export, review packet generation, and an interactive MCP Apps UI panel. Designed for procurement officers, sales teams, and bid consultants who need to discover, evaluate, and act on public tender opportunities across all 47 prefectures of Japan. All features are free during beta (until end of September 2026).
+JP Bids MCP connects LLM-powered clients to Japan's official government procurement portal (官公需情報ポータルサイト, operated by the SME Agency). The hosted Public MVP (`https://mcp.bid-jp.com/mcp`) and default `npx jp-bids-mcp` provide 7 free, read-only tools for real-time bid search, interactive MCP Apps UI browsing (`AI Bid Workspace`), scoring and ranking, official specification URL inspection, and CSV/JSON shortlist export across all 47 prefectures of Japan. Self-hosted/local users can set `JP_BIDS_PROFILE=full_local` to unlock all 22 developer tools (including ICS calendar export, internal review packets, draft questions, saved searches, Investor Radar, and optional `JP_BIDS_DOCUMENT_EXTRACTION=vertex` PDF/HTML extraction).
 
 ## Setup Requirements
-- No API key required for the remote endpoint. Connect directly via Streamable HTTP.
-- `JP_BIDS_PRO_API_KEYS` (optional): Comma-separated API keys for Pro tier enforcement when self-hosting. Default: all requests treated as Pro.
-- `JP_BIDS_VERTEX_AI` (optional): Set to `1` to enable Vertex AI Gemini PDF extraction when self-hosting. Requires `GOOGLE_CLOUD_PROJECT` and `GOOGLE_CLOUD_LOCATION`.
+- Remote endpoint (`https://mcp.bid-jp.com/mcp`): Streamable HTTP with built-in OAuth 2.0 (PKCE + Dynamic Client Registration, 1-click consent, free of charge).
+- Local stdio (`npx jp-bids-mcp`): No OAuth or API key required.
+- `JP_BIDS_PROFILE` (optional, local/self-hosted): Defaults to `public_mvp` (7 public tools). Set to `full_local` to enable all 22 local workflow and Investor Radar tools.
+- `JP_BIDS_DOCUMENT_EXTRACTION` (optional, local/self-hosted): Defaults to `off` (URL listing only). Set to `direct` for direct PDF/HTML text parsing or `vertex` for Vertex AI Gemini extraction (requires `GOOGLE_CLOUD_PROJECT` and `GOOGLE_CLOUD_LOCATION`).
 
 ## Category
 Data & Analytics
@@ -19,32 +20,27 @@ Government bid search, Procurement analysis, Bid qualification assessment, Tende
 
 ## Features
 - Search Japanese government procurement bids by keyword, region, category, and date range
-- AI Bid Radar: score and rank bids by your company profile and practical follow-up priority
-- Extract requirements from bid PDF/HTML attachments using Vertex AI Gemini
-- Assess bid qualification eligibility against your company credentials
-- Generate ICS calendar files for bid submission deadlines
-- Create internal review packets summarizing bid opportunities
-- Draft clarification questions for procuring organizations
-- Analyze past award results by organization
-- Export filtered bid shortlists as CSV or JSON
-- Interactive MCP Apps UI panel for visual bid browsing in compatible clients
-- Full-text search across all 47 prefectures and all procurement categories
-- Resource Templates for deep-linking individual bids, prefectures, and organizations
-- Both remote Streamable HTTP and local stdio transports supported
-- Free tier with 4 core tools; Pro tier with 17 tools (all free during beta)
+- Interactive MCP Apps UI (`AI Bid Workspace`) for visual bid browsing and CSV/JSON shortlist export
+- Score and rank bids by your company profile and practical follow-up priority
+- Inspect specification attachment URLs (plus optional direct/Vertex AI PDF/HTML extraction when self-hosting)
+- Export filtered or selected bid shortlists as validated 16-column CSV or JSON
+- Full-text search across all 47 prefectures and procurement categories (`物品`, `工事`, `役務`)
+- Both remote Streamable HTTP (`https://mcp.bid-jp.com/mcp`) and local stdio (`npx jp-bids-mcp`) transports supported
+- Public MVP profile with 7 free tools (`public_mvp`); local developer profile with 22 tools (`JP_BIDS_PROFILE=full_local`), including ICS calendar export, review packets, draft questions, saved searches, and Investor Radar
 
 ## Getting Started
 - "Search for IT system bids in Tokyo published this week"
-- "Rank these bids by fit for a 50-person IT consulting firm"
-- "Extract requirements from the PDF attachment of this bid"
-- "Show me upcoming bid deadlines as a calendar"
-- "Draft clarification questions for this road construction tender"
+- "Open AI Bid Workspace for service tenders in Kagoshima"
+- "Rank these bids by fit for a cloud maintenance team"
+- "List official attachment URLs and submission deadlines for this bid"
+- "Export the top ranked bids as CSV"
 - Tool: search_bids — Search bids by keyword, prefecture, category, date range
+- Tool: list_recent_bids — List recent procurement notices from the past 1–30 days
+- Tool: get_bid_detail — Get full details for a specific bid (`bid_ref` or `bid_key`)
+- Tool: search_bids_app — Open the interactive AI Bid Workspace (MCP Apps UI)
 - Tool: rank_bids — Score and rank bids against your company profile
-- Tool: get_bid_detail — Get full details for a specific bid
-- Tool: extract_bid_requirements — Extract structured requirements from bid PDFs
-- Tool: create_bid_calendar — Generate ICS calendar for bid deadlines
-- Tool: draft_bid_questions — Draft clarification questions for a bid
+- Tool: extract_bid_requirements — List official attachment URLs (and extract text when configured locally)
+- Tool: export_bid_shortlist — Export ranked or selected bids as CSV or JSON
 
 ## Tags
 japan, government, procurement, bids, tenders, 入札, 官公需, public-procurement, mcp, ai-analysis, pdf-extraction, vertex-ai, bid-search, data-analytics, streamable-http

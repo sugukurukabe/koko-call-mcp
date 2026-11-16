@@ -20,7 +20,7 @@ Menggabungkan keduanya memungkinkan satu sesi LLM mencakup kedua sisi pendanaan 
 | 運営 | スグクル株式会社 | デジタル庁 |
 | データソース | 中小企業庁 KKJ 検索API | デジタル庁 Jグランツ公開API |
 | 一次情報URL | https://kkj.go.jp | https://www.jgrants-portal.go.jp |
-| API利用規約 | https://kkj.go.jp （要確認） | https://www.jgrants-portal.go.jp/open-api |
+| API利用規約 | https://www.kkj.go.jp/s/help/notes/ | https://www.jgrants-portal.go.jp/open-api |
 | ライセンス | Apache-2.0 | MIT |
 | GitHub | https://github.com/sugukurukabe/koko-call-mcp | https://github.com/digital-go-jp/jgrants-mcp-server |
 | MCP仕様準拠 | 2025-11-25 | 2025-11-25 |
@@ -35,25 +35,27 @@ Menggabungkan keduanya memungkinkan satu sesi LLM mencakup kedua sisi pendanaan 
 
 ### 入札系 — JP Bids MCP
 
-| ツール | 目的 | Tier |
+> 公開エンドポイント（`https://mcp.bid-jp.com/mcp`）およびデフォルトの `npx jp-bids-mcp` は `public_mvp`（無料・公開7ツール）を提供します。残りのツール（および Investor Radar 5ツールを含む計22ツール）はローカルで `JP_BIDS_PROFILE=full_local` を指定した場合に有効になります。
+
+| ツール | 目的 | Profile |
 |---|---|---|
-| `search_bids` | キーワード・地域・業種で入札案件を検索 | Free |
-| `rank_bids` | 自社プロファイルでスコアリング | Free |
-| `list_recent_bids` | 直近公告一覧 | Free |
-| `get_bid_detail` | 案件詳細 | Free |
-| `search_bids_app` | MCP Apps UIで検索・操作 | Pro |
-| `explain_bid_fit` | 適合度の詳細説明 | Pro |
-| `assess_bid_qualification` | 参加資格確認 | Pro |
-| `extract_bid_requirements` | PDF/HTML仕様書から要件を抽出 | Pro |
-| `export_bid_shortlist` | CSV/JSONエクスポート | Pro |
-| `create_bid_calendar` | 締切ICSカレンダー | Pro |
-| `create_bid_review_packet` | 社内検討メモ | Pro |
-| `draft_bid_questions` | 質問書ドラフト | Pro |
-| `analyze_past_awards` | 落札実績分析 | Pro |
-| `summarize_bids_by_org` | 発注機関別サマリー | Pro |
-| `save_search` | 検索条件を保存 | Pro |
-| `check_saved_search` | 保存検索の新着確認 | Pro |
-| `list_saved_searches` | 保存検索の一覧 | Pro |
+| `search_bids` | キーワード・地域・業種で入札案件を検索 | `public_mvp`（公開・無料） |
+| `list_recent_bids` | 直近公告一覧 | `public_mvp`（公開・無料） |
+| `get_bid_detail` | 案件詳細（`bid_ref` または `bid_key`） | `public_mvp`（公開・無料） |
+| `search_bids_app` | MCP Apps UIで検索・操作 | `public_mvp`（公開・無料） |
+| `rank_bids` | 自社プロファイルでスコアリング | `public_mvp`（公開・無料） |
+| `extract_bid_requirements` | 仕様書URL整理・ローカル設定時の本文抽出 | `public_mvp`（公開・無料） |
+| `export_bid_shortlist` | CSV/JSONエクスポート | `public_mvp`（公開・無料） |
+| `explain_bid_fit` | 適合度の詳細説明 | `full_local`（ローカル開発用） |
+| `assess_bid_qualification` | 参加資格確認 | `full_local`（ローカル開発用） |
+| `create_bid_calendar` | 締切ICSカレンダー | `full_local`（ローカル開発用） |
+| `create_bid_review_packet` | 社内検討メモ | `full_local`（ローカル開発用） |
+| `draft_bid_questions` | 質問書ドラフト | `full_local`（ローカル開発用） |
+| `analyze_past_awards` | 過去公告傾向分析 | `full_local`（ローカル開発用） |
+| `summarize_bids_by_org` | 発注機関別サマリー | `full_local`（ローカル開発用） |
+| `save_search` | 検索条件を保存 | `full_local`（ローカル開発用） |
+| `check_saved_search` | 保存検索の新着確認 | `full_local`（ローカル開発用） |
+| `list_saved_searches` | 保存検索の一覧 | `full_local`（ローカル開発用） |
 
 ### 補助金系 — Jグランツ MCP（[digital-go-jp/jgrants-mcp-server](https://github.com/digital-go-jp/jgrants-mcp-server)）
 
@@ -80,20 +82,20 @@ LLMが `search_bids`（JP Bids）と `search_subsidies`（Jグランツ）を並
 ### パターン2：補助金で原資を確保 → 入札
 
 まず `search_subsidies` で申請中の補助金を特定し、補助金の締切を踏まえた上で
-`rank_bids` → `create_bid_review_packet` で入札戦略を立てる。
+`rank_bids` → `extract_bid_requirements` / `export_bid_shortlist`（ローカル `JP_BIDS_PROFILE=full_local` 利用時は `create_bid_review_packet` も利用可）で入札戦略を立てる。
 
 ```
 IT補助金の申請期限を確認してから、AIシステム開発の入札案件を絞り込んでください。
 ```
 
-### パターン3：過去落札実績との交差分析
+### パターン3：過去公告傾向との交差分析（ローカル `full_local`）
 
-`analyze_past_awards` で業種別の落札金額分布を確認し、
+ローカルの `JP_BIDS_PROFILE=full_local` で `analyze_past_awards` を呼び出してカテゴリ別の公告傾向を確認し、
 `get_subsidy_overview` で同業種に使える補助金の統計を取得。
 ファンディング全体像のレポートを生成する。
 
 ```
-清掃業務の落札実績と、同カテゴリで使える補助金の概況を合わせてレポートしてください。
+清掃業務の過去公告傾向と、同カテゴリで使える補助金の概況を合わせてレポートしてください。
 ```
 
 ---

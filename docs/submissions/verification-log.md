@@ -1,186 +1,100 @@
-# 申請証跡 / Verification Log
-# 申請証跡 / Submission Evidence Log
-# Log Bukti Pengajuan
+# 申請証跡・検証ログ / Submission Verification Log (v0.10.0)
+# Log Bukti Verifikasi Pengajuan (v0.10.0)
 
-> この記録を申請ポータルの "Additional notes" または内部証跡として使用する  
-> Use this log in the "Additional notes" field of the submission portal or as internal evidence  
-> Gunakan log ini di kolom "Additional notes" pada portal pengajuan atau sebagai bukti internal
+> 本記録は Anthropic Connectors Directory / OpenAI ChatGPT Apps の申請ポータル（"Additional notes" 欄）およびリリース監査証跡として使用する。実機確認範囲とローカル自動検証範囲を厳密に区別して記載する（詳細は [`../VERIFICATION_STATUS.md`](../VERIFICATION_STATUS.md) も参照）。
 
 ---
 
-## 最新検証 / Latest Verification Run
+## 1. `v0.10.0` ローカル品質・Gate 1 受入検証 (`public_mvp` 公開7ツール)
 
-**実施日 / Date**: 2026-06-28 01:12 JST  
-**実施者 / Operator**: kabe  
-**対象 URL / Endpoint**: https://mcp.bid-jp.com/mcp  
-**MCP-Protocol-Version**: 2025-11-25  
-**Tier**: Free key (beta Pro surface, 全17ツール)  
-**使用ツール**: npm run remote:health + npm run remote:mcp
+- **対象バージョン**: `0.10.0` (`JP_BIDS_PROFILE=public_mvp`, 完全無料・公開7ツール・課金コード非実行)
+- **MCP-Protocol-Version**: `2025-11-25`（主基準）および `2026-07-28`（ルーティングヘッダー・RFC 9207 `iss` 対応）
 
-### remote:health check（実行済み / completed）
+### 実行チェック一覧
 
-```
-JP_BIDS_REMOTE_BASE_URL=https://mcp.bid-jp.com npm run remote:health
-https://mcp.bid-jp.com/readyz OK
-https://mcp.bid-jp.com/mcp GET correctly returns 405
-```
+```bash
+# 1. Lint + Typecheck + Server/UI Single-File Build + Vitest 全テスト
+npm run check
 
-### local unit/integration tests（実行済み / completed locally）
+# 2. マニフェスト・バージョン整合検証 (package.json / server.json / server-card.json / .smithery / CITATION.cff)
+npm run registry:validate
+npm run release:parity
 
-```
-npm run build — TypeScript + Vite build OK
-npm test — 121 tests passed
-npm run lint — clean
-```
+# 3. 本番依存セキュリティ監査 (Critical 0 / High 0)
+npm audit --omit=dev
 
-### remote:mcp check (本番エンドポイント)
+# 4. OpenAI 申請パッケージ構造・PNG・スキーマ検証 (65/65 PASS)
+node scripts/build-openai-package.mjs
 
-2026-06-28に `ssw-compass-prod-494613` project の Cloud Run service `jp-bids-mcp` へデプロイ済み。`mcp.bid-jp.com` の本番domainで全チェックPASS。
-
-```
-実行コマンド:
-JP_BIDS_REMOTE_BASE_URL=https://mcp.bid-jp.com npm run remote:mcp
-
-実行日時: 2026-06-28 01:12 JST
-Cloud Run revision: jp-bids-mcp-00038-mjg
-
-[1/6] tools/list + annotation parity
-  ✅ all 17 tools present
-  ✅ all tools have title
-  ✅ all expected readOnlyHint values passed
-
-[2/6] prompts/list
-  ✅ morning_bid_briefing
-  ✅ bid_discovery_workspace
-  ✅ competitor_radar
-  ✅ bid_review_packet_workflow
-  ✅ qualification_and_question_draft
-  ✅ bid_due_alert
-
-[3/6] resources/list
-  ✅ attribution://kkj
-  ✅ docs://api-reference
-  ✅ codes://prefectures
-  ✅ ui://jp-bids/search-results.html
-
-[4/6] representative tool calls
-  ✅ search_bids call succeeds
-  ✅ attribution is KKJ
-  ✅ get_bid_detail call succeeds
-  ✅ get_bid_detail returned 2 resource_link content blocks
-  ✅ rank_bids call succeeds
-
-Verification Summary:
-  ✅ ALL CHECKS PASSED — ready for Anthropic submission on https://mcp.bid-jp.com/mcp
+# 5. Gate 1 オフライン受入試験ランナー (T01〜T10 全35サブ条件 PASS・外部通信0件・認証トークン完全マスク)
+node --import ./evidence/q02_batch2/net-guard.batch2.path-null-fix.mjs tests/acceptance/gate1-runner.mjs
 ```
 
-### Domain cutover note
+---
 
-`mcp.bid-jp.com` is mapped to the production Cloud Run service in `ssw-compass-prod-494613 / asia-northeast1`. The deployed revision `jp-bids-mcp-00038-mjg` passed `remote:health` and `remote:mcp`.
+## 2. 本番リモート実機検証記録 (`https://mcp.bid-jp.com/mcp`)
 
-### Public metadata endpoints（実行済み / completed）
+### 2.1 本番 Claude カスタムコネクタ確認（実施日: 2026-10-21 JST）
 
-```
+- **接続先**: `https://mcp.bid-jp.com/mcp`（Streamable HTTP + OAuth 2.0 DCR / PKCE S256 1クリック同意）
+- **確認済み項目**:
+  - ✅ OAuth 2.0 認可完了および公開 **7ツール**（`search_bids`, `list_recent_bids`, `get_bid_detail`, `rank_bids`, `extract_bid_requirements`, `export_bid_shortlist`, `search_bids_app`）の認識
+  - ✅ `search_bids_app` による実公告検索と `AI Bid Workspace` パネルの初期描画
+  - ✅ `get_bid_detail` による署名付き `bid_ref` スナップショットからの詳細・公式リンク復元
+  - ✅ UIの「選択CSV」から異なる発注機関（日本学術振興会・防衛省）の2案件を選択し、16列CSVとして正常取得・列整合を確認
+
+### 2.2 本番 ChatGPT 開発者モード確認（実施日: 2026-10-24 JST）
+
+- **接続先**: `https://mcp.bid-jp.com/mcp`（Cloud Run リビジョン `jp-bids-mcp-manual-export-20261024`）
+- **確認済み項目**:
+  - ✅ サンドボックス iframe 内での `search_bids_app`（`AI Bid Workspace`）描画
+  - ✅ 2案件選択 →「選択CSV」実行 → 3段階フォールバックの `CSV 手動取得欄 (2件)`（`ManualExportPanel`）経由で16列CSVをコピー・保存し、案件Key・発注機関・評価理由の対応を確認
+
+### 2.3 公開メタデータ・ヘルスエンドポイント確認
+
+```text
+https://mcp.bid-jp.com/health                                             OK 200 application/json
+https://mcp.bid-jp.com/readyz                                             OK 200 application/json
 https://mcp.bid-jp.com/privacy                                            OK 200 text/html
+https://mcp.bid-jp.com/terms                                              OK 200 text/html
 https://mcp.bid-jp.com/favicon.png                                        OK 200 image/png
 https://mcp.bid-jp.com/.well-known/mcp/server-card.json                   OK 200 application/json
 https://mcp.bid-jp.com/.well-known/agents.json                            OK 200 application/json
+https://mcp.bid-jp.com/.well-known/mcp-server.json                        OK 200 application/json
 https://mcp.bid-jp.com/.well-known/oauth-protected-resource/mcp           OK 200 application/json
 https://mcp.bid-jp.com/.well-known/oauth-authorization-server             OK 200 application/json
 ```
 
 ---
 
-## MCP Inspector 手動検証 / MCP Inspector Manual Verification
+## 3. `v0.10.0` 本番デプロイ後の最終スモーク確認テンプレート
 
-### 接続方法
+`docs/GO_LIVE_TODAY_RUNBOOK.md` に従い `v0.10.0` を Cloud Run に配備した際、以下の最小クエリ（KKJ API負荷保護のため合計5リクエスト以内・1 req/sec厳守）で確認する：
+
+### MCP Inspector 接続方法（OAuth 自動認可）
 
 ```bash
-npx @modelcontextprotocol/inspector@latest \
-  --header "Authorization: Bearer <pro-key>" \
-  http://localhost:8080/mcp     # ローカル
-# または
-npx @modelcontextprotocol/inspector@latest \
-  --header "Authorization: Bearer <pro-key>" \
-  https://mcp.bid-jp.com/mcp   # 本番
+npx --yes @modelcontextprotocol/inspector
+# Transport Type: Streamable HTTP
+# URL: https://mcp.bid-jp.com/mcp
+# OAuth 1クリック同意（「許可する / Allow」）でアクセストークンを自動取得（有料キー・審査専用パスワードは不要）
 ```
 
-### 検証済み項目
+### スモーク確認チェックリスト（公開7ツール）
 
-| 項目 | 状態 | 備考 |
+| # | 確認項目 / プロンプト例 | 期待する動作 |
 |---|---|---|
-| tools/list — 17ツール一覧 | 未実施 | 本番URL + Pro reviewer keyで実施 |
-| 各ツールの title 確認 | 未実施 | |
-| 各ツールの annotations (readOnlyHint/destructiveHint) 確認 | 未実施 | |
-| outputSchema 一致確認 | 未実施 | |
-| search_bids 実行 | 未実施 | |
-| get_bid_detail 実行 (resource_link確認) | 未実施 | |
-| rank_bids 実行 | 未実施 | |
-| explain_bid_fit 実行 | 未実施 | |
-| search_bids_app 実行 (MCP Apps UI確認) | 未実施 | |
-| analyze_past_awards 実行 | 未実施 | |
-| resources/list 確認 | 未実施 | |
-| prompts/list 確認 | 未実施 | |
-| completion (prefecture) 確認 | 未実施 | |
-| Free tier ツール一覧 (4ツールのみ) | 未実施 | beta期間中はPro表面が開放されるため、実施条件を記録 |
+| 1 | `tools/list` 確認 | 公開7ツールのみが返り、全ツールに `title`, `outputSchema`, `annotations` が存在する |
+| 2 | `東京都・役務で件名に「システム」を含む公告を最大3件検索して AI Bid Workspace を表示して` | `search_bids_app` が呼ばれ、カード一覧とKKJ出典が表示される（0件時は空状態表示） |
+| 3 | `最初の案件の bid_ref で詳細と公式URLを確認して` | `get_bid_detail` がスナップショット復元し、`resource_link` 付きで公式URLを返す |
+| 4 | `先頭2件の bid_ref を使って「保守」優先でランク付けして` | `rank_bids` が選択2件のみを採点（0〜100, `priority`）し、別案件を混入させない |
+| 5 | `同じ2件の順序を保ったまま16列CSVに出力して` | `export_bid_shortlist`（またはUI「選択CSV」）で16列CSVが取得できる |
 
 ---
 
-## Claude Custom Connector 検証 / Claude Custom Connector Verification
+## 4. 既知の仕様制約（審査補足メモ）
 
-### 接続結果 / Connection result
-
-- **2026-06-28**: 個人Claude.aiアカウントで custom connector `https://mcp.bid-jp.com/mcp` を**追加・OAuth接続成功**。コネクタが「Connected」状態になることを確認。
-- ライブ動作確認の詳細手順・チェックリストは `docs/submissions/personal-account-smoke.md` を参照。
-
-### 接続手順
-
-1. Claude.ai → Settings → Connectors → Add custom connector
-2. URL: `https://mcp.bid-jp.com/mcp`
-3. OAuth フローを完了させてPro tierを取得
-4. チャットで以下のプロンプトを順番に実行
-
-### 検証プロンプトと期待結果
-
-| # | プロンプト | 期待する動作 | 状態 |
-|---|---|---|---|
-| 1 | `鹿児島県のIT系入札を5件検索して` | search_bids が実行され、入札リストが返る | 未実施 |
-| 2 | `その中でうちに合うものをランク付けして` | rank_bids が実行され、スコア付きリストが返る | 未実施 |
-| 3 | `一番スコアが高い案件の詳細を教えて` | get_bid_detail が実行され、resource_link付きで公式URLが表示される | 未実施 |
-| 4 | `search_bids_appで農林水産省の役務入札を検索して` | search_bids_app が実行され、MCP Apps UIが表示される | 未実施 |
-| 5 | `その案件の要件を抽出して` | extract_bid_requirements が実行される | 未実施 |
-| 6 | `社内検討メモを作って` | create_bid_review_packet が実行され、Markdownメモが返る | 未実施 |
-| 7 | `このツールの出典は？` | attribution://kkj リソースが参照される | 未実施 |
-| 8 | `農林水産省の過去1年の発注傾向を分析して` | analyze_past_awards が実行される | 未実施 |
-
-### MCP Apps UI 確認項目
-
-| 項目 | 状態 |
-|---|---|
-| Welcome screen が表示される | 未実施 |
-| 検索後、左パネルに入札カードが表示される | 未実施 |
-| カードのクリックで右パネルに詳細が表示される | 未実施 |
-| 公式公告ページへのリンクが表示される | 未実施 |
-| アクションボタン（読む/判定/まとめる/聞く）が機能する | 未実施 |
-| エラー状態でエラーメッセージが表示される | 未実施 |
-| ダークモードで正しく表示される | 未実施 |
-| モバイル幅（375px）でレイアウトが崩れない | 未実施 |
-
----
-
-## 既知の制約 / Known Constraints
-
-1. **save_search / check_saved_search**: セッション内のin-memory stateのみ保持。Cloud RunのHTTPステートレスモードでは複数リクエスト間の持続性なし。
-2. **PDF抽出**: fetch_documents=false がデフォルト。trueにすると外部URLにアクセスするが添付PDFは保存しない。
-3. **KKJ APIレート制限**: デフォルト1req/sec。analyze_past_awardsでlimit=1000を指定すると時間がかかる場合がある。
-4. **MCP Apps UI**: search_bids_app のみMCP Apps対応。他のツールはテキストフォールバックを返す。
-
----
-
-## 申請メモ / Submission Notes
-
-- バージョン: v0.7.x+
-- 申請種別: Remote MCP App
-- プロトコル: Streamable HTTP + OAuth 2.0 (RFC 7591 Dynamic Client Registration)
-- サポート連絡先: GitHub Issues / mcp@bid-jp.com
-- 審査期間中: mcp-review@bid-jp.com アカウントでPro tierのテスト可能
+1. **完全無料・課金なし (`public_mvp`)**: 公開7ツールすべて無料で利用でき、有料プラン・フリーミアム誘導・Stripe通信は一切存在しません。
+2. **外部文書本文取得は既定OFF (`JP_BIDS_DOCUMENT_EXTRACTION=off`)**: 公開エンドポイントでは添付PDFや外部HTMLの本文ダウンロードは行わず、公告メタデータの構造化と公式URLの案内に限定しています（原本PDFは一切保存しません）。
+3. **上流KKJレート制限**: インスタンスあたり既定 `1 req/sec` のトークンバケット制御と10分間のメモリ内LRUキャッシュにより、官公需情報ポータルサイトへの過剰アクセスを防止しています。
+4. **MCP Apps 非対応ホストへの配慮**: `search_bids_app` は UI リソース（`ui://jp-bids/search-results.html`）と同時にテキスト要約と `structuredContent` を返すため、UI非対応クライアントでも全情報を利用できます。

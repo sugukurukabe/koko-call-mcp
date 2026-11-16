@@ -343,7 +343,10 @@ describe("Anthropic review: get_bid_detail returns resource_link", () => {
     });
 
     expect(result.isError).not.toBe(true);
-    const resourceLinks = result.content.filter((c) => c.type === "resource_link");
+    const contentBlocks = Array.isArray(result.content)
+      ? (result.content as Array<{ type?: string; uri?: string }>)
+      : [];
+    const resourceLinks = contentBlocks.filter((c) => c.type === "resource_link");
     expect(resourceLinks.length).toBeGreaterThanOrEqual(1);
     expect(resourceLinks[0]).toMatchObject({
       type: "resource_link",
@@ -401,7 +404,9 @@ describe("Anthropic review: MCP Apps UI metadata", () => {
     const { tools } = await client.listTools();
     const appTool = tools.find((t) => t.name === "search_bids_app");
     expect(appTool).toBeDefined();
-    expect(appTool?._meta?.ui?.resourceUri).toBe("ui://jp-bids/search-results.html");
+    expect((appTool?._meta?.ui as { resourceUri?: string } | undefined)?.resourceUri).toBe(
+      "ui://jp-bids/search-results.html",
+    );
 
     await client.close();
     await server.close();
@@ -416,7 +421,9 @@ describe("Anthropic review: MCP Apps UI metadata", () => {
     const { tools } = await client.listTools();
     const appTool = tools.find((t) => t.name === "search_investor_radar_app");
     expect(appTool).toBeDefined();
-    expect(appTool?._meta?.ui?.resourceUri).toBe("ui://jp-bids/investor-radar.html");
+    expect((appTool?._meta?.ui as { resourceUri?: string } | undefined)?.resourceUri).toBe(
+      "ui://jp-bids/investor-radar.html",
+    );
 
     await client.close();
     await server.close();
@@ -451,7 +458,10 @@ describe("Anthropic review: MCP Apps UI metadata", () => {
       arguments: { query: "テスト" },
     });
 
-    const textContent = result.content.find((c) => c.type === "text");
+    const fallbackBlocks = Array.isArray(result.content)
+      ? (result.content as Array<{ type?: string }>)
+      : [];
+    const textContent = fallbackBlocks.find((c) => c.type === "text");
     expect(textContent).toBeDefined();
 
     await client.close();

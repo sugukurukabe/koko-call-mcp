@@ -183,7 +183,7 @@ A. OEMライセンス: 自社ブランドで提供
 
 **連絡先**  
 スグクル株式会社 / 壁  
-https://sugukuru.co.jp  
+https://sugu-kuru.co.jp  
 https://mcp.bid-jp.com
 
 ---

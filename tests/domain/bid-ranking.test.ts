@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { createAttribution } from "../../src/domain/attribution.js";
 import type { BidSearchResult } from "../../src/domain/bid.js";
 import { rankBidSearchResult } from "../../src/domain/bid-ranking.js";
 
@@ -6,12 +7,7 @@ const baseResult: BidSearchResult = {
   searchHits: 2,
   returnedCount: 2,
   query: { Query: "システム", Count: 2 },
-  attribution: {
-    dataSource: "中小企業庁 官公需情報ポータルサイト",
-    sourceUrl: "https://www.kkj.go.jp/",
-    accessedAt: "2026-05-03T00:00:00.000Z",
-    terms: "官公需情報ポータルサイトの利用規約に従って利用してください。",
-  },
+  attribution: createAttribution(new Date("2026-05-03T00:00:00.000Z")),
   bids: [
     {
       resultId: 2,

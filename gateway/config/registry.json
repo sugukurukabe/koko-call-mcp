@@ -31,9 +31,9 @@
       },
       "cache_ttl_seconds": 60,
       "attribution": {
-        "source": "中小企業庁 官公需情報ポータルサイト KKJ",
-        "license": "政府標準利用規約 第2.0版",
-        "url": "https://kkj.go.jp"
+        "source": "中小企業庁 官公需情報ポータルサイト",
+        "license": "サイト利用上の注意（https://www.kkj.go.jp/s/help/notes/）参照",
+        "url": "https://www.kkj.go.jp/s/help/notes/"
       },
       "routing_keywords": [
         "入札",

@@ -4,6 +4,11 @@ import { describe, expect, it } from "vitest";
 import { KkjClient } from "../src/api/kkj-client.js";
 import { createJpBidsServer } from "../src/mcp.js";
 
+function resourceText(resource: Awaited<ReturnType<Client["readResource"]>>): string {
+  const content = resource.contents[0];
+  return content && "text" in content ? content.text : "";
+}
+
 describe("MCP contract", () => {
   it("exposes tools, prompts, resources, templates, and completion", async () => {
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
@@ -109,7 +114,7 @@ describe("MCP contract", () => {
     expect(resource.contents[0]).toMatchObject({
       mimeType: "application/json",
     });
-    expect(JSON.parse(resource.contents[0]?.text ?? "{}")).toMatchObject({
+    expect(JSON.parse(resourceText(resource) || "{}")).toMatchObject({
       bid: { key: "KKJ-CACHED-001" },
     });
 
@@ -128,7 +133,7 @@ describe("MCP contract", () => {
     expect(resource.contents[0]).toMatchObject({
       mimeType: "text/html;profile=mcp-app",
     });
-    expect(resource.contents[0]?.text).toContain('<div id="root"></div>');
+    expect(resourceText(resource)).toContain('<div id="root"></div>');
 
     await client.close();
     await server.close();
@@ -145,7 +150,7 @@ describe("MCP contract", () => {
     expect(resource.contents[0]).toMatchObject({
       mimeType: "text/html;profile=mcp-app",
     });
-    expect(resource.contents[0]?.text).toContain('<div id="root"></div>');
+    expect(resourceText(resource)).toContain('<div id="root"></div>');
 
     await client.close();
     await server.close();
@@ -162,8 +167,8 @@ describe("MCP contract", () => {
     expect(resource.contents[0]).toMatchObject({
       mimeType: "text/markdown",
     });
-    expect(resource.contents[0]?.text).toContain("Google-managed MCP servers");
-    expect(resource.contents[0]?.text).toContain("RequestContext");
+    expect(resourceText(resource)).toContain("Google-managed MCP servers");
+    expect(resourceText(resource)).toContain("RequestContext");
 
     await client.close();
     await server.close();
@@ -182,9 +187,9 @@ describe("MCP contract", () => {
     expect(resource.contents[0]).toMatchObject({
       mimeType: "text/markdown",
     });
-    expect(resource.contents[0]?.text).toContain("Cloud Storage Rapid");
-    expect(resource.contents[0]?.text).toContain("Fraud Defense");
-    expect(resource.contents[0]?.text).toContain("Model Armor");
+    expect(resourceText(resource)).toContain("Cloud Storage Rapid");
+    expect(resourceText(resource)).toContain("Fraud Defense");
+    expect(resourceText(resource)).toContain("Model Armor");
 
     await client.close();
     await server.close();
@@ -215,7 +220,7 @@ describe("MCP contract", () => {
     expect(resource.contents[0]).toMatchObject({
       mimeType: "application/json",
     });
-    expect(JSON.parse(resource.contents[0]?.text ?? "{}")).toMatchObject({
+    expect(JSON.parse(resourceText(resource) || "{}")).toMatchObject({
       organizationName: "鹿児島市",
       returnedCount: 1,
       categories: { 役務: 1 },

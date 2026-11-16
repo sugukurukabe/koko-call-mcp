@@ -1,3 +1,4 @@
+import { createHmac } from "node:crypto";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { JquantsClient } from "../api/jquants-client.js";
@@ -192,9 +193,13 @@ function decodeWatchToken(token: string | undefined): WatchEntry[] {
 }
 
 function resolveStateTokenSecret(): string {
-  const secret = process.env.JP_BIDS_STATE_TOKEN_SECRET ?? process.env.JP_BIDS_OAUTH_SECRET;
-  if (secret) {
-    return secret;
+  if (process.env.JP_BIDS_STATE_TOKEN_SECRET) {
+    return process.env.JP_BIDS_STATE_TOKEN_SECRET;
+  }
+  if (process.env.JP_BIDS_OAUTH_SECRET) {
+    return createHmac("sha256", process.env.JP_BIDS_OAUTH_SECRET)
+      .update("jp-bids-state-token-v1")
+      .digest("hex");
   }
   if (process.env.K_SERVICE) {
     throw new Error("JP_BIDS_STATE_TOKEN_SECRET is required in production.");

@@ -9,9 +9,10 @@
 
 ## 事前に決まっていること（前提）
 
-- 提出範囲は **Freeティア4ツールのみ**（`search_bids` / `rank_bids` / `list_recent_bids` / `get_bid_detail`）。Pro13ツール＋MCP Appは今回対象外。
+- 提出前のブロッカー管理正本は [`OPENAI_SUBMISSION_LOCAL_PREPARATION_20261021.md`](./OPENAI_SUBMISSION_LOCAL_PREPARATION_20261021.md)（特に OAI-01: KKJ二次利用条件の公式根拠確認）。
+- 提出範囲は **`public_mvp` プロファイルの公開7ツール**（`search_bids` / `list_recent_bids` / `get_bid_detail` / `search_bids_app` / `rank_bids` / `extract_bid_requirements` / `export_bid_shortlist`）。すべて完全無料・読み取り専用であり、Stripe 課金・Pro API キー・アップグレード誘導は撤廃済み。
 - ドメイン検証エンドポイント `GET /.well-known/openai-apps-challenge` は実装済み。デプロイ時に `OPENAI_APPS_CHALLENGE_TOKEN` 環境変数を設定すればトークンを返す。
-- 認証方式は「固定Bearerトークン（API key的な使い方）」を第一候補とする。ダッシュボードの実際の選択肢を見てから決める（詳細は checklist §4）。
+- 認証方式は **OAuth 2.0（PKCE + Dynamic Client Registration、アカウント登録不要の1クリック同意画面）** を使用する（詳細は checklist §4）。
 
 ---
 
@@ -37,32 +38,24 @@
    c. デプロイ完了を待つ（`curl https://mcp.bid-jp.com/.well-known/openai-apps-challenge` でトークンがそのまま返ることを確認）。
    d. ダッシュボードに戻り、フォームを開いたまま「Verify Domain」を押す。**フォームを閉じずに素早く行う**（トークンはこの申請フローの間だけ有効な使い捨て値）。
    e. 検証が終わったら、環境変数を戻す/消しても構わない（次回の申請や更新時にまた別トークンが発行される）。
-4. **Scan Tools** を実行する。4ツール（`search_bids` / `rank_bids` / `list_recent_bids` / `get_bid_detail`）だけが検出されることを確認する。
-   - もし17ツール全部やMCP Appまで見えてしまったら、それは接続時の認証がPro tierとして扱われている（OAuthで繋いでしまった等）。ステップ3の認証設定を見直す。
 
 ---
 
-## ステップ3: 認証方式の設定
+## ステップ3: 認証方式の設定と Scan Tools
 
-ダッシュボードの認証設定画面を見て、以下のどちらが選べるか確認する。
-
-- **「API Key」「Custom Header」「No special auth（reviewer provides header）」のような選択肢がある場合**（推奨パス）:
-  - ヘッダー名: `Authorization`
-  - ヘッダー値: `Bearer chatgpt-reviewer-demo`（この文字列は`JP_BIDS_PRO_API_KEYS`に登録していない値なら何でもよい。すでに登録済みでないことを事前に確認）
-  - これでFree tierとして4ツールだけが見えるはずです。
-
-- **OAuthしか選べない場合**:
-  - 一旦立ち止まって私（AIアシスタント）に相談してください。現状のコードではOAuth接続は自動的にPro tier（全17ツール）になってしまうため、そのまま接続するとスコープ決定（Free4ツールのみ）と矛盾します。コード側の追加対応が必要になります。
+1. ダッシュボードの認証設定画面で **OAuth 2.0** を選択する（Dynamic Client Registration 対応。静的 `client_id` が必須の場合は `/oauth/register` エンドポイントで発行可能）。
+2. OAuth 同意画面（`/oauth/authorize`）で「許可する」を1クリックし、接続を完了させる。
+3. **Scan Tools** を実行する。公開7ツール（`search_bids` / `list_recent_bids` / `get_bid_detail` / `search_bids_app` / `rank_bids` / `extract_bid_requirements` / `export_bid_shortlist`）が検出されることを確認する。
 
 ---
 
 ## ステップ4: App Info・スクリーンショット・動画の入力
 
-`chatgpt-apps-submission-checklist.md` §6〜8 と `docs/submissions/chatgpt-app-submission.json` を見ながら、以下を用意・入力する。
+`chatgpt-apps-submission-checklist.md` §6〜8 と `docs/submissions/chatgpt-app-submission.json`（および `plugins/jp-bids-mcp/`）を見ながら、以下を用意・入力する。
 
-1. **App Info**: `chatgpt-app-submission.json` の `app_info` フィールドをそのまま入力（display_name, subtitle, description, category）。
-2. **ロゴ**: 64×64のSVGアイコンを用意する（未用意なら教えてください。既存の `public/favicon.png` から作成できます）。
-3. **スクリーンショット**: ChatGPT Developer Modeで実際にこのMCPサーバーを接続し、checklist §7 の4プロンプトを実行してキャプチャする（幅706px目安）。
+1. **App Info**: `chatgpt-app-submission.json` の `app_info` フィールドを入力（display_name, subtitle, description, category）。
+2. **ロゴ / アイコン**: `plugins/jp-bids-mcp/assets/` 内の検証済みアイコン（`node scripts/build-openai-package.mjs` で `artifacts/openai-package/` にパッケージ化可能）を使用する。
+3. **スクリーンショット**: ChatGPT Developer Modeで `https://mcp.bid-jp.com/mcp` を接続し、checklist §7 の公開7ツール・UIワークスペース画面をキャプチャする（幅706px目安）。
 4. **動画**: checklist §8 のスクリプト通りにChatGPT web版とモバイル版で操作を録画し、YouTube限定公開かGoogle Driveにアップロードしてリンクを控える。
 5. **Test cases**: `chatgpt-app-submission.json` の `test_cases`（5件）・`negative_test_cases`（3件）を、まず自分で実際にChatGPTで試してから、フォームの該当欄に転記する。
 
@@ -72,15 +65,15 @@
 
 ## ステップ5: Tool justification の入力
 
-Scan Toolsで4ツールの `readOnlyHint` / `destructiveHint` / `openWorldHint` が読み取られたら、`chatgpt-app-submission.json` の `justifications` をツールごとにそのまま貼り付ける。
+Scan Toolsで公開7ツールの `readOnlyHint` / `destructiveHint` / `idempotentHint` / `openWorldHint` が読み取られたら、`chatgpt-app-submission.json` の `justifications` をツールごとにそのまま貼り付ける。
 
-`openWorldHint: true` について指摘や違和感があれば、checklist §5 の説明（MCP公式仕様とOpenAI独自定義の違い）をそのまま審査コメント欄に補足してもよい。もし提出後に「annotation does not match behavior」でリジェクトされた場合は、私に連絡してください。該当4ファイルの `openWorldHint` を `false` に変更して再デプロイ・再スキャンします。
+`openWorldHint: true` について指摘や違和感があれば、checklist §5 の説明（MCP公式仕様とOpenAI独自定義の違い）をそのまま審査コメント欄に補足してもよい。もし提出後に「annotation does not match behavior」でリジェクトされた場合は、私に連絡してください。公開7ツールの `openWorldHint` を `false` に変更して再デプロイ・再スキャンします。
 
 ---
 
 ## ステップ6: コンプライアンス確認・最終提出
 
-1. checklist §10 のチェックボックスを一通り確認する（Free4ツールのみなので商用取引・課金関連はすべて「該当なし」でOK）。
+1. checklist §10 のチェックボックスを一通り確認する（公開7ツールは完全無料・読み取り専用なので商用取引・課金関連はすべて「該当なし」）。
 2. 全項目を入力し終えたら **Submit for review** を押す。
 3. 確認メールに記載される **Case ID** を控える。
 4. 私に Case ID と提出日を伝えてください。`docs/submissions/mcp-directories.md` の状態表を更新します。

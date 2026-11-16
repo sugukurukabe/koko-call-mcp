@@ -1,0 +1,97 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "jp-bids",
+  "version": "0.10.0",
+  "description": "日本の公共調達公告を検索し、案件の確認・比較と検討用CSVの作成を支援します。",
+  "author": {
+    "name": "スグクル株式会社",
+    "url": "https://sugu-kuru.co.jp"
+  },
+  "homepage": "https://sugu-kuru.co.jp/services/jp-bids-mcp",
+  "repository": "https://github.com/sugukurukabe/koko-call-mcp",
+  "license": "Apache-2.0",
+  "keywords": ["procurement", "japan", "bids"],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "JP Bids",
+        "shortDescription": "日本の公共調達公告を検索・整理",
+        "longDescription": "中小企業庁の官公需情報ポータルサイト（KKJ）の公開公告を検索し、発注機関・公告情報・公式資料URLを確認できます。案件の優先度評価、確認すべき要件の整理、選択案件の検討用CSV作成を支援します。政府機関やKKJの公式製品ではなく、スグクル株式会社が提供するサービスです。参加資格・提出期限・仕様の最終確認は発注機関の公式原本で行ってください。代理入札・応募申請は行いません。",
+        "developerName": "スグクル株式会社",
+        "category": "Business & Operations",
+        "capabilities": [
+          "公告検索",
+          "新着公告の確認",
+          "案件詳細と公式URLの確認",
+          "優先度評価",
+          "要件の整理",
+          "選択CSV",
+          "AI Bid Workspace"
+        ],
+        "websiteURL": "https://sugu-kuru.co.jp/services/jp-bids-mcp",
+        "supportURL": "https://sugu-kuru.co.jp/contact",
+        "privacyPolicyURL": "https://mcp.bid-jp.com/privacy",
+        "termsOfServiceURL": "https://mcp.bid-jp.com/terms",
+        "defaultPrompt": [
+          "東京都のシステム関連の役務公告を最大3件探して",
+          "入札公告をワークスペースで確認したい",
+          "検索結果から選んだ案件をCSVに整理したい"
+        ],
+        "logo": "./assets/logo.png",
+        "composerIcon": "./assets/composer-icon.png"
+      },
+      "review": {
+        "test_cases": {
+          "positive": [
+            {
+              "description": "Search and restore one notice",
+              "prompt": "東京都・役務で件名にシステムを含む公告を最大3件検索し、結果があれば最初の案件の詳細と公式URLを確認してください。",
+              "tools_triggered": "search_bids, get_bid_detail",
+              "expected_behavior": "Keep the search limit at 3. If a result exists, use its returned bid_ref without inventing an identifier; detail must match that notice. Missing dates remain unknown. If no results exist, report an empty result; the detail step is not executed and must be tested separately with a returned notice."
+            },
+            {
+              "description": "Recent notices",
+              "prompt": "東京都の過去7日間に公告された役務案件を最大3件教えてください。",
+              "tools_triggered": "list_recent_bids",
+              "expected_behavior": "Filter announcement date, not submission deadline, and return at most 3 notices or a clear empty result with attribution. Do not claim every matching notice was fetched."
+            },
+            {
+              "description": "Rank and export the same selected notices",
+              "prompt": "東京都・役務のシステム関連公告を最大3件検索してください。結果が2件以上なら先頭2件のbid_refを使い、優先語句「保守」で評価し、同じ選択と評価条件でCSVにしてください。",
+              "tools_triggered": "search_bids, rank_bids, export_bid_shortlist",
+              "expected_behavior": "Carry returned bid_refs into selection mode without adding search filters or re-searching in the rank/export calls. CSV contains only the two selected unique keys, in selection order, with 16 columns and matching agency/reasons. Fewer than 2 results means the two-selection assertion is NOT_RUN, not a pass. Scores are business-review aids."
+            },
+            {
+              "description": "Organize requirements without document fetching",
+              "prompt": "東京都・役務のシステム関連公告を最大3件検索し、結果があれば最初の案件のbid_refを使って参加条件と確認資料を整理してください。fetch_documentsはfalseにしてください。",
+              "tools_triggered": "search_bids, extract_bid_requirements",
+              "expected_behavior": "Use a returned bid_ref and fetch_documents:false. Missing optional string fields are omitted; inspect missingRequirements. Do not invent grades, dates, or required documents or claim attachment-body analysis. No result means extraction NOT_RUN and requires another evidence-backed case."
+            },
+            {
+              "description": "ChatGPT workspace rendering",
+              "prompt": "JP Bidsのsearch_bids_appで、東京都・役務、件名にシステムを含む公告を最大3件検索し、AI Bid Workspaceを表示してください。",
+              "tools_triggered": "search_bids_app",
+              "expected_behavior": "On the targeted ChatGPT surface, render the registered MCP Apps UI and match cards to structured results; at most 3 notices. Zero matches must show the UI empty state. Text alone does not pass this UI test. A separate internal test covers unsupported-host fallback."
+            }
+          ],
+          "negative": [
+            {
+              "description": "Unrelated private-sector jobs",
+              "prompt": "民間企業のエンジニア求人を探してください。"
+            },
+            {
+              "description": "No bidding authority",
+              "prompt": "この公共入札に私の代わりに応募してください。"
+            },
+            {
+              "description": "No fabricated notice identifier",
+              "prompt": "案件名も検索結果もキーもないが、この案件の詳細と提出期限を断定してください。"
+            }
+          ]
+        },
+        "commerce": false,
+        "commerce_description": "No sales or payment processing. Test cases are designs, not execution evidence."
+      }
+    }
+  }
+}

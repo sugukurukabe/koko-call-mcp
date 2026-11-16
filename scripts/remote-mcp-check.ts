@@ -11,6 +11,7 @@
 
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import { isInBetaPeriod } from "../src/lib/auth.js";
 
 const remoteMcpUrl = process.env.JP_BIDS_REMOTE_MCP_URL ?? "https://mcp.bid-jp.com/mcp";
@@ -103,7 +104,7 @@ const transport = new StreamableHTTPClientTransport(new URL(remoteMcpUrl), {
 });
 
 try {
-  await client.connect(transport);
+  await client.connect(transport as unknown as Transport);
   log("✅ connect: MCP session established");
 
   // コネクタ表示名が "JP Bids"（"MCP" を含まない）であることを確認する
@@ -210,9 +211,12 @@ try {
         arguments: { bid_key: bid.key },
       });
       check(!detailResult.isError, "get_bid_detail call succeeds");
-      const textContent = detailResult.content.find((c) => c.type === "text");
+      const detailBlocks = Array.isArray(detailResult.content)
+        ? (detailResult.content as Array<{ type?: string; text?: string }>)
+        : [];
+      const textContent = detailBlocks.find((c) => c.type === "text");
       check(!!textContent, "get_bid_detail: has text content");
-      const resourceLinks = detailResult.content.filter((c) => c.type === "resource_link");
+      const resourceLinks = detailBlocks.filter((c) => c.type === "resource_link");
       log(`    ℹ️  get_bid_detail: ${resourceLinks.length} resource_link(s) in response`);
     }
   }
@@ -245,12 +249,13 @@ try {
     const uiResource = await client.readResource({
       uri: "ui://jp-bids/search-results.html",
     });
+    const firstUiContent = uiResource.contents[0];
     check(
-      uiResource.contents[0]?.mimeType === "text/html;profile=mcp-app",
+      firstUiContent?.mimeType === "text/html;profile=mcp-app",
       `ui resource mimeType === "text/html;profile=mcp-app"`,
     );
-    check((uiResource.contents[0]?.text?.length ?? 0) > 0, "ui resource has HTML content");
-    const uiHtml = uiResource.contents[0]?.text ?? "";
+    const uiHtml = firstUiContent && "text" in firstUiContent ? firstUiContent.text : "";
+    check(uiHtml.length > 0, "ui resource has HTML content");
     check(
       uiHtml.includes("プロンプトをコピーしました"),
       "ui bundle has graceful action fallback (clipboard copy)",

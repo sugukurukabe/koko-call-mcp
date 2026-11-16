@@ -3,7 +3,8 @@ import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { describe, expect, it } from "vitest";
 import { KkjClient } from "../../src/api/kkj-client.js";
 import { isAllowedBidOfficialUrl } from "../../src/apps/search-results.js";
-import { type Bid, type BidSearchResult, signBidRef } from "../../src/domain/bid-ref.js";
+import type { Bid, BidSearchResult } from "../../src/domain/bid.js";
+import { signBidRef } from "../../src/domain/bid-ref.js";
 import { createJpBidsServer } from "../../src/mcp.js";
 
 const MOCK_SINGLE_HIT_XML = `<?xml version="1.0" encoding="UTF-8"?>
@@ -33,9 +34,12 @@ const MOCK_EMPTY_XML = `<?xml version="1.0" encoding="UTF-8"?>
   </SearchResults>
 </Results>`;
 
-function makeSyntheticBid(idx: number, options: Partial<Bid> = {}): Bid {
+type SyntheticBid = Bid & { officialUrl?: string };
+
+function makeSyntheticBid(idx: number, options: Partial<SyntheticBid> = {}): SyntheticBid {
   const num = String(idx).padStart(4, "0");
   return {
+    resultId: idx,
     key: `KKJ-2026-46201-${num}`,
     projectName: `プロジェクト ${idx} 案件仕様書`,
     organizationName: idx % 2 === 0 ? "鹿児島県" : "鹿児島市",
@@ -94,6 +98,14 @@ describe("UI Harness & Interaction Verification (F05 / V02-V05 / S03 / C01)", ()
     expect(html).not.toContain("メモ保存");
     expect(html).not.toContain("handleDownloadIcs");
     expect(html).not.toContain("handleDownloadMemo");
+
+    // Verify zero-match UI empty state, narrow-viewport V02 input shrink rule, & host theme support are compiled into the UI bundle
+    expect(html).toContain("該当する入札公告はありません（0件）");
+    expect(html).toContain(
+      "条件に一致する入札公告は見つかりませんでした（0件）。検索条件を広げて再検索してください。",
+    );
+    expect(html).toMatch(/\.ws-search-input\{[^}]*min-width:\s*0/);
+    expect(html).toContain(":root[data-theme=dark]");
 
     // Verify pro tools are not registered
     const { tools } = await client.listTools();
@@ -262,5 +274,62 @@ describe("UI Harness & Interaction Verification (F05 / V02-V05 / S03 / C01)", ()
 
     await client.close();
     await server.close();
+  });
+
+  it("Harness parity: scripts/apps-harness/host.html uses valid certification enums and string JSON scores accepted by extractJsonFromToolResult", async () => {
+    const { readFile } = await import("node:fs/promises");
+    const { extractJsonFromToolResult } = await import("../../src/apps/export-diagnostics.js");
+    const hostHtml = await readFile("scripts/apps-harness/host.html", "utf8");
+
+    // 1. searchCriteria.certification must only contain A/B/C/D enum values
+    const certMatch = hostHtml.match(/searchCriteria:\s*\{[\s\S]*?certification:\s*(\[[^\]]*\])/);
+    expect(certMatch?.[1]).toBeDefined();
+    const certs = JSON.parse(certMatch?.[1] ?? "[]") as unknown[];
+    expect(certs.length).toBeGreaterThan(0);
+    for (const c of certs) {
+      expect(["A", "B", "C", "D"]).toContain(c);
+    }
+
+    // 2. JSON export branch in host.html must stringify score and pass extractJsonFromToolResult
+    const jsonBranchMatch = hostHtml.match(
+      /if\s*\(format\s*===\s*"json"\)\s*\{\s*exportContent\s*=\s*(\{[\s\S]*?\});\s*\}\s*else/,
+    );
+    expect(jsonBranchMatch?.[1]).toBeDefined();
+    const columns = [
+      "priority",
+      "score",
+      "key",
+      "project_name",
+      "organization_name",
+      "prefecture",
+      "city",
+      "category",
+      "procedure_type",
+      "notice_date",
+      "tender_submission_deadline",
+      "opening_tenders_event",
+      "fit_reasons",
+      "risks",
+      "next_action",
+      "official_url",
+    ];
+    const matched = [makeSyntheticBid(1), makeSyntheticBid(2)];
+    const attribution = { dataSource: "中小企業庁 官公需情報ポータルサイト" };
+    const buildExportContent = new Function(
+      "matched",
+      "columns",
+      "attribution",
+      `return (${jsonBranchMatch?.[1]});`,
+    ) as (m: SyntheticBid[], c: string[], a: Record<string, string>) => unknown;
+
+    const exportContent = buildExportContent(matched, columns, attribution);
+    const extracted = extractJsonFromToolResult({
+      isError: false,
+      structuredContent: exportContent,
+    });
+    expect(extracted.valid).toBe(true);
+    if (extracted.valid) {
+      expect(extracted.itemCount).toBe(2);
+    }
   });
 });

@@ -44,7 +44,7 @@
       "operatingSystem": "Any (Cloud / Streamable HTTP)",
       "url": "https://mcp.bid-jp.com/",
       "downloadUrl": "https://www.npmjs.com/package/jp-bids-mcp",
-      "softwareVersion": "0.9.0",
+      "softwareVersion": "0.10.0",
       "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "description": "Read-only Model Context Protocol server that exposes public procurement notice data from Japan's SME Agency KKJ portal as 7 AI tools for search, ranking, requirement extraction, export, and interactive MCP Apps workspace. Completely free and read-centric.",
       "inLanguage": ["ja", "en", "id"],
@@ -59,7 +59,7 @@
       "softwareRequirements": "Any MCP 2025-11-25 compliant client (Claude Desktop, Cursor, ChatGPT, etc.)",
       "featureList": [
         "Search public procurement notices from Japan's SME Agency KKJ portal (search_bids, list_recent_bids, get_bid_detail)",
-        "AI ranking by company profile (rank_bids)",
+        "AI ranking by keywords and deadline urgency (rank_bids)",
         "Procurement requirement extraction (extract_bid_requirements)",
         "Shortlist export to CSV/JSON (export_bid_shortlist)",
         "Interactive search workspace (search_bids_app)",
@@ -132,7 +132,7 @@
           "name": "データの出典はどこですか？",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "中小企業庁の官公需情報ポータルサイト（KKJ, https://kkj.go.jp ）の公開 API です。政府標準利用規約 第 2.0 版に従い、本サーバーが返すすべての結果に出典を含めます。"
+            "text": "中小企業庁の官公需情報ポータルサイト（KKJ, https://www.kkj.go.jp/ ）の公開検索APIです。本サーバーが返すすべての結果に、出典および注意事項ページ（https://www.kkj.go.jp/s/help/notes/）への参照を含めます。"
           }
         },
         {
@@ -341,7 +341,7 @@ footer a{color:var(--muted)}
     <div class="workflow-card">
       <div class="step">会話例 5</div>
       <h3>「うちの条件に合うか確認したい」</h3>
-      <p>自社プロファイルと案件を比較採点 (`rank_bids`)。※参考情報としての適合度整理であり、参加資格の確定判定ではありません。</p>
+      <p>優先・除外キーワードや締切条件に基づき案件を比較採点 (`rank_bids`)。※参考情報としての適合度整理であり、参加資格の確定判定ではありません。</p>
     </div>
     <div class="workflow-card">
       <div class="step">会話例 6</div>
@@ -377,7 +377,7 @@ footer a{color:var(--muted)}
     <div class="feature-card">
       <div class="feature-icon">&#x1F4CA;</div>
       <h3>rank_bids</h3>
-      <p>自社プロファイル・優先語句に基づき、候補案件の適合度と緊急度を0〜100で採点。</p>
+      <p>優先・除外キーワードと提出期限に基づき、候補案件の適合度と緊急度を0〜100で採点。</p>
     </div>
     <div class="feature-card">
       <div class="feature-icon">&#x1F4C5;</div>
@@ -456,7 +456,7 @@ footer a{color:var(--muted)}
 
 <footer>
   <p>&copy; 2025-2026 <a href="https://sugu-kuru.co.jp">スグクル株式会社</a> &nbsp;|&nbsp; <a href="/privacy">プライバシー</a> &nbsp;|&nbsp; <a href="/terms">利用規約</a> &nbsp;|&nbsp; <a href="https://github.com/sugukurukabe/koko-call-mcp">GitHub</a></p>
-  <p style="margin-top:.5rem">データ出典: <a href="https://kkj.go.jp">中小企業庁 官公需情報ポータルサイト</a>（政府標準利用規約 第2.0版）</p>
+  <p style="margin-top:.5rem">データ出典: <a href="https://www.kkj.go.jp/">中小企業庁 官公需情報ポータルサイト</a>（<a href="https://www.kkj.go.jp/s/help/notes/">サイト利用上の注意</a>）</p>
 </footer>
 
 <script>

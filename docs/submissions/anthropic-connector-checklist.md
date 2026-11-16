@@ -1,28 +1,23 @@
-# Anthropic Connectors Directory 申請チェックリスト
-# Anthropic Connectors Directory Submission Checklist
-# Daftar Periksa Pengajuan Anthropic Connectors Directory
+# Anthropic Connectors Directory 申請・更新チェックリスト (v0.10.0)
+# Anthropic Connectors Directory Submission Checklist (v0.10.0)
+# Daftar Periksa Pengajuan Anthropic Connectors Directory (v0.10.0)
 
-> 申請ポータル: Claude.ai admin settings → Connectors → Submit  
-> 対象タイプ: Remote MCP server + MCP App  
-> 申請日: TBD  
-> バージョン: v0.7.x+
+> 申請・管理ポータル: Claude.ai Admin / Settings → Connectors → Submit / Manage  
+> 対象タイプ: Remote MCP server + MCP App (`AI Bid Workspace`)  
+> 対象バージョン: **`v0.10.0`** (`JP_BIDS_PROFILE=public_mvp`・完全無料・公開7ツール)
 
 ---
 
-## Pre-submission ゲートチェック / Pre-submission Gate
+## Pre-submission ゲートチェック / Pre-submission Gate (`v0.10.0`)
 
 | 項目 | 状態 | 備考 |
 |---|---|---|
-| `npm run build` が通る | ✅ | |
-| `npm run test` が全通過 | ✅ | 121 tests |
-| `npm run lint` が通る | ✅ | root `npm run lint` 通過 |
-| `npm run remote:health` が通る | ✅ | 2026-06-28: `https://mcp.bid-jp.com/readyz` OK、`/mcp` GET 405 OK |
-| `npm run remote:mcp` が通る | ✅ | 2026-06-28: `https://mcp.bid-jp.com/mcp` で全PASS（17 tools / 6 prompts / 4 resources / MCP App UI）|
-| 公開メタデータ・privacy・OAuth well-known が200 | ✅ | 2026-06-28: server-card / agents / mcp-server / oauth-protected-resource / oauth-authorization-server / privacy / terms / favicon すべて200 |
-| Documentation URL (GitHub repo) が公開 | ✅ | `https://github.com/sugukurukabe/koko-call-mcp` 200・READMEは "JP Bids MCP" 正本 |
-| Registry メタデータ整合 (`npm run registry:validate`) | ✅ | passed。`package.json` mcpName ＝ `server.json` name ＝ `io.github.sugukurukabe/jp-bids` |
-| Claude custom connector として接続確認した | ✅ | 2026-06-28: 個人Claude.aiアカウントでコネクタ追加・OAuth接続成功 |
-| MCP App UI / 代表ツール手動確認 | ✅ | `remote:mcp` で代表ツール実行・全17 surfaced。手順は `personal-account-smoke.md` |
+| `npm run check`（lint + typecheck:all + build + test）全通過 | ✅ | `v0.10.0` 全スイート合格 |
+| Gate 1 ローカル受入ランナー（35条件・外部通信0件） | ✅ | `node --import ./evidence/q02_batch2/net-guard.batch2.path-null-fix.mjs tests/acceptance/gate1-runner.mjs` |
+| `npm run registry:validate` & `npm run release:parity` 通過 | ✅ | `package.json`, `server.json`, `server-card.json`, `.smithery/shttp/manifest.json` すべて `0.10.0` で一致 |
+| 本番ヘルス・メタデータ（`/health`, `/readyz`, `/privacy`, `/terms`, `/.well-known/*`） | ✅ | `https://mcp.bid-jp.com` 全エンドポイント HTTP 200（`/mcp` GET は仕様通り 405） |
+| Documentation URL (GitHub repo) 公開・1クリック導入案内完備 | ✅ | `https://github.com/sugukurukabe/koko-call-mcp` (`README.md`, `README.ja.md`, `docs/USER_GUIDE.ja.md`) |
+| 本番 Claude カスタムコネクタ実機検証 | ✅ | 2026-10-21 JST: `https://mcp.bid-jp.com/mcp` でOAuth 1クリック認可・7ツール認識・`search_bids_app` 表示・`get_bid_detail` 復元・選択2件16列CSV出力を確認（`docs/VERIFICATION_STATUS.md`） |
 
 ---
 
@@ -32,55 +27,43 @@
 |---|---|
 | Server URL | `https://mcp.bid-jp.com/mcp` |
 | Transport | Streamable HTTP |
-| Users connect to | Same URL (all users use the same endpoint) |
-| Protocol version supported | `2025-11-25` |
+| Users connect to | Same URL (Universal endpoint for all users) |
+| Protocol versions supported | `2025-11-25` (primary) / `2026-07-28` (routing header & RFC 9207 `iss` compatible) |
 
 ---
 
-## 2. Tools — ツール一覧と annotations 確認
+## 2. Tools — 公開7ツール一覧と annotations 確認 (`public_mvp`)
 
-全17ツール: `title` あり、`readOnlyHint` または `destructiveHint` あり、名前64文字以内。
+全7ツールすべて完全無料・読み取り専用。`title`, `inputSchema`, `outputSchema`, および4種の `annotations` (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`) を明示定義済み（Stripe課金・有料Proティア・外部書き込みツールは一切含まれません）。
 
-| ツール名 | readOnlyHint | title | Tier |
-|---|---|---|---|
-| `search_bids` | `true` | 官公需入札検索 | Free |
-| `rank_bids` | `true` | 追うべき入札ランキング | Free |
-| `list_recent_bids` | `true` | 直近の官公需入札一覧 | Free |
-| `get_bid_detail` | `true` | 官公需入札詳細 | Free |
-| `search_bids_app` | `true` | 官公需入札検索テーブル | Pro |
-| `explain_bid_fit` | `true` | 入札追跡判断の説明 | Pro |
-| `assess_bid_qualification` | `true` | 入札資格適合MVP判定 | Pro |
-| `extract_bid_requirements` | `true` | 入札要件抽出MVP | Pro |
-| `export_bid_shortlist` | `true` | 入札検討shortlist CSV | Pro |
-| `create_bid_calendar` | `true` | 入札締切カレンダーICS | Pro |
-| `create_bid_review_packet` | `true` | 入札社内検討パック | Pro |
-| `draft_bid_questions` | `true` | 入札質問書ドラフト | Pro |
-| `analyze_past_awards` | `true` | 過去公告・競合レーダー | Pro |
-| `summarize_bids_by_org` | `true` | 発注機関別の入札傾向分析 | Pro |
-| `save_search` | `false` | 検索条件を保存 | Pro |
-| `check_saved_search` | `false` | 保存検索の新着確認 | Pro |
-| `list_saved_searches` | `true` | 保存検索の一覧 | Pro |
-
-**Reviewer注**: `save_search` / `check_saved_search` は `readOnlyHint: false` — セッション内の in-memory state を更新するため。外部システムへの書き込みは一切なし。
+| # | ツール名 | readOnlyHint | destructiveHint | idempotentHint | openWorldHint | title | 料金区分 |
+|---|---|---|---|---|---|---|---|
+| 1 | `search_bids` | `true` | `false` | `true` | `true` | 官公需入札検索 | 無料 (Free) |
+| 2 | `list_recent_bids` | `true` | `false` | `true` | `true` | 直近の官公需入札一覧 | 無料 (Free) |
+| 3 | `get_bid_detail` | `true` | `false` | `true` | `true` | 官公需入札詳細 | 無料 (Free) |
+| 4 | `rank_bids` | `true` | `false` | `true` | `true` | 追うべき入札ランキング | 無料 (Free) |
+| 5 | `extract_bid_requirements` | `true` | `false` | `false` | `true` | 入札要件抽出MVP | 無料 (Free) |
+| 6 | `export_bid_shortlist` | `true` | `false` | `false` | `true` | 入札検討shortlist CSV | 無料 (Free) |
+| 7 | `search_bids_app` | `true` | `false` | `true` | `true` | AI Bid Workspace | 無料 (Free) |
 
 ---
 
-## 2.5. Prompts / Resources / Tasks
+## 2.5. Prompts / Resources / Tasks (`public_mvp`)
 
-Promptsは審査・実利用でよく使うワークフローに合わせて6本用意しています。
+`public_mvp` プロファイルでは、公開7ツールのみを使用する3本のPromptと4つの固定Resource＋1つのResource Templateを公開します（停止機能への誘導はゼロ）：
 
-| Prompt | 用途 |
-|---|---|
-| `morning_bid_briefing` | 地域・カテゴリごとの朝会用ブリーフィング |
-| `bid_discovery_workspace` | `search_bids_app` を使ったMCP Apps探索ワークスペース起動 |
-| `competitor_radar` | 発注機関別の過去傾向分析 |
-| `bid_review_packet_workflow` | `bid_key` から詳細確認・要件抽出・社内検討パック作成まで |
-| `qualification_and_question_draft` | 資格適合の仮判定と質問書ドラフト |
-| `bid_due_alert` | 提出期限が近い案件の確認 |
+| 種別 | 識別子 | 用途 |
+|---|---|---|
+| Prompt | `morning_bid_briefing` | 地域・カテゴリごとの朝会用入札ブリーフィング |
+| Prompt | `bid_due_alert` | 提出期限が近い案件の確認・優先度整理 |
+| Prompt | `bid_discovery_workspace` | `search_bids_app` を使った AI Bid Workspace 探索起動 |
+| Resource | `attribution://kkj` | 中小企業庁 官公需情報ポータルサイト 出典情報 |
+| Resource | `docs://api-reference` | パラメータ・スキーマリファレンス |
+| Resource | `codes://prefectures` | 47都道府県コード（`lg_code`）一覧 |
+| Resource | `ui://jp-bids/search-results.html` | AI Bid Workspace 単一ファイルHTMLバンドル (`text/html;profile=mcp-app`) |
+| Template | `prefecture://{lg_code}` | 都道府県別メタデータテンプレート（`01`〜`47`） |
 
-Resourcesは `attribution://kkj`、`docs://api-reference`、`codes://prefectures`、`ui://jp-bids/search-results.html`、`bid://{bid_key}`、`org://{organization_name}` などを提供します。
-
-Tasks capabilityは現時点では広告しません。現在の検索・分析・レビュー生成は短時間同期処理で完了し、MCP SDK側にも標準Task登録APIを使っていないためです。長時間ジョブが必要になった場合のみ、別途Cloud Run Jobsなどと組み合わせて公式仕様に沿って追加します。
+Tasks capabilityは広告しません（すべての検索・比較・CSV出力が短時間の同期 `tools/call` で完結するため）。
 
 ---
 
@@ -89,66 +72,59 @@ Tasks capabilityは現時点では広告しません。現在の検索・分析�
 | フィールド | 値 |
 |---|---|
 | Server name (100 chars max) | `JP Bids` |
-| Tagline (55 chars max) | `Japan government procurement bid search & AI analysis` |
+| Tagline (55 chars max) | `Japan government procurement bid search & CSV workspace` |
 | Description (2000 chars max) | 下記参照 |
 | Categories (1–5) | `Government & Public Sector`, `Data & Analytics`, `Productivity` |
 | Documentation URL | `https://github.com/sugukurukabe/koko-call-mcp` |
 | Privacy Policy URL | `https://mcp.bid-jp.com/privacy` |
-| Support contact | mcp@bid-jp.com (or GitHub Issues) |
+| Terms of Service URL | `https://mcp.bid-jp.com/terms` |
+| Support contact | `mcp@bid-jp.com` (または GitHub Issues) |
 | Icon | `https://mcp.bid-jp.com/favicon.png` |
 | URL slug | `jp-bids` |
 
 ### Description (2000文字以内)
 
-```
-JP Bids MCP は、中小企業庁 官公需情報ポータルサイト (KKJ) の公開入札情報を MCP で提供するサーバーです。KKJや外部業務システムへの書き込みは行いません。
+```text
+JP Bids MCP (v0.10.0) は、中小企業庁 官公需情報ポータルサイト (KKJ) の公開入札公告を Claude との会話で検索・比較・確認・CSV出力できる読み取り専用MCPサーバーです。完全無料で提供され、KKJや外部システムへの書き込み・代理入札・課金処理は一切行いません。
 
-**主な機能 / Key features:**
-- 官公需入札検索 — キーワード・都道府県・業種・資格等級で絞り込み検索
-- AI Bid Radar (rank_bids) — 自社条件でスコアリング・追跡優先度の自動判定
-- PDF/HTML 要件抽出 — 添付仕様書を一時取得して参加条件・期限を構造化
-- 資格適合確認 — 自社の地域・カテゴリ・資格と入札条件を照合
-- CSV/ICS エクスポート — Google Sheets/Excel 用ショートリスト、Google Calendar/Outlook 用ICS
-- 社内検討メモ・質問書ドラフト生成
-- MCP Apps UI — Claude.ai のサイドパネルで入札一覧・詳細・アクションを操作
-- 落札傾向分析・発注機関レーダー
+主な機能 / Key features (全7ツール・無料):
+- 官公需入札検索 (`search_bids` / `list_recent_bids`) — 47都道府県・調達区分（物品/工事/役務）・キーワード・公告日/締切日で検索
+- AI Bid Workspace (`search_bids_app`) — Claudeのサイドパネルに単一HTMLバンドルの対話型テーブルを表示し、案件選択やCSV出力を実行
+- 同一候補の比較・優先度評価 (`rank_bids`) — 署名付き参照 (`bid_ref`) により選択した候補を入れ替えずに0〜100点で比較
+- 詳細・公式資料URL・要件整理 (`get_bid_detail` / `extract_bid_requirements`) — 発注機関の公式公告URLや確認すべき要件項目を整理（公開版では外部PDF本文取得は既定OFF）
+- 16列CSV / JSON出力 (`export_bid_shortlist`) — 選択順序を保ったまま社内検討・Excel用の16列CSVまたはJSONを生成（保存・クリップボード・手動取得欄の3段階フォールバック対応）
 
-**データ**: 中小企業庁 官公需情報ポータルサイト (https://www.kkj.go.jp/) の公開API。PDFは一時取得のみで保存しない。
+データ出典: 中小企業庁 官公需情報ポータルサイト (https://www.kkj.go.jp/s/help/notes/)。スグクル株式会社が運営する民間サービスであり、政府機関の公式製品ではありません。入札判断前に必ず発注機関の公式原本をご確認ください。
 
-**対象ユーザー**: 日本の中小企業・スタートアップ・行政書士・入札支援担当者。
-
-**認証**: Remote endpoint は OAuth 2.0 または reviewer API key で接続します。Free ティアは4ツール、Pro/審査アカウントは全17ツール利用可。2026-10-01 までのbeta期間中は審査・初期ユーザー向けにPro表面を開放しています。
-
-The server does not write to KKJ or external systems. It keeps only ephemeral session state for saved searches and may keep short-lived in-memory document cache for duplicate fetch prevention.
+認証: リモートエンドポイント (https://mcp.bid-jp.com/mcp) は OAuth 2.0 (Dynamic Client Registration + PKCE S256) に対応しており、会員登録・パスワード不要の1クリック同意画面で即座に接続できます。
 ```
 
 ---
 
 ## 4. Use Cases — ユースケース
 
-### Primary use cases (記述例)
+### Primary use cases
 
-```
-1. 日本全国の官公需入札をキーワード・地域・業種で検索し、自社条件でAIスコアリングを実行する
-2. 入札案件の仕様書PDFを一時取得して参加条件・期限・評価項目を抽出する
-3. 選定した入札の社内検討メモ・カレンダー・質問書を自動生成する
-4. 特定機関や業種の過去発注傾向・競合パターンを分析する
+```text
+1. 日本全国47都道府県の官公需入札公告をキーワード・地域・調達区分で検索し、AI Bid Workspace画面で一覧確認する
+2. 選択した複数の候補案件を署名付き参照（bid_ref）で引き継ぎ、自社キーワードと期限余裕で優先度比較する
+3. 注目案件の公式公告URL・添付仕様書リンクと、確認すべき参加資格・提出期限のチェックリストを整理する
+4. 選択した案件の順序を保持したまま、社内共有・稟議用の16列CSVまたはJSONとして出力する
 ```
 
 ### What users need before connecting
 
-```
-Free ティア: Remote connector uses OAuth/API-key authentication. A non-Pro key exposes the 4 Free tools after beta; during beta reviewers will see the Pro tool surface.
-
-Pro ティア: https://mcp.bid-jp.com でOAuthログイン後、月額¥990のサブスクリプション。無料トライアルあり。
+```text
+事前登録・アカウント作成・APIキー・有料契約は一切不要です。
+Claudeの「設定 → コネクタ」から https://mcp.bid-jp.com/mcp を追加し、OAuth同意画面で「許可する / Allow」を1クリックするだけで全7ツールを無料で利用できます。
 ```
 
 ### Reads data / Writes data
 
-```
-Reads public KKJ procurement data and does not write to KKJ or any external business system.
-save_search / check_saved_search maintain ephemeral in-memory state within a single session.
-PDF/HTML attachments are fetched only when requested, processed ephemerally, and may be held in a short-lived in-process cache (up to 5 minutes) to avoid duplicate upstream fetches.
+```text
+Reads public Japanese government procurement notice metadata from the official KKJ Search API.
+Does NOT write to KKJ or any external system, does NOT submit bids, and does NOT store attachment PDFs.
+Maintains only short-lived in-memory search cache (TTL 10 minutes) and OAuth authorization/token state (`mcp:read`).
 ```
 
 ---
@@ -158,8 +134,9 @@ PDF/HTML attachments are fetched only when requested, processed ephemerally, and
 | フィールド | 値 |
 |---|---|
 | Company name | スグクル株式会社 / Sugukuru Inc. |
-| Company website | https://sugu-kuru.co.jp |
-| Primary contact | info@sugu-kuru.co.jp |
+| Company website | `https://sugu-kuru.co.jp` |
+| Service page | `https://sugu-kuru.co.jp/services/jp-bids-mcp` |
+| Primary contact | `info@sugu-kuru.co.jp` / `mcp@bid-jp.com` |
 
 ---
 
@@ -167,14 +144,14 @@ PDF/HTML attachments are fetched only when requested, processed ephemerally, and
 
 | フィールド | 値 |
 |---|---|
-| Auth type | OAuth 2.0 (Dynamic Client Registration, RFC 7591) |
-| OAuth redirect URI | `https://claude.ai/api/mcp/auth_callback` (already registered) |
-| PKCE | S256 required |
-| Authorization endpoint | `https://mcp.bid-jp.com/oauth/authorize` |
-| Token endpoint | `https://mcp.bid-jp.com/oauth/token` |
+| Auth type | OAuth 2.0 (Dynamic Client Registration RFC 7591 + PKCE S256) |
+| OAuth redirect URI | `https://claude.ai/api/mcp/auth_callback` (DCR対応) |
+| PKCE | `S256` required |
+| Scope | `mcp:read` |
+| Authorization endpoint | `https://mcp.bid-jp.com/oauth/authorize` (1-click Allow/Deny consent, no password/signup) |
+| Token endpoint | `https://mcp.bid-jp.com/oauth/token` (`Cache-Control: no-store`) |
 | Protected resource metadata | `https://mcp.bid-jp.com/.well-known/oauth-protected-resource/mcp` |
-| Free tools | search_bids, rank_bids, list_recent_bids, get_bid_detail. Remote production still expects OAuth/API-key authentication; non-Pro keys map to Free after beta. |
-| Note | During review, use the test account or reviewer API key below which grants Pro access. During beta, OAuth/API-key connections expose all 17 tools for review. |
+| Reviewer credentials | **不要（No test password or API key needed）** — 審査員も一般ユーザーと同じ1クリックOAuth同意のみで全7ツール・AI Bid Workspaceを利用可能 |
 
 ---
 
@@ -182,99 +159,67 @@ PDF/HTML attachments are fetched only when requested, processed ephemerally, and
 
 | フィールド | 値 |
 |---|---|
-| API ownership | Third-party MCP server operated by Sugukuru Inc. that legitimately queries the official public KKJ API (中小企業庁 官公需情報ポータル). JP Bids MCP is not affiliated with the Small and Medium Enterprise Agency. |
-| Personal health data | None |
+| API ownership | Third-party MCP server operated by Sugukuru Inc. querying the official public KKJ API (`中小企業庁 官公需情報ポータルサイト`). Not affiliated with the Small and Medium Enterprise Agency. |
+| Personal health / financial data | None |
+| Billing / Commerce | None (100% free Public MVP; zero Stripe or subscription calls) |
 | Sponsored content | None |
 
 ---
 
-## 8. Test & Launch — テスト認証情報
+## 8. Test & Launch — 審査員向け検証手順（アカウント不要）
 
-### Reviewer setup instructions
-
-```
-Option A — Free tier / beta note:
+```text
 1. In Claude.ai Settings → Connectors, add custom connector: https://mcp.bid-jp.com/mcp
-2. Complete OAuth or use Authorization: Bearer free in MCP Inspector/remote checks.
-3. During beta (until 2026-10-01), authenticated connections may expose the full Pro tool surface. After beta, a non-Pro key exposes only search_bids, rank_bids, list_recent_bids, get_bid_detail.
-
-Option B — Pro tier (full 17 tools + MCP App):
-1. Visit https://mcp.bid-jp.com and click "Pro トライアル" to create a review account
-2. Use email: mcp-review@bid-jp.com / Password: [see private notes]
-3. Add custom connector in Claude.ai with the generated OAuth token
-4. Run: "鹿児島県のIT入札を探して、うちに合う順にランク付けして" to exercise rank_bids
-5. Run: "search_bids_app" to open the MCP App workspace
-
-OR use the test API key:
-  Authorization: Bearer jp-bids-review-XXXX (see private notes)
-  This grants Pro tier access for review testing.
+2. Click "Allow / 許可する" on the 1-click OAuth consent screen (no login, email, or API key required).
+3. Verify that exactly 7 tools are surfaced: search_bids, list_recent_bids, get_bid_detail, rank_bids, extract_bid_requirements, export_bid_shortlist, search_bids_app.
+4. Run: "東京都・役務で、件名に「システム」を含む入札公告を最大3件検索して、AI Bid Workspaceを表示してください" to verify search_bids_app UI rendering.
+5. Select 2 notices in the workspace and click "選択CSV" (or ask in chat to rank and export the selected notices using their bid_ref) to verify 16-column CSV export.
 ```
 
-### Tools to verify (representative set)
+### Representative Tool Inputs
 
-| ツール | テスト入力 |
+| ツール | テスト入力例 |
 |---|---|
 | `search_bids` | `{"query": "システム", "prefecture": "鹿児島県", "category": "役務", "limit": 3}` |
-| `rank_bids` | `{"query": "IT保守", "prefecture": "鹿児島県", "preferred_keywords": ["クラウド", "保守"], "shortlist_limit": 5}` |
-| `list_recent_bids` | `{"prefecture": "東京都", "category": "役務", "days": 7}` |
-| `get_bid_detail` | `{"bid_key": "<key from search_bids result>"}` |
-| `explain_bid_fit` | `{"bid_key": "<key>", "preferred_keywords": ["システム"]}` |
-| `extract_bid_requirements` | `{"bid_key": "<key>", "fetch_documents": false}` |
-| `analyze_past_awards` | `{"organization_name": "農林水産省", "window_days": 365}` |
-| `search_bids_app` | `{"query": "システム", "prefecture": "鹿児島県"}` (MCP Apps UI) |
+| `list_recent_bids` | `{"prefecture": "東京都", "category": "役務", "days": 7, "limit": 3}` |
+| `get_bid_detail` | `{"bid_ref": "<bidRef from search_bids result>"}` |
+| `rank_bids` | `{"bid_refs": ["<bidRef1>", "<bidRef2>"], "preferred_keywords": ["クラウド", "保守"]}` |
+| `extract_bid_requirements` | `{"bid_ref": "<bidRef>", "fetch_documents": false}` |
+| `export_bid_shortlist` | `{"bid_refs": ["<bidRef1>", "<bidRef2>"], "format": "csv"}` |
+| `search_bids_app` | `{"query": "システム", "prefecture": "東京都", "category": "役務", "limit": 3}` |
 
 ---
 
 ## 9. Compliance Acknowledgements
 
-- [ ] This connector complies with the Anthropic Software Directory Policy
-- [ ] The connector is operated by Sugukuru Inc. and legitimately queries the public KKJ API; it is not affiliated with the Small and Medium Enterprise Agency
-- [ ] The connector does not facilitate financial transactions, cryptocurrency, or money transfers
-- [ ] The connector does not generate images, video, or audio via AI models
-- [ ] The connector does not inject prompts to manipulate Claude's behavior
-- [ ] The connector does not collect conversation data beyond what is needed for tool function; OAuth/billing identifiers and short-lived caches are documented in the privacy policy
-- [ ] Public documentation will be available at the GitHub repository by launch date
+- [x] This connector complies with the Anthropic Software Directory Policy
+- [x] Operated by Sugukuru Inc. and queries the public KKJ API; clearly discloses non-affiliation with government agencies
+- [x] Does not facilitate financial transactions, subscriptions, cryptocurrency, or money transfers
+- [x] Does not generate images, video, or audio via AI models
+- [x] Wraps untrusted notice metadata safely and never injects prompts to manipulate Claude's behavior
+- [x] Documented privacy policy (`https://mcp.bid-jp.com/privacy`) and terms (`https://mcp.bid-jp.com/terms`) are live
 
 ---
 
-## 10. MCP App — スクリーンショット仕様 / Screenshots
+## 10. MCP App — スクリーンショット・CSP仕様
 
-Screenshots must be PNG, ≥1000px wide, cropped to the app response only (no chat prompt visible).
-
-**準備済み / Prepared**: `docs/submissions/assets/` に5枚を生成済み。実UI(`ui://jp-bids/search-results.html`)を実データで描画してキャプチャしたもの。再生成手順は `docs/submissions/screenshot-howto.md` を参照。
-
-| # | File | 解像度 | Shows |
-|---|---|---|---|
-| 1 | `screenshot-01-welcome.png` | 2560×1720 | AI Bid Workspace の初期Welcome画面（入力例プロンプト一覧） |
-| 2 | `screenshot-02-search-results.png` | 2560×1720 | 左に案件カード（優先度バッジ「追う」/スコア/PDF/締切までの日数）、右に選択案件の詳細・アクションドック・公式公告リンク |
-| 3 | `screenshot-03-evidence.png` | 2560×1720 | 「出典・安全性情報」展開。安全性注意・Key・出典(中小企業庁 官公需情報ポータルサイト)・取得日時を表示 |
-| 4 | `screenshot-04-dark.png` | 2560×1720 | ダークモード。色付き優先度バッジ・締切バッジが正しく反転 |
-| 5 | `screenshot-05-mobile.png` | 1242×2460 | モバイル幅（414px相当）での1カラムレスポンシブ表示 |
-
-いずれも実際の `search_bids_app` 相当の構造化結果（鹿児島県・役務・23件中5件）でレンダリングしている。チャットのプロンプト部分は含めず、アプリ応答のみをトリミング済み。
-
-> 補足: より「Claude.ai上の実物」を重視する場合は、Claude custom connector接続後に Section 8 のプロンプトを実行し、アプリパネルのみをトリミングして上記ファイルを差し替えてよい。
+- **CSP**: `_meta.ui.csp = { connectDomains: [], resourceDomains: [] }`（単一HTMLインラインバンドル・外部CDN通信ゼロ）
+- **準備済みスクリーンショット**: `docs/submissions/assets/` に5枚配置済み（Welcome画面、検索結果＆優先度バッジ、出典・安全性情報、ダークモード、モバイル幅レスポンシブ表示）。さらに `npm run apps:capture` で最新の9画面決定論キャプチャも生成可能。
 
 ---
 
 ## 11. Allowed Link URIs
 
-```
+```text
 https://www.kkj.go.jp
 https://mcp.bid-jp.com
 ```
 
-These are the only origins the MCP App opens without extra confirmation via `ui/open-link`.  
-Attachment PDFs and other government domains are returned as `resource_link` blocks from KKJ metadata and should prompt or be handled by the host according to client policy.
-
 ---
 
-## Final Submission Steps / 最終申請手順
+## Final Submission / Update Steps
 
-1. `npm run build`、`npm test`、`npx biome check src/ scripts/ tests/ docs/submissions/ public/.well-known/mcp/server-card.json` が通ることを確認
-2. `npm run remote:mcp` で本番エンドポイントの全ツール実行を確認
-3. Claude.ai custom connector として全17ツール・Apps UI・Prompts・Resources を手動検証
-4. スクリーンショット5枚を `docs/submissions/assets/` に保存
-5. Claude.ai admin settings → Submit で申請ポータルを開く
-6. 上記フィールドを入力し、スクリーンショットをアップロード
-7. `docs/submissions/mcp-directories.md` の Anthropic セクションに申請日と status を記録
+1. `docs/GO_LIVE_TODAY_RUNBOOK.md` の手順で Cloud Run 本番を `v0.10.0` に更新し、`npm run remote:health` を確認する。
+2. Claude.ai カスタムコネクタで公開7ツールと `AI Bid Workspace` の動作を確認する。
+3. Claude Admin / Directory ポータルで上記 `v0.10.0`（無料7ツール・1クリックOAuth）の記載内容とスクリーンショットを提出・更新する。
+4. 提出日・ステータスを `docs/submissions/mcp-directories.md` に記録する。

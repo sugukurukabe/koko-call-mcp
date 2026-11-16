@@ -1,0 +1,220 @@
+{
+  "schema_version": 1,
+  "status": "LOCAL_DRAFT_ORGANIZATION_MATERIAL",
+  "notes": "Internal preparation draft. No official OpenAI schema affiliation.",
+  "app_info": {
+    "display_name": "JP Bids",
+    "subtitle": "Japan government procurement & bid intelligence",
+    "description": "JP Bids helps users search, evaluate, and monitor Japanese public-sector procurement notices (government tenders) published on the official Small and Medium Enterprise Agency KKJ portal. Users can search by keyword, project name, organization, prefecture, category, or date range; prioritize opportunities using AI Bid Radar scoring (pursue/review/skip); attempt structured extraction of qualification requirements and document checklists; and export shortlisted tenders to spreadsheet-compatible CSV (parsed as 16 columns). All data is read-only public government information; the app never submits bids, applications, or any data on the user's behalf.",
+    "category": "BUSINESS",
+    "legal_info": {
+      "publisher_identity": "PENDING_CONSOLE_VERIFICATION: Follow verification requirements specified in OpenAI submission console",
+      "support_url": "https://sugu-kuru.co.jp/contact",
+      "privacy_policy_url": "https://mcp.bid-jp.com/privacy",
+      "terms_of_service_url": "https://mcp.bid-jp.com/terms",
+      "kkj_license_terms": "PENDING_VERIFICATION: Confirmation of official KKJ terms text and scope is in progress",
+      "data_retention_policy": {
+        "search_content_storage": "NO_APPLICATION_PERSISTENCE (Design policy: user search queries are not persisted in application databases)",
+        "infrastructure_logs": "PENDING_CONFIRMATION: Server access and error logging retention settings require verification in Cloud Run configuration",
+        "in_memory_cache_ttl_minutes": 10,
+        "attachment_files_stored": false
+      }
+    }
+  },
+  "remote_endpoint": {
+    "production_url": "https://mcp.bid-jp.com/mcp",
+    "transport": "Streamable HTTP (implementation: StreamableHTTPServerTransport over HTTPS)",
+    "authentication": {
+      "production_remote": "HTTPS上のStreamable HTTP、OAuth認可、scope mcp:read",
+      "local_stdio": "None (Public read-only)"
+    },
+    "chatgpt_connection_verification": "NOT_VERIFIED (Pending live end-to-end verification from ChatGPT client)",
+    "submission_console_configuration": "PENDING_CONSOLE_VERIFICATION (Pending inspection of required transport and headers in submission UI)"
+  },
+  "domain_verification": {
+    "target_domain": "bid-jp.com",
+    "verification_method": "PENDING_CONSOLE_CHALLENGE (Follow challenge instructions provided in OpenAI submission console)"
+  },
+  "tools": {
+    "search_bids": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Queries the public KKJ procurement search API and returns matching notices; it never creates, updates, or deletes anything. Upstream rate limiting (1 req/sec default) is configured at the KkjClient instance level.",
+        "open_world_justification": "Queries an unpredictable, continuously-updated public data set (like a web search) but does not write, publish, or otherwise change any public-facing state; results are returned only to the requesting user.",
+        "destructive_justification": "Read-only search with no delete, overwrite, or irreversible side effects of any kind.",
+        "idempotent_justification": "Has no side effects on external state. While returned notice records may change over time as agencies publish updates, the tool execution itself does not mutate any server or client state."
+      }
+    },
+    "list_recent_bids": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Lists recently published KKJ notices for a 1–30 day announcement window; it only retrieves public data and never modifies anything.",
+        "open_world_justification": "Reads from the public, continuously-updated KKJ notice feed but does not write or publish anything.",
+        "destructive_justification": "Read-only listing with no delete, overwrite, or irreversible side effects.",
+        "idempotent_justification": "Has no side effects on external state. Successive calls with identical parameters perform read-only retrieval without mutating system state."
+      }
+    },
+    "get_bid_detail": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Fetches full detail for a single bid by bid_ref (cryptographically signed token) or bid_key and returns official links; it never modifies data and never stores attachments server-side.",
+        "open_world_justification": "Returns links to official public KKJ pages and attachments (external resources) but does not write, publish, or change any public-facing state itself.",
+        "destructive_justification": "Read-only detail lookup with no delete, overwrite, or irreversible side effects.",
+        "idempotent_justification": "Has no side effects on external state. Restores the exact snapshot from the signed bid_ref or retrieves cached upstream notice without mutating system state."
+      }
+    },
+    "rank_bids": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Runs search or scores user-selected bid_refs entirely in memory using the AI Bid Radar algorithm; no data is created, updated, or deleted anywhere.",
+        "open_world_justification": "Reads from the public procurement data set but does not write, broadcast, or publish anything.",
+        "destructive_justification": "Read-only scoring with no delete, overwrite, or irreversible side effects.",
+        "idempotent_justification": "Has no side effects on external state. The in-memory ranking calculation produces a deterministic score based on input parameters without mutating system state."
+      }
+    },
+    "extract_bid_requirements": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Parses metadata and announcement text to attempt structured extraction of eligibility grades, submission deadlines, and document checklists without storing files. Extraction depends on source text availability and may be incomplete.",
+        "open_world_justification": "May fetch external public document URLs (up to 3) for live text analysis without changing any external system state.",
+        "destructive_justification": "Pure analysis tool with zero data modification or deletion capability.",
+        "idempotent_justification": "Declared as false in implementation annotations. Operates without write side effects on system state, but reflects live remote document fetching."
+      }
+    },
+    "export_bid_shortlist": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Generates CSV or JSON text for selected bid_refs or search results in-memory. The exported CSV contains 16 columns (csv, rankedCount, columns) mapping directly to the selected bids.",
+        "open_world_justification": "Operates over current public bid data and user-provided selections without external publishing.",
+        "destructive_justification": "Generates in-memory CSV/JSON text; does not overwrite local or remote files.",
+        "idempotent_justification": "Declared as false in implementation annotations. Operates without write side effects on system state, generating formatted text output for user download or clipboard."
+      }
+    },
+    "search_bids_app": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Executes public procurement searches and renders an interactive UI workspace on supported MCP Apps hosts, falling back to text and structuredContent on unsupported hosts, with zero backend write actions.",
+        "open_world_justification": "Queries the public KKJ dataset and renders cards inside the client's sandboxed canvas; no external state is modified.",
+        "destructive_justification": "Sandboxed UI rendering with clipboard copy support; has no delete, overwrite, or persistent storage operations.",
+        "idempotent_justification": "Has no side effects on external state. Repeated search queries do not mutate server or client state."
+      }
+    }
+  },
+  "test_cases": [
+    {
+      "id": "TC-01",
+      "target_tool": "search_bids, get_bid_detail",
+      "description": "Keyword search and detailed view retrieval using signed bid_ref or key.",
+      "user_prompt": "鹿児島県でIT関連の官公需入札を検索し、その中の1件の詳細と公式URLを確認して。",
+      "file_attachment_urls": null,
+      "tools_triggered": "search_bids, get_bid_detail",
+      "expected_output": "search_bids returns matching tender notices (bidRef, key, organization, due date). get_bid_detail restores the selected notice detail and official KKJ announcement link without storing files. Zero matches on search is clean empty result.",
+      "expected_output_url": null
+    },
+    {
+      "id": "TC-02",
+      "target_tool": "list_recent_bids, search_bids",
+      "description": "Recent notices listing by region and category with procuring agency narrowing.",
+      "user_prompt": "東京都で直近7日間に公告された役務入札を一覧表示し、農林水産省の案件に絞り込んで。",
+      "file_attachment_urls": null,
+      "tools_triggered": "list_recent_bids, search_bids",
+      "expected_output": "list_recent_bids returns notices published within days=7 (CFT_Issue_Date range). search_bids narrows by organization_name='農林水産省'. Attribution metadata is included in all outputs.",
+      "expected_output_url": null
+    },
+    {
+      "id": "TC-03",
+      "target_tool": "rank_bids",
+      "description": "Prioritize candidate bids using keyword matching and deadline constraints.",
+      "user_prompt": "クラウドや保守に関わる入札を、締切30日以内で追うべき順に評価して。",
+      "file_attachment_urls": null,
+      "tools_triggered": "rank_bids",
+      "expected_output": "Returns rankedBids with score (0-100), priority ('pursue', 'review', or 'skip'), reasons, risks, and nextActions. If deadline is missing in upstream data, deadlineStatus is 'unknown'.",
+      "expected_output_url": null
+    },
+    {
+      "id": "TC-04",
+      "target_tool": "extract_bid_requirements, export_bid_shortlist",
+      "description": "Requirement structured extraction (fetch_documents=false) and 16-column shortlist CSV export.",
+      "preconditions": "Requires valid bid_refs returned from prior search. If no notice is available, recorded as NOT_EXECUTED.",
+      "user_prompt": "事前検索で選んだ2件の検討案件（有効なbid_ref）について、参加資格・提出期限・必要書類を整理し、検討用CSV形式で出力して。",
+      "file_attachment_urls": null,
+      "tools_triggered": "extract_bid_requirements, export_bid_shortlist",
+      "expected_output": "extract_bid_requirements returns knownRequirements omitting unavailable fields (z.string().optional(), null not allowed) and confirms missing items in missingRequirements without fabrication. export_bid_shortlist returns csv string, rankedCount=2, and columns array with 16 column definitions.",
+      "expected_output_url": null
+    },
+    {
+      "id": "TC-05",
+      "target_tool": "search_bids_app",
+      "description": "ChatGPT interactive UI workspace display test (mandatory UI rendering, limit 3).",
+      "user_prompt": "東京都のIT関連入札をUIワークスペースで最大3件表示して。",
+      "file_attachment_urls": null,
+      "tools_triggered": "search_bids_app",
+      "expected_output": "Mandatory UI display test for ChatGPT: successfully renders interactive AI Bid Workspace ('ui://jp-bids/search-results.html') with up to 3 cards. If only plain text is returned without UI rendering, test is marked as FAIL. In case of 0 matches, UI empty-state view must be cleanly displayed.",
+      "expected_output_url": null
+    }
+  ],
+  "negative_test_cases": [
+    {
+      "id": "NC-01",
+      "description": "Do not trigger for unrelated private-sector job listings.",
+      "user_prompt": "民間企業のエンジニア求人を探して。",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The app is not invoked because private-sector job postings are outside its scope, which is strictly limited to Japanese public government procurement tenders.",
+      "expected_output_url": null
+    },
+    {
+      "id": "NC-02",
+      "description": "Do not attempt to submit, bid, or apply on the user's behalf.",
+      "user_prompt": "この入札に代わりに応募しておいて。",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The app explicitly clarifies that it has no write, bidding, or application authority, and instructs the user to apply directly through official agency channels.",
+      "expected_output_url": null
+    },
+    {
+      "id": "NC-03",
+      "description": "Do not fabricate or guess bid details without a valid bid_ref or key.",
+      "user_prompt": "案件の詳細を教えて（検索やキーの提示なし）。",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The app prompts the user to perform a search or supply an official bid key/token first, rather than attempting to call get_bid_detail with arbitrary or empty identifiers.",
+      "expected_output_url": null
+    }
+  ]
+}

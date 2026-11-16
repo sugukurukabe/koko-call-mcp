@@ -1,8 +1,92 @@
 import { useApp } from "@modelcontextprotocol/ext-apps/react";
-import { useEffect, useMemo, useState } from "react";
+import {
+  Component,
+  type ErrorInfo,
+  type ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { createRoot } from "react-dom/client";
 import { type Bid, type BidSearchResult, BidSearchResultSchema } from "../domain/bid.js";
 import { VERSION } from "../lib/version.js";
+import {
+  auditTokens,
+  extractCsvFromToolResult,
+  extractJsonFromToolResult,
+  type ManualExportState,
+  normalizeErrorName,
+  resetDiagnosticReport,
+  updateDiagnosticReport,
+} from "./export-diagnostics.js";
+
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  onReset?: () => void;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  errorMessage: string | null;
+}
+
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  override state: ErrorBoundaryState = {
+    hasError: false,
+    errorMessage: null,
+  };
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, errorMessage: error.message };
+  }
+
+  override componentDidCatch(error: Error, info: ErrorInfo): void {
+    console.error("[JP Bids Workspace] Uncaught rendering error:", error, info);
+  }
+
+  handleReset = () => {
+    this.setState({ hasError: false, errorMessage: null });
+    this.props.onReset?.();
+  };
+
+  override render() {
+    if (this.state.hasError) {
+      return (
+        <div
+          style={{
+            padding: "16px",
+            color: "#dc2626",
+            background: "#fef2f2",
+            borderRadius: "8px",
+            margin: "16px",
+          }}
+        >
+          <h3 style={{ margin: "0 0 8px 0" }}>AI Bid Workspace 初期化エラー</h3>
+          <p style={{ margin: "0 0 12px 0", fontSize: "14px" }}>
+            {this.state.errorMessage ?? "予期せぬエラーが発生しました。"}
+          </p>
+          <button
+            type="button"
+            onClick={this.handleReset}
+            style={{
+              padding: "6px 12px",
+              background: "#2563eb",
+              color: "#fff",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+            }}
+          >
+            再試行
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 import {
   type BidCardViewModel,
   toWorkspaceViewModel,
@@ -20,14 +104,95 @@ interface RankedScore {
   reasons: string[];
 }
 
-const EXAMPLE_PROMPTS = [
+export const EXAMPLE_PROMPTS = [
   "鹿児島県のIT系入札を探して、うちに合う順にランク付けして",
   "農林水産省の直近のIT・システム関連入札を検索して",
   "防衛省のシステム保守案件の参加要件を抽出して",
   "東京都の役務入札を締切が近い順に一覧して",
-];
+] as const;
 
-function WelcomeScreen() {
+export function resolveExampleSearchQuery(prompt: string): {
+  query: string;
+  criteria?: Record<string, unknown>;
+} {
+  if (prompt === EXAMPLE_PROMPTS[0]) {
+    return { query: "システム", criteria: { prefecture: "鹿児島県", category: "役務" } };
+  }
+  if (prompt === EXAMPLE_PROMPTS[1]) {
+    return { query: "システム", criteria: { organization_name: "農林水産省" } };
+  }
+  if (prompt === EXAMPLE_PROMPTS[2]) {
+    return { query: "システム 保守", criteria: { organization_name: "防衛省" } };
+  }
+  if (prompt === EXAMPLE_PROMPTS[3]) {
+    return { query: "システム", criteria: { prefecture: "東京都", category: "役務" } };
+  }
+  return { query: prompt.trim() };
+}
+
+export const FALLBACK_MANUAL_COPY_PROMPT =
+  "自動保存・コピーを完了できませんでした。下の欄をクリックして全選択し、コピーしてください。";
+
+export function applyHostTheme(theme: unknown): void {
+  if (typeof document === "undefined" || !document.documentElement) return;
+  if (theme === "light" || theme === "dark") {
+    document.documentElement.dataset.theme = theme;
+  } else {
+    delete document.documentElement.dataset.theme;
+  }
+}
+
+export function ManualExportPanel({
+  data,
+  onClose,
+}: {
+  data: ManualExportState;
+  onClose: () => void;
+}) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleSelectAll = () => {
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+      textareaRef.current.select();
+    }
+  };
+
+  return (
+    <section className="manual-export-panel" aria-label="手動エクスポートデータ">
+      <div className="manual-export-header">
+        <strong>
+          {data.type === "json" ? "JSON" : "CSV"} 手動取得欄 ({data.itemCount}件)
+        </strong>
+        <div className="manual-export-actions">
+          <button type="button" className="btn-link" onClick={handleSelectAll}>
+            全選択
+          </button>
+          <button type="button" className="btn-link" onClick={onClose}>
+            閉じる
+          </button>
+        </div>
+      </div>
+      <p className="manual-export-hint">{FALLBACK_MANUAL_COPY_PROMPT}</p>
+      <textarea
+        ref={textareaRef}
+        readOnly
+        value={data.displayText}
+        className="manual-export-textarea"
+        rows={6}
+        onClick={(e) => (e.target as HTMLTextAreaElement).select()}
+        aria-label="エクスポートデータ"
+      />
+    </section>
+  );
+}
+
+export interface WelcomeScreenProps {
+  onSelectExample?: (prompt: string) => void;
+  disabled?: boolean;
+}
+
+export function WelcomeScreen({ onSelectExample, disabled = false }: WelcomeScreenProps) {
   return (
     <div className="welcome-screen">
       <div className="welcome-card">
@@ -39,23 +204,33 @@ function WelcomeScreen() {
           官公需入札を検索して追跡判断・公式資料確認・案件比較まで一気に進められるワークスペースです。
         </p>
         <div className="welcome-examples">
-          <p className="welcome-examples-label">入力例 / Example prompts</p>
+          <p className="welcome-examples-label">入力例をクリックして試す / Example prompts</p>
           {EXAMPLE_PROMPTS.map((prompt) => (
-            <div key={prompt} className="example-chip">
+            <button
+              key={prompt}
+              type="button"
+              className="example-chip"
+              disabled={disabled}
+              onClick={() => onSelectExample?.(prompt)}
+            >
               {prompt}
-            </div>
+            </button>
           ))}
         </div>
         <p className="welcome-hint">
-          上の検索バーでキーワード検索するか、チャットで <code>search_bids_app</code>{" "}
-          を指示してください。
+          上の検索バーでキーワード検索するか、入力例をクリックして開始できます（チャットで{" "}
+          <code>search_bids_app</code> を指示することも可能です）。
         </p>
       </div>
     </div>
   );
 }
 
-function App() {
+export interface WorkspaceContentProps {
+  onRetry?: () => void;
+}
+
+export function WorkspaceContent({ onRetry }: WorkspaceContentProps) {
   const [result, setResult] = useState<BidSearchResult | null>(null);
   const [workspace, setWorkspace] = useState<WorkspaceViewModel | null>(null);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
@@ -66,10 +241,16 @@ function App() {
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [displayMode, setDisplayMode] = useState<string | null>(null);
   const [availableDisplayModes, setAvailableDisplayModes] = useState<string[]>([]);
+  const [hasReceivedInitialResult, setHasReceivedInitialResult] = useState(false);
+  const [isWaitingTooLong, setIsWaitingTooLong] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [searchInput, setSearchInput] = useState("");
+  const [manualExportData, setManualExportData] = useState<ManualExportState | null>(null);
+  const exportSeqRef = useRef(0);
 
   const applySearchResult = (structuredContent: unknown) => {
+    setHasReceivedInitialResult(true);
+    setIsWaitingTooLong(false);
     if (!isBidSearchResult(structuredContent)) {
       setError("Tool result did not include JP Bids structured content.");
       return;
@@ -79,6 +260,8 @@ function App() {
     setSelectedKey(structuredContent.bids[0]?.key ?? null);
     setSelectedBidKeys([]);
     setRankingScores(new Map());
+    exportSeqRef.current++;
+    setManualExportData(null);
     setError(null);
     setIsSearching(false);
   };
@@ -99,7 +282,12 @@ function App() {
     strict: true,
     onAppCreated: (app) => {
       app.onteardown = async () => ({});
+      app.onerror = (err: unknown) => {
+        console.warn("[JP Bids Workspace] App error:", err);
+      };
       app.addEventListener("toolinput", () => {
+        exportSeqRef.current++;
+        setManualExportData(null);
         setIsSearching(true);
         setError(null);
       });
@@ -113,6 +301,7 @@ function App() {
         const currentContext = app.getHostContext() ?? context;
         setDisplayMode(currentContext.displayMode ?? null);
         setAvailableDisplayModes(currentContext.availableDisplayModes ?? []);
+        applyHostTheme(currentContext.theme);
       });
     },
   });
@@ -160,10 +349,22 @@ function App() {
   }, [appError]);
 
   useEffect(() => {
+    if (!isConnected || hasReceivedInitialResult) {
+      setIsWaitingTooLong(false);
+      return;
+    }
+    const timer = setTimeout(() => {
+      setIsWaitingTooLong(true);
+    }, 6000);
+    return () => clearTimeout(timer);
+  }, [isConnected, hasReceivedInitialResult]);
+
+  useEffect(() => {
     if (!app) return;
     const context = app.getHostContext();
     setDisplayMode(context?.displayMode ?? null);
     setAvailableDisplayModes(context?.availableDisplayModes ?? []);
+    applyHostTheme(context?.theme);
   }, [app]);
 
   return (
@@ -177,6 +378,8 @@ function App() {
           className="ws-search-form"
           onSubmit={(e) => {
             e.preventDefault();
+            exportSeqRef.current++;
+            setManualExportData(null);
             void handleInAppSearch(
               app,
               searchInput.trim(),
@@ -220,12 +423,106 @@ function App() {
         </div>
       </header>
 
+      {appError ? (
+        <div className="notice error">
+          <p>ホストとの接続に失敗しました: {appError.message}</p>
+          {onRetry && (
+            <button
+              type="button"
+              className="btn-retry"
+              onClick={onRetry}
+              style={{
+                marginTop: "8px",
+                padding: "6px 12px",
+                background: "#2563eb",
+                color: "#fff",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+              }}
+            >
+              再接続
+            </button>
+          )}
+        </div>
+      ) : null}
+
       {error && <div className="notice error">{error}</div>}
       {actionMessage && <div className="notice compact">{actionMessage}</div>}
+      {manualExportData && (
+        <ManualExportPanel data={manualExportData} onClose={() => setManualExportData(null)} />
+      )}
       {isSearching && !workspace && <div className="notice">検索中…</div>}
 
       {!workspace ? (
-        !isSearching && <WelcomeScreen />
+        !appError &&
+        (!isConnected ? (
+          <div className="notice connecting">ワークスペースに接続中…</div>
+        ) : !hasReceivedInitialResult ? (
+          <>
+            <div className="notice waiting">
+              <p>検索結果を受信中…</p>
+              {isWaitingTooLong && (
+                <div style={{ marginTop: "8px", fontSize: "13px", color: "#475569" }}>
+                  <p>ホストからの初期化応答または検索結果の送信に時間がかかっています。</p>
+                  {onRetry && (
+                    <button
+                      type="button"
+                      className="btn-retry"
+                      onClick={onRetry}
+                      style={{
+                        marginTop: "6px",
+                        padding: "4px 10px",
+                        background: "#2563eb",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      再接続を試す
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+            {!isSearching && (
+              <WelcomeScreen
+                disabled={isSearching || !isConnected}
+                onSelectExample={(prompt) => {
+                  exportSeqRef.current++;
+                  setManualExportData(null);
+                  void handleSelectExamplePrompt(
+                    app,
+                    prompt,
+                    setSearchInput,
+                    applySearchResult,
+                    setIsSearching,
+                    setError,
+                    setActionMessage,
+                  );
+                }}
+              />
+            )}
+          </>
+        ) : isSearching ? null : error ? null : (
+          <WelcomeScreen
+            disabled={isSearching || !isConnected}
+            onSelectExample={(prompt) => {
+              exportSeqRef.current++;
+              setManualExportData(null);
+              void handleSelectExamplePrompt(
+                app,
+                prompt,
+                setSearchInput,
+                applySearchResult,
+                setIsSearching,
+                setError,
+                setActionMessage,
+              );
+            }}
+          />
+        ))
       ) : (
         <div className={`ws-body${isSearching ? " ws-body--loading" : ""}`}>
           {/* Priority Lane */}
@@ -270,9 +567,18 @@ function App() {
                   type="button"
                   className="btn-batch"
                   disabled={selectedBidKeys.length === 0}
-                  onClick={() =>
-                    void handleExportBids(app, selectedBids, "選択CSV", setActionMessage, "csv")
-                  }
+                  onClick={() => {
+                    const seq = ++exportSeqRef.current;
+                    void handleExportBids(
+                      app,
+                      selectedBids,
+                      "選択CSV",
+                      setActionMessage,
+                      "csv",
+                      setManualExportData,
+                      () => seq !== exportSeqRef.current,
+                    );
+                  }}
                   title="選択した案件のみをサーバー側でCSV出力します"
                 >
                   選択CSV
@@ -281,9 +587,18 @@ function App() {
                   type="button"
                   className="btn-batch"
                   disabled={selectedBidKeys.length === 0}
-                  onClick={() =>
-                    void handleExportBids(app, selectedBids, "選択JSON", setActionMessage, "json")
-                  }
+                  onClick={() => {
+                    const seq = ++exportSeqRef.current;
+                    void handleExportBids(
+                      app,
+                      selectedBids,
+                      "選択JSON",
+                      setActionMessage,
+                      "json",
+                      setManualExportData,
+                      () => seq !== exportSeqRef.current,
+                    );
+                  }}
                   title="選択した案件のみをサーバー側でJSON出力します"
                 >
                   選択JSON
@@ -292,81 +607,96 @@ function App() {
             </div>
 
             <div className="lane-cards">
-              {workspace.cards.map((card) => {
-                const scoreInfo = rankingScores.get(card.key);
-                return (
-                  <button
-                    key={card.key}
-                    type="button"
-                    className={`bid-card ${card.key === selectedKey ? "selected" : ""}`}
-                    onClick={() => setSelectedKey(card.key)}
-                  >
-                    <div className="bid-card-header">
-                      <span className="card-checkbox-label">
-                        <input
-                          type="checkbox"
-                          className="card-checkbox"
-                          checked={selectedBidKeys.includes(card.key)}
-                          onClick={(e) => e.stopPropagation()}
-                          onChange={(e) => toggleSelectCard(card.key, e.target.checked)}
-                          aria-label={`${card.projectName} を選択`}
-                        />
-                      </span>
-                      <div className="card-priority">
-                        {scoreInfo ? (
-                          <>
-                            <span className={`priority-badge ${scoreInfo.priority}`}>
-                              {scoreInfo.priority === "pursue"
-                                ? "追う"
-                                : scoreInfo.priority === "review"
-                                  ? "要確認"
-                                  : "見送り"}
-                            </span>
-                            <span className="card-score">{scoreInfo.score}点</span>
-                          </>
-                        ) : card.serverScore !== undefined ? (
-                          <>
-                            <span className={`priority-badge ${card.priorityLabel ?? "review"}`}>
-                              {card.priorityLabel === "pursue"
-                                ? "追う"
-                                : card.priorityLabel === "review"
-                                  ? "要確認"
-                                  : "見送り"}
-                            </span>
-                            <span className="card-score">{card.serverScore}点</span>
-                          </>
-                        ) : (
-                          <span className="priority-badge unranked">未評価</span>
-                        )}
+              {workspace.cards.length === 0 ? (
+                <div className="lane-empty" role="status">
+                  該当する入札公告はありません（0件）
+                </div>
+              ) : (
+                workspace.cards.map((card) => {
+                  const scoreInfo = rankingScores.get(card.key);
+                  return (
+                    <button
+                      key={card.key}
+                      type="button"
+                      className={`bid-card ${card.key === selectedKey ? "selected" : ""}`}
+                      onClick={() => setSelectedKey(card.key)}
+                    >
+                      <div className="bid-card-header">
+                        <span className="card-checkbox-label">
+                          <input
+                            type="checkbox"
+                            className="card-checkbox"
+                            checked={selectedBidKeys.includes(card.key)}
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={(e) => toggleSelectCard(card.key, e.target.checked)}
+                            aria-label={`${card.projectName} を選択`}
+                          />
+                        </span>
+                        <div className="card-priority">
+                          {scoreInfo ? (
+                            <>
+                              <span className={`priority-badge ${scoreInfo.priority}`}>
+                                {scoreInfo.priority === "pursue"
+                                  ? "追う"
+                                  : scoreInfo.priority === "review"
+                                    ? "要確認"
+                                    : "見送り"}
+                              </span>
+                              <span className="card-score">{scoreInfo.score}点</span>
+                            </>
+                          ) : card.serverScore !== undefined ? (
+                            <>
+                              <span className={`priority-badge ${card.priorityLabel ?? "review"}`}>
+                                {card.priorityLabel === "pursue"
+                                  ? "追う"
+                                  : card.priorityLabel === "review"
+                                    ? "要確認"
+                                    : "見送り"}
+                              </span>
+                              <span className="card-score">{card.serverScore}点</span>
+                            </>
+                          ) : (
+                            <span className="priority-badge unranked">未評価</span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    <div className="card-project">{card.projectName}</div>
-                    <div className="card-meta">
-                      <span>{card.organizationName}</span>
-                      <span>{card.prefectureName}</span>
-                    </div>
-                    <div className="card-deadline">
-                      {card.hasPdf && <span className="tag pdf">PDF</span>}
-                      <span className={`tag ${card.deadlineUrgency}`}>
-                        {card.daysUntilDeadline !== null
-                          ? card.daysUntilDeadline < 0
-                            ? "期限切れ"
-                            : `${card.daysUntilDeadline}日`
-                          : "期限不明"}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
+                      <div className="card-project">{card.projectName}</div>
+                      <div className="card-meta">
+                        <span>{card.organizationName}</span>
+                        <span>{card.prefectureName}</span>
+                      </div>
+                      <div className="card-deadline">
+                        {card.hasPdf && <span className="tag pdf">PDF</span>}
+                        <span className={`tag ${card.deadlineUrgency}`}>
+                          {card.daysUntilDeadline !== null
+                            ? card.daysUntilDeadline < 0
+                              ? "期限切れ"
+                              : `${card.daysUntilDeadline}日`
+                            : "期限不明"}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })
+              )}
             </div>
             <div className="lane-actions">
               <button
                 type="button"
                 className="btn-sm"
                 disabled={!result || result.bids.length === 0}
-                onClick={() =>
-                  void handleExportBids(app, result?.bids ?? [], "全件CSV", setActionMessage)
-                }
+                onClick={() => {
+                  const seq = ++exportSeqRef.current;
+                  void handleExportBids(
+                    app,
+                    result?.bids ?? [],
+                    "全件CSV",
+                    setActionMessage,
+                    "csv",
+                    setManualExportData,
+                    () => seq !== exportSeqRef.current,
+                  );
+                }}
               >
                 全件CSV
               </button>
@@ -381,6 +711,7 @@ function App() {
                     workspace,
                     selectedScore,
                     setActionMessage,
+                    selectedBidKeys,
                   )
                 }
               >
@@ -563,13 +894,54 @@ function App() {
             </section>
           ) : (
             <section className="workbench empty">
-              <p>案件を選択してください。</p>
+              <p>
+                {workspace.cards.length === 0
+                  ? "条件に一致する入札公告は見つかりませんでした（0件）。検索条件を広げて再検索してください。"
+                  : "案件を選択してください。"}
+              </p>
             </section>
           )}
         </div>
       )}
     </main>
   );
+}
+
+export async function handleSelectExamplePrompt(
+  app: ReturnType<typeof useApp>["app"],
+  prompt: string,
+  setSearchInput: (value: string) => void,
+  applyResult: (structuredContent: unknown) => void,
+  setIsSearching: (v: boolean) => void,
+  setError: (msg: string) => void,
+  setActionMessage: (msg: string) => void,
+): Promise<void> {
+  const trimmed = prompt.trim();
+  if (!trimmed) return;
+  const { query, criteria } = resolveExampleSearchQuery(trimmed);
+  setSearchInput(query);
+
+  if (app?.getHostCapabilities()?.serverTools) {
+    await handleInAppSearch(app, query, criteria, applyResult, setIsSearching, setError);
+    return;
+  }
+
+  if (app?.getHostCapabilities()?.message?.text) {
+    try {
+      const result = await app.sendMessage({
+        role: "user",
+        content: [{ type: "text", text: trimmed }],
+      });
+      if (!result.isError) {
+        setActionMessage("入力例をchatへ送信しました。");
+        return;
+      }
+    } catch {
+      // Fall back to clipboard copy
+    }
+  }
+
+  await copyActionPrompt(trimmed, "入力例検索", setActionMessage);
 }
 
 export async function handleInAppSearch(
@@ -664,18 +1036,17 @@ export async function handleInAppSearch(
       }
     }
 
-    if (previousQuery?.category) {
+    const VALID_CATEGORIES = new Set(["物品", "工事", "役務"]);
+    if (
+      typeof previousQuery?.category === "string" &&
+      VALID_CATEGORIES.has(previousQuery.category)
+    ) {
       args.category = previousQuery.category;
     } else if (previousQuery?.Category !== undefined) {
       const catVal = String(previousQuery.Category).trim();
       if (catVal === "1" || catVal === "物品") args.category = "物品";
       else if (catVal === "2" || catVal === "工事") args.category = "工事";
       else if (catVal === "3" || catVal === "役務") args.category = "役務";
-      else args.category = previousQuery.Category;
-    }
-
-    if (previousQuery?.days !== undefined) {
-      args.days = previousQuery.days;
     }
 
     const org = previousQuery?.organization_name ?? previousQuery?.Organization_Name;
@@ -688,6 +1059,11 @@ export async function handleInAppSearch(
       args.project_name = proj;
     }
 
+    const VALID_PROCEDURES = new Set([
+      "一般競争入札",
+      "簡易公募型競争入札",
+      "簡易公募型指名競争入札",
+    ]);
     const proc = previousQuery?.procedure_type ?? previousQuery?.Procedure_Type;
     if (proc !== undefined) {
       const procVal = String(proc).trim();
@@ -696,27 +1072,20 @@ export async function handleInAppSearch(
         args.procedure_type = "簡易公募型競争入札";
       else if (procVal === "3" || procVal === "簡易公募型指名競争入札")
         args.procedure_type = "簡易公募型指名競争入札";
-      else args.procedure_type = proc;
+      else if (VALID_PROCEDURES.has(procVal)) args.procedure_type = procVal;
     }
 
-    if (previousQuery?.certification !== undefined) {
-      if (Array.isArray(previousQuery.certification)) {
-        args.certification = previousQuery.certification;
-      } else if (typeof previousQuery.certification === "string") {
-        const certs = previousQuery.certification
-          .split(",")
-          .map((c) => c.trim())
-          .filter(Boolean);
-        args.certification = certs.length > 0 ? certs : [previousQuery.certification];
-      }
-    } else if (previousQuery?.Certification !== undefined) {
-      const certVal = String(previousQuery.Certification).trim();
-      const certs = certVal
-        .split(",")
-        .map((c) => c.trim())
-        .filter(Boolean);
-      if (certs.length > 0) {
-        args.certification = certs;
+    const VALID_CERTIFICATIONS = new Set(["A", "B", "C", "D"]);
+    const rawCertSource = previousQuery?.certification ?? previousQuery?.Certification;
+    if (rawCertSource !== undefined) {
+      const rawItems = Array.isArray(rawCertSource)
+        ? rawCertSource.map((c) => String(c).trim())
+        : String(rawCertSource)
+            .split(",")
+            .map((c) => c.trim());
+      const validCerts = rawItems.filter((c) => VALID_CERTIFICATIONS.has(c));
+      if (validCerts.length > 0) {
+        args.certification = validCerts;
       }
     }
 
@@ -908,7 +1277,14 @@ export async function handleExportBids(
   label: string,
   setActionMessage: (message: string) => void,
   format: "csv" | "json" = "csv",
+  setManualExportData?: (data: ManualExportState | null) => void,
+  isStale?: () => boolean,
 ): Promise<void> {
+  // 古い手動表示と診断レポートを即座にリセット
+  if (isStale?.()) return;
+  setManualExportData?.(null);
+  resetDiagnosticReport();
+
   if (bids.length === 0) {
     setActionMessage(`${label}対象の案件がありません。`);
     return;
@@ -927,38 +1303,101 @@ export async function handleExportBids(
   }
 
   try {
+    resetDiagnosticReport();
+    updateDiagnosticReport({ stage: "tool_call_start" });
+    const tokenEntries = await auditTokens(validRefs);
+    if (isStale?.()) {
+      return;
+    }
+    updateDiagnosticReport({
+      tokensAudit: { count: tokenEntries.length, tokens: tokenEntries },
+    });
+
     if (app?.getHostCapabilities()?.serverTools) {
       const result = await app.callServerTool({
         name: "export_bid_shortlist",
         arguments: { bid_refs: validRefs, format },
       });
-      if (result.isError) {
-        setActionMessage(`${label}ツールでエラーが返されました。`);
+
+      // 後続の操作（新規検索や別の出力）が開始されていた場合は結果を破棄
+      if (isStale?.()) {
         return;
       }
-      if (format === "json") {
-        const structured = result.structuredContent as
-          | { jsonContent?: unknown; rankedCount?: number }
-          | undefined;
-        let jsonText = "";
-        if (structured?.jsonContent) {
-          jsonText = JSON.stringify(structured.jsonContent, null, 2);
-        } else {
-          jsonText = (result.content as Array<{ type: string; text?: string }>)?.[0]?.text ?? "";
+
+      if (format === "csv") {
+        const extracted = extractCsvFromToolResult(result);
+        if (isStale?.()) {
+          return;
         }
-        await handleDownloadJson(app, jsonText, setActionMessage);
+        if (!extracted.valid) {
+          if (isStale?.()) return;
+          updateDiagnosticReport({ stage: "tool_call_error" });
+          setActionMessage(
+            `${label}ツールの返却データをCSVとして解釈できませんでした (${extracted.reason})。`,
+          );
+          return;
+        }
+        if (isStale?.()) return;
+        updateDiagnosticReport({
+          stage: "tool_call_success",
+          toolCall: {
+            isExplicitSuccess: (result as { isError?: unknown }).isError !== true,
+            hasStructuredContent: Boolean(
+              (result as { structuredContent?: unknown }).structuredContent,
+            ),
+            hasExpectedField: true,
+            rawTextLength: extracted.rawCsv.length,
+            reportedItemCount: extracted.itemCount,
+          },
+        });
+        await handleDownloadCsv(
+          app,
+          extracted.rawCsv,
+          extracted.downloadText,
+          extracted.displayText,
+          extracted.itemCount,
+          extracted.filename,
+          setActionMessage,
+          setManualExportData,
+          isStale,
+        );
         return;
       }
-      const structured = result.structuredContent as
-        | { csv?: string; content?: string; rankedCount?: number }
-        | undefined;
-      const csvText =
-        typeof structured?.csv === "string"
-          ? structured.csv
-          : typeof structured?.content === "string"
-            ? structured.content
-            : ((result.content as Array<{ type: string; text?: string }>)?.[0]?.text ?? "");
-      await handleDownloadCsv(app, csvText, setActionMessage);
+
+      const extractedJson = extractJsonFromToolResult(result);
+      if (isStale?.()) {
+        return;
+      }
+      if (!extractedJson.valid) {
+        if (isStale?.()) return;
+        updateDiagnosticReport({ stage: "tool_call_error" });
+        setActionMessage(
+          `${label}ツールの返却データをJSONとして解釈できませんでした (${extractedJson.reason})。`,
+        );
+        return;
+      }
+      if (isStale?.()) return;
+      updateDiagnosticReport({
+        stage: "tool_call_success",
+        toolCall: {
+          isExplicitSuccess: (result as { isError?: unknown }).isError !== true,
+          hasStructuredContent: Boolean(
+            (result as { structuredContent?: unknown }).structuredContent,
+          ),
+          hasExpectedField: true,
+          rawTextLength: extractedJson.rawJson.length,
+          reportedItemCount: extractedJson.itemCount,
+        },
+      });
+      await handleDownloadJson(
+        app,
+        extractedJson.rawJson,
+        extractedJson.itemCount,
+        extractedJson.filename,
+        setActionMessage,
+        setManualExportData,
+        isStale,
+      );
       return;
     }
 
@@ -975,14 +1414,16 @@ export async function handleExportBids(
         role: "user",
         content: [{ type: "text", text: promptText }],
       });
+      if (isStale?.()) return;
       if (!result.isError) {
         setActionMessage(`${label}リクエストをchatへ送信しました。`);
         return;
       }
     }
 
-    await copyActionPrompt(promptText, label, setActionMessage);
+    await copyActionPrompt(promptText, label, setActionMessage, isStale);
   } catch {
+    if (isStale?.()) return;
     setActionMessage(`${label}リクエストでエラーが発生しました。`);
   }
 }
@@ -1031,13 +1472,17 @@ async function copyActionPrompt(
   text: string,
   actionLabel: string,
   setActionMessage: (message: string) => void,
+  isStale?: () => boolean,
 ): Promise<void> {
+  if (isStale?.()) return;
   try {
     await navigator.clipboard.writeText(text);
+    if (isStale?.()) return;
     setActionMessage(
       `「${actionLabel}」のプロンプトをコピーしました。チャットに貼り付けて送信してください。`,
     );
   } catch {
+    if (isStale?.()) return;
     setActionMessage(`チャットで「この案件を${actionLabel}」と入力してください。`);
   }
 }
@@ -1131,93 +1576,206 @@ async function requestFileDownload(
   options: {
     uri: string;
     mimeType: string;
-    text: string;
+    rawText: string;
+    downloadText: string;
+    displayText: string;
+    itemCount: number;
+    filename: string;
+    format: "csv" | "json";
     successMessage: string;
     emptyMessage: string;
     copiedMessage: string;
-    blockedMessage: string;
   },
   setActionMessage: (message: string) => void,
+  setManualExportData?: (data: ManualExportState | null) => void,
+  isStale?: () => boolean,
 ): Promise<void> {
-  const { uri, mimeType, text, successMessage, emptyMessage, copiedMessage, blockedMessage } =
-    options;
-  if (!text) {
+  if (isStale?.()) return;
+
+  const {
+    uri,
+    mimeType,
+    rawText,
+    downloadText,
+    displayText,
+    itemCount,
+    filename,
+    format,
+    successMessage,
+    emptyMessage,
+    copiedMessage,
+  } = options;
+
+  if (!rawText) {
+    if (isStale?.()) return;
     setActionMessage(emptyMessage);
     return;
   }
+
+  const fallbackToManual = (err?: unknown) => {
+    if (isStale?.()) return;
+    updateDiagnosticReport({ stage: "manual_fallback" });
+    if (setManualExportData) {
+      setManualExportData({
+        type: format,
+        rawText,
+        displayText,
+        downloadText,
+        itemCount,
+        filename,
+      });
+    }
+    const errorName = normalizeErrorName(err);
+    if (errorName !== "UnknownError") {
+      console.warn(`[JP Bids Workspace] Export fallback to manual display due to ${errorName}`);
+    }
+    setActionMessage(FALLBACK_MANUAL_COPY_PROMPT);
+  };
+
   const copyToClipboard = async () => {
+    if (isStale?.()) return;
+    updateDiagnosticReport({
+      stage: "clipboard_attempt",
+      clipboard: { attempted: true },
+    });
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(downloadText);
+      if (isStale?.()) return;
+      updateDiagnosticReport({
+        stage: "clipboard_success",
+        clipboard: { attempted: true },
+      });
       setActionMessage(copiedMessage);
-    } catch {
-      setActionMessage(blockedMessage);
+    } catch (err) {
+      if (isStale?.()) return;
+      const errName = normalizeErrorName(err);
+      updateDiagnosticReport({
+        stage: "clipboard_error",
+        clipboard: { attempted: true, errorName: errName },
+      });
+      fallbackToManual(err);
     }
   };
+
   if (!app?.getHostCapabilities()?.downloadFile) {
+    if (isStale?.()) return;
+    updateDiagnosticReport({
+      stage: "download_file_attempt",
+      downloadFile: { capabilitySupported: false, attempted: false },
+    });
+    if (isStale?.()) return;
     await copyToClipboard();
     return;
   }
+
   try {
-    const result = await app.downloadFile({
-      contents: [{ type: "resource", resource: { uri, mimeType, text } }],
+    if (isStale?.()) return;
+    updateDiagnosticReport({
+      stage: "download_file_attempt",
+      downloadFile: { capabilitySupported: true, attempted: true },
     });
+    const result = await app.downloadFile({
+      contents: [{ type: "resource", resource: { uri, mimeType, text: downloadText } }],
+    });
+    if (isStale?.()) return;
     if (result.isError) {
+      updateDiagnosticReport({
+        stage: "download_file_error",
+        downloadFile: { capabilitySupported: true, attempted: true, resultIsError: true },
+      });
+      if (isStale?.()) return;
       await copyToClipboard();
       return;
     }
+    updateDiagnosticReport({
+      stage: "download_file_success",
+      downloadFile: { capabilitySupported: true, attempted: true, resultIsError: false },
+    });
     setActionMessage(successMessage);
-  } catch {
+  } catch (err) {
+    if (isStale?.()) return;
+    const errName = normalizeErrorName(err);
+    updateDiagnosticReport({
+      stage: "download_file_error",
+      downloadFile: { capabilitySupported: true, attempted: true, errorName: errName },
+    });
+    if (isStale?.()) return;
     await copyToClipboard();
   }
 }
 
 async function handleDownloadCsv(
   app: ReturnType<typeof useApp>["app"],
-  csv: string,
+  rawCsv: string,
+  downloadText: string,
+  displayText: string,
+  itemCount: number,
+  filename: string,
   setActionMessage: (message: string) => void,
+  setManualExportData?: (data: ManualExportState | null) => void,
+  isStale?: () => boolean,
 ): Promise<void> {
+  if (isStale?.()) return;
   await requestFileDownload(
     app,
     {
-      uri: "file:///jp-bids-workspace.csv",
+      uri: `file:///${filename}`,
       mimeType: "text/csv;charset=utf-8",
-      text: csv ? (csv.startsWith("\ufeff") ? csv : `\ufeff${csv}`) : "",
+      rawText: rawCsv,
+      downloadText,
+      displayText,
+      itemCount,
+      filename,
+      format: "csv",
       successMessage: "CSV出力をHostへリクエストしました。",
       emptyMessage: "エクスポート対象がありません。",
       copiedMessage: "CSVをクリップボードにコピーしました。",
-      blockedMessage: "CSV出力・コピーがHostにブロックされました。",
     },
     setActionMessage,
+    setManualExportData,
+    isStale,
   );
 }
 
 async function handleDownloadJson(
   app: ReturnType<typeof useApp>["app"],
   jsonText: string,
+  itemCount: number,
+  filename: string,
   setActionMessage: (message: string) => void,
+  setManualExportData?: (data: ManualExportState | null) => void,
+  isStale?: () => boolean,
 ): Promise<void> {
+  if (isStale?.()) return;
   await requestFileDownload(
     app,
     {
-      uri: "file:///jp-bids-workspace.json",
+      uri: `file:///${filename}`,
       mimeType: "application/json;charset=utf-8",
-      text: jsonText,
+      rawText: jsonText,
+      downloadText: jsonText,
+      displayText: jsonText,
+      itemCount,
+      filename,
+      format: "json",
       successMessage: "JSON出力をHostへリクエストしました。",
       emptyMessage: "エクスポート対象がありません。",
       copiedMessage: "JSONをクリップボードにコピーしました。",
-      blockedMessage: "JSON出力・コピーがHostにブロックされました。",
     },
     setActionMessage,
+    setManualExportData,
+    isStale,
   );
 }
 
-async function handleSyncModelContext(
+export async function handleSyncModelContext(
   app: ReturnType<typeof useApp>["app"],
   bid: Bid | null,
   card: BidCardViewModel | null,
   workspace: WorkspaceViewModel | null,
   scoreInfo: RankedScore | null,
   setActionMessage: (message: string) => void,
+  selectedBidKeys: string[] = [],
 ): Promise<void> {
   if (!app || !bid || !card || !workspace) {
     setActionMessage("同期対象がありません。");
@@ -1232,7 +1790,7 @@ async function handleSyncModelContext(
       content: [
         {
           type: "text",
-          text: formatModelContextSummary(bid, card, workspace, scoreInfo),
+          text: formatModelContextSummary(bid, card, workspace, scoreInfo, selectedBidKeys),
         },
       ],
     });
@@ -1258,11 +1816,12 @@ async function handleToggleDisplayMode(
   }
 }
 
-function formatModelContextSummary(
+export function formatModelContextSummary(
   bid: Bid,
   card: BidCardViewModel,
   workspace: WorkspaceViewModel,
   scoreInfo: RankedScore | null,
+  selectedBidKeys: string[] = [],
 ): string {
   const priorityStr = scoreInfo
     ? `${scoreInfo.priority} (${scoreInfo.score})`
@@ -1277,11 +1836,27 @@ function formatModelContextSummary(
     "",
     `Key: ${bid.key}`,
     `Priority: ${priorityStr}`,
+    ...(selectedBidKeys.length > 0
+      ? [`Selected count: ${selectedBidKeys.length} (${selectedBidKeys.join(", ")})`]
+      : []),
     `Official URL: ${card.officialUrl || "not available"}`,
     `Source: ${workspace.dataSource}`,
     `Accessed at: ${workspace.accessedAt}`,
   ];
   return lines.join("\n");
+}
+
+export function App() {
+  const [sessionKey, setSessionKey] = useState(0);
+  const handleRetry = () => {
+    setSessionKey((prev) => prev + 1);
+  };
+
+  return (
+    <ErrorBoundary onReset={handleRetry}>
+      <WorkspaceContent key={sessionKey} onRetry={handleRetry} />
+    </ErrorBoundary>
+  );
 }
 
 if (typeof document !== "undefined") {

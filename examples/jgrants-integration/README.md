@@ -12,7 +12,7 @@ Two complementary MCP servers now let an LLM host handle both sides of Japan's p
 | [JP Bids MCP](https://github.com/sugukurukabe/koko-call-mcp) | KKJ (中小企業庁) | Sugukuru Inc. | "Which government contracts should we bid on?" |
 | [J-Grants MCP](https://github.com/digital-go-jp/jgrants-mcp-server) | J-Grants (デジタル庁) | Digital Agency | "Which subsidies can fund the work?" |
 
-Data licenses differ: KKJ data is subject to the [KKJ API Terms](https://kkj.go.jp), and J-Grants data is subject to the [J-Grants Open API Terms](https://www.jgrants-portal.go.jp/open-api). Read both before building any downstream product.
+Data licenses differ: KKJ data is subject to the [KKJ Portal Notes](https://www.kkj.go.jp/s/help/notes/), and J-Grants data is subject to the [J-Grants Open API Terms](https://www.jgrants-portal.go.jp/open-api). Read both before building any downstream product.
 
 ---
 
@@ -34,13 +34,15 @@ python -m jgrants_mcp_server.core
 # Listens on http://127.0.0.1:8000/mcp (Streamable HTTP)
 ```
 
-### 2. Connect JP Bids MCP (remote, no install required)
+### 2. Connect JP Bids MCP (remote Public MVP, or local `full_local`)
 
-JP Bids MCP is hosted at `https://mcp.bid-jp.com/mcp` and requires no local setup. Use `npx mcp-remote` as a stdio bridge if your client does not support Streamable HTTP natively:
+JP Bids MCP is hosted at `https://mcp.bid-jp.com/mcp` (`public_mvp`, 7 free tools via OAuth 2.0) and requires no local setup. Use `npx mcp-remote` as a stdio bridge if your client does not support Streamable HTTP natively:
 
 ```bash
 npx --yes mcp-remote https://mcp.bid-jp.com/mcp
 ```
+
+To also enable local extended tools (`create_bid_review_packet`, `analyze_past_awards`), run JP Bids MCP locally via `JP_BIDS_PROFILE=full_local npx jp-bids-mcp`.
 
 ### 3. Register both servers in your client
 
@@ -74,7 +76,7 @@ Expected conversation flow:
 
 **Goal**: Identify a grant that can subsidize the cost of preparing or executing a government contract.
 
-**Tools used**: `search_subsidies` → `rank_bids` → `create_bid_review_packet`
+**Tools used**: `search_subsidies` → `rank_bids` → `extract_bid_requirements` / `export_bid_shortlist` (or `create_bid_review_packet` when running local `JP_BIDS_PROFILE=full_local`)
 
 **Prompt example**:
 
@@ -85,25 +87,25 @@ IT補助金で原資を確保した上で、AIシステム開発の入札案件�
 
 Expected flow:
 1. `search_subsidies keyword="AI" acceptance=1` — find currently-open grants
-2. `search_bids query="AI システム開発"` + `rank_bids` — rank bids by profile fit
-3. `create_bid_review_packet` — produce internal review memo that includes the matched grant as a financing option
+2. `rank_bids query="AI システム開発"` — rank bids by profile fit
+3. `extract_bid_requirements` / `export_bid_shortlist` (or `create_bid_review_packet(bid_key=...)` in `full_local`) — compile specification links and review notes alongside the matched grant
 
 ---
 
-### Workflow 3 — Cross-reference past awards with grant usage
+### Workflow 3 — Cross-reference past notice trends with grant usage (local `full_local`)
 
-**Goal**: Determine which past award winners in a category also received grants, to benchmark realistic all-in budgets.
+**Goal**: Combine historical procurement notice trends with grant availability in the same service area.
 
-**Tools used**: `analyze_past_awards` (JP Bids) + `get_subsidy_overview` (J-Grants)
+**Tools used**: `analyze_past_awards` (JP Bids, local `JP_BIDS_PROFILE=full_local`) + `get_subsidy_overview` (J-Grants)
 
 **Prompt example**:
 
 ```
-清掃業務の過去落札実績を分析して、同カテゴリで利用可能な補助金との組み合わせを示してください。
+清掃業務の過去公告傾向を分析して、同カテゴリで利用可能な補助金との組み合わせを示してください。
 ```
 
 Expected flow:
-1. `analyze_past_awards category="清掃"` — distribution of award amounts
+1. `analyze_past_awards query="清掃" category="役務"` — historical procurement notice frequency and top contracting authorities
 2. `get_subsidy_overview keyword="清掃"` — count of available grants by deadline range
 3. LLM presents a funding landscape overview for the cleaning-services category
 
@@ -113,12 +115,14 @@ Expected flow:
 
 ### JP Bids MCP tools used in these workflows
 
-| Tool | Description | Tier |
+| Tool | Description | Profile |
 |---|---|---|
-| `search_bids` | Keyword/region/category search of KKJ notices | Free |
-| `rank_bids` | Score bids by your company profile | Free |
-| `analyze_past_awards` | Historical award analysis | Pro |
-| `create_bid_review_packet` | Internal review memo generation | Pro |
+| `search_bids` | Keyword/region/category search of KKJ notices | `public_mvp` (hosted & local, free) |
+| `rank_bids` | Score bids by your company profile | `public_mvp` (hosted & local, free) |
+| `extract_bid_requirements` | Inspect official attachment URLs | `public_mvp` (hosted & local, free) |
+| `export_bid_shortlist` | Export shortlist as CSV or JSON | `public_mvp` (hosted & local, free) |
+| `analyze_past_awards` | Historical notice trend analysis | `full_local` (local `JP_BIDS_PROFILE=full_local`) |
+| `create_bid_review_packet` | Internal review memo generation | `full_local` (local `JP_BIDS_PROFILE=full_local`) |
 
 ### J-Grants MCP tools used in these workflows
 

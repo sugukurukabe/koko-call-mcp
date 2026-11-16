@@ -73,9 +73,9 @@ mcp.bid-jp.com  jgrants-  freee-mcp  beta.mcp.developers.
       "risk_level": "read_only",
       "tool_allowlist": [],
       "attribution": {
-        "source": "中小企業庁 官公需情報ポータルサイト KKJ",
-        "license": "政府標準利用規約 第2.0版",
-        "url": "https://kkj.go.jp"
+        "source": "中小企業庁 官公需情報ポータルサイト",
+        "license": "官公需情報ポータルサイト ご利用上の注意（一次条件は公式サイト参照）",
+        "url": "https://www.kkj.go.jp/s/help/notes/"
       },
       "routing_keywords": ["入札", "公告", "落札", "調達", "官公需", "bid", "procurement", "tender"]
     },

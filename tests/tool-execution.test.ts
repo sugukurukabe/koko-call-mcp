@@ -5,6 +5,15 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { KkjClient } from "../src/api/kkj-client.js";
 import { createJpBidsServer } from "../src/mcp.js";
 
+function firstBlock(result: Awaited<ReturnType<Client["callTool"]>>): {
+  type?: string;
+  text?: string;
+} {
+  return Array.isArray(result.content)
+    ? ((result.content[0] as { type?: string; text?: string } | undefined) ?? {})
+    : {};
+}
+
 describe("MCP tool execution", () => {
   beforeEach(() => {
     process.env.JP_BIDS_PROFILE = "full_local";
@@ -67,7 +76,7 @@ describe("MCP tool execution", () => {
     });
 
     expect(result.isError).not.toBe(true);
-    expect(result.content[0]).toMatchObject({ type: "text" });
+    expect(firstBlock(result)).toMatchObject({ type: "text" });
     expect(result.structuredContent).toMatchObject({
       searchHits: 1,
       returnedCount: 1,
@@ -238,7 +247,9 @@ describe("MCP tool execution", () => {
       rankedCount: 1,
       columns: expect.arrayContaining(["priority", "score", "fit_reasons"]),
     });
-    expect(String(result.structuredContent?.csv)).toContain("鹿児島市システム保守業務委託");
+    expect(
+      String((result.structuredContent as Record<string, unknown> | undefined)?.csv),
+    ).toContain("鹿児島市システム保守業務委託");
 
     await client.close();
     await server.close();
@@ -380,7 +391,9 @@ describe("MCP tool execution", () => {
       ]),
       missingDates: expect.arrayContaining(["質問期限"]),
     });
-    expect(String(result.structuredContent?.ics)).toContain("BEGIN:VCALENDAR");
+    expect(
+      String((result.structuredContent as Record<string, unknown> | undefined)?.ics),
+    ).toContain("BEGIN:VCALENDAR");
     expect(fetchCount).toBe(1);
 
     await client.close();
@@ -420,7 +433,9 @@ describe("MCP tool execution", () => {
       requirements: { bid: { key: "KKJ-TEST-001" } },
       calendar: { format: "ics" },
     });
-    expect(String(result.structuredContent?.markdown)).toContain("## 判断サマリー");
+    expect(
+      String((result.structuredContent as Record<string, unknown> | undefined)?.markdown),
+    ).toContain("## 判断サマリー");
     expect(fetchCount).toBe(1);
 
     await client.close();
@@ -461,7 +476,9 @@ describe("MCP tool execution", () => {
         expect.objectContaining({ topic: "提出書類一覧" }),
       ]),
     });
-    expect(String(result.structuredContent?.markdown)).toContain("## 質問案");
+    expect(
+      String((result.structuredContent as Record<string, unknown> | undefined)?.markdown),
+    ).toContain("## 質問案");
     expect(fetchCount).toBe(1);
 
     await client.close();
@@ -521,7 +538,7 @@ describe("MCP tool execution", () => {
     });
 
     expect(result.isError).toBe(true);
-    expect(result.content[0]?.type).toBe("text");
+    expect(firstBlock(result).type).toBe("text");
 
     await client.close();
     await server.close();
@@ -540,7 +557,7 @@ describe("MCP tool execution", () => {
     });
 
     expect(result.isError).toBe(true);
-    expect(result.content[0]?.type).toBe("text");
+    expect(firstBlock(result).type).toBe("text");
 
     await client.close();
     await server.close();
@@ -635,9 +652,7 @@ describe("MCP tool execution", () => {
       arguments: { name: "テスト検索", query: "システム", prefecture: "鹿児島県" },
     });
     expect(saveResult.isError).not.toBe(true);
-    const saveContent = JSON.parse(
-      (saveResult.content as Array<{ type: string; text: string }>)[0].text,
-    );
+    const saveContent = JSON.parse(firstBlock(saveResult).text ?? "{}");
     expect(saveContent.saved).toBe(true);
     expect(saveContent.totalSaved).toBeGreaterThanOrEqual(1);
 
@@ -646,9 +661,7 @@ describe("MCP tool execution", () => {
       arguments: {},
     });
     expect(listResult.isError).not.toBe(true);
-    const listContent = JSON.parse(
-      (listResult.content as Array<{ type: string; text: string }>)[0].text,
-    );
+    const listContent = JSON.parse(firstBlock(listResult).text ?? "{}");
     expect(listContent.totalSaved).toBeGreaterThanOrEqual(1);
     expect(listContent.searches.some((s: { name: string }) => s.name === "テスト検索")).toBe(true);
 
@@ -657,9 +670,7 @@ describe("MCP tool execution", () => {
       arguments: { name: "テスト検索" },
     });
     expect(checkResult.isError).not.toBe(true);
-    const checkContent = JSON.parse(
-      (checkResult.content as Array<{ type: string; text: string }>)[0].text,
-    );
+    const checkContent = JSON.parse(firstBlock(checkResult).text ?? "{}");
     expect(checkContent.name).toBe("テスト検索");
     expect(checkContent.checkedAt).toBeDefined();
 

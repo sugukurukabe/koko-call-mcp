@@ -436,7 +436,7 @@ async function handleAuthCodeGrant(
     30 * 24 * 3600,
   );
 
-  res.json({
+  res.set("Cache-Control", "no-store").set("Pragma", "no-cache").json({
     access_token: accessToken,
     token_type: "Bearer",
     expires_in: 3600,
@@ -532,7 +532,7 @@ async function handleRefreshGrant(
     30 * 24 * 3600,
   );
 
-  res.json({
+  res.set("Cache-Control", "no-store").set("Pragma", "no-cache").json({
     access_token: accessToken,
     token_type: "Bearer",
     expires_in: 3600,

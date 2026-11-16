@@ -175,7 +175,7 @@ AI は、入札 MCP で案件を検索し、会計 MCP で残高を取得し、�
 
 ## 公共情報は、もともと公開されている
 
-入札情報は最初から公開されています。誰でも見られます。中小企業庁が政府標準利用規約 第 2.0 版に基づいて開放してくれているデータです。
+入札情報は最初から公開されています。誰でも見られます。中小企業庁が官公需情報ポータルサイト（KKJ）の公開検索 API を通じて提供してくれているデータです。
 
 JP Bids MCP は、その公開情報を AI が読みやすい形に整えただけです。新しいデータを作ったわけではありません。ただ、使える形にした。
 
@@ -186,10 +186,10 @@ JP Bids MCP は、その公開情報を AI が読みやすい形に整えただ�
 ## よくある質問 — 入札担当者・開発者からの問い合わせより
 
 ### Q. AI が間違った入札を返してきたら責任はどうなりますか？
-A. JP Bids MCP は KKJ の公開データを参照情報として返すサーバーであり、最終判断は必ず公式の入札公告で確認してください、というスタンスです。すべての応答に出典（KKJ ポータルへのリンクと「政府標準利用規約 第 2.0 版」の表示）を含めています。
+A. JP Bids MCP は KKJ の公開データを参照情報として返すサーバーであり、最終判断は必ず公式の入札公告で確認してください、というスタンスです。すべての応答に出典（中小企業庁 官公需情報ポータルサイトおよび公式「ご利用上の注意」`https://www.kkj.go.jp/s/help/notes/` へのリンク）を含めています。
 
 ### Q. 自社の独自評価基準でランキングしたい場合は？
-A. `rank_bids` ツールに自社プロファイル（業種・資格・キーワード・予算レンジ）を渡せます。通常のランキング入力は永続保存しません。保存検索を使う場合だけ、検索条件はサーバーの短期メモリ上に保持されます。
+A. `rank_bids` ツールに自社プロファイル（優先キーワード・除外キーワード・地域・提出期限までの日数等）を渡せます。通常のランキング入力は永続保存しません。保存検索を使う場合だけ、検索条件はサーバーの短期メモリ上に保持されます。
 
 ### Q. データはサーバーに保存されますか？
 A. 通常の検索クエリ・参照した入札・自社プロファイルは永続保存しません。OAuth 2.0 はJWTベースで扱い、保存検索や短期キャッシュなど一部の機能は Cloud Run インスタンスのメモリ上に保持される場合があります。詳しくは[プライバシーポリシー](https://mcp.bid-jp.com/privacy)をご覧ください。
@@ -198,7 +198,7 @@ A. 通常の検索クエリ・参照した入札・自社プロファイルは�
 A. はい。Apache-2.0 ライセンスの OSS なので、リポジトリの Dockerfile を使って自社環境で動かせます。`npx jp-bids-mcp` でローカル stdio モードでも動きます。
 
 ### Q. 開発者ですが、どんな技術で作られていますか？
-A. TypeScript + Express + MCP TypeScript SDK + Vertex AI（PDF 抽出）+ Google Cloud Run。OAuth 2.0 Authorization Code + PKCE + Dynamic Client Registration を実装しています。MCP 2025-11-25 仕様に基づき、Tools / Resources / Resource Templates / Prompts / Completion を組み合わせて、入札検索に必要な文脈を提供しています。詳しくは [GitHub リポジトリ](https://github.com/sugukurukabe/koko-call-mcp) をご覧ください。
+A. TypeScript + Express + MCP TypeScript SDK + Vertex AI（ローカル設定時の PDF 抽出）+ Google Cloud Run。OAuth 2.0 Authorization Code + PKCE + Dynamic Client Registration を実装しています。MCP 2025-11-25 仕様に基づき、Tools / Resources / Resource Templates / Prompts / Completion を組み合わせて、入札検索に必要な文脈を提供しています。詳しくは [GitHub リポジトリ](https://github.com/sugukurukabe/koko-call-mcp) をご覧ください。
 
 ---
 
@@ -212,4 +212,4 @@ A. TypeScript + Express + MCP TypeScript SDK + Vertex AI（PDF 抽出）+ Google
 
 ---
 
-*JP Bids MCP は[スグクル株式会社](https://sugukuru.co.jp)（鹿児島県霧島市）が開発・運営しています。Jグランツ MCP はデジタル庁の公式 OSS、freee MCP は freee 株式会社が提供しています。それぞれ独立した運営であり、本記事の所要時間や事例は参考情報です。実際の入札参加にあたっては、必ず公式の入札公告と一次情報源をご確認ください。*
+*JP Bids MCP は[スグクル株式会社](https://sugu-kuru.co.jp)（鹿児島県霧島市）が開発・運営しています。Jグランツ MCP はデジタル庁の公式 OSS、freee MCP は freee 株式会社が提供しています。それぞれ独立した運営であり、本記事の所要時間や事例は参考情報です。実際の入札参加にあたっては、必ず公式の入札公告と一次情報源をご確認ください。*

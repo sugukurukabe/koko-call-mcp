@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "description": "7ツールの期待値一覧。本番環境のScan Tools結果やOpenAI管理画面スキャン時の比較照合に使用する。",
+  "endpoint": "https://mcp.bid-jp.com/mcp",
+  "expected_tool_count": 7,
+  "tools": [
+    {
+      "name": "search_bids",
+      "title": "官公需入札検索",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "primary_inputs": [
+        "query",
+        "prefecture",
+        "category",
+        "organization_name",
+        "issued_after",
+        "due_before",
+        "limit"
+      ]
+    },
+    {
+      "name": "list_recent_bids",
+      "title": "直近の官公需入札一覧",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "primary_inputs": ["prefecture", "category", "days", "limit"]
+    },
+    {
+      "name": "get_bid_detail",
+      "title": "官公需入札詳細",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "primary_inputs": ["bid_ref", "bid_key"]
+    },
+    {
+      "name": "rank_bids",
+      "title": "追うべき入札ランキング",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "primary_inputs": [
+        "bid_refs",
+        "query",
+        "preferred_keywords",
+        "avoid_keywords",
+        "due_within_days",
+        "shortlist_limit"
+      ]
+    },
+    {
+      "name": "extract_bid_requirements",
+      "title": "入札要件抽出MVP",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "primary_inputs": ["bid_ref", "bid_key", "fetch_documents", "target_uris"]
+    },
+    {
+      "name": "export_bid_shortlist",
+      "title": "入札検討shortlist CSV",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "primary_inputs": [
+        "bid_refs",
+        "format",
+        "preferred_keywords",
+        "avoid_keywords",
+        "due_within_days",
+        "shortlist_limit"
+      ]
+    },
+    {
+      "name": "search_bids_app",
+      "title": "AI Bid Workspace (MCP Apps)",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "primary_inputs": ["query", "prefecture", "category", "organization_name", "limit"]
+    }
+  ]
+}

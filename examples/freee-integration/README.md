@@ -55,8 +55,8 @@ freeeで当社の直近の売掛金残高と預金残高を確認して、
 ```
 
 Expected flow:
-1. `search_bids(query="システム", prefecture="鹿児島県")` → find candidates
-2. `rank_bids(bids=[...], company_profile={...})` → score and sort
+1. `search_bids(query="システム", prefecture="鹿児島県")` → find candidates (returns signed `bid_ref` tokens)
+2. `rank_bids(bid_refs=[...], preferred_keywords=["システム", "保守"])` → score and sort
 3. `freee_api_get(service="accounting", path="/api/1/reports/trial_bs")` → get balance sheet
 4. LLM evaluates: current assets vs. estimated contract size
 
@@ -64,20 +64,20 @@ Expected flow:
 
 ### Workflow 2 — Auto-create deal entry after winning a bid
 
-**Goal**: After winning a government contract, create an accounting entry in freee.
+**Goal**: After winning a government contract, create an accounting entry in freee using the notice metadata plus your confirmed award amount.
 
 **Tools used**: `get_bid_detail` (JP Bids) → `freee_api_post` (freee)
 
 **Prompt**:
 
 ```
-案件「2026-KKJ-12345」の詳細を取得して、
-落札額と発注機関名をもとに freee に売上取引を登録してください。
+案件「2026-KKJ-12345」の詳細を取得して、発注機関名と案件タイトルを確認し、
+契約金額 5,500,000円（税込）で freee に売上取引を登録してください。
 勘定科目は「売上高」、取引先は発注機関名で新規作成してください。
 ```
 
 Expected flow:
-1. `get_bid_detail(bid_key="2026-KKJ-12345")` → get contract details
+1. `get_bid_detail(bid_key="2026-KKJ-12345")` → get official notice title and organization name (note: KKJ public tender notices do not include final award amounts, so pass your confirmed contract amount in the prompt)
 2. `freee_api_post(service="accounting", path="/api/1/deals", body={...})` → create deal
 3. LLM confirms the entry with amount, partner, and account item
 
@@ -85,41 +85,41 @@ Expected flow:
 
 ### Workflow 3 — Invoice generation from bid data
 
-**Goal**: Generate an invoice for a completed government contract using bid metadata.
+**Goal**: Generate an invoice for a completed government contract using bid metadata and your confirmed contract amount.
 
 **Tools used**: `get_bid_detail` (JP Bids) → `freee_api_post` (freee Invoice)
 
 **Prompt**:
 
 ```
-落札案件「2026-KKJ-12345」の情報をもとに、
-freee請求書で請求書を作成してください。
-品名は案件タイトル、金額は落札額、支払期限は納品日から30日後としてください。
+案件「2026-KKJ-12345」の情報をもとに、
+契約金額 5,500,000円（税込）で freee請求書を作成してください。
+品名は案件タイトル、支払期限は納品日から30日後としてください。
 ```
 
 Expected flow:
-1. `get_bid_detail(bid_key="2026-KKJ-12345")` → contract details
+1. `get_bid_detail(bid_key="2026-KKJ-12345")` → notice title and contracting authority details
 2. `freee_api_post(service="invoice", path="/invoices", body={...})` → create invoice
 
 ---
 
-### Workflow 4 — Monthly bid expense tracking
+### Workflow 4 — Monthly bid expense tracking (local `full_local` profile)
 
-**Goal**: Track bid preparation expenses (travel, printing, consultants) against actual bids.
+**Goal**: Track bid preparation expenses (travel, printing, consultants) alongside recent procurement notice trends.
 
-**Tools used**: `analyze_past_awards` (JP Bids) + `freee_api_get` (freee)
+**Tools used**: `analyze_past_awards` (JP Bids, requires local `JP_BIDS_PROFILE=full_local`) + `freee_api_get` (freee)
 
 **Prompt**:
 
 ```
 先月の入札関連経費（旅費交通費、印刷費、外注費）をfreeeから集計して、
-同期間の落札実績と合わせて、入札の費用対効果を分析してください。
+同期間の過去公告傾向と合わせて、入札活動の振り返りレポートを作成してください。
 ```
 
 Expected flow:
 1. `freee_api_get(service="accounting", path="/api/1/deals", params={...})` → bid-related expenses
-2. `analyze_past_awards(category="...", months=1)` → recent awards
-3. LLM calculates: total bid expenses vs. total contract value won
+2. `analyze_past_awards(category="役務", window_days=30)` → recent procurement notice volume and top organizations
+3. LLM summarizes total bid preparation expenses alongside procurement activity
 
 ---
 
@@ -127,12 +127,12 @@ Expected flow:
 
 ### JP Bids MCP tools used in these workflows
 
-| Tool | Description | Tier |
+| Tool | Description | Profile |
 |---|---|---|
-| `search_bids` | Keyword/region/category search | Free |
-| `rank_bids` | Score bids by company profile | Free |
-| `get_bid_detail` | Full bid details | Free |
-| `analyze_past_awards` | Historical award analysis | Pro |
+| `search_bids` | Keyword/region/category search | `public_mvp` (hosted & local, free) |
+| `rank_bids` | Score bids by company profile | `public_mvp` (hosted & local, free) |
+| `get_bid_detail` | Full bid details (`bid_ref` or `bid_key`) | `public_mvp` (hosted & local, free) |
+| `analyze_past_awards` | Historical notice trend analysis | `full_local` (local `JP_BIDS_PROFILE=full_local`) |
 
 ### freee MCP tools used in these workflows
 

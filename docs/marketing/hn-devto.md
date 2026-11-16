@@ -1,5 +1,7 @@
 # Hacker News / dev.to 投稿テキスト
 
+> 注記: 現行の `public_mvp`（公開7ツール・無料）およびローカル `JP_BIDS_PROFILE=full_local`（全22ツール）構成に合わせて更新済みです。
+
 ---
 
 ## Hacker News: Show HN
@@ -11,15 +13,14 @@ Show HN: JP Bids MCP – MCP server for Japan's public procurement notices
 
 **本文（HNコメント欄）**
 ```
-I built an MCP server (Model Context Protocol) that exposes Japan's government procurement portal (KKJ) as 17 AI tools.
+I built an open-source MCP server (Model Context Protocol) that exposes Japan's government procurement portal (KKJ) to AI agents, with 7 free Public MVP tools on the hosted endpoint and 22 total tools in local full_local mode.
 
 **What it does:**
 - Search public procurement notices from Japan's SME Agency KKJ portal
-- AI-score bids against company profile (keywords, qualifications, deadlines)
-- Extract requirements from PDF spec sheets via Vertex AI Gemini
-- Generate ICS calendar events for bid deadlines
-- Export ranked shortlists as CSV for Google Sheets
-- Internal review packets in Markdown
+- Interactive MCP Apps UI (`AI Bid Workspace`) with validated CSV/JSON shortlist export
+- Score and rank bids against company profile (keywords, region, deadlines)
+- Inspect official attachment URLs (plus optional local PDF/HTML requirement extraction)
+- Additional local workflows (`JP_BIDS_PROFILE=full_local`): ICS calendar events, internal review packets, draft clarification questions, saved searches, and Investor Radar
 
 **Why Japan's public procurement:**
 - ~¥8 trillion/yr market, ~360k SMEs participating
@@ -27,17 +28,17 @@ I built an MCP server (Model Context Protocol) that exposes Japan's government p
 - KKJ has a public API but it's barely used outside of scrapers
 
 **Technical choices:**
-- MCP 2025-11-25 targeted implementation: Tools, Resources, Resource Templates, Prompts, and Completion
+- MCP 2025-11-25 targeted implementation: Tools, MCP Apps UI Resource (`ui://jp-bids/search-results.html`), Prompts, and Completion
 - Streamable HTTP transport + OAuth 2.0 (PKCE + DCR)
 - outputSchema + annotations on every tool
 - Deployed on Cloud Run, custom domain mcp.bid-jp.com
-- 103 tests, biome lint, TypeDoc API docs, GitHub Actions CI
+- Automated test suite (Vitest), Biome lint, TypeDoc API docs, GitHub Actions CI
 
 **Ecosystem:**
 J-Grants + freee MCP workflow demos are published in the repo, showing how procurement, subsidies, and accounting can be combined in one conversation across three independent MCP servers.
 
-**Free during beta (until September 2026)**
-Remote: https://mcp.bid-jp.com/mcp
+**Free & Open Source (Apache-2.0)**
+Remote (Public MVP, 7 tools): https://mcp.bid-jp.com/mcp
 GitHub: https://github.com/sugukurukabe/koko-call-mcp
 
 Happy to answer questions about MCP implementation patterns for public data APIs.
@@ -68,33 +69,32 @@ That's a gap worth filling — not just for utility, but as a demonstration of w
 
 ## What JP Bids MCP Does
 
-17 tools across the full bid management workflow:
+7 free tools in the hosted `public_mvp` profile, plus 15 additional local developer tools (`JP_BIDS_PROFILE=full_local`, 22 tools total):
 
-| Phase | Tools |
-|-------|-------|
-| Discovery | `search_bids`, `list_recent_bids`, `get_bid_detail` |
-| Analysis | `rank_bids`, `analyze_past_awards`, `summarize_bids_by_org` |
-| Qualification | `assess_bid_qualification`, `extract_bid_requirements` |
-| Decision | `explain_bid_fit`, `create_bid_review_packet` |
-| Action | `create_bid_calendar`, `export_bid_shortlist`, `draft_bid_questions` |
-| Alerts | `save_search`, `check_saved_search`, `list_saved_searches` |
+| Phase | Public MVP (`public_mvp`) | Local Extended (`JP_BIDS_PROFILE=full_local`) |
+|-------|---------------------------|-----------------------------------------------|
+| Discovery | `search_bids`, `list_recent_bids`, `get_bid_detail`, `search_bids_app` | — |
+| Analysis | `rank_bids` | `analyze_past_awards`, `summarize_bids_by_org` |
+| Qualification | `extract_bid_requirements` | `assess_bid_qualification`, `explain_bid_fit` |
+| Action & Alerts | `export_bid_shortlist` | `create_bid_calendar`, `create_bid_review_packet`, `draft_bid_questions`, `save_search`, `check_saved_search`, `list_saved_searches` |
+| Investor Radar | — | `resolve_listed_company`, `map_awards_to_company`, `get_company_award_history`, `screen_procurement_tailwinds`, `investor_radar_app_view` |
 
 ## MCP Spec Support
 
 The server implements the core MCP primitives needed for public procurement search:
 
-- **Tools** — 17 tools with full inputSchema descriptions and outputSchema
-- **Resources** — KKJ attribution, API reference, prefecture codes, Search Results App
-- **Resource Templates** — bid-by-key template
-- **Prompts** — morning briefing, competitor radar, deadline alert
-- **Completion** — prefecture name and category autocomplete
+- **Tools** — 7 public tools (`public_mvp`) / 22 total tools (`full_local`) with full inputSchema descriptions and outputSchema
+- **Resources** — KKJ attribution, API reference, prefecture codes, and MCP Apps UI (`ui://jp-bids/search-results.html`)
+- **Resource Templates** — bid-by-key template (`full_local`)
+- **Prompts** — morning briefing, competitor radar, deadline alert (`full_local`)
+- **Completion** — prefecture name and category autocomplete (`full_local`)
 
 Every tool has:
 - `title` (human-readable)
 - `description` (Japanese + English + Bahasa Indonesia)
 - `inputSchema` with `.describe()` on every parameter
 - `outputSchema` (Zod-inferred)
-- `annotations` (readOnlyHint, idempotentHint, openWorldHint)
+- `annotations` (readOnlyHint, destructiveHint, idempotentHint, openWorldHint)
 
 ## Transport: Streamable HTTP + OAuth 2.0
 
@@ -102,8 +102,8 @@ The remote endpoint at `https://mcp.bid-jp.com/mcp` uses:
 - Streamable HTTP (stateless, Cloud Run compatible)
 - OAuth 2.0 Authorization Code + PKCE
 - Dynamic Client Registration (DCR)
-- JWT verification
-- Free/Pro tier separation via API keys
+- Signed JWT `bid_ref` snapshot tokens for deterministic follow-up calls
+- Free Public MVP profile (no paid tier or API key gating)
 
 ## Working alongside the J-Grants MCP
 
@@ -114,8 +114,9 @@ In one conversation, an agent can search for procurement bids, look up matching 
 ## Try It
 
 ```bash
-npx jp-bids-mcp          # stdio mode
-npx jp-bids-mcp --http   # HTTP mode
+npx jp-bids-mcp                              # stdio mode (public_mvp, 7 tools)
+JP_BIDS_PROFILE=full_local npx jp-bids-mcp   # stdio mode (full_local, 22 tools)
+npx jp-bids-mcp --http                       # HTTP mode
 ```
 
 Remote (no install): `https://mcp.bid-jp.com/mcp`

@@ -383,7 +383,7 @@ describe("U2-R: Authentication & Authorization Acceptance (A01 - A08)", () => {
         })
         .expect(302);
 
-      const location = new URL(authRes.header.location);
+      const location = new URL(authRes.header.location ?? "");
       const code = location.searchParams.get("code");
       expect(code).toBeDefined();
 

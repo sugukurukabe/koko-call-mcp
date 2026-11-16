@@ -1,3 +1,5 @@
+export {};
+
 const remoteUrl = process.env.JP_BIDS_REMOTE_URL ?? "https://mcp.bid-jp.com";
 
 async function check(path: string): Promise<void> {

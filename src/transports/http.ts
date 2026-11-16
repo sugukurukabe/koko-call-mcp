@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import cors from "cors";
-import express, { type Request, type Response } from "express";
+import express, { type NextFunction, type Request, type Response } from "express";
 import { KkjClient } from "../api/kkj-client.js";
 import { parseProApiKeys, parseTier } from "../lib/auth.js";
 import { authenticateMcpRequest } from "../lib/authn.js";
@@ -35,6 +35,42 @@ function readJsonRpcName(body: unknown): string | undefined {
   return typeof name === "string" ? name : undefined;
 }
 
+const LOOPBACK_HOST_PATTERN = /^(?:localhost|127\.0\.0\.1|\[::1\])(?::\d{1,5})?$/i;
+
+function isAllowedLocalHostHeader(hostHeader: string, configuredBaseUrl?: string): boolean {
+  const trimmed = hostHeader.trim();
+  if (LOOPBACK_HOST_PATTERN.test(trimmed)) {
+    return true;
+  }
+  if (configuredBaseUrl) {
+    try {
+      const parsed = new URL(configuredBaseUrl);
+      const lower = trimmed.toLowerCase();
+      if (lower === parsed.host.toLowerCase() || lower === parsed.hostname.toLowerCase()) {
+        return true;
+      }
+    } catch {
+      // Ignore malformed configuredBaseUrl; fall back to loopback check only
+    }
+  }
+  return false;
+}
+
+function validateLocalHostHeader(allowedOrigins: ReadonlySet<string>) {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    if (allowedOrigins.size > 0) {
+      next();
+      return;
+    }
+    const hostHeader = req.header("host");
+    if (!hostHeader || isAllowedLocalHostHeader(hostHeader, process.env.JP_BIDS_BASE_URL)) {
+      next();
+      return;
+    }
+    res.status(403).json({ error: "Host header is not allowed" });
+  };
+}
+
 function validateRoutableMcpHeaders(req: Request, res: Response): boolean {
   const headerMethod = req.header("Mcp-Method");
   const headerName = req.header("Mcp-Name");
@@ -42,19 +78,19 @@ function validateRoutableMcpHeaders(req: Request, res: Response): boolean {
 
   const bodyMethod = readJsonRpcMethod(req.body);
   const bodyName = readJsonRpcName(req.body);
-  if (headerMethod && bodyMethod && headerMethod !== bodyMethod) {
+  if (headerMethod && headerMethod !== bodyMethod) {
     res.status(400).json({
       error: "Mcp-Method header does not match JSON-RPC method",
       header_method: headerMethod,
-      body_method: bodyMethod,
+      body_method: bodyMethod ?? null,
     });
     return false;
   }
-  if (headerName && bodyName && headerName !== bodyName) {
+  if (headerName && headerName !== bodyName) {
     res.status(400).json({
       error: "Mcp-Name header does not match JSON-RPC params.name",
       header_name: headerName,
-      body_name: bodyName,
+      body_name: bodyName ?? null,
     });
     return false;
   }
@@ -121,7 +157,8 @@ export function createHttpApp(): express.Express {
     rememberRecentBids: false,
   });
 
-  if (proApiKeys.size === 0 && process.env.K_SERVICE) {
+  const startupProfile = resolveServerProfile();
+  if (startupProfile !== "public_mvp" && proApiKeys.size === 0 && process.env.K_SERVICE) {
     console.error(
       "[warning] JP_BIDS_PRO_API_KEYS is unset. All HTTP requests will be treated as Pro tier. Set this variable in production to enable Free/Pro tier separation.",
     );
@@ -129,6 +166,7 @@ export function createHttpApp(): express.Express {
 
   app.use(express.json({ limit: "1mb" }));
   app.use(cors({ origin: allowedOrigins.size === 0 ? true : [...allowedOrigins] }));
+  app.use(validateLocalHostHeader(allowedOrigins));
   app.use(validateOrigin(allowedOrigins));
 
   if (oauthSecret) {
@@ -215,6 +253,10 @@ export function createHttpApp(): express.Express {
 
   app.get("/mcp", (_req, res) => {
     res.status(405).json({ error: "SSE GET is not enabled for this stateless server" });
+  });
+
+  app.delete("/mcp", (_req, res) => {
+    res.status(405).json({ error: "Session termination is not enabled for this stateless server" });
   });
 
   app.post("/mcp", async (req, res) => {

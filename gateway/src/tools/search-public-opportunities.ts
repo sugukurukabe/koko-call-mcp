@@ -99,8 +99,8 @@ export function registerSearchPublicOpportunities(server: McpServer): void {
             server: jpBidsServer,
             toolName: "search_bids",
             toolArguments: {
-              keyword,
-              prefecture,
+              query: keyword,
+              ...(prefecture ? { prefecture } : {}),
               limit: max_results_per_source,
             },
             bearerToken: apiKey,

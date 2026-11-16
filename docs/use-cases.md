@@ -1,24 +1,25 @@
 # ユースケース / Use Cases / Kasus Penggunaan
 
-JP Bids MCP が解決する、顧客ごとの具体的な課題。
+JP Bids MCP が解決する、利用者ごとの具体的な課題。
 
-## 1. 入札情報サービス事業者（Grabion / NJSS / うるるなど）
+> **プロファイル構成について**: 公開リモートエンドポイント（`https://mcp.bid-jp.com/mcp`）および既定の `public_mvp` プロファイルは、**完全無料・読み取り専用の公開7ツール**（`search_bids`, `list_recent_bids`, `get_bid_detail`, `search_bids_app`, `rank_bids`, `extract_bid_requirements`, `export_bid_shortlist`）を提供します（月額課金・Stripe呼出しなし）。ICS生成・検討メモ・過去公告集計・Investor Radar を含む全22ツールは、ローカル自己ホスト用の開発者プロファイル（`JP_BIDS_PROFILE=full_local`）で利用できます。
 
-**課題**: 既存の検索UIに加え、AI対話型のアクセスを顧客に提供したい。自社でMCP基盤を開発するコストと時間が障壁。
+## 1. 入札情報サービス事業者・業務システム開発者
+
+**課題**: 既存の検索UIに加え、AI対話型のアクセスを顧客や社内チームに提供したい。ゼロからMCP基盤を開発するコストと時間が障壁。
 
 **JP Bids MCPでの解決**:
-- 22ツール・Remote Streamable HTTP・OAuth 2.0が即利用可能
-- 自社ブランドでラベリングし、既存顧客にAI機能を追加提供
-- Free/Proティア分離済み。¥990/月の課金基盤が稼働中
-- MCP Apps UIで、Claude.aiのサイドパネルに入札一覧を表示
+- 公開7ツール（`public_mvp`）およびローカル拡張22ツール（`full_local`）・Remote Streamable HTTP・OAuth 2.0がApache-2.0 OSSとして即利用可能
+- MCP Apps UI（`search_bids_app`）で、互換クライアントの会話内に案件ワークスペースを描画
+- 署名付き `bid_ref` スナップショットと16列CSV/JSONエクスポートを備え、後続システムへの連携が容易
 
-**想定シナリオ**:
+**想定シナリオ（公開MVP 7ツール）**:
 ```
-顧客: 「来週締切のIT系案件を東京都で探して」
-AI:   JP Bids MCPで検索 → 8件ヒット
-      → AIスコアリングで上位3件を推奨
-      → 仕様書PDFから要件を自動抽出
-      → iCalendarで締切をカレンダーに追加
+担当者: 「来週締切のIT系案件を東京都で探して」
+AI:     search_bids_app で検索 → 候補一覧をUI表示
+        → rank_bids で優先キーワード・期限に基づき比較採点
+        → extract_bid_requirements で確認すべき参加要件チェックリストを整理
+        → export_bid_shortlist で選択候補をCSV/JSON出力
 ```
 
 **自社開発との比較**:
@@ -28,126 +29,76 @@ AI:   JP Bids MCPで検索 → 8件ヒット
 | 開発期間 | 3-6ヶ月 | 即日 |
 | MCP仕様対応 | 要学習 | 2025-11-25仕様に基づく実装 |
 | OAuth 2.0 | 要実装 | 実装済み（PKCE + DCR） |
-| AI分析機能 | 要設計 | 22ツール即利用 |
-| 保守コスト | エンジニア人件費 | サブスク or OEMライセンス |
+| AI分析・出力機能 | 要設計 | 公開7ツール（ローカル最大22ツール） |
+| ライセンス | 自社保守 | Apache-2.0 OSS（公開MVPは完全無料） |
 
 ---
 
 ## 2. 中小企業の入札担当者
 
-**課題**: 入札案件の検索・仕様書の読み込み・資格確認・締切管理を手作業で行っている。1案件あたり2-3時間。
+**課題**: 入札案件の検索・公告内容の確認・要件チェックリスト作成・候補リスト共有を手作業で行っている。
 
 **JP Bids MCPでの解決**:
-- AIに「うちに合う入札を探して」と話しかけるだけ
-- 仕様書PDFの要件を自動で構造化
-- 参加資格の適合チェックを即実行
-- 締切をカレンダーに自動登録
-
-**Before / After**:
-
-| 作業 | Before（手作業） | After（JP Bids MCP） |
-|------|------------------|---------------------|
-| 案件検索 | KKJサイトで検索 30分 | AI会話 1分 |
-| 仕様書読込 | PDF手動確認 1時間 | AI抽出 30秒 |
-| 資格確認 | 要項と照合 30分 | 自動チェック 10秒 |
-| 締切管理 | Excel転記 15分 | iCal自動生成 5秒 |
-| **合計** | **2時間15分** | **約2分** |
+- AIに「うちに合う入札を探して」と話しかけるだけで横断検索（`search_bids` / `list_recent_bids`）
+- 優先語句・除外語句と締切に基づく比較採点（`rank_bids`）
+- 公告メタデータ（および自己ホスト設定時の添付PDF）から確認すべき要件を構造化（`extract_bid_requirements`）
+- 選んだ候補を順序そのままCSV/JSON出力（`export_bid_shortlist`）
 
 ---
 
-## 3. 行政書士・コンサルタント
+## 3. 行政書士・コンサルタント（`full_local` ローカル拡張の活用例）
 
-**課題**: 複数クライアントの入札案件を並行管理。案件ごとにKKJを検索し、要件をまとめ、適合確認する反復作業。
+**課題**: 複数クライアントの入札案件を並行調査し、要件整理・質問案・社内検討メモを作成する反復作業。
 
-**JP Bids MCPでの解決**:
-- 「A社向けの農業関連入札」「B社向けのIT案件」を会話で切り替えて管理
-- 過去落札実績から競合分析
-- 発注機関別の予算傾向レポート
-- 社内検討メモの自動生成
-
-**想定シナリオ**:
-```
-行政書士: 「全省庁統一資格を持つA社が参加できる、
-           来月締切のシステム開発案件を全て検索して、
-           競合の落札率も分析して」
-AI:       search_bids → 23件
-          assess_bid_qualification → 参加可能12件
-          analyze_past_awards → 主要競合3社の落札率
-          create_bid_review_packet → A社向け検討メモ作成
-```
+**JP Bids MCP（`JP_BIDS_PROFILE=full_local`）での解決**:
+- クライアントごとの対象地域・資格等級に応じた適合確認補助（`assess_bid_qualification`）
+- 過去公告データからの発注機関別傾向集計（`analyze_past_awards` / `summarize_bids_by_org`）
+- 社内検討メモ・質問書ドラフト・ICSカレンダー生成（`create_bid_review_packet` / `draft_bid_questions` / `create_bid_calendar`）
 
 ---
 
 ## 4. GovTech / デジタル庁エコシステム企業
 
-**課題**: 公共データのMCP化に取り組みたいが、品質基準とMCP仕様の理解が不十分。リファレンス実装がない。
+**課題**: 公共データのMCP化に取り組みたいが、MCP 2025-11-25仕様やMCP Apps UIの実践リファレンスが少ない。
 
 **JP Bids MCPでの解決**:
-- MCP 2025-11-25仕様に基づく実装例
-- OAuth 2.0 / Streamable HTTP / Resource Templates / Prompts / Completions の実装パターン
-- server.json / agents.json / mcp-server.json のメタデータ設計
-- Jグランツ MCP との相互運用実証
-
-**参照ポイント**:
-- `server.json`: MCP Registry メタデータの標準構造
-- `src/oauth/`: PKCE + DCR + JWT の実装パターン
-- `src/transports/http.ts`: Streamable HTTP の実装パターン
-- `src/tools/`: 22ツールの設計パターン（zod入力・構造化出力・エラーハンドリング）
-- `examples/`: エコシステム連携の設定テンプレート
+- MCP 2025-11-25仕様に基づくTypeScriptリファレンス実装
+- OAuth 2.0 / Streamable HTTP / Resource Templates / Prompts / Completions / MCP Apps UI の実装パターン
+- `server.json` / `.well-known/mcp/server-card.json` のメタデータ設計
+- Jグランツ MCP との相互運用構成例（`examples/jgrants-integration/`）
 
 ---
 
-## 5. 会計 × 入札の自動化
+## 5. 会計 × 入札の連携ワークフロー（参考構成）
 
-**課題**: 落札後の会計処理（売上登録・請求書作成・経費集計）が手作業で、入札情報との紐づけが断絶。
+**課題**: 受注後の会計処理（取引登録・請求書作成・経費集計）が手作業で、案件メタデータとの紐づけが断絶。
 
-**JP Bids MCP × freee MCPでの解決**:
-- 落札情報から売上取引を自動生成
-- 案件メタデータから請求書を自動作成
-- 入札準備経費と落札実績の費用対効果分析
-
-**想定ワークフロー**:
-```
-担当者: 「先月落札したA案件の売上をfreeeに登録して」
-AI:     get_bid_detail で案件情報取得
-        → freee_create_deal で売上取引登録（¥15,000,000）
-        → freee_create_invoice で請求書生成
-        → 「登録完了。請求書No.2026-0123を作成しました」
-```
+**JP Bids MCP × freee MCPでの解決**（別途 `freee-mcp` を併用する参考構成）:
+- `get_bid_detail` で取得した案件名・発注機関情報をもとに、会計MCP側で取引・請求書作成を補助
+- 入札準備経費と受注案件の費用対効果整理
 
 ---
 
-## 6. 上場企業の官公需調査（Investor Radar）
+## 6. 上場企業の官公需公告調査（Investor Radar — `full_local` 限定参考実装）
 
 **課題**: 官公需の公告にどの上場企業が名前として出てくるかを、KKJ と株価画面を行き来しながら手で集めている。
 
-**JP Bids MCPでの解決**:
+**JP Bids MCP（`JP_BIDS_PROFILE=full_local`）での解決**:
 - `map_awards_to_listed` で公告を銘柄コードへ名寄せ
-- `analyze_award_price_impact` で公告日前後の公開終値（J-Quants キー）
-- 市場データ MCP を同じ会話に並べれば日足と突き合わせ
+- `analyze_award_price_impact` で公告日前後の公開終値を確認（利用者自身の J-Quants キーを使用）
 - 売買推奨は出さない。KKJ は公告であり公式落札結果ではない
-
-**想定シナリオ**:
-```
-調査: 「6702 の官公需公告と、公告日前後の終値を見せて」
-AI:   map_awards_to_listed → get_listed_award_history
-      → analyze_award_price_impact（J-Quants）
-      → 「投資助言ではありません」と出典を添えて返す
-```
 
 ---
 
-## 導入判断のための数字
+## 導入判断のための指標
 
 | 指標 | 値 |
 |------|-----|
 | MCP仕様バージョン | 2025-11-25 |
-| ツール数 | 22 |
-| テスト数 | 103 (23ファイル) |
-| コードカバレッジ | 71% |
-| CIチェック | lint + build + test + docs + security |
+| ツール数 | 公開MVP 7ツール（ローカル `full_local` 22ツール） |
+| 自動テスト | 41ファイル・290テスト |
+| 品質ゲート | Biome lint + `tsc` 全層型検査 + 再現性ビルド検証 + Vitest |
 | トランスポート | stdio + Streamable HTTP |
-| 認証 | OAuth 2.0 (PKCE + DCR) + API Key |
-| エコシステム連携 | Jグランツ MCP + freee MCP |
-| ライセンス | Apache-2.0 |
-| 本番稼働 | Cloud Run (asia-northeast1) |
+| 認証 | リモート HTTP: OAuth 2.0 (PKCE + DCR) / ローカル stdio: 不要 |
+| エコシステム連携例 | Jグランツ MCP + freee MCP |
+| ライセンス | Apache-2.0（公開MVP完全無料） |

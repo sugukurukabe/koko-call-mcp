@@ -25,13 +25,13 @@ JP Bids MCP は、中小企業庁の官公需情報ポータルサイト（KKJ�
 - `search_bids(query, prefecture, category, ...)` — キーワード・地域・業種で入札を検索 / Search bids by keyword, region, category
 - `search_bids_app(...)` — 上記の MCP Apps 版。会話の中に検索結果テーブルを描画 / MCP Apps widget that renders results inside the conversation
 - `list_recent_bids(limit, ...)` — 直近の新着公告を一覧 / List recent notices
-- `get_bid_detail(bid_key)` — 1 件の詳細取得 / Get a single bid detail
+- `get_bid_detail(bid_ref | bid_key)` — 1 件の詳細取得（署名付き `bid_ref` または `bid_key`） / Get a single bid detail
 
 ### 比較・抽出・出力 / Comparison, Extraction, Export
 
-- `rank_bids(bid_refs, query, profile, preferred_keywords, ...)` — 複数案件（最大50件）の適合度・期限を比較採点 / Compare and rank bids
-- `extract_bid_requirements(bid_key)` — 案件の参加資格・提出要件チェックリストを生成 / Structured requirement checklist extraction
-- `export_bid_shortlist(bid_refs, format)` — 選択した案件群（最大50件）を CSV または JSON で出力（選択順序保持） / Export shortlist as CSV or JSON
+- `rank_bids(bid_refs | query, preferred_keywords, avoid_keywords, due_within_days, shortlist_limit, ...)` — 複数案件（選択最大50件または検索条件）の適合度・期限を比較採点 / Compare and rank bids
+- `extract_bid_requirements(bid_ref | bid_key, fetch_documents)` — 案件の参加資格・提出要件チェックリストを生成 / Structured requirement checklist extraction
+- `export_bid_shortlist(bid_refs | query, format)` — 選択した案件群（最大50件）または検索上位候補を CSV または JSON で出力（選択順序保持） / Export shortlist as CSV or JSON
 
 *(注: Investor Radar、落札傾向分析、保存検索などの追加ツールはローカル開発用 `full_local` プロファイル限定の機能です)*
 
@@ -42,10 +42,10 @@ JP Bids MCP は MCP 2025-11-25 仕様に基づき、入札検索に必要な主�
 | プリミティブ | 実装 |
 |---|---|
 | Tools | 公開 7 ツール、すべてに `inputSchema`, `outputSchema`, `annotations` を付与 |
-| Resources | KKJ 出典、API リファレンス、都道府県コード、Search Results App (`ui://jp-bids/search-results.html`) |
+| Resources | KKJ 出典 (`attribution://kkj`)、API リファレンス (`docs://api-reference`)、都道府県コード (`codes://prefectures`)、Search Results App (`ui://jp-bids/search-results.html`) |
 | Resource Templates | `prefecture://{lg_code}` |
 | Prompts | morning briefing / bid discovery / deadline alert |
-| Completion | 都道府県名・カテゴリ名のオートコンプリート |
+| Completion | 都道府県コード・カテゴリ等のオートコンプリート |
 
 ## 4. セットアップ / Setup
 
@@ -123,9 +123,9 @@ npx jp-bids-mcp
 
 ## 7. データ出典とライセンス / Attribution and License
 
-- データ出典: 中小企業庁 官公需情報ポータルサイト（KKJ）, https://kkj.go.jp
-- データ利用規約: 政府標準利用規約 第2.0版
-- 本サーバーの返答には常に上記の出典を含めます。AI クライアント側でもこの出典をユーザーへ提示してください。
+- データ出典: 中小企業庁 官公需情報ポータルサイト（KKJ）, https://www.kkj.go.jp/
+- サイト利用上の注意・参照URL: https://www.kkj.go.jp/s/help/notes/
+- 本サーバーの返答には常に上記の出典および注意事項URLを含めます。AI クライアント側でもこの出典をユーザーへ提示してください。
 - コードのライセンス: Apache-2.0
 - リポジトリ: https://github.com/sugukurukabe/koko-call-mcp
 
@@ -134,8 +134,9 @@ npx jp-bids-mcp
 - 「JP Bids MCP × Jグランツ MCP × freee MCP — 入札・補助金・会計をひとつの会話で」 https://github.com/sugukurukabe/koko-call-mcp/blob/main/articles/zenn-jp-bids-jgrants.md
 - 「無形資産の4SからみたMCP — 小さなプロトコルが、なぜ新しい価値を生むのか」 https://github.com/sugukurukabe/koko-call-mcp/blob/main/articles/mcp-intangible-assets-4s.md
 - 「会話の中に画面を置く — MCP Apps で入札ワークスペースを実装する」 https://github.com/sugukurukabe/koko-call-mcp/blob/main/articles/mcp-apps-bid-workspace.md
+  MCP Apps UI「AI Bid Workspace」の設計解説。`ui://jp-bids/search-results.html` を `text/html;profile=mcp-app` の単一HTMLバンドルとして配信する構成、CSP の `connectDomains: []` によるデータ経路分離、ホストアクション拒否時のフォールバック、view-model 分離によるテスト設計を扱う。
 - 「官公需の公告に、銘柄コードを付ける — Investor Radar」 https://github.com/sugukurukabe/koko-call-mcp/blob/main/articles/investor-radar.md
-  過去版の実装解説（現在の配布物・受入結果とは区別）。MCP Apps UI「AI Bid Workspace」の実装解説。`ui://` リソースを `text/html;profile=mcp-app` で返し単一HTML（558,006 bytes / gzip 149.38 KiB / 162 modules）として配信する理由、CSP の `connectDomains: []` によりデータ経路が tool result だけになること、ホストアクション7種それぞれの拒否時フォールバック、`sendMessage` がツールを呼ばず整形された発話を送る設計、view-model 分離によるテスト、モックホストによる決定的スクリーンショット取得手順を扱う。
+  ローカル開発用 `full_local` プロファイル向けの参考実装解説（公開MVP 7ツールには含まれない）。KKJ公告の組織名・件名から上場企業カタログへの名寄せとイベントウィンドウ検証の設計を扱う。
 
 ## 9. 著者 / Author
 

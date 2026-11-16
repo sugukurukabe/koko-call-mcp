@@ -38,6 +38,7 @@ describe("U2-R: Search, 3 Distinct States & JST Deadline Acceptance (B01, B02, B
       const mockResult: BidSearchResult = {
         searchHits: 2,
         returnedCount: 2,
+        query: {},
         bids: [
           {
             resultId: 1,
@@ -51,15 +52,17 @@ describe("U2-R: Search, 3 Distinct States & JST Deadline Acceptance (B01, B02, B
           },
         ],
         attribution: {
-          dataSource: "官公需情報ポータルサイト (KKJ)",
+          dataSource: "中小企業庁 官公需情報ポータルサイト",
+          apiEndpoint: "http://www.kkj.go.jp/api/",
+          licenseUrl: "https://www.kkj.go.jp/s/help/notes/",
+          serviceDisclaimer: "本データは官公需情報ポータルサイトの公開公告情報に基づきます。",
           accessedAt: "2026-04-01T00:00:00Z",
-          notice: "本データは官公需情報ポータルサイトの公開公告情報に基づきます。",
         },
       };
 
       const summary = formatSearchSummary(mockResult);
       expect(summary).toContain("2件ヒット（取得 2件）");
-      expect(summary).toContain("出典: 官公需情報ポータルサイト (KKJ)");
+      expect(summary).toContain("出典: 中小企業庁 官公需情報ポータルサイト");
       expect(summary).toContain("官庁ポータルサイト構築業務");
       expect(summary).toContain("提出期限: 2026-04-20");
     });
@@ -71,16 +74,20 @@ describe("U2-R: Search, 3 Distinct States & JST Deadline Acceptance (B01, B02, B
       const emptyResult: BidSearchResult = {
         searchHits: 0,
         returnedCount: 0,
+        query: {},
         bids: [],
         attribution: {
-          dataSource: "KKJ",
+          dataSource: "中小企業庁 官公需情報ポータルサイト",
+          apiEndpoint: "http://www.kkj.go.jp/api/",
+          licenseUrl: "https://www.kkj.go.jp/s/help/notes/",
+          serviceDisclaimer: "本データは官公需情報ポータルサイトの公開公告情報に基づきます。",
           accessedAt: "2026-04-01T00:00:00Z",
         },
       };
 
       const summary = formatSearchSummary(emptyResult);
       expect(summary).toContain("0件ヒット（取得 0件）");
-      expect(summary).toContain("出典: KKJ");
+      expect(summary).toContain("出典: 中小企業庁 官公需情報ポータルサイト");
       expect(emptyResult.bids).toHaveLength(0);
     });
 

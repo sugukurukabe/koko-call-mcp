@@ -1,5 +1,5 @@
 import { useApp } from "@modelcontextprotocol/ext-apps/react";
-import { useState } from "react";
+import { Component, type ErrorInfo, type ReactNode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { AwardMappingResultSchema } from "../domain/investor.js";
 import { VERSION } from "../lib/version.js";
@@ -13,6 +13,84 @@ import "./investor-radar.css";
 
 interface ToolResultLike {
   structuredContent?: unknown;
+}
+
+export interface InvestorErrorBoundaryProps {
+  children: ReactNode;
+  onReset?: () => void;
+}
+
+export interface InvestorErrorBoundaryState {
+  hasError: boolean;
+  errorMessage: string | null;
+}
+
+export class ErrorBoundary extends Component<
+  InvestorErrorBoundaryProps,
+  InvestorErrorBoundaryState
+> {
+  override state: InvestorErrorBoundaryState = {
+    hasError: false,
+    errorMessage: null,
+  };
+
+  static getDerivedStateFromError(error: Error): InvestorErrorBoundaryState {
+    return { hasError: true, errorMessage: error.message };
+  }
+
+  override componentDidCatch(error: Error, info: ErrorInfo): void {
+    console.error("[JP Bids Investor Radar] Uncaught rendering error:", error, info);
+  }
+
+  handleReset = () => {
+    this.setState({ hasError: false, errorMessage: null });
+    this.props.onReset?.();
+  };
+
+  override render() {
+    if (this.state.hasError) {
+      return (
+        <div
+          style={{
+            padding: "16px",
+            color: "#dc2626",
+            background: "#fef2f2",
+            borderRadius: "8px",
+            margin: "16px",
+          }}
+        >
+          <h3 style={{ margin: "0 0 8px 0" }}>Investor Radar 初期化エラー</h3>
+          <p style={{ margin: "0 0 12px 0", fontSize: "14px" }}>
+            {this.state.errorMessage ?? "予期せぬエラーが発生しました。"}
+          </p>
+          <button
+            type="button"
+            onClick={this.handleReset}
+            style={{
+              padding: "6px 12px",
+              background: "#2563eb",
+              color: "#fff",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+            }}
+          >
+            再試行
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+export function applyHostTheme(theme: unknown): void {
+  if (typeof document === "undefined" || !document.documentElement) return;
+  if (theme === "light" || theme === "dark") {
+    document.documentElement.dataset.theme = theme;
+  } else {
+    delete document.documentElement.dataset.theme;
+  }
 }
 
 function WelcomeScreen() {
@@ -32,7 +110,11 @@ function WelcomeScreen() {
   );
 }
 
-function App() {
+export interface InvestorRadarContentProps {
+  onRetry?: () => void;
+}
+
+export function InvestorRadarContent({ onRetry }: InvestorRadarContentProps) {
   const [workspace, setWorkspace] = useState<InvestorWorkspaceViewModel | null>(null);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -84,9 +166,18 @@ function App() {
         const currentContext = created.getHostContext() ?? context;
         setDisplayMode(currentContext.displayMode ?? null);
         setAvailableDisplayModes(currentContext.availableDisplayModes ?? []);
+        applyHostTheme(currentContext.theme);
       });
     },
   });
+
+  useEffect(() => {
+    if (!app) return;
+    const context = app.getHostContext();
+    setDisplayMode(context?.displayMode ?? null);
+    setAvailableDisplayModes(context?.availableDisplayModes ?? []);
+    applyHostTheme(context?.theme);
+  }, [app]);
 
   const selected = workspace?.cards.find((card) => card.key === selectedKey);
 
@@ -132,7 +223,28 @@ function App() {
           <span className="status-dot">{isConnected ? "●" : "○"}</span>
         </div>
       </header>
-      {(error || appError) && <div className="notice error">{error ?? String(appError)}</div>}
+      {(error || appError) && (
+        <div className="notice error">
+          <span>{error ?? String(appError)}</span>
+          {appError && onRetry && (
+            <button
+              type="button"
+              onClick={onRetry}
+              style={{
+                marginLeft: "10px",
+                padding: "4px 10px",
+                background: "#2563eb",
+                color: "#fff",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+              }}
+            >
+              再接続
+            </button>
+          )}
+        </div>
+      )}
       {actionMessage && <div className="notice compact">{actionMessage}</div>}
       {workspace && <div className="disclaimer">{workspace.disclaimer}</div>}
       {!workspace ? (
@@ -337,7 +449,22 @@ async function handleToggleDisplayMode(
   }
 }
 
-const root = document.getElementById("root");
-if (root) {
-  createRoot(root).render(<App />);
+export function App() {
+  const [sessionKey, setSessionKey] = useState(0);
+  const handleRetry = () => {
+    setSessionKey((prev) => prev + 1);
+  };
+
+  return (
+    <ErrorBoundary onReset={handleRetry}>
+      <InvestorRadarContent key={sessionKey} onRetry={handleRetry} />
+    </ErrorBoundary>
+  );
+}
+
+if (typeof document !== "undefined") {
+  const root = document.getElementById("root");
+  if (root) {
+    createRoot(root).render(<App />);
+  }
 }

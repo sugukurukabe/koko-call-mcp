@@ -13,7 +13,7 @@ const DEFAULT_BRANDING: Branding = {
   organizationName: "Sugukuru Inc.",
   serviceUrl: "https://mcp.bid-jp.com",
   contactUrl: "https://sugu-kuru.co.jp",
-  dataAttribution: "中小企業庁 官公需情報ポータルサイト（政府標準利用規約 第2.0版）",
+  dataAttribution: "中小企業庁 官公需情報ポータルサイト（https://www.kkj.go.jp/s/help/notes/）",
 };
 
 let cachedBranding: Branding | null = null;

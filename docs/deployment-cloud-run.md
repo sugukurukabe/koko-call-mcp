@@ -28,7 +28,8 @@ gcloud run deploy jp-bids-mcp \
 デプロイ後確認:
 
 ```bash
-curl https://YOUR_CLOUD_RUN_URL/healthz
+curl https://YOUR_CLOUD_RUN_URL/health
+curl https://YOUR_CLOUD_RUN_URL/readyz
 npm run registry:validate
 npm run remote:health
 ```
@@ -47,7 +48,8 @@ Recommended environment variables:
 Post-deploy checks:
 
 ```bash
-curl https://YOUR_CLOUD_RUN_URL/healthz
+curl https://YOUR_CLOUD_RUN_URL/health
+curl https://YOUR_CLOUD_RUN_URL/readyz
 npm run registry:validate
 npm run remote:health
 ```
@@ -66,7 +68,8 @@ Environment variable yang direkomendasikan:
 Pemeriksaan setelah deploy:
 
 ```bash
-curl https://YOUR_CLOUD_RUN_URL/healthz
+curl https://YOUR_CLOUD_RUN_URL/health
+curl https://YOUR_CLOUD_RUN_URL/readyz
 npm run registry:validate
 npm run remote:health
 ```

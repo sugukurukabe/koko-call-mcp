@@ -71,10 +71,10 @@ export function registerAnalyzeFundingFit(server: McpServer, context: ToolContex
             server: jpBidsServer,
             toolName: "rank_bids",
             toolArguments: {
-              keyword: bid_keyword,
-              industry: company_profile.industry,
-              prefecture: company_profile.prefecture,
-              limit: 5,
+              query: bid_keyword,
+              preferred_keywords: [company_profile.industry],
+              ...(company_profile.prefecture ? { prefecture: company_profile.prefecture } : {}),
+              shortlist_limit: 5,
             },
             bearerToken: apiKey,
           })

@@ -30,8 +30,13 @@ japan-real-estate-intel-mcp/
 
 # local review archives, evidence packets & draft artifacts (internal only)
 *.zip
+artifacts/
 evidence/
+scratch/
 docs/drafts/
 JP_BIDS_*.md
 JP_BIDS_*.json
 ANTIGRAVITY_*.md
+*公開前再点検*.md
+.vscode/
+xmcp/

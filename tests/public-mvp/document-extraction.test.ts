@@ -38,8 +38,18 @@ function createBaseExtraction(bid: Bid): BidRequirementExtraction {
       procedureType: "一般競争入札",
     },
     documentTargets: [
-      { name: "公式公告ページ", uri: bid.externalDocumentUri ?? "" },
-      ...(bid.attachments ?? []).map((a) => ({ name: a.name, uri: a.uri })),
+      {
+        label: "公式公告ページ",
+        uri: bid.externalDocumentUri ?? "",
+        kind: "official_page",
+        recommendedProcessor: "gemini_document_understanding",
+      },
+      ...(bid.attachments ?? []).map((a) => ({
+        label: a.name,
+        uri: a.uri,
+        kind: "attachment" as const,
+        recommendedProcessor: "gemini_document_understanding" as const,
+      })),
     ],
     missingRequirements: ["参加資格等級 (A/B/C/D)", "必要提出書類一覧", "質問提出期限"],
     extractionPlan: ["公式公告ページおよび添付仕様書から参加要件と提出期限を確認する"],
@@ -326,7 +336,9 @@ describe("U3-A: Limited Document Extraction & Security Acceptance (X01, X03, X04
             text: JSON.stringify({ eligibility: ["要件A"] }),
           }),
         },
-      },
+      } as unknown as NonNullable<
+        NonNullable<ConstructorParameters<typeof VertexGeminiClient>[0]>["ai"]
+      >,
     });
     expect(client).toBeDefined();
   });
@@ -438,7 +450,7 @@ describe("U3-A: Limited Document Extraction & Security Acceptance (X01, X03, X04
       sha256: "adv-sha-256",
     });
 
-    let capturedRequest: Record<string, unknown> | null = null;
+    let capturedRequest = null as Record<string, unknown> | null;
     const vertexClient = new VertexGeminiClient({
       ai: {
         models: {
@@ -464,7 +476,9 @@ describe("U3-A: Limited Document Extraction & Security Acceptance (X01, X03, X04
             };
           },
         },
-      },
+      } as unknown as NonNullable<
+        NonNullable<ConstructorParameters<typeof VertexGeminiClient>[0]>["ai"]
+      >,
     });
 
     const result = await enrichWithDocumentExtraction(

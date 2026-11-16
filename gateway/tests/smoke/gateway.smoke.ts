@@ -179,4 +179,98 @@ describe("Gateway smoke test", () => {
     expect(text).toContain("search_public_opportunities");
     expect(text).toContain("issue_approval_token");
   });
+
+  it("forwards jp-bids schema-compliant arguments (query, preferred_keywords, shortlist_limit) in search_public_opportunities and analyze_funding_fit", async () => {
+    const mcpProxy = await import("../../src/proxy/mcp-proxy.js");
+    const calls: Array<{
+      serverId: string;
+      toolName: string;
+      toolArguments: Record<string, unknown>;
+    }> = [];
+    const spy = (await import("vitest")).vi
+      .spyOn(mcpProxy, "proxyToolCall")
+      .mockImplementation(async (opts) => {
+        calls.push({
+          serverId: opts.server.id,
+          toolName: opts.toolName,
+          toolArguments: opts.toolArguments,
+        });
+        return {
+          content: [{ type: "text", text: "{}" }],
+          structuredContent: {
+            searchHits: 1,
+            returnedCount: 1,
+            rankedCount: 1,
+            bids: [],
+            rankedBids: [],
+          },
+        };
+      });
+
+    const originalKeys = process.env.GATEWAY_PRO_API_KEYS;
+    process.env.GATEWAY_PRO_API_KEYS = "test-pro-key";
+    try {
+      const app = createHttpApp();
+
+      // 1. search_public_opportunities without prefecture omits prefecture and maps keyword -> query
+      const searchRes = await request(app)
+        .post("/mcp")
+        .set("Content-Type", "application/json")
+        .set("Accept", "application/json, text/event-stream")
+        .set("MCP-Protocol-Version", "2025-11-25")
+        .send({
+          jsonrpc: "2.0",
+          id: 10,
+          method: "tools/call",
+          params: {
+            name: "search_public_opportunities",
+            arguments: { keyword: "クラウド", max_results_per_source: 4 },
+          },
+        });
+      expect(searchRes.status).toBe(200);
+      const jpBidsSearchCall = calls.find(
+        (c) => c.serverId === "jp-bids" && c.toolName === "search_bids",
+      );
+      expect(jpBidsSearchCall?.toolArguments).toEqual({
+        query: "クラウド",
+        limit: 4,
+      });
+
+      // 2. analyze_funding_fit maps industry + focus_keywords -> query, preferred_keywords, shortlist_limit
+      const fitRes = await request(app)
+        .post("/mcp")
+        .set("Content-Type", "application/json")
+        .set("Accept", "application/json, text/event-stream")
+        .set("MCP-Protocol-Version", "2025-11-25")
+        .set("Authorization", "Bearer test-pro-key")
+        .send({
+          jsonrpc: "2.0",
+          id: 11,
+          method: "tools/call",
+          params: {
+            name: "analyze_funding_fit",
+            arguments: {
+              bid_keyword: "AI クラウド",
+              company_profile: {
+                industry: "情報通信",
+                prefecture: "鹿児島県",
+              },
+            },
+          },
+        });
+      expect(fitRes.status).toBe(200);
+      const jpBidsRankCall = calls.find(
+        (c) => c.serverId === "jp-bids" && c.toolName === "rank_bids",
+      );
+      expect(jpBidsRankCall?.toolArguments).toEqual({
+        query: "AI クラウド",
+        preferred_keywords: ["情報通信"],
+        prefecture: "鹿児島県",
+        shortlist_limit: 5,
+      });
+    } finally {
+      spy.mockRestore();
+      process.env.GATEWAY_PRO_API_KEYS = originalKeys;
+    }
+  });
 });

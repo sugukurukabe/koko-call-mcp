@@ -1,7 +1,31 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readdirSync, readFileSync, rmSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { existsSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
+import { dirname, join, relative } from "node:path";
+
+function runNpmBuild(): void {
+  const npmExecPath = process.env.npm_execpath;
+  if (npmExecPath && existsSync(npmExecPath)) {
+    execFileSync(process.execPath, [npmExecPath, "run", "build"], { stdio: "inherit" });
+    return;
+  }
+  if (process.platform === "win32") {
+    const bundledNpmCli = join(
+      dirname(process.execPath),
+      "node_modules",
+      "npm",
+      "bin",
+      "npm-cli.js",
+    );
+    if (existsSync(bundledNpmCli)) {
+      execFileSync(process.execPath, [bundledNpmCli, "run", "build"], { stdio: "inherit" });
+      return;
+    }
+    execFileSync("npm.cmd", ["run", "build"], { stdio: "inherit", shell: true });
+    return;
+  }
+  execFileSync("npm", ["run", "build"], { stdio: "inherit" });
+}
 
 function collectFiles(directory: string): string[] {
   return readdirSync(directory)
@@ -10,13 +34,14 @@ function collectFiles(directory: string): string[] {
       const stat = statSync(path);
       return stat.isDirectory() ? collectFiles(path) : [path];
     })
+    .map((path) => path.replaceAll("\\", "/"))
     .sort();
 }
 
 function distHash(): string {
   const hash = createHash("sha256");
   for (const file of collectFiles("dist")) {
-    hash.update(relative("dist", file));
+    hash.update(relative("dist", file).replaceAll("\\", "/"));
     hash.update(readFileSync(file));
   }
   return hash.digest("hex");
@@ -24,7 +49,7 @@ function distHash(): string {
 
 function buildAndHash(): string {
   rmSync("dist", { recursive: true, force: true });
-  execFileSync("npm", ["run", "build"], { stdio: "inherit" });
+  runNpmBuild();
   return distHash();
 }
 

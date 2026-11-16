@@ -11,6 +11,7 @@ import {
 import { daysAgoDate, formatKkjDateRange, todayDate } from "../domain/date-range.js";
 import { summarizePastAwards } from "../domain/past-awards.js";
 import { PrefectureNameSchema, toLgCode } from "../domain/prefectures.js";
+import { UserInputError } from "../lib/errors.js";
 import { toolError } from "../lib/tool-result.js";
 
 const inputSchema = {
@@ -70,7 +71,9 @@ export function registerAnalyzePastAwards(server: McpServer, client: KkjClient):
           !args.procedure_type
         ) {
           return toolError(
-            new Error("missing filters"),
+            new UserInputError(
+              "analyze_past_awards は query, organization_name, prefecture, category, procedure_type のいずれかを指定してください。検索が広すぎると上流APIが拒否します。",
+            ),
             "analyze_past_awards は query, organization_name, prefecture, category, procedure_type のいずれかを指定してください。検索が広すぎると上流APIが拒否します。",
           );
         }
