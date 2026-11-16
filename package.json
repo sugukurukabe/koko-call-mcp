@@ -80,7 +80,7 @@
     "mutation": "stryker run",
     "apps:harness": "tsx scripts/apps-harness/serve.ts",
     "apps:capture": "npm run build:ui && tsx scripts/apps-harness/capture.ts",
-    "docs:api": "node --input-type=module -e \"const C=Intl.Collator;function D(l,o){return new C(!l||l==='und'?'en-US':l,o)}D.supportedLocalesOf=C.supportedLocalesOf.bind(C);Object.setPrototypeOf(D,C);D.prototype=C.prototype;Intl.Collator=D;const s=String.prototype.localeCompare;String.prototype.localeCompare=function(t,l,o){return s.call(this,t,!l||l==='und'?'en-US':l,o)};await import('./node_modules/typedoc/bin/typedoc');\"",
+    "docs:api": "node -e \"const C=Intl.Collator;function D(l,o){return new C(!l||l==='und'?'en-US':l,o)}D.supportedLocalesOf=C.supportedLocalesOf.bind(C);Object.setPrototypeOf(D,C);D.prototype=C.prototype;Intl.Collator=D;const s=String.prototype.localeCompare;String.prototype.localeCompare=function(t,l,o){return s.call(this,t,!l||l==='und'?'en-US':l,o)};await import('./node_modules/typedoc/dist/lib/cli.js');\"",
     "api:health": "tsx scripts/api-health-check.ts",
     "remote:health": "tsx scripts/remote-health-check.ts",
     "remote:mcp": "tsx scripts/remote-mcp-check.ts",
