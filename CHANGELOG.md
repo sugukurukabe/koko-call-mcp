@@ -4,6 +4,13 @@
 
 ### Unreleased
 
+### 0.10.1
+
+- **未公開版 `0.10.1` への候補版数一本化 (`PUBLIC-V0100-F04`)**: npmjs.org に既公開の `jp-bids-mcp@0.10.0` との版数衝突を解消するため、`package.json`、`package-lock.json`、`src/lib/version.ts`、`server.json`、`.well-known`、プラグイン、スキルを含む全候補構成を未公開版 `0.10.1` へ統一し、公開ワークフローに既公開版チェックを追加。
+- **`2026-07-28` HTTP アダプタとメソッド別 `Mcp-Name` 検証 (`PUBLIC-V0100-F01`)**: `@modelcontextprotocol/sdk@1.32.2`（`2025-11-25` ネイティブ）の前段に `src/transports/http.ts` ステートレス境界アダプタを実装。`params._meta["io.modelcontextprotocol/protocolVersion"]` と `MCP-Protocol-Version` の一致、`Mcp-Method` 必須、メソッド別 `Mcp-Name`（`tools/call`・`prompts/get` は `params.name`、`resources/read` 等は `params.uri`）、および `2025-11-25` 旧クライアント互換を厳格に検証。
+- **2段階 Cloud Run 手順への分離 (`PUBLIC-V0100-F02`)**: `0%` 候補配備・厳格検査（Stage 1）と検証済み候補のトラフィック昇格（Stage 2）を分離し、`traffic[0]` 参照・`ERR` からの盲目的復帰・`latestCreatedRevisionName` 依存を排除。
+- **画面受入試験の実描画・故障検出強化 (`PUBLIC-V0100-F03`)**: オフライン構造検査とローカルブラウザ実描画・操作検査を分離し、モジュール起動例外・選択イベント破損・ダウンロード/クリップボード失敗時の検出およびフォールバック検証を追加。
+
 ### 0.10.0
 
 - **Public MVP (7ツール・完全無料) バージョン統一**: パッケージ・レジストリ・`.well-known`・OpenAI プラグイン・Smithery マニフェストの公開バージョンを `0.10.0` に統一し、`server.json` の独自拡張情報を `2025-12-11/server.schema.json` 準拠の `_meta["io.github.sugukurukabe/jp-bids"]` 配下へ移動。
@@ -185,6 +192,13 @@
 
 ### Unreleased
 
+### 0.10.1
+
+- **Unified unpublished `0.10.1` release candidate (`PUBLIC-V0100-F04`)**: Bumped all package, lockfile, registry, `.well-known`, plugin, and skill manifests to unpublished `0.10.1` to prevent collision with the already-published `jp-bids-mcp@0.10.0` on npmjs.org, and added a pre-publish npm registry guard to `release.yml`.
+- **`2026-07-28` HTTP boundary adapter & method-aware `Mcp-Name` validation (`PUBLIC-V0100-F01`)**: Implemented a stateless `2026-07-28` HTTP / `_meta` adapter in `src/transports/http.ts` over `@modelcontextprotocol/sdk@1.32.2`, enforcing `MCP-Protocol-Version` and `params._meta["io.modelcontextprotocol/protocolVersion"]` parity, mandatory `Mcp-Method`, method-aware `Mcp-Name` (`params.name` for `tools/call`/`prompts/get`; `params.uri` for `resources/read`), and `2025-11-25` client regression compatibility.
+- **Two-stage Cloud Run promotion runbook (`PUBLIC-V0100-F02`)**: Separated Stage 1 `0%` candidate deploy/verification from Stage 2 traffic promotion, eliminating `traffic[0]` rollback assumptions, blind `ERR` traps, and `latestCreatedRevisionName` selection.
+- **Browser-executed UI acceptance & fault-injection gates (`PUBLIC-V0100-F03`)**: Separated static bundle checks from real loopback browser DOM/host-bridge execution and fault-injection negative controls.
+
 ### 0.10.0
 
 - **Public MVP (7 tools, completely free) version unification**: Unified the release version to `0.10.0` across npm, MCP Registry, `.well-known` discovery files, the OpenAI plugin bundle, and the Smithery manifest, and moved custom interoperability metadata in `server.json` under `_meta["io.github.sugukurukabe/jp-bids"]` per `2025-12-11/server.schema.json`.
@@ -365,6 +379,13 @@
 ## Bahasa Indonesia
 
 ### Unreleased
+
+### 0.10.1
+
+- **Penyatuan kandidat rilis `0.10.1` yang belum dipublikasikan (`PUBLIC-V0100-F04`)**: Menaikkan seluruh manifes paket, lockfile, registri, `.well-known`, plugin, dan skill ke `0.10.1` agar tidak bentrok dengan `jp-bids-mcp@0.10.0` yang sudah terbit di npmjs.org.
+- **Adapter batas HTTP `2026-07-28` & validasi `Mcp-Name` sesuai metode (`PUBLIC-V0100-F01`)**: Menambahkan adapter stateless `2026-07-28` di `src/transports/http.ts` di atas `@modelcontextprotocol/sdk@1.32.2`, dengan pemeriksaan `_meta`, `Mcp-Method`, dan `Mcp-Name` (`params.name` vs `params.uri`), serta kompatibilitas regresi `2025-11-25`.
+- **Pemisahan promosi Cloud Run 2 tahap (`PUBLIC-V0100-F02`)**: Memisahkan deploy kandidat `0%` (Stage 1) dari promosi trafik (Stage 2) tanpa asumsi `traffic[0]` atau `latestCreatedRevisionName`.
+- **Uji penerimaan UI berbasis browser & injeksi kesalahan (`PUBLIC-V0100-F03`)**: Memisahkan pemeriksaan bundel statis dari eksekusi DOM/interaksi browser lokal dan kontrol negatif injeksi kesalahan.
 
 ### 0.10.0
 

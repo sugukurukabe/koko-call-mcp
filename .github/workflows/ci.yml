@@ -24,6 +24,14 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
+      - name: Run offline safety & acceptance suite (Gate 1 + cleanup probes + Cloud Shell sim)
+        env:
+          JP_BIDS_DOCUMENT_EXTRACTION: "off"
+          NPM_CONFIG_UPDATE_NOTIFIER: "false"
+          NO_UPDATE_NOTIFIER: "1"
+        run: npm run test:safety
+      - name: Verify no secret-bearing artifacts in generated evidence
+        run: node scripts/ci-verify-no-secrets.mjs evidence --require=gate1/gate1-summary.json --require=f01-child-cleanup-probes-after.json --require=cloudshell-offline-sim-results.json
       - run: npm run bench
       - run: npm run docs:check
       - run: npm run api:health

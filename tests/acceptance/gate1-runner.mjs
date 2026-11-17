@@ -25,6 +25,7 @@ import {
 } from "../../dist/apps/export-diagnostics.js";
 import { createJpBidsServer } from "../../dist/mcp.js";
 import { createHttpApp } from "../../dist/transports/http.js";
+import { verifyUiBrowserAcceptance } from "../../scripts/apps-harness/verify-ui-browser-acceptance.mjs";
 import { createMockKkjRecoveryClient } from "./fixtures/mock-kkj-recovery.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -1901,17 +1902,19 @@ export async function runT08() {
       );
     }
     subResults["T08-A"] = {
+      verificationClass: "OFFLINE_BUNDLE_STRUCTURAL",
       execution: "COMPLETED",
       assertion: "PASS",
       evidence: "PRESENT",
       evidenceRef: `search_bids_app -> ${uiResourceUri} (${content.mimeType}, ${content.text.length} chars, matches dist/apps/search-results.html)`,
       evidenceValue: {
+        verificationClass: "OFFLINE_BUNDLE_STRUCTURAL",
         resourceUri: uiResourceUri,
         mimeType: content.mimeType,
         htmlLength: content.text.length,
         matchesDistBundle: true,
       },
-      detail: `UI resource ${uiResourceUri} (${content.mimeType}) matches compiled single-file bundle`,
+      detail: `[Offline Bundle Structure] UI resource ${uiResourceUri} (${content.mimeType}) matches compiled single-file bundle`,
     };
 
     // T08-B: Unauthorized URI rejection (including investor-radar in public_mvp) & 0 external URLs in HTML
@@ -1955,35 +1958,35 @@ export async function runT08() {
       );
     }
     subResults["T08-B"] = {
+      verificationClass: "OFFLINE_BUNDLE_STRUCTURAL",
       execution: "COMPLETED",
       assertion: "PASS",
       evidence: "PRESENT",
       evidenceRef:
         "Unauthorized & investor-radar URIs rejected in public_mvp && 0 external subresource URLs in dist/apps/search-results.html",
       evidenceValue: {
+        verificationClass: "OFFLINE_BUNDLE_STRUCTURAL",
         unauthorizedRejected: true,
         investorRadarRejectedInPublicMvp: true,
         externalHostReferencesCount: externalUrlMatches.length,
       },
       detail:
-        "Single-file delivery boundary verified: non-MVP URIs blocked and 0 external script/stylesheet/CSS URLs",
+        "[Offline Bundle Structure] Single-file delivery boundary verified: non-MVP URIs blocked and 0 external script/stylesheet/CSS URLs",
     };
 
-    // T08-C: CSP metadata (connectDomains: [], resourceDomains: []) + ViewModel populated & 0-hit empty state
+    // Execute real local VM module startup gate + loopback headless-browser MCP Apps host-bridge DOM/interaction suite
+    const browserReport = await verifyUiBrowserAcceptance({
+      repoRoot: REPO_ROOT,
+      htmlText: htmlBody,
+    });
+
+    // T08-C: CSP metadata + ViewModel conversion + Live Browser Startup, Welcome, Populated & 0-Hit DOM Rendering
     const cspMeta = content._meta?.ui?.csp;
     const cspLocked =
       Array.isArray(cspMeta?.connectDomains) &&
       cspMeta.connectDomains.length === 0 &&
       Array.isArray(cspMeta?.resourceDomains) &&
       cspMeta.resourceDomains.length === 0;
-    if (!cspLocked) {
-      throw new AcceptanceAssertionError(
-        "T08-C",
-        `T08-C FAIL: Expected empty connectDomains/resourceDomains in _meta.ui.csp, got ${JSON.stringify(cspMeta)}`,
-        "ASSERTION",
-        subResults,
-      );
-    }
 
     const populatedAppRes = await client.callTool({
       name: "search_bids_app",
@@ -1996,53 +1999,54 @@ export async function runT08() {
     const populatedVm = toWorkspaceViewModel(populatedAppRes.structuredContent);
     const emptyVm = toWorkspaceViewModel(emptyAppRes.structuredContent);
 
-    if (
-      populatedAppRes.isError ||
-      emptyAppRes.isError ||
-      populatedVm.cards.length !== 2 ||
-      !populatedVm.cards.every((c) => isSignedJwtString(c.bidRef)) ||
-      populatedVm.dataSource !== CANONICAL_KKJ_ATTRIBUTION ||
-      emptyVm.cards.length !== 0 ||
-      emptyVm.returnedCount !== 0
-    ) {
-      throw new AcceptanceAssertionError(
-        "T08-C",
-        `T08-C FAIL: WorkspaceViewModel state mapping failed (populated=${populatedVm.cards.length}, empty=${emptyVm.cards.length})`,
-        "ASSERTION",
-        subResults,
-      );
-    }
+    const viewModelOk =
+      !populatedAppRes.isError &&
+      !emptyAppRes.isError &&
+      populatedVm.cards.length === 2 &&
+      populatedVm.cards.every((c) => isSignedJwtString(c.bidRef)) &&
+      populatedVm.dataSource === CANONICAL_KKJ_ATTRIBUTION &&
+      emptyVm.cards.length === 0 &&
+      emptyVm.returnedCount === 0;
+
+    const cRuntimeOk = Boolean(
+      browserReport.vmGate?.ok &&
+        browserReport.browserExecuted &&
+        browserReport.checks?.startupAndWelcome &&
+        browserReport.checks?.populatedCardsRendered &&
+        browserReport.checks?.zeroHitEmptyStateRendered &&
+        browserReport.checks?.zeroUncaughtExceptions,
+    );
+    const t08cPass = cspLocked && viewModelOk && cRuntimeOk;
+
     subResults["T08-C"] = {
+      verificationClass: "LOCAL_BROWSER_RUNTIME_DOM_INTERACTION",
       execution: "COMPLETED",
-      assertion: "PASS",
+      assertion: t08cPass ? "PASS" : "FAIL",
       evidence: "PRESENT",
-      evidenceRef:
-        "_meta.ui.csp { connectDomains: [], resourceDomains: [] } && toWorkspaceViewModel populated (2 cards) + 0-hit empty state (0 cards) verified",
+      evidenceRef: t08cPass
+        ? "VM startup gate + headless browser sandbox='allow-scripts' mounted Welcome, 3 populated cards, and 0-hit empty state with empty-domain _meta.ui.csp"
+        : `T08-C runtime/DOM check failed (${browserReport.failedStage ?? "csp_or_viewmodel"}): ${browserReport.failureReason ?? "CSP or ViewModel mismatch"}`,
       evidenceValue: {
-        cspConnectDomains: cspMeta.connectDomains.length,
-        cspResourceDomains: cspMeta.resourceDomains.length,
-        populatedCardCount: populatedVm.cards.length,
-        emptyCardCount: emptyVm.cards.length,
+        verificationClass: "LOCAL_BROWSER_RUNTIME_DOM_INTERACTION",
+        realClientHostUiVerified: false,
+        cspConnectDomains: cspMeta?.connectDomains?.length ?? null,
+        cspResourceDomains: cspMeta?.resourceDomains?.length ?? null,
+        vmGateOk: Boolean(browserReport.vmGate?.ok),
+        browserExecuted: Boolean(browserReport.browserExecuted),
+        iframeOrigin: browserReport.iframeOrigin ?? null,
+        populatedDomCards: browserReport.measurements?.populatedCardCount ?? 0,
+        emptyDomCards: browserReport.measurements?.emptyCardCount ?? -1,
+        uncaughtExceptions: browserReport.uncaughtExceptions ?? [],
+        failureReason: browserReport.failureReason ?? null,
       },
-      detail:
-        "Strict empty-domain CSP metadata and WorkspaceViewModel populated/empty-state rendering verified offline",
+      detail: t08cPass
+        ? "[Local Browser Host-Bridge DOM] Empty-domain CSP, VM startup gate, and live sandboxed iframe Welcome/populated/0-hit DOM rendering verified (real ChatGPT/Claude host UI unverified on current build)"
+        : `T08-C FAIL: ${browserReport.failureReason ?? "CSP or ViewModel assertion failed"}`,
     };
 
-    // T08-D: Selection-only compare/export, 3-tier ManualExportPanel fallback & 0 stopped Pro buttons in HTML
-    const stoppedButtons = ["締切ICS", "検討メモ作成", "質問ドラフト"];
+    // T08-D: Live Browser Multi-Select Comparison (rank_bids), Tier-1 CSV Download, Tier-3 ManualExportPanel CSV/JSON Fallback, Corrupted CSV Rejection & 0 Stopped Pro Buttons
+    const stoppedButtons = ["締切ICS", "検討メモ作成", "質問ドラフト", "メモ保存"];
     const presentStoppedButtons = stoppedButtons.filter((label) => htmlBody.includes(label));
-    const hasPublicExportControls =
-      htmlBody.includes("選択CSV") &&
-      htmlBody.includes("選択JSON") &&
-      htmlBody.includes("手動取得欄");
-    if (presentStoppedButtons.length > 0 || !hasPublicExportControls) {
-      throw new AcceptanceAssertionError(
-        "T08-D",
-        `T08-D FAIL: Bundle missing public export/fallback controls (${hasPublicExportControls}) or contains stopped Pro buttons [${presentStoppedButtons.join(", ")}]`,
-        "ASSERTION",
-        subResults,
-      );
-    }
 
     const uiSelectedRefs = populatedVm.cards.map((c) => c.bidRef);
     const uiExportCsvRes = await client.callTool({
@@ -2055,79 +2059,101 @@ export async function runT08() {
     });
     const csvDiag = extractCsvFromToolResult(uiExportCsvRes);
     const jsonDiag = extractJsonFromToolResult(uiExportJsonRes);
-    if (
-      !csvDiag.valid ||
-      !jsonDiag.valid ||
-      csvDiag.itemCount !== uiSelectedRefs.length ||
-      jsonDiag.itemCount !== uiSelectedRefs.length
-    ) {
-      throw new AcceptanceAssertionError(
-        "T08-D",
-        "T08-D FAIL: 3-tier export diagnostics / ManualExportPanel payload validation failed",
-        "ASSERTION",
-        subResults,
-      );
-    }
+    const offlineExportDiagOk =
+      presentStoppedButtons.length === 0 &&
+      csvDiag.valid &&
+      jsonDiag.valid &&
+      csvDiag.itemCount === uiSelectedRefs.length &&
+      jsonDiag.itemCount === uiSelectedRefs.length;
+
+    const dRuntimeOk = Boolean(
+      browserReport.vmGate?.ok &&
+        browserReport.browserExecuted &&
+        browserReport.checks?.selectionRankOrderPreserved &&
+        browserReport.checks?.tier1DownloadCsv16Col &&
+        browserReport.checks?.tier3ManualExportCsvFallback &&
+        browserReport.checks?.tier3ManualExportJsonFallback &&
+        browserReport.checks?.corruptedCsvRejectedCleanly &&
+        browserReport.checks?.noStoppedProButtons &&
+        browserReport.checks?.zeroUncaughtExceptions,
+    );
+    const t08dPass = offlineExportDiagOk && dRuntimeOk;
+
     subResults["T08-D"] = {
+      verificationClass: "LOCAL_BROWSER_RUNTIME_DOM_INTERACTION",
       execution: "COMPLETED",
-      assertion: "PASS",
+      assertion: t08dPass ? "PASS" : "FAIL",
       evidence: "PRESENT",
-      evidenceRef:
-        "0 stopped Pro buttons in search-results.html && ManualExportPanel CSV/JSON 3-tier fallback payloads verified",
+      evidenceRef: t08dPass
+        ? "Live browser checkbox selection order -> rank_bids, Tier-1 ui/download-file 16-col BOM CSV, Tier-3 ManualExportPanel CSV/JSON select-all, 10-col corrupted CSV rejection, and 0 stopped Pro buttons verified"
+        : `T08-D runtime interaction failed (${browserReport.failedStage ?? "export_diag"}): ${browserReport.failureReason ?? "Selection/export assertion failed"}`,
       evidenceValue: {
+        verificationClass: "LOCAL_BROWSER_RUNTIME_DOM_INTERACTION",
+        realClientHostUiVerified: false,
         stoppedButtonsCount: presentStoppedButtons.length,
-        hasManualExportPanel: true,
-        selectedCsvCount: csvDiag.itemCount,
-        selectedJsonCount: jsonDiag.itemCount,
+        selectionRankOrderPreserved: Boolean(browserReport.checks?.selectionRankOrderPreserved),
+        tier1DownloadCsv16Col: Boolean(browserReport.checks?.tier1DownloadCsv16Col),
+        tier3ManualExportCsvFallback: Boolean(browserReport.checks?.tier3ManualExportCsvFallback),
+        tier3ManualExportJsonFallback: Boolean(browserReport.checks?.tier3ManualExportJsonFallback),
+        corruptedCsvRejectedCleanly: Boolean(browserReport.checks?.corruptedCsvRejectedCleanly),
+        failureReason: browserReport.failureReason ?? null,
       },
-      detail:
-        "Workspace selection export, 3-tier ManualExportPanel fallback payload, and absence of stopped Pro buttons verified",
+      detail: t08dPass
+        ? "[Local Browser Host-Bridge Interaction] Selection order comparison, 16-col CSV download, Tier-3 ManualExportPanel CSV/JSON fallback, corrupted CSV rejection, and 0 stopped Pro buttons verified in live DOM"
+        : `T08-D FAIL: ${browserReport.failureReason ?? "Export/selection interaction failed"}`,
     };
 
-    // T08-E: Theme (data-theme dark/light), narrow viewport @media rules, keyboard focus/button semantics, lang="ja" & 0 egress
+    // T08-E: Live Browser lang='ja', Keyboard Focus/Enter on Example Chip, Light/Dark Theme Computed Background Switch, Narrow Mobile Viewport (390x844) & 0 Egress
     const hasLangJa = /<html[^>]*\blang="ja"/i.test(htmlBody);
-    const hasDarkThemeCss = htmlBody.includes("data-theme") && htmlBody.includes("dark");
-    const hasResponsiveMediaCss = /@media\s*\([^)]*(?:max-width|width\s*<=)/i.test(htmlBody);
-    const hasAccessibleControls =
-      htmlBody.includes(":focus-visible") && htmlBody.includes("example-chip");
     const t08Egress = testSpecificOutboundAttempts.T08 ?? 0;
-    if (
-      !hasLangJa ||
-      !hasDarkThemeCss ||
-      !hasResponsiveMediaCss ||
-      !hasAccessibleControls ||
-      t08Egress > 0
-    ) {
-      throw new AcceptanceAssertionError(
-        "T08-E",
-        `T08-E FAIL: Theme/responsive/accessibility/egress check failed (langJa=${hasLangJa}, dark=${hasDarkThemeCss}, media=${hasResponsiveMediaCss}, controls=${hasAccessibleControls}, egress=${t08Egress})`,
-        "ASSERTION",
-        subResults,
-      );
-    }
+    const eRuntimeOk = Boolean(
+      browserReport.vmGate?.ok &&
+        browserReport.browserExecuted &&
+        browserReport.checks?.keyboardExampleChipSearch &&
+        browserReport.checks?.lightDarkThemeSwitched &&
+        browserReport.checks?.narrowMobileViewportResponsive &&
+        browserReport.checks?.zeroUncaughtExceptions,
+    );
+    const t08ePass = hasLangJa && t08Egress === 0 && eRuntimeOk;
+
     subResults["T08-E"] = {
+      verificationClass: "LOCAL_BROWSER_RUNTIME_DOM_INTERACTION",
       execution: "COMPLETED",
-      assertion: "PASS",
+      assertion: t08ePass ? "PASS" : "FAIL",
       evidence: "PRESENT",
-      evidenceRef:
-        "dist/apps/search-results.html includes lang='ja', data-theme dark CSS, @media responsive layout, :focus-visible + example-chip keyboard controls, and 0 outbound egress",
+      evidenceRef: t08ePass
+        ? "Live browser lang='ja', keyboard focus/Enter on .example-chip, light/dark computed background switch, 390x844 responsive single-column layout, and 0 outbound egress verified"
+        : `T08-E runtime theme/mobile/keyboard check failed (${browserReport.failedStage ?? "theme_or_egress"}): ${browserReport.failureReason ?? `langJa=${hasLangJa}, egress=${t08Egress}`}`,
       evidenceValue: {
+        verificationClass: "LOCAL_BROWSER_RUNTIME_DOM_INTERACTION",
+        realClientHostUiVerified: false,
         hasLangJa,
-        hasDarkThemeCss,
-        hasResponsiveMediaCss,
-        hasAccessibleControls,
+        keyboardExampleChipSearch: Boolean(browserReport.checks?.keyboardExampleChipSearch),
+        lightBg: browserReport.measurements?.lightBg ?? null,
+        darkBg: browserReport.measurements?.darkBg ?? null,
+        mobileViewport: browserReport.measurements?.mobileViewport ?? null,
         outboundEgress: t08Egress,
+        failureReason: browserReport.failureReason ?? null,
       },
-      detail:
-        "Japanese locale attribute, light/dark theme CSS, narrow-width responsive breakpoints, keyboard focus-visible controls, and zero egress verified",
+      detail: t08ePass
+        ? "[Local Browser Host-Bridge Theme/Mobile/Keyboard] Japanese lang='ja', keyboard focus/activation, computed light/dark theme transition, 390x844 mobile layout, and zero egress verified"
+        : `T08-E FAIL: ${browserReport.failureReason ?? "Theme/mobile/keyboard/egress check failed"}`,
     };
 
+    const allT08RuntimePass = t08cPass && t08dPass && t08ePass;
     outcome = {
       id: "T08",
-      status: "PASS",
+      status: allT08RuntimePass ? "PASS" : "FAIL",
       subResults,
       resourceUri: uiResourceUri,
       htmlLength: content.text.length,
+      htmlSha256: browserReport.htmlSha256,
+      realClientHostVerification: {
+        status: "NOT_EXECUTED_LOCAL_HARNESS_ONLY",
+        chatgptProductionHostUi: "UNVERIFIED_ON_CURRENT_BUILD",
+        claudeProductionHostUi: "UNVERIFIED_ON_CURRENT_BUILD",
+        note: "T08-A/B verify offline bundle structure; T08-C/D/E verify local loopback headless-browser MCP Apps host-bridge DOM rendering and interaction. Real ChatGPT and Claude host rendering on this candidate build is not claimed and remains an open acceptance item.",
+      },
     };
   } catch (err) {
     primaryError = err;
@@ -2702,6 +2728,7 @@ export async function runAllGate1Tests(options = { throwOnFailure: false }) {
         registerConditionResult(conditionResults, condId, testId, {
           id: condId,
           testId,
+          ...(sub?.verificationClass ? { verificationClass: sub.verificationClass } : {}),
           implementation: impl,
           execution: exec,
           assertion: assert,
@@ -2717,8 +2744,16 @@ export async function runAllGate1Tests(options = { throwOnFailure: false }) {
         const cond = conditionResults[condId];
         return cond && cond.status !== SUB_STATUS.PASS;
       });
+      const hasFailSub = requiredList.some(
+        (condId) => conditionResults[condId]?.status === SUB_STATUS.FAIL,
+      );
 
-      const parentStatus = nonPassSubs.length === 0 ? "PASS" : "INCOMPLETE";
+      const parentStatus =
+        res.status === "FAIL" || hasFailSub
+          ? "FAIL"
+          : nonPassSubs.length === 0
+            ? "PASS"
+            : "INCOMPLETE";
       results.push({ id: testId, status: parentStatus, nonPassCount: nonPassSubs.length });
 
       if (nonPassSubs.length > 0) {
@@ -2902,6 +2937,12 @@ export async function runAllGate1Tests(options = { throwOnFailure: false }) {
     unexpectedIds,
     outboundEgressAttempts,
     loopbackFetchCount,
+    realClientHostVerification: {
+      status: "NOT_EXECUTED_LOCAL_HARNESS_ONLY",
+      chatgptProductionHostUi: "UNVERIFIED_ON_CURRENT_BUILD",
+      claudeProductionHostUi: "UNVERIFIED_ON_CURRENT_BUILD",
+      note: "Gate 1 verifies offline MCP contracts, single-file UI bundle structure (T08-A/B), and local loopback headless-browser MCP Apps host-bridge DOM/interaction (T08-C/D/E). Real ChatGPT and Claude host rendering on this candidate build remains an explicit open item.",
+    },
   });
 
   // Persist masked Gate 1 evidence logs to gitignored evidence/gate1/

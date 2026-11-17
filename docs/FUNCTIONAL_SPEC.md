@@ -1,12 +1,12 @@
 # JP Bids MCP 機能仕様書
 
-更新日: 2026-11-01 JST
+更新日: 2026-11-16 JST
 
 [使用説明書](./USER_GUIDE.ja.md) · [検証状況](./VERIFICATION_STATUS.md)
 
 ## 仕様の基準
 
-対象は公開リポジトリ（`SUGUKURU-CO-LTD/jp-bids-mcp`）のPublic版 `0.10.0`、公開コードの確認基準は `9afe0c6ffb1ec18930c1b358d43ecec784ff7da7`（およびその後のUI/出力検証改善。ローカル作業リポジトリ `sugukurukabe/koko-call-mcp` 側の `package.json` 版数は履歴統合前のため `0.9.0`）です。ソースSHAと本番コンテナの配備リビジョン・イメージdigestとの対応は運用記録および[検証状況](./VERIFICATION_STATUS.md)で管理します。
+対象は `JP_BIDS_PROFILE=public_mvp`（公開7ツール）の公開候補 `0.10.1`（本候補ツリーの `package.json`・`server.json`・`plugin.json` 版数はすべて `0.10.1` に統一済み。なお `npmjs.org` 既公開版は `0.10.0`、過去の実機確認時点の公開リポジトリ `SUGUKURU-CO-LTD/jp-bids-mcp` コミットは `9afe0c6ffb1ec18930c1b358d43ecec784ff7da7`）です。ソースSHAと本番コンテナの配備リビジョン・イメージdigestとの対応は運用記録、[承認境界マトリクス](../JP_BIDS_CLIENT_ACCEPTANCE_APPROVAL_MATRIX_v1.0.md)、および[検証状況](./VERIFICATION_STATUS.md)で管理します。
 
 | ツール | 入力・機能 | 動作・制約 |
 | --- | --- | --- |

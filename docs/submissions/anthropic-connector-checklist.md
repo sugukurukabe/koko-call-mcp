@@ -1,23 +1,23 @@
-# Anthropic Connectors Directory 申請・更新チェックリスト (v0.10.0)
-# Anthropic Connectors Directory Submission Checklist (v0.10.0)
-# Daftar Periksa Pengajuan Anthropic Connectors Directory (v0.10.0)
+# Anthropic Connectors Directory 申請・更新チェックリスト (v0.10.1 候補)
+# Anthropic Connectors Directory Submission Checklist (v0.10.1 Candidate)
+# Daftar Periksa Pengajuan Anthropic Connectors Directory (Kandidat v0.10.1)
 
 > 申請・管理ポータル: Claude.ai Admin / Settings → Connectors → Submit / Manage  
 > 対象タイプ: Remote MCP server + MCP App (`AI Bid Workspace`)  
-> 対象バージョン: **`v0.10.0`** (`JP_BIDS_PROFILE=public_mvp`・完全無料・公開7ツール)
+> 対象候補バージョン: **`0.10.1`** (`JP_BIDS_PROFILE=public_mvp`・完全無料・公開7ツール / ※ `npmjs.org` 既公開版は `0.10.0`)
 
 ---
 
-## Pre-submission ゲートチェック / Pre-submission Gate (`v0.10.0`)
+## Pre-submission ゲートチェック / Pre-submission Gate (`0.10.1` 候補)
 
 | 項目 | 状態 | 備考 |
 |---|---|---|
-| `npm run check`（lint + typecheck:all + build + test）全通過 | ✅ | `v0.10.0` 全スイート合格 |
-| Gate 1 ローカル受入ランナー（35条件・外部通信0件） | ✅ | `node --import ./evidence/q02_batch2/net-guard.batch2.path-null-fix.mjs tests/acceptance/gate1-runner.mjs` |
-| `npm run registry:validate` & `npm run release:parity` 通過 | ✅ | `package.json`, `server.json`, `server-card.json`, `.smithery/shttp/manifest.json` すべて `0.10.0` で一致 |
-| 本番ヘルス・メタデータ（`/health`, `/readyz`, `/privacy`, `/terms`, `/.well-known/*`） | ✅ | `https://mcp.bid-jp.com` 全エンドポイント HTTP 200（`/mcp` GET は仕様通り 405） |
-| Documentation URL (GitHub repo) 公開・1クリック導入案内完備 | ✅ | `https://github.com/sugukurukabe/koko-call-mcp` (`README.md`, `README.ja.md`, `docs/USER_GUIDE.ja.md`) |
-| 本番 Claude カスタムコネクタ実機検証 | ✅ | 2026-10-21 JST: `https://mcp.bid-jp.com/mcp` でOAuth 1クリック認可・7ツール認識・`search_bids_app` 表示・`get_bid_detail` 復元・選択2件16列CSV出力を確認（`docs/VERIFICATION_STATUS.md`） |
+| `npm run check`（lint + typecheck:all + build + test）全通過 | ✅ ローカル完了 | `0.10.1` 候補スイート合格 |
+| Gate 1 ローカル受入ランナー（35条件・外部通信0件・VM＋模擬ブラウザUI 13項目） | ✅ ローカル完了 | `node --import ./evidence/q02_batch2/net-guard.batch2.path-null-fix.mjs tests/acceptance/gate1-runner.mjs` |
+| `npm run registry:validate` & `npm run release:parity` 通過 | ✅ ローカル完了 | `package.json`, `server.json`, `server-card.json`, `.smithery/shttp/manifest.json`, `plugin.json` すべて `0.10.1` で一致 |
+| Cloud Run `0.10.1` 本番昇格（Stage 1 `0%` → Stage 2 `100%`） | ⚠️ 本番未配備 | 再監査・管理者承認後に `docs/GO_LIVE_TODAY_RUNBOOK.md` に従い実施（現時点の本番状態は `UNCONFIRMED_NOT_QUERIED`） |
+| Documentation URL (GitHub repo) 公開・1クリック導入案内整備 | ✅ | `https://github.com/sugukurukabe/koko-call-mcp` (`README.md`, `README.ja.md`, `docs/USER_GUIDE.ja.md`) |
+| 実 Claude クライアントでの `0.10.1` バンドル実機確認 | ⚠️ 未実施 (`NOT_EXECUTED_ON_0_10_1`) | 過去版（2026-10-21 JST）の実績は `docs/VERIFICATION_STATUS.md` に参考保持。提出前に `0.10.1` 本番配備後の実 Claude 上で再確認する |
 
 ---
 
@@ -28,13 +28,13 @@
 | Server URL | `https://mcp.bid-jp.com/mcp` |
 | Transport | Streamable HTTP |
 | Users connect to | Same URL (Universal endpoint for all users) |
-| Protocol versions supported | `2025-11-25` (primary) / `2026-07-28` (routing header & RFC 9207 `iss` compatible) |
+| Protocol versions supported | `2025-11-25` (`@modelcontextprotocol/sdk@1.32.2` ネイティブ) / `2026-07-28` (`src/transports/http.ts` ステートレスHTTP境界アダプター経由: `Mcp-Method`・メソッド別 `Mcp-Name`・`_meta` 検証対応) |
 
 ---
 
 ## 2. Tools — 公開7ツール一覧と annotations 確認 (`public_mvp`)
 
-全7ツールすべて完全無料・読み取り専用。`title`, `inputSchema`, `outputSchema`, および4種の `annotations` (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`) を明示定義済み（Stripe課金・有料Proティア・外部書き込みツールは一切含まれません）。
+全7ツールすべて完全無料・読み取り専用。`title`, `inputSchema`, `outputSchema`, および4種の `annotations` (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`) を明示定義済み（リポジトリ内にはローカル `full_local` 開発用に `src/lib/billing.ts` と `stripe` 依存が残存するが、`public_mvp` では課金ツール・Proキー判定・外部書き込みツールは登録されず実行時 Stripe 通信はゼロ）。
 
 | # | ツール名 | readOnlyHint | destructiveHint | idempotentHint | openWorldHint | title | 料金区分 |
 |---|---|---|---|---|---|---|---|
@@ -85,7 +85,7 @@ Tasks capabilityは広告しません（すべての検索・比較・CSV出力�
 ### Description (2000文字以内)
 
 ```text
-JP Bids MCP (v0.10.0) は、中小企業庁 官公需情報ポータルサイト (KKJ) の公開入札公告を Claude との会話で検索・比較・確認・CSV出力できる読み取り専用MCPサーバーです。完全無料で提供され、KKJや外部システムへの書き込み・代理入札・課金処理は一切行いません。
+JP Bids MCP (v0.10.1) は、中小企業庁 官公需情報ポータルサイト (KKJ) の公開入札公告を Claude との会話で検索・比較・確認・CSV出力できる読み取り専用MCPサーバーです。完全無料で提供され、KKJや外部システムへの書き込み・代理入札・課金処理は一切行いません。
 
 主な機能 / Key features (全7ツール・無料):
 - 官公需入札検索 (`search_bids` / `list_recent_bids`) — 47都道府県・調達区分（物品/工事/役務）・キーワード・公告日/締切日で検索
@@ -219,7 +219,7 @@ https://mcp.bid-jp.com
 
 ## Final Submission / Update Steps
 
-1. `docs/GO_LIVE_TODAY_RUNBOOK.md` の手順で Cloud Run 本番を `v0.10.0` に更新し、`npm run remote:health` を確認する。
-2. Claude.ai カスタムコネクタで公開7ツールと `AI Bid Workspace` の動作を確認する。
-3. Claude Admin / Directory ポータルで上記 `v0.10.0`（無料7ツール・1クリックOAuth）の記載内容とスクリーンショットを提出・更新する。
+1. 独立再監査・管理者承認後、`docs/GO_LIVE_TODAY_RUNBOOK.md` の Stage 1 / Stage 2 手順で Cloud Run 本番を `v0.10.1` に更新する。
+2. 実 Claude.ai カスタムコネクタで `0.10.1` の公開7ツールと `AI Bid Workspace` の動作を確認し、`docs/VERIFICATION_STATUS.md` に記録する。
+3. Claude Admin / Directory ポータルで上記 `v0.10.1`（無料7ツール・1クリックOAuth）の記載内容と最新スクリーンショットを提出・更新する。
 4. 提出日・ステータスを `docs/submissions/mcp-directories.md` に記録する。

@@ -1,17 +1,17 @@
-# JP Bids MCP — Panduan Bahasa Indonesia (v0.10.0)
+# JP Bids MCP — Panduan Bahasa Indonesia (v0.10.1)
 
 [![Smithery](https://smithery.ai/badge/a-kabe-1qio/jp-bids-mcp)](https://smithery.ai/servers/a-kabe-1qio/jp-bids-mcp)
 
 ## Gambaran Umum / Overview / 概要
 
-**JP Bids MCP (v0.10.0)** adalah server Model Context Protocol (MCP) yang memungkinkan siapa saja mencari, membandingkan, memeriksa URL pengumuman resmi, dan mengekspor daftar tender pengadaan pemerintah Jepang (KKJ) ke CSV/JSON 16 kolom langsung melalui obrolan AI (**Claude** atau **ChatGPT**). **Tanpa instalasi, tanpa pendaftaran akun, dan 100% gratis (7 alat publik + antarmuka AI Bid Workspace).**
+**JP Bids MCP (v0.10.1)** adalah server Model Context Protocol (MCP) yang memungkinkan siapa saja mencari, membandingkan, memeriksa URL pengumuman resmi, dan mengekspor daftar tender pengadaan pemerintah Jepang (KKJ) ke CSV/JSON 16 kolom langsung melalui obrolan AI (**Claude** atau **ChatGPT**). **Tanpa instalasi, tanpa pendaftaran akun, dan 100% gratis (7 alat publik + antarmuka AI Bid Workspace).**
 
-JP Bids MCP (`v0.10.0`) connects Claude, ChatGPT, and MCP clients to Japan's SME Agency procurement portal (KKJ) with **7 free, read-centric tools** and an interactive **AI Bid Workspace** UI.
+JP Bids MCP (`v0.10.1`) connects Claude, ChatGPT, and MCP clients to Japan's SME Agency procurement portal (KKJ) with **7 free, read-centric tools** and an interactive **AI Bid Workspace** UI.
 
-JP Bids MCP (`v0.10.0`) は、中小企業庁「官公需情報ポータルサイト」の入札公告をAIとの会話だけで検索・比較・CSV出力できる完全無料のMCPサーバーです。
+JP Bids MCP (`v0.10.1`) は、中小企業庁「官公需情報ポータルサイト」の入札公告をAIとの会話だけで検索・比較・CSV出力できる完全無料のMCPサーバーです。
 
-> **Sepenuhnya Gratis & Read-Only / Free & Read-Centric**<br>
-> Semua 7 alat publik dan panel **AI Bid Workspace** tersedia gratis tanpa kartu kredit, tanpa paket berbayar, dan tanpa pemanggilan Stripe. Server ini tidak pernah mengirim penawaran atau menulis ke sistem eksternal.
+> **Sepenuhnya Gratis & Read-Only (`public_mvp`) / Free & Read-Centric**<br>
+> Semua 7 alat `public_mvp` dan panel **AI Bid Workspace** tersedia gratis tanpa kartu kredit, tanpa paket berbayar, dan tanpa pemanggilan Stripe saat runtime (`src/lib/billing.ts` serta paket `stripe` hanya dipertahankan untuk profil pengembangan lokal `full_local` dan tidak didaftarkan pada `public_mvp`). Server ini tidak pernah mengirim penawaran atau menulis ke sistem eksternal.
 
 ---
 
@@ -58,7 +58,7 @@ Agar Claude otomatis memahami nama 47 prefektur Jepang, kategori pengadaan (`物
 
 ---
 
-## Daftar 7 Alat Publik (Public MVP `v0.10.0`)
+## Daftar 7 Alat Publik (Public MVP `v0.10.1`)
 
 | Alat | Deskripsi | Profil |
 |---|---|---|
@@ -74,7 +74,7 @@ Agar Claude otomatis memahami nama 47 prefektur Jepang, kategori pengadaan (`物
 
 | Paket | Harga | Fitur |
 |---|---|---|
-| **Public MVP (`v0.10.0`)** | **Gratis (Free)** | Seluruh 7 alat publik + UI AI Bid Workspace (tanpa langganan berbayar atau penagihan Stripe) |
+| **Public MVP (`v0.10.1`)** | **Gratis (Free)** | Seluruh 7 alat publik + UI AI Bid Workspace (tanpa langganan berbayar atau pemanggilan Stripe saat runtime) |
 
 *(※ Tidak termasuk biaya langganan klien AI pihak ketiga atau infrastruktur cloud self-hosted).*
 
@@ -93,7 +93,7 @@ Agar Claude otomatis memahami nama 47 prefektur Jepang, kategori pengadaan (`物
 
 ```text
 Remote MCP:             https://mcp.bid-jp.com/mcp
-Paket npm:              jp-bids-mcp (v0.10.0)
+Versi kandidat:         0.10.1 (paket npm terbit saat ini: jp-bids-mcp@0.10.0)
 Nama MCP Registry:      io.github.sugukurukabe/jp-bids
 ```
 
@@ -157,7 +157,7 @@ Untuk mereproduksi panel UI di Claude Desktop atau menjalankan seluruh 35 sub-ko
 node --import ./evidence/q02_batch2/net-guard.batch2.path-null-fix.mjs tests/acceptance/gate1-runner.mjs
 ```
 
-### 4. Spesifikasi Metadata & Registri (`v0.10.0`)
+### 4. Spesifikasi Metadata & Registri (`v0.10.1`)
 
 1. **Manifes MCP Registry Resmi (`server.json`)**: Mematuhi `$schema: "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json"` (`io.github.sugukurukabe/jp-bids`).
 2. **Endpoint Server Card (`public/.well-known/mcp/server-card.json`)**: Menyediakan introspeksi skema lengkap untuk 7 alat publik serta binding `_meta.ui` MCP Apps.

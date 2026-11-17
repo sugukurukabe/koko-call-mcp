@@ -19,20 +19,69 @@ import { createJpBidsServer } from "../mcp.js";
 import { createOAuthRouterWithStore } from "../oauth/router.js";
 import { createOAuthStoreFromEnv } from "../oauth/store.js";
 
-const supportedProtocolVersions = new Set(["2025-11-25", "2026-07-28"]);
+const LEGACY_SDK_PROTOCOL_VERSIONS = new Set(["2025-11-25"]);
+const STATELESS_2026_PROTOCOL_VERSION = "2026-07-28";
+const supportedProtocolVersions = new Set([
+  ...LEGACY_SDK_PROTOCOL_VERSIONS,
+  STATELESS_2026_PROTOCOL_VERSION,
+]);
 
-function readJsonRpcMethod(body: unknown): string | undefined {
-  if (typeof body !== "object" || body === null || Array.isArray(body)) return undefined;
-  const method = (body as { method?: unknown }).method;
-  return typeof method === "string" ? method : undefined;
+const NAME_TARGET_METHODS = new Set(["tools/call", "prompts/get"]);
+const URI_TARGET_METHODS = new Set([
+  "resources/read",
+  "resources/subscribe",
+  "resources/unsubscribe",
+]);
+const UNNAMED_METHODS = new Set([
+  "tools/list",
+  "resources/list",
+  "resources/templates/list",
+  "prompts/list",
+  "completion/complete",
+  "ping",
+  "initialize",
+  "notifications/initialized",
+  "notifications/cancelled",
+  "logging/setLevel",
+]);
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function readJsonRpcName(body: unknown): string | undefined {
-  if (typeof body !== "object" || body === null || Array.isArray(body)) return undefined;
-  const params = (body as { params?: unknown }).params;
-  if (typeof params !== "object" || params === null || Array.isArray(params)) return undefined;
-  const name = (params as { name?: unknown }).name;
-  return typeof name === "string" ? name : undefined;
+function readNonEmptyString(value: unknown): string | undefined {
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+function readJsonRpcMethod(body: unknown): string | undefined {
+  if (!isPlainObject(body)) return undefined;
+  return readNonEmptyString(body.method);
+}
+
+type ExpectedMcpTarget =
+  | { kind: "named"; source: "params.name" | "params.uri"; value: string | undefined }
+  | { kind: "unnamed" };
+
+function resolveExpectedMcpName(method: string | undefined, body: unknown): ExpectedMcpTarget {
+  const params = isPlainObject(body) && isPlainObject(body.params) ? body.params : undefined;
+  if (method && NAME_TARGET_METHODS.has(method)) {
+    return { kind: "named", source: "params.name", value: readNonEmptyString(params?.name) };
+  }
+  if (method && URI_TARGET_METHODS.has(method)) {
+    return { kind: "named", source: "params.uri", value: readNonEmptyString(params?.uri) };
+  }
+  if (!method || UNNAMED_METHODS.has(method)) {
+    return { kind: "unnamed" };
+  }
+  const byName = readNonEmptyString(params?.name);
+  if (byName) {
+    return { kind: "named", source: "params.name", value: byName };
+  }
+  const byUri = readNonEmptyString(params?.uri);
+  if (byUri) {
+    return { kind: "named", source: "params.uri", value: byUri };
+  }
+  return { kind: "unnamed" };
 }
 
 const LOOPBACK_HOST_PATTERN = /^(?:localhost|127\.0\.0\.1|\[::1\])(?::\d{1,5})?$/i;
@@ -71,30 +120,473 @@ function validateLocalHostHeader(allowedOrigins: ReadonlySet<string>) {
   };
 }
 
-function validateRoutableMcpHeaders(req: Request, res: Response): boolean {
+interface ProtocolContractOutcome {
+  ok: boolean;
+  effectiveVersion: "2026-07-28" | "legacy";
+}
+
+type JsonRpcId = string | number | undefined;
+
+function extractJsonRpcId(body: unknown): JsonRpcId {
+  if (!isPlainObject(body)) return undefined;
+  const id = body.id;
+  if (typeof id === "string" && id.length > 0) return id;
+  if (typeof id === "number" && Number.isInteger(id)) return id;
+  return undefined;
+}
+
+function sendMcpProtocolError(
+  res: Response,
+  req: Request,
+  reason: string,
+  message: string,
+  extraData: Record<string, unknown> = {},
+): void {
+  const id = extractJsonRpcId(req.body);
+  res.status(400).json({
+    jsonrpc: "2.0",
+    ...(id !== undefined ? { id } : {}),
+    error: {
+      code: -32020,
+      message,
+      data: {
+        reason,
+        ...extraData,
+      },
+    },
+  });
+}
+
+type DecodedHeaderResult = { ok: true; value: string } | { ok: false };
+
+function decodeMcpNameHeader(raw: string): DecodedHeaderResult {
+  if (!raw.startsWith("=?base64?") || !raw.endsWith("?=")) {
+    return { ok: true, value: raw };
+  }
+  const encoded = raw.slice("=?base64?".length, -"?=".length);
+  if (encoded.length === 0 || !/^[A-Za-z0-9+/]+={0,2}$/.test(encoded)) {
+    return { ok: false };
+  }
+  const decodedBuffer = Buffer.from(encoded, "base64");
+  if (decodedBuffer.toString("base64").replace(/=+$/, "") !== encoded.replace(/=+$/, "")) {
+    return { ok: false };
+  }
+  return { ok: true, value: decodedBuffer.toString("utf8") };
+}
+
+function validateMcpProtocolAndRoutingContract(
+  req: Request,
+  res: Response,
+): ProtocolContractOutcome {
+  const headerProtocolVersion = req.header("MCP-Protocol-Version");
+  if (headerProtocolVersion && !supportedProtocolVersions.has(headerProtocolVersion)) {
+    sendMcpProtocolError(
+      res,
+      req,
+      "UnsupportedProtocolVersion",
+      "Unsupported MCP protocol version",
+      {
+        protocol_version: headerProtocolVersion,
+        supported: [...supportedProtocolVersions],
+      },
+    );
+    return { ok: false, effectiveVersion: "legacy" };
+  }
+
+  const bodyParams =
+    isPlainObject(req.body) && isPlainObject(req.body.params) ? req.body.params : undefined;
+  const bodyMeta = bodyParams && isPlainObject(bodyParams._meta) ? bodyParams._meta : undefined;
+  const metaProtocolVersionRaw = bodyMeta?.["io.modelcontextprotocol/protocolVersion"];
+
+  if (metaProtocolVersionRaw !== undefined) {
+    if (
+      typeof metaProtocolVersionRaw !== "string" ||
+      !supportedProtocolVersions.has(metaProtocolVersionRaw)
+    ) {
+      sendMcpProtocolError(
+        res,
+        req,
+        "UnsupportedProtocolVersion",
+        "Unsupported MCP protocol version in params._meta",
+        {
+          meta_protocol_version: metaProtocolVersionRaw ?? null,
+          supported: [...supportedProtocolVersions],
+        },
+      );
+      return { ok: false, effectiveVersion: "legacy" };
+    }
+    if (headerProtocolVersion && headerProtocolVersion !== metaProtocolVersionRaw) {
+      sendMcpProtocolError(
+        res,
+        req,
+        "HeaderMismatch",
+        "MCP-Protocol-Version header does not match params._meta['io.modelcontextprotocol/protocolVersion']",
+        {
+          header_protocol_version: headerProtocolVersion,
+          meta_protocol_version: metaProtocolVersionRaw,
+        },
+      );
+      return { ok: false, effectiveVersion: "legacy" };
+    }
+  }
+
+  const is2026Request =
+    headerProtocolVersion === STATELESS_2026_PROTOCOL_VERSION ||
+    metaProtocolVersionRaw === STATELESS_2026_PROTOCOL_VERSION;
+
+  if (is2026Request) {
+    if (!isPlainObject(req.body)) {
+      sendMcpProtocolError(
+        res,
+        req,
+        "InvalidBatchRequest",
+        "MCP 2026-07-28 requires a single JSON-RPC object body (batch arrays are not supported)",
+      );
+      return { ok: false, effectiveVersion: "2026-07-28" };
+    }
+    if (!headerProtocolVersion) {
+      sendMcpProtocolError(
+        res,
+        req,
+        "MissingRequiredHeader",
+        "MCP-Protocol-Version header is required for MCP 2026-07-28 requests",
+        { required_header: "MCP-Protocol-Version" },
+      );
+      return { ok: false, effectiveVersion: "2026-07-28" };
+    }
+    if (req.header("Mcp-Session-Id")) {
+      sendMcpProtocolError(
+        res,
+        req,
+        "StatelessProtocolViolation",
+        "Mcp-Session-Id header was removed in stateless MCP 2026-07-28",
+      );
+      return { ok: false, effectiveVersion: "2026-07-28" };
+    }
+    const bodyMethod = readJsonRpcMethod(req.body);
+    if (!bodyMethod) {
+      sendMcpProtocolError(res, req, "InvalidJsonRpcRequest", "JSON-RPC method is required");
+      return { ok: false, effectiveVersion: "2026-07-28" };
+    }
+    if (bodyMethod === "initialize" || bodyMethod === "notifications/initialized") {
+      sendMcpProtocolError(
+        res,
+        req,
+        "StatelessProtocolViolation",
+        `${bodyMethod} handshake was removed in stateless MCP 2026-07-28`,
+      );
+      return { ok: false, effectiveVersion: "2026-07-28" };
+    }
+    if (metaProtocolVersionRaw === undefined) {
+      sendMcpProtocolError(
+        res,
+        req,
+        "MissingProtocolMetadata",
+        "MCP 2026-07-28 requests require params._meta['io.modelcontextprotocol/protocolVersion']",
+      );
+      return { ok: false, effectiveVersion: "2026-07-28" };
+    }
+    const clientInfo = bodyMeta?.["io.modelcontextprotocol/clientInfo"];
+    if (clientInfo !== undefined) {
+      if (
+        !isPlainObject(clientInfo) ||
+        !readNonEmptyString(clientInfo.name) ||
+        typeof clientInfo.version !== "string"
+      ) {
+        sendMcpProtocolError(
+          res,
+          req,
+          "InvalidProtocolMetadata",
+          "Invalid io.modelcontextprotocol/clientInfo in params._meta",
+        );
+        return { ok: false, effectiveVersion: "2026-07-28" };
+      }
+    }
+    const clientCapabilities = bodyMeta?.["io.modelcontextprotocol/clientCapabilities"];
+    if (clientCapabilities !== undefined && !isPlainObject(clientCapabilities)) {
+      sendMcpProtocolError(
+        res,
+        req,
+        "InvalidProtocolMetadata",
+        "Invalid io.modelcontextprotocol/clientCapabilities in params._meta",
+      );
+      return { ok: false, effectiveVersion: "2026-07-28" };
+    }
+
+    const headerMethod = req.header("Mcp-Method");
+    if (!headerMethod) {
+      sendMcpProtocolError(
+        res,
+        req,
+        "MissingRequiredHeader",
+        "Mcp-Method header is required for MCP 2026-07-28 HTTP requests",
+        { required_header: "Mcp-Method" },
+      );
+      return { ok: false, effectiveVersion: "2026-07-28" };
+    }
+    if (headerMethod !== bodyMethod) {
+      sendMcpProtocolError(
+        res,
+        req,
+        "HeaderMismatch",
+        "Mcp-Method header does not match JSON-RPC method",
+        {
+          header_method: headerMethod,
+          body_method: bodyMethod,
+        },
+      );
+      return { ok: false, effectiveVersion: "2026-07-28" };
+    }
+
+    const rawHeaderName = req.header("Mcp-Name");
+    const expectedTarget = resolveExpectedMcpName(bodyMethod, req.body);
+    if (expectedTarget.kind === "named") {
+      if (!rawHeaderName) {
+        sendMcpProtocolError(
+          res,
+          req,
+          "MissingRequiredHeader",
+          `Mcp-Name header is required for ${bodyMethod} in MCP 2026-07-28`,
+          {
+            required_header: "Mcp-Name",
+            expected_source: expectedTarget.source,
+          },
+        );
+        return { ok: false, effectiveVersion: "2026-07-28" };
+      }
+      const decodedHeaderName = decodeMcpNameHeader(rawHeaderName);
+      if (!decodedHeaderName.ok) {
+        sendMcpProtocolError(
+          res,
+          req,
+          "HeaderMismatch",
+          "Mcp-Name header contains malformed Base64 sentinel encoding",
+          {
+            header_name: rawHeaderName,
+            expected_source: expectedTarget.source,
+          },
+        );
+        return { ok: false, effectiveVersion: "2026-07-28" };
+      }
+      if (!expectedTarget.value || decodedHeaderName.value !== expectedTarget.value) {
+        sendMcpProtocolError(
+          res,
+          req,
+          "HeaderMismatch",
+          `Mcp-Name header does not match JSON-RPC ${expectedTarget.source}`,
+          {
+            header_name: rawHeaderName,
+            decoded_header_name: decodedHeaderName.value,
+            body_target: expectedTarget.value ?? null,
+            expected_source: expectedTarget.source,
+          },
+        );
+        return { ok: false, effectiveVersion: "2026-07-28" };
+      }
+    } else if (rawHeaderName !== undefined) {
+      sendMcpProtocolError(
+        res,
+        req,
+        "HeaderMismatch",
+        `Mcp-Name header must not be sent for unnamed method ${bodyMethod}`,
+        {
+          header_name: rawHeaderName,
+          body_method: bodyMethod,
+        },
+      );
+      return { ok: false, effectiveVersion: "2026-07-28" };
+    }
+
+    return { ok: true, effectiveVersion: "2026-07-28" };
+  }
+
+  // Legacy (2025-11-25 and earlier): Mcp-Method and Mcp-Name are optional, but validated when present
   const headerMethod = req.header("Mcp-Method");
-  const headerName = req.header("Mcp-Name");
-  if (!headerMethod && !headerName) return true;
+  const rawHeaderName = req.header("Mcp-Name");
+  if (!headerMethod && rawHeaderName === undefined) {
+    return { ok: true, effectiveVersion: "legacy" };
+  }
 
   const bodyMethod = readJsonRpcMethod(req.body);
-  const bodyName = readJsonRpcName(req.body);
   if (headerMethod && headerMethod !== bodyMethod) {
-    res.status(400).json({
-      error: "Mcp-Method header does not match JSON-RPC method",
-      header_method: headerMethod,
-      body_method: bodyMethod ?? null,
-    });
-    return false;
+    sendMcpProtocolError(
+      res,
+      req,
+      "HeaderMismatch",
+      "Mcp-Method header does not match JSON-RPC method",
+      {
+        header_method: headerMethod,
+        body_method: bodyMethod ?? null,
+      },
+    );
+    return { ok: false, effectiveVersion: "legacy" };
   }
-  if (headerName && headerName !== bodyName) {
-    res.status(400).json({
-      error: "Mcp-Name header does not match JSON-RPC params.name",
-      header_name: headerName,
-      body_name: bodyName ?? null,
-    });
-    return false;
+
+  if (rawHeaderName !== undefined) {
+    const decodedHeaderName = decodeMcpNameHeader(rawHeaderName);
+    if (!decodedHeaderName.ok) {
+      sendMcpProtocolError(
+        res,
+        req,
+        "HeaderMismatch",
+        "Mcp-Name header contains malformed Base64 sentinel encoding",
+        { header_name: rawHeaderName },
+      );
+      return { ok: false, effectiveVersion: "legacy" };
+    }
+    const expectedTarget = resolveExpectedMcpName(bodyMethod, req.body);
+    if (expectedTarget.kind === "named") {
+      if (!expectedTarget.value || decodedHeaderName.value !== expectedTarget.value) {
+        sendMcpProtocolError(
+          res,
+          req,
+          "HeaderMismatch",
+          `Mcp-Name header does not match JSON-RPC ${expectedTarget.source}`,
+          {
+            header_name: rawHeaderName,
+            decoded_header_name: decodedHeaderName.value,
+            body_name:
+              expectedTarget.source === "params.name" ? (expectedTarget.value ?? null) : null,
+            body_target: expectedTarget.value ?? null,
+            expected_source: expectedTarget.source,
+          },
+        );
+        return { ok: false, effectiveVersion: "legacy" };
+      }
+    } else {
+      sendMcpProtocolError(
+        res,
+        req,
+        "HeaderMismatch",
+        "Mcp-Name header does not match JSON-RPC params.name",
+        {
+          header_name: rawHeaderName,
+          body_name: null,
+        },
+      );
+      return { ok: false, effectiveVersion: "legacy" };
+    }
   }
-  return true;
+
+  return { ok: true, effectiveVersion: "legacy" };
+}
+
+function rewriteIncomingProtocolVersionHeader(req: Request, targetVersion: string): void {
+  req.headers["mcp-protocol-version"] = targetVersion;
+  if (Array.isArray(req.rawHeaders)) {
+    for (let i = 0; i < req.rawHeaders.length; i += 2) {
+      if (req.rawHeaders[i]?.toLowerCase() === "mcp-protocol-version") {
+        req.rawHeaders[i + 1] = targetVersion;
+      }
+    }
+  }
+}
+
+function toChunkBuffer(chunk: unknown, encoding?: BufferEncoding): Buffer {
+  if (Buffer.isBuffer(chunk)) return chunk;
+  if (chunk instanceof Uint8Array) {
+    return Buffer.from(chunk.buffer, chunk.byteOffset, chunk.byteLength);
+  }
+  return Buffer.from(String(chunk), encoding ?? "utf8");
+}
+
+function install2026MethodNotFoundHttpStatusAdapter(res: Response): void {
+  const origWriteHead = res.writeHead.bind(res);
+  const origWrite = res.write.bind(res);
+  const origEnd = res.end.bind(res);
+
+  let intercepted = false;
+  let pendingStatus = 200;
+  let pendingMessage: string | undefined;
+  let pendingHeaders: Parameters<Response["writeHead"]>[1] | undefined;
+  const chunks: Buffer[] = [];
+
+  res.writeHead = ((
+    statusCode: number,
+    reasonOrHeaders?: string | Parameters<Response["writeHead"]>[1],
+    maybeHeaders?: Parameters<Response["writeHead"]>[1],
+  ) => {
+    const headersObj = typeof reasonOrHeaders === "string" ? maybeHeaders : reasonOrHeaders;
+    const contentType =
+      headersObj && !Array.isArray(headersObj)
+        ? String(
+            (headersObj as Record<string, unknown>)["content-type"] ??
+              (headersObj as Record<string, unknown>)["Content-Type"] ??
+              "",
+          )
+        : String(res.getHeader("content-type") ?? "");
+
+    if (statusCode === 200 && contentType.toLowerCase().includes("application/json")) {
+      intercepted = true;
+      pendingStatus = statusCode;
+      pendingMessage = typeof reasonOrHeaders === "string" ? reasonOrHeaders : undefined;
+      pendingHeaders = headersObj;
+      return res;
+    }
+
+    if (typeof reasonOrHeaders === "string") {
+      return origWriteHead(statusCode, reasonOrHeaders, maybeHeaders);
+    }
+    return origWriteHead(statusCode, reasonOrHeaders);
+  }) as Response["writeHead"];
+
+  res.write = ((
+    chunk: unknown,
+    encodingOrCb?: BufferEncoding | ((error: Error | null | undefined) => void),
+    cb?: (error: Error | null | undefined) => void,
+  ) => {
+    if (!intercepted) {
+      if (typeof encodingOrCb === "function") {
+        return origWrite(chunk, encodingOrCb);
+      }
+      if (encodingOrCb !== undefined) {
+        return origWrite(chunk, encodingOrCb, cb);
+      }
+      return origWrite(chunk);
+    }
+    const enc = typeof encodingOrCb === "string" ? encodingOrCb : undefined;
+    chunks.push(toChunkBuffer(chunk, enc));
+    if (typeof encodingOrCb === "function") encodingOrCb(null);
+    else if (typeof cb === "function") cb(null);
+    return true;
+  }) as Response["write"];
+
+  res.end = ((chunk?: unknown, encodingOrCb?: BufferEncoding | (() => void), cb?: () => void) => {
+    if (!intercepted) {
+      if (typeof chunk === "function") return origEnd(chunk);
+      if (typeof encodingOrCb === "function") return origEnd(chunk, encodingOrCb);
+      if (encodingOrCb !== undefined) return origEnd(chunk, encodingOrCb, cb);
+      return origEnd(chunk);
+    }
+    if (chunk !== undefined && typeof chunk !== "function") {
+      const enc = typeof encodingOrCb === "string" ? encodingOrCb : undefined;
+      chunks.push(toChunkBuffer(chunk, enc));
+    }
+    const payload = Buffer.concat(chunks);
+    let finalStatus = pendingStatus;
+    try {
+      const parsed = JSON.parse(payload.toString("utf8")) as unknown;
+      if (isPlainObject(parsed) && isPlainObject(parsed.error) && parsed.error.code === -32601) {
+        finalStatus = 404;
+      }
+    } catch {
+      // Preserve original status if payload is not JSON
+    }
+    if (pendingMessage !== undefined) {
+      origWriteHead(finalStatus, pendingMessage, pendingHeaders);
+    } else if (pendingHeaders !== undefined) {
+      origWriteHead(finalStatus, pendingHeaders);
+    } else {
+      origWriteHead(finalStatus);
+    }
+    const doneCb: (() => void) | undefined =
+      typeof chunk === "function"
+        ? (chunk as () => void)
+        : typeof encodingOrCb === "function"
+          ? encodingOrCb
+          : cb;
+    return doneCb ? origEnd(payload, doneCb) : origEnd(payload);
+  }) as Response["end"];
 }
 
 function resolveOAuthSecret(): string | undefined {
@@ -260,15 +752,8 @@ export function createHttpApp(): express.Express {
   });
 
   app.post("/mcp", async (req, res) => {
-    const protocolVersion = req.header("MCP-Protocol-Version");
-    if (protocolVersion && !supportedProtocolVersions.has(protocolVersion)) {
-      res.status(400).json({
-        error: "Unsupported MCP protocol version",
-        supported: [...supportedProtocolVersions],
-      });
-      return;
-    }
-    if (!validateRoutableMcpHeaders(req, res)) return;
+    const contract = validateMcpProtocolAndRoutingContract(req, res);
+    if (!contract.ok) return;
 
     // OAuth有効時: Bearerトークンがなければ401を返してOAuthフローを起動する
     // When OAuth is enabled: return 401 without Bearer token to trigger OAuth flow
@@ -349,6 +834,15 @@ export function createHttpApp(): express.Express {
       void server.close();
     });
     try {
+      if (contract.effectiveVersion === "2026-07-28") {
+        // @modelcontextprotocol/sdk 1.32.2 implements MCP 2025-11-25 natively.
+        // After enforcing the 2026-07-28 stateless request contract above, adapt the
+        // internal SDK header to 2025-11-25, emit MCP-Protocol-Version: 2026-07-28,
+        // and map JSON-RPC -32601 (Method not found) to HTTP 404.
+        rewriteIncomingProtocolVersionHeader(req, "2025-11-25");
+        res.setHeader("MCP-Protocol-Version", STATELESS_2026_PROTOCOL_VERSION);
+        install2026MethodNotFoundHttpStatusAdapter(res);
+      }
       await server.connect(transport as Transport);
       await transport.handleRequest(req, res, req.body);
     } catch (error) {

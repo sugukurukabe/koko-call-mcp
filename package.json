@@ -1,6 +1,6 @@
 {
   "name": "jp-bids-mcp",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "日本の官公需公告をMCPで検索・順位付け・要件抽出・出力する（完全無料・読み取り中心・7ツール）。Search, rank, extract requirements, and export Japanese public procurement notices through MCP (free, read-centric, 7 tools).",
   "type": "module",
   "license": "Apache-2.0",
@@ -74,6 +74,7 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "test": "vitest run",
+    "test:safety": "node tests/acceptance/verify-net-guard.mjs && node tests/acceptance/verify-ci-secret-check.mjs && node --import ./tests/acceptance/net-guard.mjs tests/acceptance/gate1-runner.mjs && node --import ./tests/acceptance/net-guard.mjs cloudshell/run-f01-cleanup-probes.mjs && node --import ./tests/acceptance/net-guard.mjs cloudshell/run-offline-cloudshell-sim.mjs",
     "test:watch": "vitest",
     "test:contract": "vitest run tests/contract.test.ts",
     "bench": "tsx benchmarks/kkj.bench.ts",

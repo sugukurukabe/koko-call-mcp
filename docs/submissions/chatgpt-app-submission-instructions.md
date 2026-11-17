@@ -9,8 +9,9 @@
 
 ## 事前に決まっていること（前提）
 
-- 提出前のブロッカー管理正本は [`OPENAI_SUBMISSION_LOCAL_PREPARATION_20261021.md`](./OPENAI_SUBMISSION_LOCAL_PREPARATION_20261021.md)（特に OAI-01: KKJ二次利用条件の公式根拠確認）。
-- 提出範囲は **`public_mvp` プロファイルの公開7ツール**（`search_bids` / `list_recent_bids` / `get_bid_detail` / `search_bids_app` / `rank_bids` / `extract_bid_requirements` / `export_bid_shortlist`）。すべて完全無料・読み取り専用であり、Stripe 課金・Pro API キー・アップグレード誘導は撤廃済み。
+- 提出前のブロッカー管理正本は [`OPENAI_SUBMISSION_LOCAL_PREPARATION_20261021.md`](./OPENAI_SUBMISSION_LOCAL_PREPARATION_20261021.md)（特に OAI-01/04: KKJ二次利用条件の公式根拠確認）。
+- ローカルの `node scripts/build-openai-package.mjs`（6ファイル構成ZIP・65項目構造/画像検査）は **`LOCAL_PARTIAL_VALIDATION_WITH_SCHEMA_WARNING_NOT_SUBMITTED`**（警告 **`CORE_MCP_OPENAI_EXTENSION_MISMATCH`** 付き）であり、ポータル互換性・提出完了・審査合格を意味しない。本手順（法人確認・ドメイン検証・`0.10.1` 実ホスト画面/動画取得・提出・Case ID 記録）はすべて未完了の残課題である。
+- 提出範囲は **`public_mvp` プロファイルの公開7ツール**（`search_bids` / `list_recent_bids` / `get_bid_detail` / `search_bids_app` / `rank_bids` / `extract_bid_requirements` / `export_bid_shortlist`）。リポジトリ内にはローカル開発（`full_local`）向けに `src/lib/billing.ts` と `stripe` 依存が残存しているが、`public_mvp` プロファイルでは課金ツール・Pro API キー・アップグレード誘導は登録されず実行時 Stripe 通信もゼロであり、公開7ツールはすべて完全無料・読み取り専用である。
 - ドメイン検証エンドポイント `GET /.well-known/openai-apps-challenge` は実装済み。デプロイ時に `OPENAI_APPS_CHALLENGE_TOKEN` 環境変数を設定すればトークンを返す。
 - 認証方式は **OAuth 2.0（PKCE + Dynamic Client Registration、アカウント登録不要の1クリック同意画面）** を使用する（詳細は checklist §4）。
 
