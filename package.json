@@ -74,7 +74,7 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "test": "vitest run",
-    "test:safety": "node --test tests/acceptance/cdp-client.test.mjs && node tests/acceptance/verify-net-guard.mjs && node tests/acceptance/verify-ci-secret-check.mjs && node --import ./tests/acceptance/net-guard.mjs tests/acceptance/gate1-runner.mjs && node --import ./tests/acceptance/net-guard.mjs cloudshell/run-f01-cleanup-probes.mjs && node --import ./tests/acceptance/net-guard.mjs cloudshell/run-offline-cloudshell-sim.mjs",
+    "test:safety": "node --test tests/acceptance/cdp-client.test.mjs tests/acceptance/ci-secret-command.test.mjs && node tests/acceptance/verify-net-guard.mjs && node tests/acceptance/verify-ci-secret-check.mjs && node --import ./tests/acceptance/net-guard.mjs tests/acceptance/gate1-runner.mjs && node --import ./tests/acceptance/net-guard.mjs cloudshell/run-f01-cleanup-probes.mjs && node --import ./tests/acceptance/net-guard.mjs cloudshell/run-offline-cloudshell-sim.mjs",
     "test:watch": "vitest",
     "test:contract": "vitest run tests/contract.test.ts",
     "bench": "tsx benchmarks/kkj.bench.ts",
@@ -101,7 +101,7 @@
     "publish:dry-run": "npm run release:gate && npm publish --dry-run --access public --ignore-scripts",
     "security:dependencies": "node scripts/security-dependency-check.mjs",
     "security:code": "node scripts/run-code-security.mjs",
-    "security:verify": "node tests/acceptance/verify-security-dependency-check.mjs && node scripts/verify-code-security-canary.mjs"
+    "security:verify": "node --test tests/acceptance/code-security-review.test.mjs && node tests/acceptance/verify-security-dependency-check.mjs && node scripts/verify-code-security-canary.mjs"
   },
   "dependencies": {
     "@google-cloud/firestore": "^8.7.0",

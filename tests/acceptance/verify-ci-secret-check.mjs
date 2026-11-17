@@ -10,10 +10,12 @@
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { extractSecretCheckCommand } from "./ci-secret-command.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,15 +25,8 @@ const SCANNER_SRC = path.join(REPO_ROOT, "scripts", "ci-verify-no-secrets.mjs");
 const OUT_FILE = path.join(REPO_ROOT, "evidence", "f02-ci-secret-check-after.json");
 
 const ciYml = fs.readFileSync(CI_YML_PATH, "utf8");
-const stepMatch = ciYml.match(
-  /Verify no secret-bearing artifacts in generated evidence\r?\n\s*run:\s*(.+)/,
-);
-assert.ok(stepMatch, "Could not locate secret-check step command in .github/workflows/ci.yml");
-const extractedCommand = stepMatch[1].trim();
-assert.ok(
-  extractedCommand.startsWith("node scripts/ci-verify-no-secrets.mjs "),
-  `Unexpected CI command: ${extractedCommand}`,
-);
+const extractedCommand = extractSecretCheckCommand(ciYml);
+const ciDefinitionSha256 = createHash("sha256").update(ciYml).digest("hex");
 const cmdParts = extractedCommand.split(/\s+/).slice(1);
 const scannerArgs = cmdParts.slice(1);
 
@@ -173,6 +168,7 @@ fs.readFileSync = function (p, ...rest) {
     generatedAt: new Date().toISOString(),
     findingId: "READINESS-V2-F02",
     ciCommandVerified: extractedCommand,
+    ciDefinitionSha256,
     unmaskedSyntheticSecretsStored: 0,
     allPassed: results.every((r) => r.passed),
     results,

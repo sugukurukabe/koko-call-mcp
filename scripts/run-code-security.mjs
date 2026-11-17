@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { evaluateSecurityScan } from "./code-security-review.mjs";
 import { createSemgrepEnvironment } from "./semgrep-engine-env.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -30,6 +31,16 @@ try {
   );
   const configHash = createHash("sha256").update(fs.readFileSync(config)).digest("hex");
   if (configHash !== bundle.sha256) throw new Error("Security rule bundle hash mismatch");
+  const ruleIds = new Set(
+    [...fs.readFileSync(config, "utf8").matchAll(/^- id:[ \t]*(?:\r?\n[ \t]+)?(\S+)[ \t]*$/gm)].map(
+      (m) => m[1],
+    ),
+  );
+  if (ruleIds.size !== bundle.rules) throw new Error("Cannot account for every bundled rule");
+  const reviewPath = path.join(root, "security/semgrep/reviewed-nonissues.json");
+  const reviewBytes = fs.readFileSync(reviewPath);
+  const reviewHash = createHash("sha256").update(reviewBytes).digest("hex");
+  const reviewDocument = JSON.parse(reviewBytes.toString("utf8"));
   const groups = { typescript: [], javascript: [] };
   function collect(directory) {
     for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
@@ -44,6 +55,22 @@ try {
   }
   for (const directory of ["src", "ui", "gateway/src", "scripts"])
     collect(path.join(root, directory));
+  const expectedTargets = Object.values(groups)
+    .flat()
+    .map((p) => p.replaceAll("\\", "/"))
+    .sort();
+  const sourceSnapshots = Object.fromEntries(
+    expectedTargets.map((p) => {
+      const bytes = fs.readFileSync(path.join(root, p));
+      return [
+        p,
+        {
+          sha256: createHash("sha256").update(bytes).digest("hex"),
+          lines: bytes.toString("utf8").split("\n").length,
+        },
+      ];
+    }),
+  );
   const findings = [];
   const errors = [];
   const scanned = new Set();
@@ -81,58 +108,55 @@ try {
       }
     }
   }
-  const expectedTargets = Object.values(groups)
-    .flat()
-    .map((p) => p.replaceAll("\\", "/"))
-    .sort();
-  const missingTargets = expectedTargets.filter((p) => !scanned.has(p));
-  const reviewPath = path.join(root, "security/semgrep/reviewed-nonissues.json");
-  const reviews = fs.existsSync(reviewPath) ? JSON.parse(fs.readFileSync(reviewPath, "utf8")) : [];
-  const reviewedNonissues = [];
-  const blockingFindings = [];
-  for (const finding of findings) {
-    const normalized = finding.path.replaceAll("\\", "/");
-    if (!expectedTargets.includes(normalized)) {
-      errors.push({ message: "Unexpected finding target", path: normalized });
-      continue;
-    }
-    const sourceHash = createHash("sha256")
-      .update(fs.readFileSync(path.join(root, normalized)))
-      .digest("hex");
-    const review = reviews.find(
-      (r) =>
-        r.rule === finding.check_id &&
-        r.path === normalized &&
-        r.line === finding.start.line &&
-        r.sourceSha256 === sourceHash,
-    );
-    if (review) reviewedNonissues.push({ finding, review });
-    else blockingFindings.push(finding);
+  for (const [p, snapshot] of Object.entries(sourceSnapshots)) {
+    if (
+      createHash("sha256")
+        .update(fs.readFileSync(path.join(root, p)))
+        .digest("hex") !== snapshot.sha256
+    )
+      errors.push({ message: "Source input changed during scan", path: p });
   }
-  const staleReviews = reviews.filter(
-    (r) => !reviewedNonissues.some((entry) => entry.review === r),
-  );
-  if (staleReviews.length)
-    errors.push({ message: "Stale nonissue review requires explicit update", staleReviews });
+  for (const [p, expected] of [
+    [config, configHash],
+    [reviewPath, reviewHash],
+  ]) {
+    if (createHash("sha256").update(fs.readFileSync(p)).digest("hex") !== expected)
+      errors.push({ message: "Security configuration changed during scan" });
+  }
+  const evaluated = evaluateSecurityScan({
+    findings,
+    reviewDocument,
+    sourceSnapshots,
+    ruleIds,
+    ruleBundleSha256: configHash,
+    scannedTargets: [...scanned],
+    engineErrors: errors,
+  });
+  const { reviewedNonissues, blockingFindings, unreportedReviews, missingTargets } = evaluated;
   const report = {
     version: 1,
     engine: version.stdout.trim(),
+    platform: process.platform,
     ruleCount: bundle.rules,
     ruleBundleSha256: configHash,
+    reviewDocumentSha256: reviewHash,
     sourceScope: ["src", "ui", "gateway/src", "scripts"],
     expectedTargets,
+    sourceSnapshots,
     scannedTargets: [...scanned].sort(),
     missingTargets,
     findings,
     reviewedNonissues,
     blockingFindings,
-    errors,
+    unreportedReviews,
+    errors: evaluated.errors,
+    allPassed: evaluated.allPassed,
     sourceUpload: false,
     metricsOrRemoteRuleLookup: false,
   };
   fs.mkdirSync(path.dirname(output), { recursive: true });
   fs.writeFileSync(output, `${JSON.stringify(report, null, 2)}\n`);
-  console.log(
+  console.error(
     JSON.stringify({
       rules: bundle.rules,
       targets: expectedTargets.length,
@@ -140,11 +164,12 @@ try {
       findings: findings.length,
       reviewedNonissues: reviewedNonissues.length,
       blockingFindings: blockingFindings.length,
-      errors: errors.length,
+      unreportedReviews: unreportedReviews.length,
+      errors: evaluated.errors.length,
       missing: missingTargets.length,
     }),
   );
-  if (blockingFindings.length || errors.length || missingTargets.length) process.exitCode = 1;
+  if (!evaluated.allPassed) process.exitCode = 1;
 } finally {
   engineEnvironment.dispose();
 }
