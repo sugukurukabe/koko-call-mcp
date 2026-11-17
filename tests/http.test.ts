@@ -25,8 +25,16 @@ describe("HTTP transport app", () => {
       .send({ jsonrpc: "2.0", id: 1, method: "initialize", params: {} })
       .expect(400);
     expect(response.body).toMatchObject({
-      error: "Unsupported MCP protocol version",
-      supported: ["2025-11-25", "2026-07-28"],
+      jsonrpc: "2.0",
+      id: 1,
+      error: {
+        code: -32020,
+        message: "Unsupported MCP protocol version",
+        data: {
+          reason: "UnsupportedProtocolVersion",
+          supported: ["2025-11-25", "2026-07-28"],
+        },
+      },
     });
   });
 

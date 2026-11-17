@@ -6,8 +6,11 @@
 > 対象タイプ: Universal MCP server（単一の公開エンドポイント）  
 > 参照元: `https://developers.openai.com/apps-sdk/deploy/submission`、`https://developers.openai.com/apps-sdk/app-submission-guidelines`  
 > 最新のローカル準備状況・残課題正本: [`OPENAI_SUBMISSION_LOCAL_PREPARATION_20261021.md`](./OPENAI_SUBMISSION_LOCAL_PREPARATION_20261021.md)  
-> 申請日: TBD  
-> バージョン: Public MVP (`0.9.0` / 公開版 `0.10.0`)
+> 申請日: 未提出 (`NOT_SUBMITTED`)  
+> 対象候補バージョン: `0.10.1` (`JP_BIDS_PROFILE=public_mvp` / ※ `npmjs.org` 既公開版は `0.10.0`)
+
+> **ローカルパッケージ検査の状態に関する重要事項**:
+> `node scripts/build-openai-package.mjs`（6ファイル構成ZIP・65項目のローカル構造/画像/ZIP検査）の判定ステータスは **`LOCAL_PARTIAL_VALIDATION_WITH_SCHEMA_WARNING_NOT_SUBMITTED`** であり、コアプラグインスキーマと OpenAI 拡張フィールドの差異に関するスキーマ警告 **`CORE_MCP_OPENAI_EXTENSION_MISMATCH`** を含みます。これはローカル構造検査の通過であり、OpenAI 申請ポータルでの互換性確認・提出完了・審査合格を意味しません。また、本 `0.10.1` ビルドにおける実 ChatGPT クライアント上での描画・操作検証、KKJ二次利用条件根拠確認（`OAI-01/04`）、Organization/Business Verification、ドメインチャレンジ検証、提出 Case ID 取得は未完了の残課題です。
 
 > **公式ドキュメントに載っていない実務上の要点**（コミュニティ報告に基づく）は「⚠️ 未文書化」と明記する。ダッシュボードのUIは変わりうるため、実際の画面表示を優先すること。
 
@@ -15,9 +18,9 @@
 
 ## 0. スコープの決定（現行 Public MVP 公開7ツール）
 
-**今回のChatGPT App提出は `public_mvp` プロファイルの公開7ツール（完全無料・読み取り専用・課金導線ゼロ）を対象とする。**
+**今回のChatGPT App提出は `public_mvp` プロファイルの公開7ツール（完全無料・読み取り専用・公開面の課金導線ゼロ）を対象とする。**
 
-理由: v0.9.0 以降、Stripe 課金・Pro API キー・アップグレード誘導文言をコードベースから完全に撤廃し、公開エンドポイント `https://mcp.bid-jp.com/mcp` は **無料・読み取り専用の公開7ツール（`public_mvp`）のみ** を公開する構成へ移行済み。これにより OpenAI App Submission Guidelines の「サブスクリプション販売・フリーミアム誘導の禁止」に完全準拠しつつ、`AI Bid Workspace`（MCP Apps UI）と16列CSV/JSON出力まで審査対象に含められる。
+理由: リポジトリ内にはローカル開発プロファイル（`JP_BIDS_PROFILE=full_local`）向けに `src/lib/billing.ts` および `package.json` の `stripe` 依存が残存しているが、公開エンドポイント `https://mcp.bid-jp.com/mcp` で稼働する `JP_BIDS_PROFILE=public_mvp` では課金ツール・Pro API キー判定・アップグレード誘導文言を一切登録せず実行時の Stripe 通信もゼロであり、**無料・読み取り専用の公開7ツールのみ** を公開する境界が分離されている。これにより OpenAI App Submission Guidelines の「サブスクリプション販売・フリーミアム誘導の禁止」に準拠しつつ、`AI Bid Workspace`（MCP Apps UI）と16列CSV/JSON出力まで審査対象に含められる。
 
 | 区分 | ツール |
 |---|---|
@@ -30,17 +33,17 @@
 
 | 項目 | 状態 | 備考 |
 |---|---|---|
-| MCPサーバーが公開HTTPSドメインで稼働 | ✅ | `https://mcp.bid-jp.com/mcp` |
-| localhost/テスト用エンドポイントでない | ✅ | 本番Cloud Runエンドポイント |
+| MCPサーバーが公開HTTPSドメインで稼働 | ⚠️ 候補 `0.10.1` 本番未配備 | ドメイン `https://mcp.bid-jp.com/mcp` は構築済みだが、本候補 `0.10.1` の Cloud Run 昇格および現時点の実状態照会は未実施（`UNCONFIRMED_NOT_QUERIED`） |
+| localhost/テスト用エンドポイントでない | ✅ | 申請対象URLは `https://mcp.bid-jp.com/mcp` |
 | 公開7ツールに `readOnlyHint`/`destructiveHint`/`idempotentHint`/`openWorldHint` が明示されている | ✅ | 全てtrue/false明示、nullなし（`src/tools/*.ts`） |
 | 公開7ツール全てに `outputSchema` がある | ✅ | `BidSearchResultSchema` / `BidRankingResultSchema` / `BidShortlistExportSchema` 等 |
 | プライバシーポリシー・利用規約が公開URL | ✅ | `https://mcp.bid-jp.com/privacy` / `/terms` |
 | サポート連絡先 | ✅ | `mcp@bid-jp.com`（またはGitHub Issues） |
-| KKJ 二次利用・第三者提供条件の事前確認（OAI-01） | ⚠️ 要確認（壁さん） | `OPENAI_SUBMISSION_LOCAL_PREPARATION_20261021.md` §OAI-01 参照 |
-| OpenAI Organization データレジデンシー = Global（EUではない） | ⚠️ 要確認（壁さん） | 壁さんがDashboardで確認。EUだと提出不可 |
-| Organization/個人 verification 完了 | ⚠️ 要対応（壁さん） | §2参照 |
-| ドメイン所有確認エンドポイント実装済み | ✅ | `GET /.well-known/openai-apps-challenge`（`OPENAI_APPS_CHALLENGE_TOKEN` 環境変数） |
-| OAuth 2.0（PKCE + DCR, 1クリック同意）稼働確認 | ✅ | §4参照（ChatGPT Developer Mode 実機接続実績あり） |
+| KKJ 二次利用・第三者提供条件の事前確認（OAI-01/04） | ⚠️ 未完了（要確認: 壁さん） | `OPENAI_SUBMISSION_LOCAL_PREPARATION_20261021.md` §OAI-01 参照 |
+| OpenAI Organization データレジデンシー = Global（EUではない） | ⚠️ 未確認（要確認: 壁さん） | 壁さんがDashboardで確認。EUだと提出不可 |
+| Organization/個人 verification 完了 | ⚠️ 未完了（要対応: 壁さん） | §2参照 |
+| ドメイン所有確認エンドポイント実装 & ポータルチャレンジ検証 | ⚠️ コード実装済み・ポータル検証未実施 | `GET /.well-known/openai-apps-challenge` 実装済み。申請時のトークン設定・Verify Domain 操作は未実施 |
+| `0.10.1` バンドルでの実 ChatGPT 接続・UI・動画・スクリーンショット確認 | ⚠️ 未実施 (`NOT_EXECUTED_ON_0_10_1`) | ローカル模擬ブラウザ（13項目）のみ完了。過去版（2026-10-24 `9afe0c6`）の実機記録で代用せず、`0.10.1` 本番昇格後に実 ChatGPT で再確認・撮影する |
 
 ---
 

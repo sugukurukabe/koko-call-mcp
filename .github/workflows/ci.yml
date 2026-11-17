@@ -17,13 +17,25 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
-          node-version: 24
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 24.22.1
           cache: npm
       - run: npm ci
       - run: npm run check
+      - name: Run offline safety & acceptance suite (Gate 1 + cleanup probes + Cloud Shell sim)
+        env:
+          JP_BIDS_DOCUMENT_EXTRACTION: "off"
+          NPM_CONFIG_UPDATE_NOTIFIER: "false"
+          NO_UPDATE_NOTIFIER: "1"
+        run: npm run test:safety
+      - name: Verify no secret-bearing artifacts in generated evidence
+        id: safe-evidence
+        if: always()
+        run: node scripts/ci-verify-no-secrets.mjs evidence --require=gate1/gate1-summary.json --require=f01-child-cleanup-probes-after.json --require=cloudshell-offline-sim-results.json
       - run: npm run bench
       - run: npm run docs:check
       - run: npm run api:health
@@ -35,6 +47,17 @@ jobs:
           npm install --prefix "$TMPDIR" "./$TARBALL" >/dev/null
           test -x "$TMPDIR/node_modules/.bin/jp-bids-mcp"
           "$TMPDIR/node_modules/.bin/jp-bids-mcp" --version
+      - name: Upload reviewed acceptance evidence
+        if: always() && steps.safe-evidence.outcome == 'success'
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: acceptance-${{ github.sha }}
+          path: |
+            evidence/gate1/gate1-summary.json
+            evidence/f01-child-cleanup-probes-after.json
+            evidence/cloudshell-offline-sim-results.json
+          if-no-files-found: error
+          retention-days: 7
 
   gateway-check:
     runs-on: ubuntu-latest
@@ -43,10 +66,12 @@ jobs:
       run:
         working-directory: gateway
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
-          node-version: 24
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 24.22.1
           cache: npm
           cache-dependency-path: gateway/package-lock.json
       - run: npm ci

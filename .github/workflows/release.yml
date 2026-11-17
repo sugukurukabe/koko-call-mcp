@@ -13,17 +13,59 @@ concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
+env:
+  NPM_CONFIG_UPDATE_NOTIFIER: "false"
+  NO_UPDATE_NOTIFIER: "1"
+
 jobs:
   publish:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm
           registry-url: https://registry.npmjs.org
+      - name: Verify release tag parity and unpublished npm target (fail-closed)
+        shell: bash
+        env:
+          RELEASE_REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          PKG_NAME="$(node -p "JSON.parse(require('node:fs').readFileSync('package.json','utf8')).name")"
+          VERSION="$(node -p "JSON.parse(require('node:fs').readFileSync('package.json','utf8')).version")"
+          PLUGIN_VERSION="$(node -p "JSON.parse(require('node:fs').readFileSync('plugins/jp-bids-mcp/plugin.json','utf8')).version")"
+          EXPECTED_TAG="v${VERSION}"
+          if [[ "${RELEASE_REF_NAME}" != "${EXPECTED_TAG}" ]]; then
+            echo "ERROR: Git tag '${RELEASE_REF_NAME}' does not match package.json version '${EXPECTED_TAG}'." >&2
+            exit 1
+          fi
+          if [[ "${PLUGIN_VERSION}" != "${VERSION}" ]]; then
+            echo "ERROR: plugins/jp-bids-mcp/plugin.json version '${PLUGIN_VERSION}' !== '${VERSION}'." >&2
+            exit 1
+          fi
+          set +e
+          VIEW_OUT="$(npm view "${PKG_NAME}@${VERSION}" version --json 2>&1)"
+          VIEW_RC=$?
+          set -e
+          if [[ "${VIEW_RC}" -eq 0 && -n "${VIEW_OUT}" ]]; then
+            echo "ERROR: ${PKG_NAME}@${VERSION} is ALREADY published on npm (${VIEW_OUT}). Refusing re-publish." >&2
+            exit 1
+          fi
+          if [[ "${VIEW_OUT}" != *"E404"* ]]; then
+            echo "ERROR: Fail-closed registry check for ${PKG_NAME}@${VERSION} (rc=${VIEW_RC}): ${VIEW_OUT}" >&2
+            exit 1
+          fi
+          echo "Verified ${PKG_NAME}@${VERSION} matches tag ${EXPECTED_TAG} and is unpublished on npm." >&2
       - run: npm ci
-      - run: npm run release:gate
+      - name: Run release gate
+        env:
+          REQUIRE_GIT_CLEAN: "1"
+          REQUIRE_RELEASE_TAG: "1"
+          REQUIRE_NPM_UNPUBLISHED: "1"
+        run: npm run release:gate
       - run: npm publish --access public --provenance --ignore-scripts

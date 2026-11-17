@@ -1,22 +1,34 @@
 import { createHash, createHmac } from "node:crypto";
 import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { JSONRPCErrorResponseSchema } from "@modelcontextprotocol/sdk/types.js";
 import request from "supertest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { KkjClient } from "../src/api/kkj-client.js";
 import { createJpBidsServer } from "../src/mcp.js";
-import { verifyJwt } from "../src/oauth/jwt.js";
+import { signJwt, verifyJwt } from "../src/oauth/jwt.js";
 import { createHttpApp } from "../src/transports/http.js";
 
 const BASE_URL = "https://mcp.test";
 const REDIRECT_URI = "http://localhost/callback";
+const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 function challengeFor(verifier: string): string {
   return createHash("sha256").update(verifier).digest("base64url");
 }
 
-describe("MCP v0.10.0 specification & security hardening", () => {
+function requestMeta(version: string) {
+  return {
+    "io.modelcontextprotocol/protocolVersion": version,
+    "io.modelcontextprotocol/clientInfo": { name: "hardening-suite", version: "1.0.0" },
+    "io.modelcontextprotocol/clientCapabilities": {},
+  };
+}
+
+describe("MCP v0.10.1 specification, protocol adapter & security hardening", () => {
   const originalEnv = { ...process.env };
 
   beforeEach(() => {
@@ -27,6 +39,8 @@ describe("MCP v0.10.0 specification & security hardening", () => {
       JP_BIDS_OAUTH_STORE: "memory",
       JP_BIDS_PRO_API_KEYS: "jp-bids.test.key",
       JP_BIDS_OAUTH_RATE_LIMIT_MAX: "100",
+      JP_BIDS_PROFILE: "public_mvp",
+      JP_BIDS_DOCUMENT_EXTRACTION: "off",
     };
   });
 
@@ -92,30 +106,418 @@ describe("MCP v0.10.0 specification & security hardening", () => {
     expect(refreshRes.headers.pragma).toBe("no-cache");
   });
 
-  it("rejects Mcp-Method and Mcp-Name headers when JSON-RPC body omits method/name or is a batch array", async () => {
+  it("supports authenticated MCP 2026-07-28 positive controls (P01 tools/list, P02 resources/read via params.uri, prompts/list, prompts/get, tools/call)", async () => {
+    const app = createHttpApp();
+    const secret = process.env.JP_BIDS_OAUTH_SECRET ?? "";
+    const token = signJwt(
+      {
+        sub: "hardening-user",
+        iss: BASE_URL,
+        aud: `${BASE_URL}/mcp`,
+        scope: "mcp:read",
+        type: "access_token",
+      },
+      secret,
+      300,
+    );
+
+    // P01: 2026-07-28 tools/list positive control -> 200 with 7 public_mvp tools
+    const p01 = await request(app)
+      .post("/mcp")
+      .set("Accept", "application/json, text/event-stream")
+      .set("Authorization", `Bearer ${token}`)
+      .set("MCP-Protocol-Version", "2026-07-28")
+      .set("Mcp-Method", "tools/list")
+      .send({
+        jsonrpc: "2.0",
+        id: "P01",
+        method: "tools/list",
+        params: { _meta: requestMeta("2026-07-28") },
+      })
+      .expect(200);
+    expect(p01.headers["mcp-protocol-version"]).toBe("2026-07-28");
+    const p01Tools = (p01.body as { result?: { tools?: Array<{ name: string }> } }).result?.tools;
+    expect(p01Tools?.length).toBe(7);
+
+    // P02: 2026-07-28 resources/read with Mcp-Name === params.uri -> 200 with 1 content item
+    const p02 = await request(app)
+      .post("/mcp")
+      .set("Accept", "application/json, text/event-stream")
+      .set("Authorization", `Bearer ${token}`)
+      .set("MCP-Protocol-Version", "2026-07-28")
+      .set("Mcp-Method", "resources/read")
+      .set("Mcp-Name", "ui://jp-bids/search-results.html")
+      .send({
+        jsonrpc: "2.0",
+        id: "P02",
+        method: "resources/read",
+        params: {
+          uri: "ui://jp-bids/search-results.html",
+          _meta: requestMeta("2026-07-28"),
+        },
+      })
+      .expect(200);
+    expect(p02.headers["mcp-protocol-version"]).toBe("2026-07-28");
+    const p02Contents = (p02.body as { result?: { contents?: unknown[] } }).result?.contents;
+    expect(p02Contents?.length).toBe(1);
+
+    // A07: Base64 sentinel Mcp-Name on resources/read -> 200
+    const b64Sentinel = `=?base64?${Buffer.from("ui://jp-bids/search-results.html", "utf8").toString("base64")}?=`;
+    const a07 = await request(app)
+      .post("/mcp")
+      .set("Accept", "application/json, text/event-stream")
+      .set("Authorization", `Bearer ${token}`)
+      .set("MCP-Protocol-Version", "2026-07-28")
+      .set("Mcp-Method", "resources/read")
+      .set("Mcp-Name", b64Sentinel)
+      .send({
+        jsonrpc: "2.0",
+        id: "A07",
+        method: "resources/read",
+        params: {
+          uri: "ui://jp-bids/search-results.html",
+          _meta: requestMeta("2026-07-28"),
+        },
+      })
+      .expect(200);
+    expect((a07.body as { result?: { contents?: unknown[] } }).result?.contents?.length).toBe(1);
+
+    // 2026-07-28 prompts/get with Mcp-Name === params.name -> 200
+    const promptRes = await request(app)
+      .post("/mcp")
+      .set("Accept", "application/json, text/event-stream")
+      .set("Authorization", `Bearer ${token}`)
+      .set("MCP-Protocol-Version", "2026-07-28")
+      .set("Mcp-Method", "prompts/get")
+      .set("Mcp-Name", "morning_bid_briefing")
+      .send({
+        jsonrpc: "2.0",
+        id: "P-PROMPT",
+        method: "prompts/get",
+        params: {
+          name: "morning_bid_briefing",
+          arguments: { prefecture: "東京都" },
+          _meta: requestMeta("2026-07-28"),
+        },
+      })
+      .expect(200);
+    expect(
+      (promptRes.body as { result?: { messages?: unknown[] } }).result?.messages?.length,
+    ).toBeGreaterThanOrEqual(1);
+
+    // 2026-07-28 tools/call (offline UserInputError validation path, 0 KKJ calls) with Mcp-Name === params.name -> 200
+    const toolCallRes = await request(app)
+      .post("/mcp")
+      .set("Accept", "application/json, text/event-stream")
+      .set("Authorization", `Bearer ${token}`)
+      .set("MCP-Protocol-Version", "2026-07-28")
+      .set("Mcp-Method", "tools/call")
+      .set("Mcp-Name", "search_bids")
+      .send({
+        jsonrpc: "2.0",
+        id: "P-TOOL",
+        method: "tools/call",
+        params: {
+          name: "search_bids",
+          arguments: {},
+          _meta: requestMeta("2026-07-28"),
+        },
+      })
+      .expect(200);
+    expect((toolCallRes.body as { result?: { isError?: boolean } }).result?.isError).toBe(true);
+  });
+
+  it("enforces distinct MCP 2026-07-28 negative controls (P03, P04, P05, metadata, stateless, batch, version, auth)", async () => {
+    const app = createHttpApp();
+    const secret = process.env.JP_BIDS_OAUTH_SECRET ?? "";
+    const token = signJwt(
+      {
+        sub: "hardening-user",
+        iss: BASE_URL,
+        aud: `${BASE_URL}/mcp`,
+        scope: "mcp:read",
+        type: "access_token",
+      },
+      secret,
+      300,
+    );
+
+    // P03: missing Mcp-Name on resources/read -> 400 JSON-RPC -32020 (MissingRequiredHeader)
+    const p03 = await request(app)
+      .post("/mcp")
+      .set("Accept", "application/json, text/event-stream")
+      .set("Authorization", `Bearer ${token}`)
+      .set("MCP-Protocol-Version", "2026-07-28")
+      .set("Mcp-Method", "resources/read")
+      .send({
+        jsonrpc: "2.0",
+        id: "P03",
+        method: "resources/read",
+        params: {
+          uri: "ui://jp-bids/search-results.html",
+          _meta: requestMeta("2026-07-28"),
+        },
+      })
+      .expect(400);
+    expect(JSONRPCErrorResponseSchema.parse(p03.body)).toMatchObject({
+      jsonrpc: "2.0",
+      id: "P03",
+      error: {
+        code: -32020,
+        data: {
+          reason: "MissingRequiredHeader",
+          required_header: "Mcp-Name",
+          expected_source: "params.uri",
+        },
+      },
+    });
+
+    // A04 / P04: header 2026-07-28 vs _meta 2025-11-25 -> 400 JSON-RPC -32020 (HeaderMismatch)
+    const p04 = await request(app)
+      .post("/mcp")
+      .set("Accept", "application/json, text/event-stream")
+      .set("Authorization", `Bearer ${token}`)
+      .set("MCP-Protocol-Version", "2026-07-28")
+      .set("Mcp-Method", "tools/list")
+      .send({
+        jsonrpc: "2.0",
+        id: "A04",
+        method: "tools/list",
+        params: { _meta: requestMeta("2025-11-25") },
+      })
+      .expect(400);
+    expect(JSONRPCErrorResponseSchema.parse(p04.body)).toMatchObject({
+      jsonrpc: "2.0",
+      id: "A04",
+      error: {
+        code: -32020,
+        data: {
+          reason: "HeaderMismatch",
+          header_protocol_version: "2026-07-28",
+          meta_protocol_version: "2025-11-25",
+        },
+      },
+    });
+
+    // A05 / P05: missing Mcp-Method on 2026-07-28 -> 400 JSON-RPC -32020 (MissingRequiredHeader)
+    const p05 = await request(app)
+      .post("/mcp")
+      .set("Accept", "application/json, text/event-stream")
+      .set("Authorization", `Bearer ${token}`)
+      .set("MCP-Protocol-Version", "2026-07-28")
+      .send({
+        jsonrpc: "2.0",
+        id: "A05",
+        method: "tools/list",
+        params: { _meta: requestMeta("2026-07-28") },
+      })
+      .expect(400);
+    expect(JSONRPCErrorResponseSchema.parse(p05.body)).toMatchObject({
+      jsonrpc: "2.0",
+      id: "A05",
+      error: {
+        code: -32020,
+        data: {
+          reason: "MissingRequiredHeader",
+          required_header: "Mcp-Method",
+        },
+      },
+    });
+
+    // A06: unknown RPC method -> HTTP 404 + valid JSON-RPC -32601
+    const a06 = await request(app)
+      .post("/mcp")
+      .set("Accept", "application/json, text/event-stream")
+      .set("Authorization", `Bearer ${token}`)
+      .set("MCP-Protocol-Version", "2026-07-28")
+      .set("Mcp-Method", "nonexistent/method")
+      .send({
+        jsonrpc: "2.0",
+        id: "A06",
+        method: "nonexistent/method",
+        params: { _meta: requestMeta("2026-07-28") },
+      })
+      .expect(404);
+    expect(JSONRPCErrorResponseSchema.parse(a06.body)).toMatchObject({
+      jsonrpc: "2.0",
+      id: "A06",
+      error: {
+        code: -32601,
+      },
+    });
+
+    // Malformed Base64 sentinel -> 400 JSON-RPC -32020 (HeaderMismatch)
+    const badSentinel = await request(app)
+      .post("/mcp")
+      .set("Accept", "application/json, text/event-stream")
+      .set("Authorization", `Bearer ${token}`)
+      .set("MCP-Protocol-Version", "2026-07-28")
+      .set("Mcp-Method", "resources/read")
+      .set("Mcp-Name", "=?base64?not-valid-base64!!!?=")
+      .send({
+        jsonrpc: "2.0",
+        id: "A07-BAD",
+        method: "resources/read",
+        params: {
+          uri: "ui://jp-bids/search-results.html",
+          _meta: requestMeta("2026-07-28"),
+        },
+      })
+      .expect(400);
+    expect(JSONRPCErrorResponseSchema.parse(badSentinel.body)).toMatchObject({
+      jsonrpc: "2.0",
+      id: "A07-BAD",
+      error: { code: -32020, data: { reason: "HeaderMismatch" } },
+    });
+
+    // Missing _meta protocolVersion -> 400 JSON-RPC -32020 (MissingProtocolMetadata)
+    const missingMeta = await request(app)
+      .post("/mcp")
+      .set("Accept", "application/json, text/event-stream")
+      .set("Authorization", `Bearer ${token}`)
+      .set("MCP-Protocol-Version", "2026-07-28")
+      .set("Mcp-Method", "tools/list")
+      .send({ jsonrpc: "2.0", id: "P08", method: "tools/list", params: {} })
+      .expect(400);
+    expect(JSONRPCErrorResponseSchema.parse(missingMeta.body)).toMatchObject({
+      jsonrpc: "2.0",
+      id: "P08",
+      error: { code: -32020, data: { reason: "MissingProtocolMetadata" } },
+    });
+
+    // Removed initialize handshake on 2026-07-28 -> 400 JSON-RPC -32020 (StatelessProtocolViolation)
+    const init2026 = await request(app)
+      .post("/mcp")
+      .set("Accept", "application/json, text/event-stream")
+      .set("Authorization", `Bearer ${token}`)
+      .set("MCP-Protocol-Version", "2026-07-28")
+      .set("Mcp-Method", "initialize")
+      .send({
+        jsonrpc: "2.0",
+        id: "P-INIT",
+        method: "initialize",
+        params: { _meta: requestMeta("2026-07-28") },
+      })
+      .expect(400);
+    expect(JSONRPCErrorResponseSchema.parse(init2026.body)).toMatchObject({
+      jsonrpc: "2.0",
+      id: "P-INIT",
+      error: { code: -32020, data: { reason: "StatelessProtocolViolation" } },
+    });
+
+    // Unsupported version -> 400 JSON-RPC -32020 (UnsupportedProtocolVersion)
+    const badVer = await request(app)
+      .post("/mcp")
+      .set("Accept", "application/json, text/event-stream")
+      .set("Authorization", `Bearer ${token}`)
+      .set("MCP-Protocol-Version", "1999-01-01")
+      .send({ jsonrpc: "2.0", id: "P09", method: "tools/list", params: {} })
+      .expect(400);
+    expect(JSONRPCErrorResponseSchema.parse(badVer.body)).toMatchObject({
+      jsonrpc: "2.0",
+      id: "P09",
+      error: { code: -32020, data: { reason: "UnsupportedProtocolVersion" } },
+    });
+
+    // Invalid auth on valid 2026-07-28 request -> 401 invalid_token
+    const badAuth = await request(app)
+      .post("/mcp")
+      .set("Accept", "application/json, text/event-stream")
+      .set("Authorization", "Bearer forged-invalid-token")
+      .set("MCP-Protocol-Version", "2026-07-28")
+      .set("Mcp-Method", "tools/list")
+      .send({
+        jsonrpc: "2.0",
+        id: "P10",
+        method: "tools/list",
+        params: { _meta: requestMeta("2026-07-28") },
+      })
+      .expect(401);
+    expect(badAuth.body).toMatchObject({ error: "invalid_token" });
+  });
+
+  it("preserves 2025-11-25 legacy compatibility (L01, L02, L03 with Mcp-Name === params.uri) and rejects header/body mismatches", async () => {
     const app = createHttpApp();
 
+    // L01: 2025-11-25 tools/list without Mcp-Method
+    const l01 = await request(app)
+      .post("/mcp")
+      .set("Accept", "application/json, text/event-stream")
+      .set("Authorization", "Bearer jp-bids.test.key")
+      .set("MCP-Protocol-Version", "2025-11-25")
+      .send({ jsonrpc: "2.0", id: "L01", method: "tools/list", params: {} })
+      .expect(200);
+    expect((l01.body as { result?: { tools?: unknown[] } }).result?.tools?.length).toBe(7);
+
+    // L02: 2025-11-25 resources/read without Mcp-Method/Mcp-Name
+    const l02 = await request(app)
+      .post("/mcp")
+      .set("Accept", "application/json, text/event-stream")
+      .set("Authorization", "Bearer jp-bids.test.key")
+      .set("MCP-Protocol-Version", "2025-11-25")
+      .send({
+        jsonrpc: "2.0",
+        id: "L02",
+        method: "resources/read",
+        params: { uri: "ui://jp-bids/search-results.html" },
+      })
+      .expect(200);
+    expect((l02.body as { result?: { contents?: unknown[] } }).result?.contents?.length).toBe(1);
+
+    // L03: 2025-11-25 resources/read WITH optional Mcp-Method and Mcp-Name === params.uri -> 200
+    const l03 = await request(app)
+      .post("/mcp")
+      .set("Accept", "application/json, text/event-stream")
+      .set("Authorization", "Bearer jp-bids.test.key")
+      .set("MCP-Protocol-Version", "2025-11-25")
+      .set("Mcp-Method", "resources/read")
+      .set("Mcp-Name", "ui://jp-bids/search-results.html")
+      .send({
+        jsonrpc: "2.0",
+        id: "L03",
+        method: "resources/read",
+        params: { uri: "ui://jp-bids/search-results.html" },
+      })
+      .expect(200);
+    expect((l03.body as { result?: { contents?: unknown[] } }).result?.contents?.length).toBe(1);
+
+    // Batch array with Mcp-Method -> 400 JSON-RPC -32020 (HeaderMismatch)
     const batchRes = await request(app)
       .post("/mcp")
       .set("Mcp-Method", "tools/list")
       .send([{ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "search_bids" } }])
       .expect(400);
-    expect(batchRes.body).toMatchObject({
-      error: "Mcp-Method header does not match JSON-RPC method",
-      header_method: "tools/list",
-      body_method: null,
+    expect(JSONRPCErrorResponseSchema.parse(batchRes.body)).toMatchObject({
+      jsonrpc: "2.0",
+      error: {
+        code: -32020,
+        message: "Mcp-Method header does not match JSON-RPC method",
+        data: {
+          reason: "HeaderMismatch",
+          header_method: "tools/list",
+          body_method: null,
+        },
+      },
     });
 
-    const missingNameRes = await request(app)
+    // Unnamed method with Mcp-Name -> 400 JSON-RPC -32020 (HeaderMismatch)
+    const unnamedWithName = await request(app)
       .post("/mcp")
       .set("Mcp-Method", "tools/list")
       .set("Mcp-Name", "search_bids")
       .send({ jsonrpc: "2.0", id: 2, method: "tools/list", params: {} })
       .expect(400);
-    expect(missingNameRes.body).toMatchObject({
-      error: "Mcp-Name header does not match JSON-RPC params.name",
-      header_name: "search_bids",
-      body_name: null,
+    expect(JSONRPCErrorResponseSchema.parse(unnamedWithName.body)).toMatchObject({
+      jsonrpc: "2.0",
+      id: 2,
+      error: {
+        code: -32020,
+        data: {
+          reason: "HeaderMismatch",
+          header_name: "search_bids",
+          body_name: null,
+        },
+      },
     });
   });
 
@@ -168,7 +570,7 @@ describe("MCP v0.10.0 specification & security hardening", () => {
     });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     const server = createJpBidsServer({ kkjClient, profile: "full_local" });
-    const client = new Client({ name: "hardening-test", version: "0.10.0" });
+    const client = new Client({ name: "hardening-test", version: "0.10.1" });
     await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
 
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
@@ -204,7 +606,7 @@ describe("MCP v0.10.0 specification & security hardening", () => {
 
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     const server = createJpBidsServer({ kkjClient, profile: "full_local" });
-    const client = new Client({ name: "subkey-test", version: "0.10.0" });
+    const client = new Client({ name: "subkey-test", version: "0.10.1" });
     await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
 
     const saveRes = await client.callTool({
@@ -239,9 +641,11 @@ describe("MCP v0.10.0 specification & security hardening", () => {
     await server.close();
   });
 
-  it("nests custom interoperability metadata under _meta in server.json at version 0.10.0", async () => {
-    const serverJson = JSON.parse(await readFile("server.json", "utf8")) as Record<string, unknown>;
-    expect(serverJson.version).toBe("0.10.0");
+  it("nests custom interoperability metadata under _meta in server.json at version 0.10.1", async () => {
+    const serverJson = JSON.parse(
+      await readFile(path.join(REPO_ROOT, "server.json"), "utf8"),
+    ) as Record<string, unknown>;
+    expect(serverJson.version).toBe("0.10.1");
     expect("interoperability" in serverJson).toBe(false);
     const meta = serverJson._meta as Record<string, unknown> | undefined;
     const ns = meta?.["io.github.sugukurukabe/jp-bids"] as Record<string, unknown> | undefined;

@@ -1,6 +1,6 @@
 # JP Bids MCP 使用説明書
 
-対象: Public版0.10.0（公開リポジトリ `SUGUKURU-CO-LTD/jp-bids-mcp` / 本番 `https://mcp.bid-jp.com/mcp`） / 更新日: 2026-11-01 JST
+対象: 公開候補 `0.10.1`（`JP_BIDS_PROFILE=public_mvp` / 本番エンドポイント `https://mcp.bid-jp.com/mcp` ※既公開 npm 版は `0.10.0`） / 更新日: 2026-11-16 JST
 
 [確認済み範囲・既知の問題](./VERIFICATION_STATUS.md) · [機能仕様書](./FUNCTIONAL_SPEC.md)
 

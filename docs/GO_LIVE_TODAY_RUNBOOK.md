@@ -1,224 +1,170 @@
-# JP Bids MCP `v0.10.0` — 即日公開・一般ユーザー導入ランブック (Go-Live Today Runbook)
+# JP Bids MCP `v0.10.1` — 段階的本番配備・公開運用ランブック (Stage 1 / Stage 2 Production & Release Runbook)
 
-**対象バージョン**: `0.10.0` (`JP_BIDS_PROFILE=public_mvp`・完全無料・公開7ツール＋AI Bid Workspace UI)  
-**本番エンドポイント**: `https://mcp.bid-jp.com/mcp`  
-**目的**: ローカル検証完了状態から、**① GitHub 反映 → ② Cloud Run 無停止段階デプロイ → ③ npm / MCP Registry / Skill ZIP 公開 → ④ ChatGPT App & Claude Connector 提出** までを最短・安全に今日完了するためのコピペ実行手順書です。
+> **重要（承認境界と前提条件）**:
+> 1. **本書は独立再監査完了および管理者の明示的承認後にのみ実行する正式手順書です。** 本書の整備自体は Cloud Shell / GCP 照会、Cloud Build、Cloud Run 配備・トラフィック切替、`git push`、タグ push、`npm publish`、外部ディレクトリ提出の承認を意味しません。
+> 2. 過去の `v11`（コミット `f8363c0` / `jp-bids-mcp-r8-f8363c0-a7ad36fb14c53c57`）に対する `0%` 配備1回承認は本候補（`0.10.1`）へ流用できません。また、既存の Stage 2 読取由来調査（v4 差戻し `F01`〜`F03` → v5 是正指示）を継続する場合はその完了が前提であり、本書を使って由来確認や固定切替条件を迂回してはなりません。
+> 3. `npmjs.org` には既に **`jp-bids-mcp@0.10.0` が公開済み**です。本候補はリモート・npm・各種マニフェストのすべてを未公開の新バージョン **`0.10.1`** に一本化しています（`v0.10.0` タグの再作成・強制更新・再公開は行いません）。
+> 4. 本候補作成時点では外部通信を **0回** に制限しているため、現在の Cloud Run 実稼働リビジョン・`generation`・タグ状態および新規ビルドのコンテナ image `sha256` digest は **`UNCONFIRMED_NOT_QUERIED`（未照会・未確定）** です。実行時に下記 Stage 1 スクリプトが実測・固定します。
+
+- **対象バージョン**: `0.10.1` (`JP_BIDS_PROFILE=public_mvp`・公開7ツール＋AI Bid Workspace UI)
+- **本番エンドポイント**: `https://mcp.bid-jp.com/mcp`
+- **承認境界正本**: [`JP_BIDS_CLIENT_ACCEPTANCE_APPROVAL_MATRIX_v1.0.md`](../JP_BIDS_CLIENT_ACCEPTANCE_APPROVAL_MATRIX_v1.0.md)
 
 ---
 
-## 事前確認（ローカル最終プリフライト — 約10分）
-
-外部反映の前に、ローカルで全チェックがグリーンであることを確認します（KKJ API への実通信は一切発生しません）。
+## Step 0: ローカル最終プリフライト（外部通信 0 回で実行可能）
 
 ```bash
-# 1. Lint + Typecheck + 単一HTMLバンドルビルド + 全テスト + TypeDoc同期
-npm run check
-npm run docs:api
+export NPM_CONFIG_UPDATE_NOTIFIER=false
+export NO_UPDATE_NOTIFIER=1
 
-# 2. v0.10.0 マニフェスト整合 & 本番依存監査 (Critical 0 / High 0)
+# 1. Lint + Typecheck + Server/UI 単一HTMLビルド + 全ユニットテスト + APIドキュメント差分検査
+npm run check
+npm run docs:check
+
+# 2. v0.10.1 全マニフェスト・レジストリ整合検査
 npm run registry:validate
 npm run release:parity
-npm audit --omit=dev
 
-# 3. ネットワーク遮断ガード下での Gate 1 受入試験 (35/35 PASS・外部通信0件)
+# 3. ネットワーク遮断ガード下での Gate 1 受入試験 (35/35 PASS: VM起動 + ローカルヘッドレスブラウザ13項目含む)
 node --import ./evidence/q02_batch2/net-guard.batch2.path-null-fix.mjs tests/acceptance/gate1-runner.mjs
 
-# 4. OpenAI 申請パッケージ検証 (65/65 PASS) & npm 配布tarball内容確認
-# (※ npmjs.org には既に jp-bids-mcp@0.10.0 が公開済みのため、ローカルtarball検証には npm pack --dry-run を使用します)
+# 4. Cloud Shell Stage 1 / Stage 2 スクリプトのオフライン全シナリオ模擬試験 (外部通信0件)
+node --import ./evidence/q02_batch2/net-guard.batch2.path-null-fix.mjs ../cloudshell/run-offline-cloudshell-sim.mjs
+
+# 5. OpenAI 6ファイルZIP構造検査 & npm 配布tarball内容確認
+# ※ OpenAI検査器は LOCAL_PARTIAL_VALIDATION_WITH_SCHEMA_WARNING_NOT_SUBMITTED
+#    および CORE_MCP_OPENAI_EXTENSION_MISMATCH 警告を正直に出力します（提出完了・審査合格とは別です）。
 node scripts/build-openai-package.mjs
 npm pack --dry-run --ignore-scripts
 ```
 
 ---
 
-## Step 1: `git commit` & `git push`（GitHub Actions `ci.yml` 通過 — 約15分）
+## Step 1: 【要承認: Gate 4A-1】`0.10.1` コミット & `main` ブランチ push（タグ付与なし）
 
-> タグはまだ付けません（`v*.*.*` タグ push は `release.yml` 経由で `npm publish` を自動起動するため、Step 3 の注意点を確認してから実施します）。
+独立再監査合格および管理者の Gate 4A-1 承認後に実行します（まだ `v0.10.1` タグは付けません）。
 
 ```bash
-# 1. 変更ファイル確認（秘密値・大容量PDF/XML・不要な一時ファイルが含まれないことを確認）
+# 1. 変更ファイル確認（秘密値・大容量PDF/XMLが含まれないことを確認）
 git status --short
 
-# 2. v0.10.0 変更をステージングしてコミット
+# 2. 0.10.1 変更をコミットし、TARGET_SHA を控える
 git add -A
-git commit -m "release: JP Bids MCP v0.10.0 Public MVP hardening, 1-click onboarding, and 35/35 Gate 1 proof"
+git commit -m "release: JP Bids MCP v0.10.1 protocol contract, browser UI gate, and two-stage Cloud Run safety"
+TARGET_SHA="$(git rev-parse HEAD)"
+echo "Pinned TARGET_SHA=${TARGET_SHA}"
 
-# 3. main ブランチへ push（GitHub Actions ci.yml が自動起動）
+# 3. main ブランチへ通常 push し、GitHub Actions ci.yml 全ジョブ通過を確認する
 git push origin HEAD:main
 ```
 
-- GitHub Actions の **`ci.yml`** が全ジョブ緑（PASS）で完了したことを確認してから Step 2 へ進みます。
+- ローカルでビルド済みの `dist/apps/search-results.html` の SHA-256（`EXPECTED_UI_HTML_SHA256`）を控え、GitHub Actions `ci.yml` が `TARGET_SHA` に対して成功したことを確認してから Step 2 へ進みます。
 
 ---
 
-## Step 2: Cloud Run 本番デプロイ（`--no-traffic` 検証 → カナリア → 100%切替 — 約30分）
+## Step 2: 【要承認: Gate 4B-Stage 1】Cloud Run `0%` 候補配備・設定前後照合・16項目検証
 
-本番トラフィックをいきなり切り替えず、**トラフィック0%のタグ付きURLで公開7ツールとOAuth 2.0を実機検証してから**段階的に切り替えます。
+管理者の Stage 1 配備承認後、Cloud Shell（または認証済み環境）で **`cloudshell/stage1-deploy-0pct-candidate.sh`** を実行します。
 
-### 2.1 ロールバック用リビジョン名の固定と `--no-traffic` デプロイ
+### Stage 1 スクリプトが行う安全制御（本番トラフィック変更 0 回）
+1. **稼働状態の明示的固定**: `gcloud run services describe --format=json` を `cloudrun-state-guard.mjs pre-stage1` で解析し、配列添字に依存せず **`percent === 100` が唯一存在するリビジョン**（`prev100Revision`）と既存の全トラフィックタグ・URL・`generation`・Runtime SA・Secret参照・リソース制限を `pre-stage1-service-snapshot.json` に固定します。
+2. **クリーン clone と不変 image digest 固定**: 空ディレクトリへ `TARGET_SHA` を直接 checkout（失敗時は GCP 変更 0 回で停止）し、`gcloud builds submit --format=json` から不変の `sha256:<64-hex>`（`BUILT_IMAGE_DIGEST`）を抽出します（失敗時は Cloud Run 変更 0 回で停止）。
+3. **決定論的リビジョン名での `--no-traffic` 配備**: `--image="${IMAGE_REPO}@${BUILT_IMAGE_DIGEST}" --revision-suffix="${CAND_REVISION_SUFFIX}" --no-traffic --tag="${CAND_TAG}"` で `0%` 配備します。**応答不明・非ゼロ終了時は再送もトラフィック変更も行わず、1回だけ状態照会して `phase-journal.json` に `OUTCOME_UNKNOWN_HALTED` を記録して停止します。**
+4. **設定・Secret参照・SA・全タグの前後一致証明**: `post-stage1-diff` により、`prev100Revision` が引き続き `100%` であること、競合リビジョンが混入していないこと、Runtime SA・Secret参照・環境変数ハッシュ・既存全タグが 100% 保持されていることを `stage1-config-preservation-diff.json` に証明します。
+5. **実KKJ通信 0 回の 16項目ランタイム検証とレシート封印**: `verify-cloudrun-candidate.mjs` が候補タグURLに対して `/health`・`/readyz`・`/stats`（版数 `0.10.1`）・`server-card.json`（7ツール）・OAuth 不正拒否（未認証401・偽造Bearer 401・誤PKCE 400）・正当 DCR＋PKCE `S256` 認可（`Cache-Control: no-store`）・認証付き MCP `2025-11-25` & `2026-07-28`（7ツール一致＋`resources/read` `ui://jp-bids/search-results.html` の SHA-256 一致）を検査し、全16項目合格時のみ `stage1-verified-receipt.json` を SHA-256 整合ハッシュ付きで封印します。
 
 ```bash
-# 環境に合わせてプロジェクトID・リージョン・サービス名を指定
 export GCP_PROJECT="ssw-compass-prod-494613"   # 実運用プロジェクトIDを確認して設定
 export GCP_REGION="asia-northeast1"
 export SERVICE_NAME="jp-bids-mcp"
-export CAND_TAG="cand-v0-10-0"
+export IMAGE_REPO="asia-northeast1-docker.pkg.dev/${GCP_PROJECT}/cloud-run-source-deploy/${SERVICE_NAME}"
+export TARGET_SHA="<Step 1で確定した40桁コミットSHA>"
+export EXPECTED_UI_HTML_SHA256="<dist/apps/search-results.html の64桁SHA-256>"
+export STAGE1_WORK_DIR="$HOME/jp-bids-stage1-${TARGET_SHA:0:12}"
 
-# 1. 現在の100%稼働リビジョン名を取得して控える（即時ロールバック先）
-PREV_REVISION=$(gcloud run services describe "$SERVICE_NAME" \
+bash ./cloudshell/stage1-deploy-0pct-candidate.sh \
   --project="$GCP_PROJECT" \
   --region="$GCP_REGION" \
-  --format='value(status.traffic[0].revisionName)')
-echo "Rollback target revision: $PREV_REVISION"
-
-# 2. Cloud Build でコンテナイメージをビルド（dist/apps/search-results.html 同梱）
-IMAGE_URI="asia-northeast1-docker.pkg.dev/${GCP_PROJECT}/cloud-run-source-deploy/${SERVICE_NAME}:v0.10.0"
-gcloud builds submit --project="$GCP_PROJECT" --tag "$IMAGE_URI" .
-
-# 3. 本番トラフィックを変えずに (--no-traffic) タグ付きリビジョンとして配備
-gcloud run deploy "$SERVICE_NAME" \
-  --project="$GCP_PROJECT" \
-  --region="$GCP_REGION" \
-  --image="$IMAGE_URI" \
-  --no-traffic \
-  --tag="$CAND_TAG" \
-  --update-env-vars="JP_BIDS_PROFILE=public_mvp,JP_BIDS_DOCUMENT_EXTRACTION=off,JP_BIDS_BASE_URL=https://mcp.bid-jp.com"
-
-# 4. タグ付き検証URLを取得
-CAND_URL=$(gcloud run services describe "$SERVICE_NAME" \
-  --project="$GCP_PROJECT" \
-  --region="$GCP_REGION" \
-  --format="value(status.traffic.filter(tag:${CAND_TAG}).url)")
-echo "Candidate URL: $CAND_URL"
+  --service="$SERVICE_NAME" \
+  --repo-url="https://github.com/sugukurukabe/koko-call-mcp.git" \
+  --target-sha="$TARGET_SHA" \
+  --image-repo="$IMAGE_REPO" \
+  --candidate-suffix="v0101-${TARGET_SHA:0:8}" \
+  --candidate-tag="cand-v0101" \
+  --expected-version="0.10.1" \
+  --expected-ui-sha256="$EXPECTED_UI_HTML_SHA256" \
+  --work-dir="$STAGE1_WORK_DIR"
 ```
 
-### 2.2 タグ付きURL（`$CAND_URL`）に対するスモークテスト
-
-```bash
-# (a) ヘルスチェック & Ready チェック -> 200 OK
-curl -fsS "${CAND_URL}/health"
-curl -fsS "${CAND_URL}/readyz"
-
-# (b) OAuth メタデータ確認 -> 200 OK ("S256" 含有)
-curl -fsS "${CAND_URL}/.well-known/oauth-protected-resource/mcp"
-curl -fsS "${CAND_URL}/.well-known/oauth-authorization-server"
-
-# (c) 未認証 POST /mcp が 401 + WWW-Authenticate を返すことを確認
-curl -i -s "${CAND_URL}/mcp" \
-  -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | head -n 15
-
-# (d) GET /mcp および DELETE /mcp が 405 を返すことを確認
-curl -s -o /dev/null -w "GET /mcp -> %{http_code}\n" "${CAND_URL}/mcp"
-curl -s -X DELETE -o /dev/null -w "DELETE /mcp -> %{http_code}\n" "${CAND_URL}/mcp"
-```
-
-### 2.3 カナリア 10% → 本番 100% 切替（＆緊急ロールバックコマンド）
-
-```bash
-# 1. 新リビジョン名を取得
-NEW_REVISION=$(gcloud run services describe "$SERVICE_NAME" \
-  --project="$GCP_PROJECT" \
-  --region="$GCP_REGION" \
-  --format="value(status.latestCreatedRevisionName)")
-echo "New revision: $NEW_REVISION"
-
-# 2. 10% カナリア切替 + 本番ドメインヘルス確認
-gcloud run services update-traffic "$SERVICE_NAME" \
-  --project="$GCP_PROJECT" \
-  --region="$GCP_REGION" \
-  --to-revisions="${NEW_REVISION}=10,${PREV_REVISION}=90"
-
-JP_BIDS_REMOTE_BASE_URL=https://mcp.bid-jp.com npm run remote:health
-
-# 3. 問題なければ 100% 本番切替
-gcloud run services update-traffic "$SERVICE_NAME" \
-  --project="$GCP_PROJECT" \
-  --region="$GCP_REGION" \
-  --to-revisions="${NEW_REVISION}=100"
-
-JP_BIDS_REMOTE_BASE_URL=https://mcp.bid-jp.com npm run remote:health
-```
-
-> **【異常時の1コマンド即時ロールバック】**:  
-> いずれかの確認で異常が見つかった場合は、以下の1コマンドで即座に旧リビジョン100%へ戻せます：
-> ```bash
-> gcloud run services update-traffic "$SERVICE_NAME" \
->   --project="$GCP_PROJECT" \
->   --region="$GCP_REGION" \
->   --to-revisions="${PREV_REVISION}=100"
-> ```
+- 実行後、`$STAGE1_WORK_DIR/stage1-verified-receipt.json` と `$STAGE1_WORK_DIR/stage1-config-preservation-diff.json` を確認し、**Stage 2 昇格の個別承認**を得てから Step 3 へ進みます。
 
 ---
 
-## Step 3: MCP Registry・Skill ZIP 配布・npm 次期パッチ（`0.10.1`）公開（約20分）
+## Step 3: 【要承認: Gate 4B-Stage 2】検証済み候補の `100%` 昇格と所有権確認付き復帰制御
 
-> **重要な実環境前提（`npmjs.org` 版数重複防止）**:
-> - **Cloud Run 本番稼働（Step 2）および OpenAI ChatGPT Apps / Anthropic Connectors Directory 提出（Step 4）は、現行の `0.10.0` のまま今すぐ完結できます**（いずれもリモート `https://mcp.bid-jp.com/mcp` を参照するため npm 再公開を待つ必要はありません）。
-> - 一方、公式 `npmjs.org` には既に **`jp-bids-mcp@0.10.0` が公開済み**であり、npm の仕様上同一バージョンへの上書き公開はできません（そのまま `v0.10.0` タグを push すると `release.yml` の `npm publish` がバージョン重複エラーとなります）。
-> - したがって、ローカル用の `npx jp-bids-mcp` パッケージまで今回の更新内容で再公開する場合は、パッチ版数を **`0.10.1`** に上げて `v0.10.1` タグを push してください。
+Stage 1 封印レシートの鮮度内（既定900秒以内、期限切れ時は Stage 1 検証を再取得）に、**`cloudshell/stage2-promote-verified-candidate.sh`** を実行します。
 
-### 3A. 今日すぐ実施（`0.10.0` のまま MCP Registry 反映 & GitHub Release 配布物添付）
+### Stage 2 スクリプトが行う安全制御
+1. **API 接続先固定（`https://run.googleapis.com`）と厳格な期限引数・直前ゲート（`pre-stage2-gate`）**: 本番経路では `https://run.googleapis.com` のみを許可し、任意の API 上書き指定（`--cloudrun-api-base`・`CLOUDRUN_API_BASE`）は `gcloud auth print-access-token` 呼出前に非ゼロ停止します。`--max-age-seconds` / `MAX_AGE_SECONDS` が `[1, 86400]` の有限正整数であることを検証した上、v1（`gcloud run services describe`）と正規 Cloud Run v2 `Service GET` の双方を取得し、`name`・`uid`・`generation`・`observedGeneration`・`reconciling === false`・`trafficStatuses` 収束・トップレベル不透明 `etag`・全タグ・image `sha256` digest・SA・Secret参照一致を検査し、候補URLへ16項目ランタイム検証を再実行します。1つでも不一致があれば **変更 0 回で停止**します。
+2. **Cloud Run v2 `services.patch`（正規 `etag` 前提条件付き）と単調増加時計期限付き非同期 `Operation` 追跡**: レシートに固定された候補リビジョン名（`<CAND_REVISION>=100`）と全保持タグ、v2 `Service GET` 由来の `etag` を含む JSON ペイロードを `https://run.googleapis.com/v2/...` へ `--rpc-timeout-seconds` 上限内で送信し、応答を `Operation` として解析・名前検証した上で、単調増加時計に基づく共通期限（`--op-timeout-seconds`）内で sleep・トークン取得・`curl --max-time`（250ms 子プロセス終了猶予付き）・応答後期限再確認を行う読取専用 poll を実行します。`409`/`412` 競合時は第三者状態を一切上書きせず `CONCURRENT_MODIFICATION_ABORTED` で停止し、`Operation.error` / タイムアウト / 期限後応答 / poll 障害 / 応答不明時は再送も盲目的ロールバックも行わず停止します。
+3. **`trafficStatuses` 収束確認・双方16項目検証・同一契約の上限1回ロールバック**: `Operation.done === true && !Operation.error` 後に最新の v2 `Service GET` で `observedGeneration >= generation`、非 `reconciling`、および `trafficStatuses`（実サービング状態）が `CAND_REVISION=100` に収束したことを確認した上で、`CAND_URL` と `https://mcp.bid-jp.com` の双方で全16項目検証を実行します。万一失敗した場合は v1＋v2 双方で第三者変更がないことを確認し、同一の `etag` 前提条件付き `services.patch`＋`Operation` 追跡＋`trafficStatuses` 収束照合により最大1回のみ `prev100Revision=100` へ復帰します（両シェルとも `phase-journal.json` 書込失敗時は変更RPCを送出せず停止し、変更後の記録失敗時は `UNKNOWN_OR_MAY_HAVE_STARTED` として非ゼロ停止します）。
 
 ```bash
-# 1. 公式 MCP Registry (io.github.sugukurukabe/jp-bids) のメタデータを更新
+export STAGE2_WORK_DIR="${STAGE1_WORK_DIR}/stage2"
+
+bash ./cloudshell/stage2-promote-verified-candidate.sh \
+  --receipt="${STAGE1_WORK_DIR}/stage1-verified-receipt.json" \
+  --production-url="https://mcp.bid-jp.com" \
+  --max-receipt-age-seconds=900 \
+  --work-dir="$STAGE2_WORK_DIR"
+```
+
+- 完了後、`$STAGE2_WORK_DIR/stage2-promotion-complete.json` に `FINAL_OUTCOME: "PROMOTED_AND_VERIFIED"` が記録されていることを確認します。
+- 続けて **Gate 2（実クライアント確認）** として、実際の Claude および ChatGPT から `https://mcp.bid-jp.com/mcp` へ接続し、`0.10.1` での `search_bids_app`（AI Bid Workspace）描画・選択2件16列CSV出力を実機確認して [`docs/VERIFICATION_STATUS.md`](./VERIFICATION_STATUS.md) に記録します。
+
+---
+
+## Step 4: 【要承認: Gate 4A-2 / 4C / 4D】`v0.10.1` npm 公開・MCP Registry・スキル配布
+
+Stage 2 本番稼働確認後、管理者の公開承認を得て実施します。
+
+```bash
+# 1. オンライン環境で最新の脆弱性DBと照合 (Critical 0 / High 0 を再確認して日時を記録)
+NPM_CONFIG_UPDATE_NOTIFIER=false NO_UPDATE_NOTIFIER=1 npm audit --omit=dev
+
+# 2. 未公開版 v0.10.1 タグを作成して push
+# (.github/workflows/release.yml がタグ一致と npm view jp-bids-mcp@0.10.1 の E404 未公開を検証した上で
+#  release:gate -> npm publish --access public --provenance --ignore-scripts を実行)
+git tag v0.10.1 "$TARGET_SHA"
+git push origin v0.10.1
+
+# 3. 公式 MCP Registry (io.github.sugukurukabe/jp-bids) を 0.10.1 に更新
 mcp-publisher login github
 npm run registry:validate
 mcp-publisher publish
 
-# 2. GitHub Release に一般ユーザー向け 1クリック配布ファイルを添付（gh CLI 使用例）
-# ※ release:gate は dist/ を再生成するため、永続保存先の artifacts/skills/searching-japanese-bids.zip
-#   （または再生成後の dist/searching-japanese-bids.zip）を指定します。
-gh release upload v0.10.0 \
+# 4. GitHub Release v0.10.1 に Claude 用スキルZIPを添付
+gh release upload v0.10.1 \
   artifacts/skills/searching-japanese-bids.zip \
-  artifacts/openai-package/jp-bids-submission-candidate-20261022.zip \
   --clobber
-```
-
-### 3B. npm パッケージ自体も更新公開する場合（`0.10.1` パッチリリース）
-
-```bash
-# 1. package.json / package-lock.json / server.json / src/lib/version.ts / CITATION.cff /
-#    public/index.html / public/.well-known/* / .smithery/shttp/manifest.json / plugin.json を 0.10.1 に揃える
-npm version 0.10.1 --no-git-tag-version
-# (各マニフェストを 0.10.1 に更新後、npm run server-card:generate && npm run release:parity && npm run registry:validate で確認)
-
-# 2. コミットして v0.10.1 タグを push（release.yml が npm publish --provenance を自動実行）
-git add -A
-git commit -m "chore(release): v0.10.1"
-git push origin HEAD:main
-git tag v0.10.1
-git push origin v0.10.1
 ```
 
 ---
 
-## Step 4: 一般ユーザーが1クリックで使えるようにするディレクトリ提出（約2〜4時間＋審査待機）
+## Step 5: 【要承認・手動対応: Gate 4D】外部ディレクトリ提出と残課題解消
 
-### 4.1 OpenAI ChatGPT Apps Directory 提出（6ステップ）
+### 5.1 OpenAI ChatGPT Apps Directory 提出前の必須解消事項（未完了の残課題）
 
-詳細原稿・ツール別 justification は [`docs/submissions/chatgpt-apps-submission-checklist.md`](./submissions/chatgpt-apps-submission-checklist.md) および [`docs/submissions/chatgpt-app-submission-instructions.md`](./submissions/chatgpt-app-submission-instructions.md) に完備しています。**本人確認（Persona ID）を含むため、ブラウザ自動操作を使わず代表者・担当者ご本人が操作してください。**
+ローカルの `node scripts/build-openai-package.mjs`（6ファイルZIP・65項目構造/画像検査）は **`LOCAL_PARTIAL_VALIDATION_WITH_SCHEMA_WARNING_NOT_SUBMITTED`** であり、コアプラグインスキーマと OpenAI 拡張フィールドの差異に関する警告 **`CORE_MCP_OPENAI_EXTENSION_MISMATCH`** を伴います。これはローカル構造検査であり、OpenAI ポータルでの互換性・提出完了・審査合格を意味しません。提出前に必ず代表者・担当者本人が以下を完了してください（詳細: [`docs/submissions/chatgpt-apps-submission-checklist.md`](./submissions/chatgpt-apps-submission-checklist.md) / [`docs/submissions/chatgpt-app-submission-instructions.md`](./submissions/chatgpt-app-submission-instructions.md)）：
 
-1. **事前確認（`OAI-01/03/04`）**: KKJ留意事項（`https://www.kkj.go.jp/s/help/notes/`）の根拠記録と `https://mcp.bid-jp.com/privacy` の記載内容を最終確認する。
-2. **法人・本人確認（Organization Verification）**: `https://platform.openai.com` → `Settings → Organization → General` で **Business verification**（`スグクル株式会社 / Sugukuru Inc.`）を完了し、対象プロジェクトが **Global data residency** であることを確認する。
-3. **App Draft 作成 & ドメイン所有確認**:
-   - Dashboard → Apps → Create App で MCP Server URL に `https://mcp.bid-jp.com/mcp` を入力。
-   - チャレンジトークンが表示されたら Cloud Run に一時設定して Verify Domain を押す：
-     ```bash
-     gcloud run services update "$SERVICE_NAME" \
-       --project="$GCP_PROJECT" \
-       --region="$GCP_REGION" \
-       --update-env-vars="OPENAI_APPS_CHALLENGE_TOKEN=<画面に表示されたトークン>"
-     curl -fsS https://mcp.bid-jp.com/.well-known/openai-apps-challenge
-     ```
-4. **OAuth 2.0 設定 & Scan Tools**: 認証方式に **OAuth 2.0**（DCR + PKCE S256、1クリック同意）を選び、`Scan Tools` で公開 **7ツール**（`search_bids`, `list_recent_bids`, `get_bid_detail`, `rank_bids`, `extract_bid_requirements`, `export_bid_shortlist`, `search_bids_app`）が検出されることを確認する。
-5. **App Info・画像・動画・テストケース入力**:
-   - アイコン: `plugins/jp-bids-mcp/assets/logo.png` (512×512) & `composer-icon.png` (64×64)。
-   - スクリーンショット（4〜5枚）および Web版＋モバイル版の1〜2分操作動画URLを添付し、`plugins/jp-bids-mcp/plugin.json` 内のポジティブ5件・ネガティブ3件のテストケースを転記する。
-6. **Tool Justifications 貼付 & Submit for review**: `docs/submissions/chatgpt-app-submission.json` の各ツール justification を貼り付け、課金なし（`commerce: false`）を確認して提出し、発行された **Case ID** を [`docs/submissions/mcp-directories.md`](./submissions/mcp-directories.md) に記録する。
+1. **KKJ 二次利用・第三者提供条件の公式根拠確認（`OAI-01/04`）**: [`docs/submissions/OPENAI_SUBMISSION_LOCAL_PREPARATION_20261021.md`](./submissions/OPENAI_SUBMISSION_LOCAL_PREPARATION_20261021.md) に従い根拠を確認・記録する。
+2. **Organization / Business Verification**: `https://platform.openai.com`（Global data residency プロジェクト）で `スグクル株式会社 / Sugukuru Inc.` の法人・本人確認（Persona ID）を完了する（ブラウザ自動操作不可）。
+3. **ドメイン所有チャレンジ検証**: App Draft 作成時に発行されるトークンを `OPENAI_APPS_CHALLENGE_TOKEN` に設定し、`https://mcp.bid-jp.com/.well-known/openai-apps-challenge` の一致検証を完了する。
+4. **`0.10.1` 実ホスト画面キャプチャ・Web/モバイル操作動画の準備**: `0.10.1` 本番稼働後に実 ChatGPT Developer Mode でスクリーンショットおよびウォークスルー動画を撮影する（過去版の実績で代用しない）。
+5. **提出と Case ID 記録**: 提出完了後に発行される **Case ID** を [`docs/submissions/mcp-directories.md`](./submissions/mcp-directories.md) に記録する。
 
-### 4.2 Anthropic Connectors Directory 更新・提出
+### 5.2 Anthropic Connectors Directory 更新・提出
 
-1. Claude Admin / Connectors 提出画面を開く。
-2. [`docs/submissions/anthropic-connector-checklist.md`](./submissions/anthropic-connector-checklist.md) の `v0.10.0` 原稿（**完全無料・公開7ツール・1クリックOAuth同意・審査用パスワード不要**）および `docs/submissions/assets/` のスクリーンショット5枚を反映して提出する。
-3. 提出日を [`docs/submissions/mcp-directories.md`](./submissions/mcp-directories.md) に記録する。
+1. `0.10.1` 本番稼働後、実 Claude.ai カスタムコネクタで公開7ツールと `AI Bid Workspace` の動作を確認する。
+2. [`docs/submissions/anthropic-connector-checklist.md`](./submissions/anthropic-connector-checklist.md) の `0.10.1` 記載内容に基づき提出・更新し、提出日と確認証跡を [`docs/submissions/mcp-directories.md`](./submissions/mcp-directories.md) に記録する。

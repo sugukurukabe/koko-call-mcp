@@ -1,18 +1,18 @@
-# JP Bids MCP (v0.10.0)
+# JP Bids MCP (v0.10.1)
 
 [![npm version](https://img.shields.io/npm/v/jp-bids-mcp)](https://www.npmjs.com/package/jp-bids-mcp)
 [![CI](https://github.com/sugukurukabe/koko-call-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/sugukurukabe/koko-call-mcp/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Smithery](https://smithery.ai/badge/a-kabe-1qio/jp-bids-mcp)](https://smithery.ai/servers/a-kabe-1qio/jp-bids-mcp)
 
-日本の官公需入札情報を普段お使いのAI（Claude / ChatGPT）から検索・比較・公式URL確認・16列CSV出力できるMCPサーバー（**v0.10.0・完全無料・インストール不要・公開7ツール**）。<br>
-Search, compare, verify official notice URLs, and export 16-column CSV/JSON shortlists of Japanese government procurement notices via MCP (**v0.10.0, 100% free, read-centric, 7 public tools + interactive AI Bid Workspace UI**).<br>
-Cari, bandingkan, periksa URL resmi, dan ekspor CSV/JSON 16 kolom pengumuman pengadaan pemerintah Jepang melalui MCP (**v0.10.0, sepenuhnya gratis, read-centric, 7 alat publik**).
+日本の官公需入札情報を普段お使いのAI（Claude / ChatGPT）から検索・比較・公式URL確認・16列CSV出力できるMCPサーバー（**v0.10.1・完全無料・インストール不要・公開7ツール**）。<br>
+Search, compare, verify official notice URLs, and export 16-column CSV/JSON shortlists of Japanese government procurement notices via MCP (**v0.10.1, 100% free, read-centric, 7 public tools + interactive AI Bid Workspace UI**).<br>
+Cari, bandingkan, periksa URL resmi, dan ekspor CSV/JSON 16 kolom pengumuman pengadaan pemerintah Jepang melalui MCP (**v0.10.1, sepenuhnya gratis, read-centric, 7 alat publik**).
 
 [日本語ガイド (README.ja.md)](README.ja.md) · [使用説明書 (USER_GUIDE.ja.md)](docs/USER_GUIDE.ja.md) · [Panduan Bahasa Indonesia (README.id.md)](README.id.md)
 
-> **100% Free & Read-Only / 完全無料・読み取り中心**<br>
-> All 7 public tools and the interactive **AI Bid Workspace** UI are free with zero sign-up, zero credit card, and zero Stripe billing calls. The server never submits bids or writes to external systems.
+> **100% Free & Read-Only (`public_mvp`) / 完全無料・読み取り中心**<br>
+> All 7 `public_mvp` tools and the interactive **AI Bid Workspace** UI are free with zero sign-up, zero credit card, and zero runtime Stripe billing calls (`src/lib/billing.ts` and the `stripe` package remain in the repository solely for optional local `full_local` development and are never registered in `public_mvp`). The server never submits bids or writes to external systems.
 
 ---
 
@@ -79,7 +79,7 @@ To give Claude built-in mastery of Japanese prefecture codes, procurement catego
 
 | Plan | Price | Included |
 |---|---|---|
-| **Public MVP (`v0.10.0`)** | **Free / 無料 / Gratis** | All 7 public tools + single-file MCP Apps UI (`AI Bid Workspace`). Zero subscriptions or billing calls. |
+| **Public MVP (`v0.10.1`)** | **Free / 無料 / Gratis** | All 7 public tools + single-file MCP Apps UI (`AI Bid Workspace`). Zero subscriptions or runtime billing calls. |
 
 *(Excludes third-party AI client subscriptions or self-hosted cloud costs / 外部AIクライアント利用料や自己ホスト時のクラウド費用は除きます).*
 
@@ -112,7 +112,7 @@ JP Bids MCP pairs seamlessly with [J-Grants MCP](https://github.com/digital-go-j
 
 ```text
 Remote MCP:             https://mcp.bid-jp.com/mcp
-npm package:            jp-bids-mcp (v0.10.0)
+Candidate version:      0.10.1 (currently published npm package: jp-bids-mcp@0.10.0)
 Registry metadata name: io.github.sugukurukabe/jp-bids
 ```
 
@@ -182,9 +182,9 @@ To test UI rendering and all 35 Gate 1 acceptance sub-conditions locally with **
 node --import ./evidence/q02_batch2/net-guard.batch2.path-null-fix.mjs tests/acceptance/gate1-runner.mjs
 ```
 
-### 4. Protocol & Registry Specifications (`v0.10.0`)
+### 4. Protocol & Registry Specifications (`v0.10.1`)
 
-- **MCP `2025-11-25` & `2026-07-28` Dual Readiness**: Accepts both protocol versions, validates `Mcp-Method` / `Mcp-Name` routing headers, emits `Cache-Control: no-store` on OAuth token responses, and includes RFC 9207 `iss` ([docs/spec-notes/mcp-2026-07-28.md](docs/spec-notes/mcp-2026-07-28.md)).
+- **MCP `2025-11-25` & Stateless `2026-07-28` HTTP Adapter**: Runs `@modelcontextprotocol/sdk@1.32.2` (`2025-11-25` native) with a stateless `2026-07-28` HTTP boundary adapter in `src/transports/http.ts` enforcing `_meta["io.modelcontextprotocol/protocolVersion"]`, `Mcp-Method`, method-aware `Mcp-Name` (`params.name` for `tools/call`/`prompts/get`, `params.uri` for `resources/read`), `Cache-Control: no-store`, and RFC 9207 `iss` ([docs/spec-notes/mcp-2026-07-28.md](docs/spec-notes/mcp-2026-07-28.md)).
 - **Official MCP Registry (`server.json`)**: Conforms to `2025-12-11/server.schema.json` (`io.github.sugukurukabe/jp-bids`).
 - **Server Card Discovery (`public/.well-known/mcp/server-card.json`)**: Exposes full JSON schemas and `_meta.ui` bindings for the 7 `public_mvp` tools.
 

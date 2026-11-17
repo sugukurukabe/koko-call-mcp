@@ -1,10 +1,13 @@
 # JP Bids MCP 検証状況と既知の問題
 
-更新日: 2026-11-11 JST / 対象: Public版0.10.0
+更新日: 2026-11-17 JST / 対象: 公開候補 `0.10.1`（`public-candidate-20261117-v6` / ※ `npmjs.org` 既公開版は `0.10.0`）
 
-実装されている機能、固定データによる自動テスト、実クライアントの確認を分けて記録します。説明書は[こちら](./USER_GUIDE.ja.md)、機能の入出力・制約は[機能仕様書](./FUNCTIONAL_SPEC.md)を参照してください。
+実装されている機能、固定データおよびローカル模擬ブラウザによる自動テスト、過去版での実クライアント確認、および本 `0.10.1` 候補における未実施事項を厳密に分けて記録します。説明書は[こちら](./USER_GUIDE.ja.md)、機能の入出力・制約は[機能仕様書](./FUNCTIONAL_SPEC.md)、承認境界と残課題は[承認境界マトリクス](../JP_BIDS_CLIENT_ACCEPTANCE_APPROVAL_MATRIX_v1.0.md)を参照してください。
 
-## 本番Claudeで確認した範囲
+> **`0.10.1` 候補における実機・本番状態の扱い**:
+> 本 `0.10.1` 候補（`dist/apps/search-results.html` `sha256: 92532dfb047ca3cac07968258d58dceba204f432bf11bdf3ae7d3c4c69e4d741`）については、ローカルの Node VM 起動検査および `127.0.0.1` ヘッドレスブラウザ模擬ホスト検証（13項目＋故障注入3種負例）まで完了していますが、**Cloud Run への配備・現在の本番状態照会（`UNCONFIRMED_NOT_QUERIED`）および実 Claude / 実 ChatGPT クライアント上での表示・操作確認（`NOT_EXECUTED_ON_0_10_1`）は未実施**です。以下の本番確認記録は過去版時点の参考実績であり、`0.10.1` の実ホスト受入完了証拠とは扱いません。
+
+## 【過去版参考実績】本番Claudeで確認した範囲（2026-10-21 JST）
 
 | 操作 | 確認内容 | 証拠の範囲 |
 | --- | --- | --- |
@@ -28,7 +31,7 @@
 
 ## 固定データとMCPプロトコルの自動テスト
 
-公開リポジトリ（`SUGUKURU-CO-LTD/jp-bids-mcp`、Public版 `0.10.0`）のコミット `9afe0c6ffb1ec18930c1b358d43ecec784ff7da7` 時点では28ファイル・222テスト（公開 `main` `4a3ca72` 時点では28ファイル・224テスト、ローカル是正候補 `0fa2e9b` / `f8363c0` では29ファイル・229テスト）の成功を確認しています。なお、本作業ツリー（`sugukurukabe/koko-call-mcp` ベース、`package.json` 版数 `0.9.0`・`full_local` テスト含む）では41ファイル・290テスト（および独立サブパッケージ `gateway/` で8ファイル・63テスト）の自動テストが通過します（リポジトリ間の版数・履歴統合は未完了）。
+公開リポジトリ（`SUGUKURU-CO-LTD/jp-bids-mcp`、Public版 `0.10.0`）のコミット `9afe0c6ffb1ec18930c1b358d43ecec784ff7da7` 時点では28ファイル・222テスト（公開 `main` `4a3ca72` 時点では28ファイル・224テスト、ローカル是正候補 `0fa2e9b` / `f8363c0` では29ファイル・229テスト）の成功を確認しています。また、本公開候補ツリー（`public-candidate-20261117-v6`、`sugukurukabe/koko-call-mcp` ベース、版数 `0.10.1`）では `npm run check`（43テストファイル・305テスト合格）、オフライン Gate 1 受入試験（35条件：オフライン構造検査・Node VM 起動検査・ローカルヘッドレスブラウザ UI 13項目実操作）、`PUBLIC-V5-F01` 子孫プロセス確実回収プローブ（5条件：`/proc` 走査＋`JP_BIDS_OWNED_STEP_TOKEN`＋隔離PGID＋`timeout_flag` 完遂検証）、および Cloud Shell Stage 1/Stage 2 オフライン模擬試験（42シナリオ：標準v1＋正規v2 `Service GET` `etag`・単調増加時計期限付き非同期 `Operation` 追跡・`trafficStatuses` 収束・接続先固定化・子孫プロセス回収を含む）が外部通信 0 回で通過しています。
 
 - `multi-organization-parity.test.ts`（公開リポジトリ `SUGUKURU-CO-LTD/jp-bids-mcp` 側）: 複数の発注機関を含む固定データで、機関名・評価理由の対応と配列順を変えた場合の混入の有無を検査。
 - `csv-pipeline-fidelity.test.ts`（公開リポジトリ `SUGUKURU-CO-LTD/jp-bids-mcp` 側）: MCP SDKのClientとInMemoryTransportを使用。検索モード・選択モードのCSVについて、ヘッダーと各行の16列、件数、案件Key、機関と理由の対応を検査。連続実行と選択モードでの検索呼出0回も検査。

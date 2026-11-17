@@ -1,80 +1,63 @@
-# MCP Directory Submission Notes (v0.10.0)
+# MCP Directory Submission Notes (`v0.10.1` Candidate)
 
 > Anthropic Connectors Directory チェックリスト: [`anthropic-connector-checklist.md`](./anthropic-connector-checklist.md)  
 > OpenAI ChatGPT Apps チェックリスト: [`chatgpt-apps-submission-checklist.md`](./chatgpt-apps-submission-checklist.md)（操作手順: [`chatgpt-app-submission-instructions.md`](./chatgpt-app-submission-instructions.md)）  
-> 即日公開ランブック: [`../GO_LIVE_TODAY_RUNBOOK.md`](../GO_LIVE_TODAY_RUNBOOK.md)
+> 段階的本番配備・公開ランブック: [`../GO_LIVE_TODAY_RUNBOOK.md`](../GO_LIVE_TODAY_RUNBOOK.md)
 
 ---
 
 ## 日本語
 
-JP Bids MCP (`v0.10.0`・完全無料・公開7ツール＋AI Bid Workspace UI) の各ディレクトリ・レジストリ掲載状況です。
+JP Bids MCP 公開候補（**`v0.10.1`**・`JP_BIDS_PROFILE=public_mvp`・公開7ツール＋AI Bid Workspace UI）の各ディレクトリ・レジストリ準備状況です（※ `npmjs.org` には `jp-bids-mcp@0.10.0` が既公開のため、本候補は未公開の `0.10.1` に統一しています。本候補パッケージ作成時点では外部申請・本番配備は未実施です）。
 
-### 基本情報 (`v0.10.0`)
+### 基本情報 (`0.10.1` 候補)
 
-- Display Name: `JP Bids`（パッケージ名: `jp-bids-mcp`）
-- Version: `0.10.0` (`JP_BIDS_PROFILE=public_mvp`, 無料7ツール・読み取り専用)
+- Display Name: `JP Bids`（npm パッケージ名: `jp-bids-mcp`）
+- Candidate Version: `0.10.1`（未公開 / `JP_BIDS_PROFILE=public_mvp` 無料公開7ツール・読み取り専用 / ※ 既公開 npm 版は `0.10.0`）
 - MCP Registry Name: `io.github.sugukurukabe/jp-bids`
-- Remote Endpoint: `https://mcp.bid-jp.com/mcp`（Streamable HTTP + 1クリック OAuth 2.0 DCR / PKCE S256）
+- Remote Endpoint: `https://mcp.bid-jp.com/mcp`（Streamable HTTP + 1クリック OAuth 2.0 DCR / PKCE S256 ※ `0.10.1` は未配備）
 - GitHub: `https://github.com/sugukurukabe/koko-call-mcp`
 - Data Source: 中小企業庁 官公需情報ポータルサイト 検索API（`https://www.kkj.go.jp/s/help/notes/`）
 
-### Submission Targets と状態
+### Submission Targets と現在の正直な状態
 
-| ディレクトリ / 配布チャネル | 状態 (`v0.10.0`) | 備考・次のアクション |
+| ディレクトリ / 配布チャネル | 現在の状態 (`0.10.1` 候補) | 残課題・承認後のアクション |
 |---|---|---|
-| **Anthropic Connectors Directory** | `v0.10.0` 無料7ツール原稿整備済み（提出・更新準備完了） | `anthropic-connector-checklist.md` に沿って管理画面で反映 |
-| **OpenAI ChatGPT Apps Directory** | `v0.10.0` 無料7ツール＋`AI Bid Workspace` 申請パッケージ検証済み（65/65 PASS・未提出） | `chatgpt-app-submission-instructions.md` の6ステップ（法人確認・ドメイン検証・提出）を実施 |
-| **MCP Official Registry** (`io.github.sugukurukabe/jp-bids`) | `v0.9.0` 公開実績あり / `v0.10.0` `server.json` 検証済み | `v0.10.0` デプロイ後に `mcp-publisher publish` を実行 |
-| **Smithery** | 掲載済み (`listed`) | `.smithery/shttp/manifest.json` を `v0.10.0` 公開7ツールに同期済み |
-| **GitHub Releases (Skills & Plugin ZIP)** | `dist/searching-japanese-bids.zip` & OpenAI提出用ZIP 生成可能 | `v0.10.0` リリースページに添付して1クリック配布 |
-| **GitHub topics** | 完了 | - |
-| awesome-mcp-servers / Glama / PulseMCP / mcpservers.org | 任意申請候補 | `LAUNCHGUIDE.md` の説明文を流用可能 |
+| **Anthropic Connectors Directory** | ローカル原稿整備済み・**未提出** (`NOT_SUBMITTED`) | 再監査・Stage 1/2 昇格承認後、実 Claude 上で `0.10.1` の表示・操作を確認（現在 `NOT_EXECUTED_ON_0_10_1`）してから提出 |
+| **OpenAI ChatGPT Apps Directory** | **`LOCAL_PARTIAL_VALIDATION_WITH_SCHEMA_WARNING_NOT_SUBMITTED`**<br>（6ファイル構成ZIP・ローカル構造/画像検査 `65/65` 通過、スキーマ警告 **`CORE_MCP_OPENAI_EXTENSION_MISMATCH`** あり・**未提出**） | ポータル互換性確認・審査合格とは別。提出前に ① KKJ二次利用条件根拠確認 (`OAI-01/04`)、② Business Verification、③ ドメインチャレンジ検証、④ `0.10.1` 実 ChatGPT 画面・動画取得、⑤ 提出と **Case ID** 記録が必要（現在 Case ID: `UNASSIGNED_NOT_SUBMITTED`） |
+| **npm (`jp-bids-mcp`)** | `0.10.0` 既公開 / **`0.10.1` 未公開** | 再監査・公開承認後、`v0.10.1` タグ push により `.github/workflows/release.yml`（既公開版 fail-closed 停止ゲート付き）で公開 |
+| **MCP Official Registry** (`io.github.sugukurukabe/jp-bids`) | `0.10.1` `server.json` ローカル検証済み・**未公開** | `0.10.1` Cloud Run 昇格・npm 公開後に `mcp-publisher publish` を実行 |
+| **Smithery** | 既存掲載あり (`listed`) / `.smithery/shttp/manifest.json` を `0.10.1` 公開7ツールに同期済み | リモート更新後に反映確認 |
+| **GitHub Releases (Skills ZIP)** | `artifacts/skills/searching-japanese-bids.zip` (`0.10.1`, 3ファイル) ローカル生成済み・**未アップロード** | `v0.10.1` リリース承認後に添付 |
 
 ### Short Description
 
 ```text
-Free, read-only MCP server (7 tools + AI Bid Workspace UI) for searching, ranking, inspecting official URLs, and exporting 16-column CSV/JSON shortlists of Japanese government procurement notices (KKJ).
+Free, read-only MCP server (7 public_mvp tools + AI Bid Workspace UI) for searching, ranking, inspecting official URLs, and exporting 16-column CSV/JSON shortlists of Japanese government procurement notices (KKJ).
 ```
 
 ---
 
 ## English
 
-Directory and registry status for **JP Bids MCP (`v0.10.0`)** — 7 free, read-only procurement tools + single-file MCP Apps UI (`AI Bid Workspace`).
+Directory and registry status for **JP Bids MCP (`0.10.1` candidate)** (`JP_BIDS_PROFILE=public_mvp`, 7 free tools + single-file `AI Bid Workspace` UI; `jp-bids-mcp@0.10.0` is already published on `npmjs.org`, while `0.10.1` has not yet been deployed or published).
 
-### Basic Information (`v0.10.0`)
-
-- Display Name: `JP Bids` (npm package: `jp-bids-mcp`)
-- Version: `0.10.0` (`JP_BIDS_PROFILE=public_mvp`, 7 free tools, zero billing)
-- Registry Name: `io.github.sugukurukabe/jp-bids`
-- Remote Endpoint: `https://mcp.bid-jp.com/mcp` (Streamable HTTP + 1-click OAuth 2.0 DCR / PKCE S256)
-- GitHub: `https://github.com/sugukurukabe/koko-call-mcp`
-- Data Source: Small and Medium Enterprise Agency KKJ procurement search API
-
-### Submission Targets
-
-| Directory / Channel | Status (`v0.10.0`) | Notes |
+| Directory / Channel | Current Status (`0.10.1` Candidate) | Remaining Prerequisites |
 |---|---|---|
-| **Anthropic Connectors Directory** | Ready for `v0.10.0` 7-tool free listing submit/update | See `anthropic-connector-checklist.md` |
-| **OpenAI ChatGPT Apps Directory** | Validated 6-file package (`65/65` checks PASS) for all 7 free tools; pending org & domain verification | Follow 6 steps in `chatgpt-app-submission-instructions.md` |
-| **MCP Official Registry** | `v0.9.0` published; `v0.10.0` `server.json` validated | Run `mcp-publisher publish` after `v0.10.0` Cloud Run deploy |
-| **Smithery** | Listed | `.smithery/shttp/manifest.json` synced to `v0.10.0` 7 public tools |
-| **GitHub Releases (Claude Skill & Plugin ZIP)** | Ready (`dist/searching-japanese-bids.zip`) | Attach to `v0.10.0` GitHub Release |
-| **GitHub topics** | Completed | - |
+| **Anthropic Connectors Directory** | Checklist prepared (`0.10.1`); **not submitted** | Deploy `0.10.1` after approval, execute live Claude host UI verification (`NOT_EXECUTED_ON_0_10_1`), then submit |
+| **OpenAI ChatGPT Apps Directory** | **`LOCAL_PARTIAL_VALIDATION_WITH_SCHEMA_WARNING_NOT_SUBMITTED`** (6-file ZIP, `65/65` local structural/PNG/ZIP checks, warning **`CORE_MCP_OPENAI_EXTENSION_MISMATCH`**; **not submitted**, Case ID: `UNASSIGNED_NOT_SUBMITTED`) | Local checks do not prove portal compatibility or approval. Complete `OAI-01/04` KKJ terms check, Business Verification, Domain Challenge, live `0.10.1` ChatGPT screenshots/video, and record Case ID |
+| **npm (`jp-bids-mcp`)** | `0.10.0` already published; **`0.10.1` unpublished** | Push `v0.10.1` tag after approval (`release.yml` enforces fail-closed `E404` check) |
+| **MCP Official Registry** | `0.10.1` `server.json` locally validated; **not published** | Run `mcp-publisher publish` after `0.10.1` deployment |
+| **GitHub Releases (Claude Skill ZIP)** | `artifacts/skills/searching-japanese-bids.zip` (`0.10.1`, 3 files) built locally; **not uploaded** | Attach to `v0.10.1` release after approval |
 
 ---
 
 ## Bahasa Indonesia
 
-Status direktori dan registri untuk **JP Bids MCP (`v0.10.0`)** — 7 alat publik gratis & read-only + antarmuka MCP Apps (`AI Bid Workspace`).
+Status direktori dan registri untuk kandidat **JP Bids MCP (`0.10.1`)** (`JP_BIDS_PROFILE=public_mvp`, 7 alat gratis + UI `AI Bid Workspace`; versi `0.10.0` sudah terbit di `npmjs.org`, sedangkan `0.10.1` belum di-deploy atau diterbitkan).
 
-### Target Submission
-
-| Direktori / Kanal | Status (`v0.10.0`) | Catatan |
+| Direktori / Kanal | Status Saat Ini (`0.10.1`) | Prasyarat Tersisa |
 |---|---|---|
-| **Anthropic Connectors Directory** | Siap diajukan/diperbarui untuk `v0.10.0` (7 alat gratis) | Lihat `anthropic-connector-checklist.md` |
-| **OpenAI ChatGPT Apps Directory** | Paket 6 file tervalidasi (`65/65` LULUS) untuk 7 alat gratis; menunggu verifikasi organisasi & domain | Ikuti 6 langkah di `chatgpt-app-submission-instructions.md` |
-| **MCP Official Registry** | `v0.9.0` telah terbit; `server.json` `v0.10.0` tervalidasi | Jalankan `mcp-publisher publish` setelah deploy `v0.10.0` |
-| **Smithery** | Terdaftar (`listed`) | `.smithery/shttp/manifest.json` disinkronkan ke 7 alat publik `v0.10.0` |
-| **GitHub topics** | Selesai | - |
+| **Anthropic Connectors Directory** | Dokumen `0.10.1` siap secara lokal; **belum diajukan** | Deploy `0.10.1` setelah persetujuan, verifikasi UI di klien Claude nyata (`NOT_EXECUTED_ON_0_10_1`), lalu ajukan |
+| **OpenAI ChatGPT Apps Directory** | **`LOCAL_PARTIAL_VALIDATION_WITH_SCHEMA_WARNING_NOT_SUBMITTED`** (ZIP 6 file, `65/65` pemeriksaan struktural lokal, peringatan **`CORE_MCP_OPENAI_EXTENSION_MISMATCH`**; **belum diajukan**) | Selesaikan konfirmasi ketentuan KKJ (`OAI-01/04`), Business Verification, tantangan domain, tangkapan layar/video `0.10.1` di ChatGPT nyata, dan catat Case ID |
+| **npm & MCP Official Registry** | `0.10.1` tervalidasi lokal; **belum diterbitkan** | Terbitkan setelah audit ulang dan persetujuan eksplisit |
