@@ -5,14 +5,41 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
+  pull-requests: read
 
 jobs:
   dependency-review:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/dependency-review-action@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Native dependency review for public repositories
+        if: github.event.repository.private == false
+        uses: actions/dependency-review-action@v5
         with:
           fail-on-severity: moderate
+      - name: Set up dependency audit client for private repositories
+        if: github.event.repository.private
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 24.22.1
+      - name: Check all private-repository dependencies and record lockfile changes
+        if: github.event.repository.private
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: npm run security:dependencies -- --base "$BASE_SHA"
+      - name: Verify dependency evidence contains no secrets
+        id: safe-evidence
+        if: always() && github.event.repository.private
+        run: node scripts/ci-verify-no-secrets.mjs evidence --require=security/dependency-audit.json
+      - name: Upload reviewed dependency evidence
+        if: always() && steps.safe-evidence.outcome == 'success'
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: dependency-security-${{ github.sha }}
+          path: evidence/security/dependency-audit.json
+          if-no-files-found: error
+          retention-days: 7

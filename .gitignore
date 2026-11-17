@@ -40,3 +40,6 @@ ANTIGRAVITY_*.md
 *公開前再点検*.md
 .vscode/
 xmcp/
+
+# Pinned rule source extraction; tracked bundle and provenance are in security/semgrep.
+security/semgrep/vendor/

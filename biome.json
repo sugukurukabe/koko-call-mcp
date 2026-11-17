@@ -17,7 +17,12 @@
       "!evidence",
       "!scratch",
       "!artifacts",
-      "!schemas/*.schema.json"
+      "!schemas/*.schema.json",
+      "!.stryker-tmp",
+      "!.mutation-tmp",
+      "!reports",
+      "!f01-probes-tmp-*",
+      "!security/semgrep/vendor"
     ]
   },
   "formatter": {

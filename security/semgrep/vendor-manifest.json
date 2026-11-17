@@ -1,0 +1,925 @@
+{
+  "recordedAtUtc": "2026-11-17T11:41:21.670152+00:00",
+  "source": "https://github.com/semgrep/semgrep-rules",
+  "commit": "a5ad1714f00c9f7fde980cab0ea1d6dc6d414fd2",
+  "archiveSha256": "e5a7ec33035fc7707b87385cb99e1228c76b1604efe5439e92891f3005714cc3",
+  "selection": "javascript/typescript YAML under security directories; root license/notice files",
+  "fileCount": 183,
+  "files": [
+    {
+      "path": "LICENSE",
+      "bytes": 92,
+      "sha256": "1a6466ae5f1c68631bbd13e3f1aa8f380d84219853c08f0456b853fccfacee1d"
+    },
+    {
+      "path": "javascript/ajv/security/audit/ajv-allerrors-true.yaml",
+      "bytes": 876,
+      "sha256": "6ca5fea0744a265e8625a59031acda251386341382947e1a3d1551699d2b5276"
+    },
+    {
+      "path": "javascript/angular/security/detect-angular-element-methods.yaml",
+      "bytes": 2017,
+      "sha256": "53ed0a99d9e4656c218a130c7457f25b24308ecbf014af556d7fcb7b62b097da"
+    },
+    {
+      "path": "javascript/angular/security/detect-angular-element-taint.yaml",
+      "bytes": 2982,
+      "sha256": "23328bbbcb5d616583589cc3bceca7bef696a69f346691e8c208ad588862346c"
+    },
+    {
+      "path": "javascript/angular/security/detect-angular-open-redirect.yaml",
+      "bytes": 1180,
+      "sha256": "b6fe8dc8d581bd31a83efb91606f7a8ec89c13690e2f7c37220dac91f5e85b95"
+    },
+    {
+      "path": "javascript/angular/security/detect-angular-resource-loading.yaml",
+      "bytes": 1080,
+      "sha256": "56ac5e35640bb870ad6aa5f4507d6905ff0cc1f45072ba781476989c4272d324"
+    },
+    {
+      "path": "javascript/angular/security/detect-angular-sce-disabled.yaml",
+      "bytes": 917,
+      "sha256": "60146159f1d2450dd28a4ab32b825b54b6d22720556ea61903fa08adfcef80fd"
+    },
+    {
+      "path": "javascript/angular/security/detect-angular-trust-as-css.yaml",
+      "bytes": 1078,
+      "sha256": "74b296e8e806034f616893136c16a174303f9c556cca8d3b93f755a6127126e7"
+    },
+    {
+      "path": "javascript/angular/security/detect-angular-trust-as-html-method.yaml",
+      "bytes": 1083,
+      "sha256": "31185bca9e3d04444467bf5de6285b0cb1fb4538b96d70bf4378862ef9d07baa"
+    },
+    {
+      "path": "javascript/angular/security/detect-angular-trust-as-js-method.yaml",
+      "bytes": 1073,
+      "sha256": "bc0fedd40efd649153c4135192ae0a867d7810246db3a11a151bd08b7b42aa03"
+    },
+    {
+      "path": "javascript/angular/security/detect-angular-trust-as-method.yaml",
+      "bytes": 1053,
+      "sha256": "98471a1374782cd2eaca97da3ebbd3a4ce05c18c7bc006a9329ad4fe61142a9f"
+    },
+    {
+      "path": "javascript/angular/security/detect-angular-trust-as-resourceurl-method.yaml",
+      "bytes": 1118,
+      "sha256": "933e25b0d8ec6e0914823144de0561485ba49fb2fd7731d1aba68bed7310fb8b"
+    },
+    {
+      "path": "javascript/angular/security/detect-angular-trust-as-url-method.yaml",
+      "bytes": 1078,
+      "sha256": "d379e93983bf77fb8be0f2684e096944bae15c1a16878e1c873486213c367085"
+    },
+    {
+      "path": "javascript/angular/security/detect-third-party-angular-translate.yaml",
+      "bytes": 1020,
+      "sha256": "16909dd65be9567bceafcd92f8f084af78e3eb6a3061aabe88540ae23b7d3968"
+    },
+    {
+      "path": "javascript/apollo/security/apollo-axios-ssrf.yaml",
+      "bytes": 1383,
+      "sha256": "f93e9aa4ce5336b7000b3692e99abf271886bfff15f775dee09c8e8878050a4a"
+    },
+    {
+      "path": "javascript/argon2/security/unsafe-argon2-config.yaml",
+      "bytes": 1274,
+      "sha256": "694bf4a2db7b031f8e886a87eca661a7604d48047341cf06d45897e460d12fd5"
+    },
+    {
+      "path": "javascript/aws-lambda/security/detect-child-process.yaml",
+      "bytes": 1896,
+      "sha256": "4dc9a8a72a6af4d2f6cb772420f6d6085f382db135105dcc2aff34b4fd22f349"
+    },
+    {
+      "path": "javascript/aws-lambda/security/dynamodb-request-object.yaml",
+      "bytes": 1950,
+      "sha256": "70d379a513be39d3153671da9fa92dc6f279d8004bc1f4c8aa970333fa08fa80"
+    },
+    {
+      "path": "javascript/aws-lambda/security/knex-sqli.yaml",
+      "bytes": 1792,
+      "sha256": "caf1c5f56055363af67ead62f248df123c44ef46d3b2e9d8bbd32f8179d296ba"
+    },
+    {
+      "path": "javascript/aws-lambda/security/mysql-sqli.yaml",
+      "bytes": 2016,
+      "sha256": "d5fa1549406aab261b6e95b82bf4ab238e55f924100e487a2967e965f1fc408e"
+    },
+    {
+      "path": "javascript/aws-lambda/security/pg-sqli.yaml",
+      "bytes": 1682,
+      "sha256": "267e1dea6127d5f6b311a048c8a9de8c7a88e756a90a31c5c2bd737715c919e8"
+    },
+    {
+      "path": "javascript/aws-lambda/security/sequelize-sqli.yaml",
+      "bytes": 1770,
+      "sha256": "f2389a77852e1f2fa95ad9cc41cc05da6b533351ac13ba50a350732efa3f0603"
+    },
+    {
+      "path": "javascript/aws-lambda/security/tainted-eval.yaml",
+      "bytes": 1445,
+      "sha256": "4f8fddb06773facb40bee50b0d31a7f32c560b42f39a609e2397c504d9ed68b1"
+    },
+    {
+      "path": "javascript/aws-lambda/security/tainted-html-response.yaml",
+      "bytes": 1490,
+      "sha256": "75f8a5a377edc368e8c0f4ae9d5c0c52c473993288317565220da538fe279a19"
+    },
+    {
+      "path": "javascript/aws-lambda/security/tainted-html-string.yaml",
+      "bytes": 2078,
+      "sha256": "fb000ca9211864a4f3320b399ef91df627dd1c168443c9e450c218f6e5ccd6b5"
+    },
+    {
+      "path": "javascript/aws-lambda/security/tainted-sql-string.yaml",
+      "bytes": 2123,
+      "sha256": "c0b4169c9501a6b59b09e5b676a49adc48d53069a477f19f2951688e79cfb861"
+    },
+    {
+      "path": "javascript/aws-lambda/security/vm-runincontext-injection.yaml",
+      "bytes": 2006,
+      "sha256": "094f5d3607833b965208747263fa85b2b67f87e4b794b268993e25a02093730a"
+    },
+    {
+      "path": "javascript/bluebird/security/audit/tofastproperties-code-execution.yaml",
+      "bytes": 1115,
+      "sha256": "10b077b1232e52b830a373f9beb4cc2c6b3ff2f2362f4991fee07cb85db1cd98"
+    },
+    {
+      "path": "javascript/browser/security/dom-based-xss.yaml",
+      "bytes": 1165,
+      "sha256": "d34055a348ee0d5e6f5587825bd14c9546997550e624e3966e5ef8438f86381d"
+    },
+    {
+      "path": "javascript/browser/security/eval-detected.yaml",
+      "bytes": 1115,
+      "sha256": "356589363d16cda8bd2ca1d296ce2b6953105ee4c751ddbbc9bcde5849341811"
+    },
+    {
+      "path": "javascript/browser/security/insecure-document-method.yaml",
+      "bytes": 1039,
+      "sha256": "c2071baab4896cb66b3337ef2d901c9c772a6cbcfd4b2c942efb74ee0be3b7f3"
+    },
+    {
+      "path": "javascript/browser/security/insecure-innerhtml.yaml",
+      "bytes": 795,
+      "sha256": "3f2854f92c3c8a1ba3a107a140a5b31789650851be57586fd21a409e129193e4"
+    },
+    {
+      "path": "javascript/browser/security/insufficient-postmessage-origin-validation.yaml",
+      "bytes": 1506,
+      "sha256": "72e69717624b282e678e03aeab8416c883a9d0c286f0496af406a80fd4dcc2bf"
+    },
+    {
+      "path": "javascript/browser/security/open-redirect-from-function.yaml",
+      "bytes": 1960,
+      "sha256": "6afe3ff95252261c3f3502bda97921193e821a6931119f945fa30aae3c122b8d"
+    },
+    {
+      "path": "javascript/browser/security/open-redirect.yaml",
+      "bytes": 3142,
+      "sha256": "896332cf7d17f4ccea855006baebfddd83ccf90e07315958bb62bbc2916950f4"
+    },
+    {
+      "path": "javascript/browser/security/raw-html-concat.yaml",
+      "bytes": 4548,
+      "sha256": "39c8c842711e452c1b4b0b03bc526652d69c887b6ac790215604ec4cde80a403"
+    },
+    {
+      "path": "javascript/browser/security/raw-html-join.yaml",
+      "bytes": 1095,
+      "sha256": "276ca2addaf9507ef1a792411ff8bc71f55f7c93ddbedee902b1a627c1fa271b"
+    },
+    {
+      "path": "javascript/browser/security/wildcard-postmessage-configuration.yaml",
+      "bytes": 795,
+      "sha256": "4bb9d0a44a38c433ebe1b3df30895576a056262c3e12da57cee9c6be9fc0d813"
+    },
+    {
+      "path": "javascript/chrome-remote-interface/security/audit/chrome-remote-interface-compilescript-injection.yaml",
+      "bytes": 1580,
+      "sha256": "9558ad0de583611929d44b1521cb8aa22241d02741172b2f9c20ee418437e9f2"
+    },
+    {
+      "path": "javascript/deno/security/audit/deno-dangerous-run.yaml",
+      "bytes": 1275,
+      "sha256": "a0c95810bafdec79d969995a808549b9846b7d50e993c97450d0cf57d3c1cae1"
+    },
+    {
+      "path": "javascript/express/security/audit/express-check-csurf-middleware-usage.yaml",
+      "bytes": 1456,
+      "sha256": "6b86b942f4560327a225f65d3b8b4ffabae108e05c3ad786b453c070c8e626fb"
+    },
+    {
+      "path": "javascript/express/security/audit/express-check-directory-listing.yaml",
+      "bytes": 1652,
+      "sha256": "1e74ace508017ac44d8fb8d54981f7fd5d446825f5352e00e726fbec51ccee9e"
+    },
+    {
+      "path": "javascript/express/security/audit/express-cookie-settings.yaml",
+      "bytes": 11197,
+      "sha256": "5454f228b1d91b93c47576d16017e15e332e5ffd13549d0bff8a3745926c0f3e"
+    },
+    {
+      "path": "javascript/express/security/audit/express-detect-notevil-usage.yaml",
+      "bytes": 1597,
+      "sha256": "62dc9b6b97ee580b3b6ad18ae7bb8ef9d79570fea089611cb90d8945783643d4"
+    },
+    {
+      "path": "javascript/express/security/audit/express-jwt-not-revoked.yaml",
+      "bytes": 1383,
+      "sha256": "a8c3d45fbcd35eab0443e98e6770dfd74642a1f6841dac59ca3617bb0042039b"
+    },
+    {
+      "path": "javascript/express/security/audit/express-libxml-noent.yaml",
+      "bytes": 2931,
+      "sha256": "b6ab5be236a46d39966f743dd96d184959eb121925fa201f7def860425893dcd"
+    },
+    {
+      "path": "javascript/express/security/audit/express-libxml-vm-noent.yaml",
+      "bytes": 1709,
+      "sha256": "71ee7954ddb00d72371d4a70cdf087df817f7e2bbba48b68ff84a1a820b58a5b"
+    },
+    {
+      "path": "javascript/express/security/audit/express-open-redirect.yaml",
+      "bytes": 4469,
+      "sha256": "64f0f94744db113fe0c5faceefaef5bbdbf98f93cfcbb3c6467d8db4b2c266f0"
+    },
+    {
+      "path": "javascript/express/security/audit/express-path-join-resolve-traversal.yaml",
+      "bytes": 2732,
+      "sha256": "eb0c16f2414023ecc43de3a47ccba2f242fc136d1aa8b25bdce3b73276fca6d9"
+    },
+    {
+      "path": "javascript/express/security/audit/express-res-sendfile.yaml",
+      "bytes": 2446,
+      "sha256": "96d3af39aa5066b659e813e8703584ce839f2d74df69b1b243001f82c00bfe26"
+    },
+    {
+      "path": "javascript/express/security/audit/express-session-hardcoded-secret.yaml",
+      "bytes": 1638,
+      "sha256": "7d9bb3877803e9becb87adebfeb703a251d3ef9e4175edcb1538821660c36289"
+    },
+    {
+      "path": "javascript/express/security/audit/express-ssrf.yaml",
+      "bytes": 7788,
+      "sha256": "110d6fc1493f2a7220d89969f48d495135cb786c49082977c2850ee986209f36"
+    },
+    {
+      "path": "javascript/express/security/audit/express-third-party-object-deserialization.yaml",
+      "bytes": 3026,
+      "sha256": "766fb8851d34792ff58b64e26a12ee2597b909c89915d7088a07faabae0b988c"
+    },
+    {
+      "path": "javascript/express/security/audit/express-xml2json-xxe-event.yaml",
+      "bytes": 2202,
+      "sha256": "573c948baf8093b8f2c6b8ebd930beb55a4258c0d08d2733478c8a90d70f4eea"
+    },
+    {
+      "path": "javascript/express/security/audit/possible-user-input-redirect.yaml",
+      "bytes": 1212,
+      "sha256": "aae4e7ccc3c8952cfcef32308948b030cfb8788096318d21456e69e66d7f04e9"
+    },
+    {
+      "path": "javascript/express/security/audit/remote-property-injection.yaml",
+      "bytes": 2294,
+      "sha256": "193d6a1eb76496758ebdaf9f7c55e916976686cbd97d690198e54f58bd785855"
+    },
+    {
+      "path": "javascript/express/security/audit/res-render-injection.yaml",
+      "bytes": 2205,
+      "sha256": "63ebc257f5f3bbfb2543b3c25b5e2bf8d155408d61f2c577b3d099ded5b1a516"
+    },
+    {
+      "path": "javascript/express/security/audit/xss/direct-response-write.yaml",
+      "bytes": 6736,
+      "sha256": "e73a91ed72b1f2f7fb8bfb975f98cc809001d5af06c7b9a877678d49a0b87a08"
+    },
+    {
+      "path": "javascript/express/security/audit/xss/ejs/explicit-unescape.yaml",
+      "bytes": 1084,
+      "sha256": "2081cbffbfad1683ee35ea8b95b624715cf1783a39e06912385a9d3f07d2983f"
+    },
+    {
+      "path": "javascript/express/security/audit/xss/ejs/var-in-href.yaml",
+      "bytes": 1191,
+      "sha256": "b702befd090bf1f80a8d2aa11d2a280d5ad26ca03f56066998a320caa00e1362"
+    },
+    {
+      "path": "javascript/express/security/audit/xss/ejs/var-in-script-src.yaml",
+      "bytes": 1354,
+      "sha256": "2451e4ac509cfb006a027dfc4730e42f24de9334ac0c721c6e3eee9484ab3ace"
+    },
+    {
+      "path": "javascript/express/security/audit/xss/ejs/var-in-script-tag.yaml",
+      "bytes": 1368,
+      "sha256": "a0e19236741f7be66bfc7f9825810acfe33004743483bcb8c325094fca5c08c9"
+    },
+    {
+      "path": "javascript/express/security/audit/xss/mustache/escape-function-overwrite.yaml",
+      "bytes": 1103,
+      "sha256": "cb045648e431bba77190b9bafb5dab4882789fe056ce0ba3199b32338459b347"
+    },
+    {
+      "path": "javascript/express/security/audit/xss/mustache/explicit-unescape.yaml",
+      "bytes": 1128,
+      "sha256": "5e11ef9298cd7353f268581058caa76fd5d63977a73d5069bd0f9ce68b439628"
+    },
+    {
+      "path": "javascript/express/security/audit/xss/mustache/var-in-script-tag.yaml",
+      "bytes": 1295,
+      "sha256": "26b82d4e2b31fd7f1d853061130329de173bb0ec7b2a7d75bb9db5957051e30a"
+    },
+    {
+      "path": "javascript/express/security/audit/xss/pug/and-attributes.yaml",
+      "bytes": 920,
+      "sha256": "41757422fc08d88350c07de76b5230e80a91ce94f0ea2dc5e542a40f023bd997"
+    },
+    {
+      "path": "javascript/express/security/audit/xss/pug/explicit-unescape.yaml",
+      "bytes": 1075,
+      "sha256": "8d0f075b9ee003d4742d1d54e44bda3d9b77fcc97f28eaa42157562f691f5cf7"
+    },
+    {
+      "path": "javascript/express/security/audit/xss/pug/var-in-href.yaml",
+      "bytes": 1155,
+      "sha256": "5a23c06f82aea2d2f24395decb064491a2b9c371ce1c7cce083c877e3a9a43c0"
+    },
+    {
+      "path": "javascript/express/security/audit/xss/pug/var-in-script-tag.yaml",
+      "bytes": 1458,
+      "sha256": "745eb96f363eaac1cb3671a5668d9a6aa0eb9144086d09c682a845eeab98e32f"
+    },
+    {
+      "path": "javascript/express/security/cors-misconfiguration.yaml",
+      "bytes": 2268,
+      "sha256": "97453880350c250408af9d7ce0c8ff177acf1f4419ca3f75a9c2583e1748e180"
+    },
+    {
+      "path": "javascript/express/security/express-data-exfiltration.yaml",
+      "bytes": 1975,
+      "sha256": "990263632cc239dcec752f396492a77be0784d2cc9e882f1f1453321e302c82d"
+    },
+    {
+      "path": "javascript/express/security/express-expat-xxe.yaml",
+      "bytes": 2705,
+      "sha256": "f03645ff22d02ed58fffcb6647009168359a5b4854e46f2e021a4eaa132fa591"
+    },
+    {
+      "path": "javascript/express/security/express-insecure-template-usage.yaml",
+      "bytes": 5088,
+      "sha256": "9d7b08fd25478ca520eb0835f8aa3b39f252731df15018c226eef9695819bbc1"
+    },
+    {
+      "path": "javascript/express/security/express-jwt-hardcoded-secret.yaml",
+      "bytes": 1583,
+      "sha256": "873fb9a36319838d0d70cb6bc01279814b1c2e3e28dd3cd8e21c1ee9f0ae25ff"
+    },
+    {
+      "path": "javascript/express/security/express-phantom-injection.yaml",
+      "bytes": 2234,
+      "sha256": "ed0d30cbb9e0d2be43a991a4788845f14a5bb25ff2829c41355e11bc7ae8f841"
+    },
+    {
+      "path": "javascript/express/security/express-puppeteer-injection.yaml",
+      "bytes": 2401,
+      "sha256": "c3e4dc920e40889f2ac6f151c0fa73f4460b5af6f555996dc7c1e16efd7f9a3f"
+    },
+    {
+      "path": "javascript/express/security/express-sandbox-injection.yaml",
+      "bytes": 2088,
+      "sha256": "40fbb1a8b591cf543a0814c7d8848bf9297093fd78061efb6d62270ba115de38"
+    },
+    {
+      "path": "javascript/express/security/express-vm-injection.yaml",
+      "bytes": 2073,
+      "sha256": "ae73d6c55ba88fb5d13110fba82f33d7c152c6f6ce13f86df9dc2c9edb3f368b"
+    },
+    {
+      "path": "javascript/express/security/express-vm2-injection.yaml",
+      "bytes": 2298,
+      "sha256": "1a97256d1e9ef8a7ca583eea8ae5d55e3d39184aa8bc77db69b5f51ed69f4370"
+    },
+    {
+      "path": "javascript/express/security/express-wkhtml-injection.yaml",
+      "bytes": 4219,
+      "sha256": "5bbfcf24aead0373e0cf75aff64006c3f37e920d1a2e36a0a70c76d3c4814cb4"
+    },
+    {
+      "path": "javascript/express/security/express-xml2json-xxe.yaml",
+      "bytes": 2622,
+      "sha256": "ffd2410ced3c3e111cfb9dddf680d16fc49f456cab32cb559270bcd117606a83"
+    },
+    {
+      "path": "javascript/express/security/injection/raw-html-format.yaml",
+      "bytes": 2919,
+      "sha256": "d00b6ba1fe8476e9fe29c9e9e9e1b631bd67c466d94087d0e0834f5036fcc6af"
+    },
+    {
+      "path": "javascript/express/security/injection/tainted-sql-string.yaml",
+      "bytes": 2253,
+      "sha256": "22dab9b0182dd25bb5aaf3ae796973dc53ea91ccb0e747055fd15ee1ef9a8592"
+    },
+    {
+      "path": "javascript/express/security/require-request.yaml",
+      "bytes": 1979,
+      "sha256": "d62c5837e4ff26b67ff6df494ba8cf135ae902309273875480c6560c3af3ef79"
+    },
+    {
+      "path": "javascript/express/security/x-frame-options-misconfiguration.yaml",
+      "bytes": 2253,
+      "sha256": "04de6503bb2f93da5abf75fa6f4535681ff3eda05597c8ae1d708df898197ed1"
+    },
+    {
+      "path": "javascript/fbjs/security/audit/insecure-createnodesfrommarkup.yaml",
+      "bytes": 935,
+      "sha256": "9b9fc4b8bfd37054c8e6f17a9e194037b1dfc3c6f97d3cda69de8b8e9466544c"
+    },
+    {
+      "path": "javascript/grpc/security/grpc-nodejs-insecure-connection.yaml",
+      "bytes": 1410,
+      "sha256": "dea1767cf8e6179b159fe1b3ac3d3eb0abe23072c4bf6a79edfd71db658f4528"
+    },
+    {
+      "path": "javascript/intercom/security/audit/intercom-settings-user-identifier-without-user-hash.yaml",
+      "bytes": 1784,
+      "sha256": "68495a5578d32f9b532daee5497c53104414847ca0bb4127f6af82064309ebc3"
+    },
+    {
+      "path": "javascript/jose/security/audit/jose-exposed-data.yaml",
+      "bytes": 1529,
+      "sha256": "9530a8421db6cb2342336442ed4bda2d94ce46c432cb8559fae0027608058652"
+    },
+    {
+      "path": "javascript/jose/security/jwt-hardcode.yaml",
+      "bytes": 2089,
+      "sha256": "7e31bdbca8407e577e9917f0c48dbb845a1873d42c7eb0b26f54903ef3fefaa4"
+    },
+    {
+      "path": "javascript/jose/security/jwt-none-alg.yaml",
+      "bytes": 1732,
+      "sha256": "01506ef4f6a16636863369425d853bf751bea29791a15e2037fa25cc098d2a30"
+    },
+    {
+      "path": "javascript/jquery/security/audit/jquery-insecure-method.yaml",
+      "bytes": 1687,
+      "sha256": "37b93e45c77cab72365d6bf36486dc0946759d91e30bf566c40b318566285737"
+    },
+    {
+      "path": "javascript/jquery/security/audit/jquery-insecure-selector.yaml",
+      "bytes": 2116,
+      "sha256": "0bf767dc6a3b85005d4bbf0157e2bac8051a5b8947660ed262b7755b67073726"
+    },
+    {
+      "path": "javascript/jquery/security/audit/prohibit-jquery-html.yaml",
+      "bytes": 1492,
+      "sha256": "44b5bdb44dc29f9086defe4a247744926f93314f638280845e9ad32135f488d1"
+    },
+    {
+      "path": "javascript/jsonwebtoken/security/audit/jwt-decode-without-verify.yaml",
+      "bytes": 1594,
+      "sha256": "7b02fe998a434f6a7df5976848c1ea5d3ca3eae8cb299c2631c69d6cb239ea32"
+    },
+    {
+      "path": "javascript/jsonwebtoken/security/audit/jwt-exposed-data.yaml",
+      "bytes": 1320,
+      "sha256": "aad1ab235fb6c710eca4d30f918a5bab11cbd7c56eb9066ee53bf512ee3e3ab5"
+    },
+    {
+      "path": "javascript/jsonwebtoken/security/jwt-hardcode.yaml",
+      "bytes": 2164,
+      "sha256": "987a43509b40e20dbd032f11c0adf04b21a163b5684e41e1bb48ad41bfe11e4d"
+    },
+    {
+      "path": "javascript/jsonwebtoken/security/jwt-none-alg.yaml",
+      "bytes": 1427,
+      "sha256": "61cd42e96ebbb3b88e8dec1fc5096378467a8a15636104c2385348776c80d3f4"
+    },
+    {
+      "path": "javascript/jwt-simple/security/jwt-simple-noverify.yaml",
+      "bytes": 1451,
+      "sha256": "acc82f3ead23d5ec166bb17e1c8925346198872306488fdf8a3032543db78031"
+    },
+    {
+      "path": "javascript/lang/security/audit/code-string-concat.yaml",
+      "bytes": 2938,
+      "sha256": "6a1d29327dd908382bdf9109e223f6ed4ca6167ae2be6617b59191c892e3c0cc"
+    },
+    {
+      "path": "javascript/lang/security/audit/dangerous-spawn-shell.yaml",
+      "bytes": 1948,
+      "sha256": "1a81f91e9ad9ea4c62a9b0bda4dcf3cf2fc1bb6f2d9e2580ea3effa6bfe9ba74"
+    },
+    {
+      "path": "javascript/lang/security/audit/detect-non-literal-fs-filename.yaml",
+      "bytes": 10929,
+      "sha256": "3a7da5626cf3186380f3be1daf1ed38ba766075912d9b0dcd7ae73b7c51bb42e"
+    },
+    {
+      "path": "javascript/lang/security/audit/detect-non-literal-regexp.yaml",
+      "bytes": 1662,
+      "sha256": "cc2b78967131265c24e9700f36195ef1f3ba11f651598ee8a583e900c60e03fc"
+    },
+    {
+      "path": "javascript/lang/security/audit/detect-non-literal-require.yaml",
+      "bytes": 1057,
+      "sha256": "f02a0340092111bfea7df82492e9f1ad12071403984b9c863c3f755bc815d8c5"
+    },
+    {
+      "path": "javascript/lang/security/audit/detect-redos.yaml",
+      "bytes": 1411,
+      "sha256": "c649d508a43408dee1339e4f49415cbfb1cacfc7b1cafb7cb22ba81f335665bb"
+    },
+    {
+      "path": "javascript/lang/security/audit/hardcoded-hmac-key.yaml",
+      "bytes": 1094,
+      "sha256": "fdca07b8fc42fa0d1e24be2a372e719f21b09c060f09716ee7008a1df1dfd52a"
+    },
+    {
+      "path": "javascript/lang/security/audit/incomplete-sanitization.yaml",
+      "bytes": 942,
+      "sha256": "54b042cc05900fd624852cac1bb4962c2d33a0674d468b4a61a6fae8d2a64250"
+    },
+    {
+      "path": "javascript/lang/security/audit/md5-used-as-password.yaml",
+      "bytes": 1255,
+      "sha256": "95f8166a5066f012641c89fbc59e9ee98299f886cb70d2057b1e6cc741561b33"
+    },
+    {
+      "path": "javascript/lang/security/audit/path-traversal/path-join-resolve-traversal.yaml",
+      "bytes": 2067,
+      "sha256": "d9a1c9b559fee5b993bb9150fead40a48570a58f08762d7b6674125f6e0784bc"
+    },
+    {
+      "path": "javascript/lang/security/audit/prototype-pollution/prototype-pollution-assignment.yaml",
+      "bytes": 2242,
+      "sha256": "c494050bfb86b17b96497f1acb6f2cffe68890c2658e3ccf36945c6fda61e67d"
+    },
+    {
+      "path": "javascript/lang/security/audit/prototype-pollution/prototype-pollution-loop.yaml",
+      "bytes": 2194,
+      "sha256": "f781360a7d929bea0dacf339e30060e441f9e738aee0d1b6481219fea49126c5"
+    },
+    {
+      "path": "javascript/lang/security/audit/spawn-shell-true.yaml",
+      "bytes": 1358,
+      "sha256": "452fb593301edca721a151ed3c051f428ca1df1fc1af613380d58b076601b5ba"
+    },
+    {
+      "path": "javascript/lang/security/audit/sqli/node-knex-sqli.yaml",
+      "bytes": 2901,
+      "sha256": "074be35c73756917896e051a8d77a8a705c7ef54d4846d7a93c829e4d68aabd2"
+    },
+    {
+      "path": "javascript/lang/security/audit/sqli/node-mssql-sqli.yaml",
+      "bytes": 1461,
+      "sha256": "a3c995249bdd6ffbf3d36ba42cdd1f1c04798bb0e41765bd396a218516e59ee9"
+    },
+    {
+      "path": "javascript/lang/security/audit/sqli/node-mysql-sqli.yaml",
+      "bytes": 2077,
+      "sha256": "152d5848cbcb5bdd3555507eb4a55b5ee2cd7276effbd5975a7da97d82bba0d0"
+    },
+    {
+      "path": "javascript/lang/security/audit/sqli/node-postgres-sqli.yaml",
+      "bytes": 1809,
+      "sha256": "23709e35b9ce213d8306c793a3174320dcf3141043e31297fcdec48735c1bbd8"
+    },
+    {
+      "path": "javascript/lang/security/audit/unknown-value-with-script-tag.yaml",
+      "bytes": 1144,
+      "sha256": "c22e6be10888c9c457ddfb8d75dd70e812d0c9667e9b3bd910e3f3bc504d8892"
+    },
+    {
+      "path": "javascript/lang/security/audit/unsafe-dynamic-method.yaml",
+      "bytes": 1295,
+      "sha256": "3608be77e1a11f4a4b756b9ccf8cd95e8e93c311f84a69e5483c5af560d5d790"
+    },
+    {
+      "path": "javascript/lang/security/audit/unsafe-formatstring.yaml",
+      "bytes": 1308,
+      "sha256": "6e0f93aaccf1eb08bd02bd160768d41dda2a3b5de2a26d55e18f417ee0ff408c"
+    },
+    {
+      "path": "javascript/lang/security/detect-buffer-noassert.yaml",
+      "bytes": 956,
+      "sha256": "e6566d2c7138b038e1c3167f3e9ff98550cf81a2d70caa94a5362a55294077f6"
+    },
+    {
+      "path": "javascript/lang/security/detect-child-process.yaml",
+      "bytes": 2448,
+      "sha256": "baee696b05b3c38fa5a82435ae458026ec81ce9a6e6a73116d68dc963496296c"
+    },
+    {
+      "path": "javascript/lang/security/detect-disable-mustache-escape.yaml",
+      "bytes": 783,
+      "sha256": "8d6d81249121230be2d11fd7a2cce2ce23837520f8e0fc1df45868ec159edb09"
+    },
+    {
+      "path": "javascript/lang/security/detect-eval-with-expression.yaml",
+      "bytes": 3075,
+      "sha256": "3b8fe2524b094c72c34aaa6d21b0408ffdac2471a335125cf726993253777951"
+    },
+    {
+      "path": "javascript/lang/security/detect-insecure-websocket.yaml",
+      "bytes": 1017,
+      "sha256": "65935c49d62e264a6b85a496455989137d7e82d4698855d511d173ed08ad3099"
+    },
+    {
+      "path": "javascript/lang/security/detect-no-csrf-before-method-override.yaml",
+      "bytes": 1047,
+      "sha256": "d361537a89c773a4940f107a2e787c6309d121e965a88f471b55d0db15ccb859"
+    },
+    {
+      "path": "javascript/lang/security/detect-pseudoRandomBytes.yaml",
+      "bytes": 1037,
+      "sha256": "d3c2b2168e6b1efdfc305a783387634e3ead8e0db6d4bdd3417381e177da4058"
+    },
+    {
+      "path": "javascript/lang/security/html-in-template-string.yaml",
+      "bytes": 914,
+      "sha256": "1c32479fb6228a0a3a3618e6308b5bdfec14f05f7cf12a2321519b4095cf117d"
+    },
+    {
+      "path": "javascript/lang/security/insecure-object-assign.yaml",
+      "bytes": 953,
+      "sha256": "bc5a5fdef1a8a4889f1d3efebdd3cb1f1e58f5261418928ae6c765eb7f1b2397"
+    },
+    {
+      "path": "javascript/lang/security/spawn-git-clone.yaml",
+      "bytes": 1298,
+      "sha256": "d87fdf812e1a61f137bde701d75415525ea66c45c593374a6f9ec2081609539f"
+    },
+    {
+      "path": "javascript/monaco-editor/security/audit/monaco-hover-htmlsupport.yaml",
+      "bytes": 1226,
+      "sha256": "26a148440d4405fb236e029dde7a2ecd1542766effad12630132890dbfef20b5"
+    },
+    {
+      "path": "javascript/node-crypto/security/aead-no-final.yaml",
+      "bytes": 1126,
+      "sha256": "4c993da95b21b43a8a5890dbaf7c9767af846abd2b9fdae36fb46c88ca4aa5f9"
+    },
+    {
+      "path": "javascript/node-crypto/security/create-de-cipher-no-iv.yaml",
+      "bytes": 1084,
+      "sha256": "4b922a0df84b85469500b92eb4a8023bf64e0aca889c85ba5fdf3d23ffa2f406"
+    },
+    {
+      "path": "javascript/node-crypto/security/gcm-no-tag-length.yaml",
+      "bytes": 1312,
+      "sha256": "1ed0553e584f3a12feba324ed352db660acb177f8f631876747372c27193962e"
+    },
+    {
+      "path": "javascript/node-expat/security/audit/expat-xxe.yaml",
+      "bytes": 1979,
+      "sha256": "92751f4813a7563c6d0c1768034564483e8baf09689d687d54e4658fc56c38ca"
+    },
+    {
+      "path": "javascript/passport-jwt/security/passport-hardcode.yaml",
+      "bytes": 3174,
+      "sha256": "cf0b2b419496884a87bfd9d0bc212e179f7cafb42c4ecd509ab6633af80647ed"
+    },
+    {
+      "path": "javascript/phantom/security/audit/phantom-injection.yaml",
+      "bytes": 1253,
+      "sha256": "d69ea49d67bdcce17c1a570a52227183d073f78c452bf3e879b105e87994367f"
+    },
+    {
+      "path": "javascript/playwright/security/audit/playwright-addinitscript-code-injection.yaml",
+      "bytes": 1037,
+      "sha256": "3042fd8790341877a88a0db0915d98a6175dab7f17eafe8b91207ce1b840e4f2"
+    },
+    {
+      "path": "javascript/playwright/security/audit/playwright-evaluate-arg-injection.yaml",
+      "bytes": 1064,
+      "sha256": "7e9f4eb8a9755376ffe281b4ee73b404cff8b99737eaa6c09a60da921c54c654"
+    },
+    {
+      "path": "javascript/playwright/security/audit/playwright-evaluate-code-injection.yaml",
+      "bytes": 1363,
+      "sha256": "bc910ef671626206fa889de9d8b53141e3783218a56faa8af5e35fd19822067d"
+    },
+    {
+      "path": "javascript/playwright/security/audit/playwright-exposed-chrome-devtools.yaml",
+      "bytes": 922,
+      "sha256": "af09f9d838cdc99a5d6704ff3a2458db1808b40aec70c010488f844758c3b64d"
+    },
+    {
+      "path": "javascript/playwright/security/audit/playwright-goto-injection.yaml",
+      "bytes": 969,
+      "sha256": "e508af0b9136740db3fc375c8a2ee244d2e83631ee302960ae91b6926aa82991"
+    },
+    {
+      "path": "javascript/playwright/security/audit/playwright-setcontent-injection.yaml",
+      "bytes": 1003,
+      "sha256": "6934a12e560fc76e45e7d7f103f16d8fab1b8ed879162ab56255bb36e91c30ea"
+    },
+    {
+      "path": "javascript/puppeteer/security/audit/puppeteer-evaluate-arg-injection.yaml",
+      "bytes": 1136,
+      "sha256": "38d2f72ceb9b3ee0e62963f27efcac2121eecaece9a719067b1d6b00f2773fbe"
+    },
+    {
+      "path": "javascript/puppeteer/security/audit/puppeteer-evaluate-code-injection.yaml",
+      "bytes": 1360,
+      "sha256": "d6afb98f25e49a2ade7c812c440e51ee6d43efa8559a4df1d43c7be18863dd7f"
+    },
+    {
+      "path": "javascript/puppeteer/security/audit/puppeteer-exposed-chrome-devtools.yaml",
+      "bytes": 919,
+      "sha256": "675ce5bb0b1b65bc68cd628217f7c9db96cc50f760cf6601634f27f2934d1967"
+    },
+    {
+      "path": "javascript/puppeteer/security/audit/puppeteer-goto-injection.yaml",
+      "bytes": 965,
+      "sha256": "3163ac2d6c964d9b873f35ce111830d65c52b023a1e96432e8c3640aad7dcdc5"
+    },
+    {
+      "path": "javascript/puppeteer/security/audit/puppeteer-setcontent-injection.yaml",
+      "bytes": 964,
+      "sha256": "e849783a3e404faeae5096cc5b123943716a4d6300d8cb4a95e2f616a14ea56d"
+    },
+    {
+      "path": "javascript/sandbox/security/audit/sandbox-code-injection.yaml",
+      "bytes": 1066,
+      "sha256": "780663d7e195d684ac3563a9abc95c19b749835423c4393d01cf40b0eb82e2c6"
+    },
+    {
+      "path": "javascript/sax/security/audit/sax-xxe.yaml",
+      "bytes": 1171,
+      "sha256": "b9afe39dadea5e31365572fa527ee4c4867d40d387fbf2c8c858b7cd8171c7b8"
+    },
+    {
+      "path": "javascript/sequelize/security/audit/sequelize-enforce-tls.yaml",
+      "bytes": 1574,
+      "sha256": "59cdb04721b35e398f0f35e73fc68cdc44d4c9ff11ecd8f83c9470cbee1c2440"
+    },
+    {
+      "path": "javascript/sequelize/security/audit/sequelize-injection-express.yaml",
+      "bytes": 3022,
+      "sha256": "b3b6149dcd1f7611e020aa6c915eabf540a64bdc11626f5003c5d4922d7824a5"
+    },
+    {
+      "path": "javascript/sequelize/security/audit/sequelize-raw-query.yaml",
+      "bytes": 1456,
+      "sha256": "b51a5f7b8a32132c57960b559bc533e2632da00a863118154d89b692c4a1342c"
+    },
+    {
+      "path": "javascript/sequelize/security/audit/sequelize-tls-disabled-cert-validation.yaml",
+      "bytes": 1601,
+      "sha256": "464e5fc309be5a130455338209a4e2a204a09dd602c8c978968bc0887004062f"
+    },
+    {
+      "path": "javascript/sequelize/security/audit/sequelize-weak-tls-version.yaml",
+      "bytes": 1616,
+      "sha256": "dca4bc4e602cac974e0d988113b615e7dd5aaa2dc8b15346209f215a8b23c570"
+    },
+    {
+      "path": "javascript/serialize-javascript/security/audit/unsafe-serialize-javascript.yaml",
+      "bytes": 816,
+      "sha256": "136841473fd2bd7187c82e133b7f4e8a265d7a9a8729afbb9fe75b0d9b224f11"
+    },
+    {
+      "path": "javascript/shelljs/security/shelljs-exec-injection.yaml",
+      "bytes": 923,
+      "sha256": "adfff907f257d82341c060dca56d2361bc2e750c89243b89b781d0d9678000bb"
+    },
+    {
+      "path": "javascript/thenify/security/audit/multiargs-code-execution.yaml",
+      "bytes": 1059,
+      "sha256": "07fd5f32265400a4d94fd5cb3a5ec9aa104f9b50ae3628a6ec9551a0b0afb217"
+    },
+    {
+      "path": "javascript/vm2/security/audit/vm2-code-injection.yaml",
+      "bytes": 1459,
+      "sha256": "e8414f25da4e766dad6ce570498ddd353a3956e5958bef40a1d3997369b741a3"
+    },
+    {
+      "path": "javascript/vm2/security/audit/vm2-context-injection.yaml",
+      "bytes": 8586,
+      "sha256": "1b0b2484884856f55ad0f2f8c8aedb6dff535a05b51d3c6a61818f4d3453d998"
+    },
+    {
+      "path": "javascript/vue/security/audit/xss/templates/avoid-v-html.yaml",
+      "bytes": 848,
+      "sha256": "bc439da93c3291d1745b2a9ef8c77d388186284e1a8f7ac28153e3e18757c48e"
+    },
+    {
+      "path": "javascript/wkhtmltoimage/security/audit/wkhtmltoimage-injection.yaml",
+      "bytes": 921,
+      "sha256": "b77dd2689fa79391c68af5f8316d6cb10b07959fbc1c8c541d7524350dfc4d33"
+    },
+    {
+      "path": "javascript/wkhtmltopdf/security/audit/wkhtmltopdf-injection.yaml",
+      "bytes": 891,
+      "sha256": "269d9292c144863232890a8234c09425d701c755cbe5655fb09d61b60e62a3b8"
+    },
+    {
+      "path": "javascript/xml2json/security/audit/xml2json-xxe.yaml",
+      "bytes": 1347,
+      "sha256": "b8810863b7f5d9dc98bcdf13616edf6030e1a84330ba6698235b245423e4d362"
+    },
+    {
+      "path": "typescript/angular/security/audit/angular-domsanitizer.yaml",
+      "bytes": 3871,
+      "sha256": "6d76a4427ad54a224d6e0e529be01ecab0c6f5588d1dd7066af3f4762215fc18"
+    },
+    {
+      "path": "typescript/aws-cdk/security/audit/awscdk-bucket-encryption.yml",
+      "bytes": 1649,
+      "sha256": "79b5b1b67fa4c830d1dadd76e32c69def1da136a8537c6338c56d77bbf6b8345"
+    },
+    {
+      "path": "typescript/aws-cdk/security/audit/awscdk-bucket-enforcessl.yml",
+      "bytes": 1187,
+      "sha256": "8e743cc5f8bd93d1ca19c3bdd31658e57846a6427d05c4bc2d0d8a654527ded0"
+    },
+    {
+      "path": "typescript/aws-cdk/security/audit/awscdk-sqs-unencryptedqueue.yml",
+      "bytes": 1476,
+      "sha256": "5b189956aebfcf84f720915f441dde53a68aa4e89a21ba688395c157b3dba2f5"
+    },
+    {
+      "path": "typescript/aws-cdk/security/awscdk-bucket-grantpublicaccessmethod.yml",
+      "bytes": 1148,
+      "sha256": "139f4687e7b57b0a98c433669a8d26e7bf0e8a396527fa023a25e0be2ea9430c"
+    },
+    {
+      "path": "typescript/aws-cdk/security/awscdk-codebuild-project-public.yml",
+      "bytes": 1192,
+      "sha256": "2e58af401f1c4c318b17a0b370152d58c6ffabdd4af4a69895f3b0c5c20b8de8"
+    },
+    {
+      "path": "typescript/lang/security/audit/cors-regex-wildcard.yaml",
+      "bytes": 810,
+      "sha256": "fc271110d672f2093bf1e949ab413e6117f7483ad6e285ef093096d77fb33821"
+    },
+    {
+      "path": "typescript/mcp/security/mcp-command-injection-typescript.yaml",
+      "bytes": 2477,
+      "sha256": "a95d2233cd5bde1370a7201f5597c839b9f4eb947b5e9cf2e84df25d14bf6644"
+    },
+    {
+      "path": "typescript/mcp/security/mcp-ssrf-typescript.yaml",
+      "bytes": 2629,
+      "sha256": "580fcd1f47443b85d2bcf9b09e819310e56b5e9e5977382417c84f7087e969ff"
+    },
+    {
+      "path": "typescript/nestjs/security/audit/nestjs-header-cors-any.yaml",
+      "bytes": 1303,
+      "sha256": "9a68d31a2f94e65b8d1668a76aced58485bf26351413c401bdbf6d1b93a655ea"
+    },
+    {
+      "path": "typescript/nestjs/security/audit/nestjs-header-xss-disabled.yaml",
+      "bytes": 859,
+      "sha256": "fadfb8d6acc2a8d27697aeafd13db92696b559b35a31dc6dd893e89eb1b682b6"
+    },
+    {
+      "path": "typescript/nestjs/security/audit/nestjs-open-redirect.yaml",
+      "bytes": 795,
+      "sha256": "7c1291037cc5e5e4dab949953c1a488f01b321fa4c63d27c45eaa80540b3d487"
+    },
+    {
+      "path": "typescript/react/security/audit/react-dangerouslysetinnerhtml.yaml",
+      "bytes": 4181,
+      "sha256": "794094512be7f7dcaa49a4b1edf621dbdf1f984b4f29ab09a23538c0e59c2136"
+    },
+    {
+      "path": "typescript/react/security/audit/react-href-var.yaml",
+      "bytes": 3040,
+      "sha256": "aa8ade23b4a351f93be2bcd47ecc694b6b3d2a861a65fc8d345a6cb87f9253f2"
+    },
+    {
+      "path": "typescript/react/security/audit/react-jwt-decoded-property.yaml",
+      "bytes": 788,
+      "sha256": "5e4ca6b6fa672c29cfbf78993f8b3b5724d77fd99da251de7b108835705fec15"
+    },
+    {
+      "path": "typescript/react/security/audit/react-jwt-in-localstorage.yaml",
+      "bytes": 989,
+      "sha256": "8850734261ecbb6eee29707a683acc5d177b2d785cec00ef4788eb6193b5ba05"
+    },
+    {
+      "path": "typescript/react/security/audit/react-unsanitized-method.yaml",
+      "bytes": 4158,
+      "sha256": "c774bae09d1b0d8c4c12c32436f4dad6d93a590f9cfbd159bc2ab2416054d273"
+    },
+    {
+      "path": "typescript/react/security/audit/react-unsanitized-property.yaml",
+      "bytes": 4424,
+      "sha256": "0dc00b10abae599731f0c4f56c9efc64cf2469dfa4cc0d562ca6a3a0581be59d"
+    },
+    {
+      "path": "typescript/react/security/react-insecure-request.yaml",
+      "bytes": 1815,
+      "sha256": "4869905cc60559b8ca0ed0ac62c5abe9a26b2ee0e3bbdc0d1baf47271ee70376"
+    },
+    {
+      "path": "typescript/react/security/react-markdown-insecure-html.yaml",
+      "bytes": 1373,
+      "sha256": "e464c0f72c8a89ae325524b738c7c2024be1258e7a060a6365b487a0aa284434"
+    }
+  ]
+}

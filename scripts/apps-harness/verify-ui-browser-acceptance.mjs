@@ -223,19 +223,22 @@ try {
   };
 }
 
-class CdpClient {
+export class CdpClient {
   nextId = 1;
   pending = new Map();
   eventListeners = new Map();
 
-  constructor(socket) {
+  constructor(socket, { requestTimeoutMs = 15000 } = {}) {
     this.socket = socket;
+    this.requestTimeoutMs = requestTimeoutMs;
+    this.closedError = null;
     socket.addEventListener("message", (event) => {
       const payload = JSON.parse(String(event.data));
       if (payload.id !== undefined) {
         const entry = this.pending.get(payload.id);
         if (entry) {
           this.pending.delete(payload.id);
+          clearTimeout(entry.timer);
           if (payload.error) {
             entry.reject(new Error(payload.error.message || JSON.stringify(payload.error)));
           } else {
@@ -253,17 +256,48 @@ class CdpClient {
         }
       }
     });
+    socket.addEventListener("close", () => this.failPending(new Error("CDP WebSocket closed")));
+    socket.addEventListener("error", () => this.failPending(new Error("CDP WebSocket failed")));
   }
 
-  static async connect(wsUrl) {
-    const socket = new WebSocket(wsUrl);
+  static async connect(
+    wsUrl,
+    { WebSocketImpl = WebSocket, timeoutMs = 10000, requestTimeoutMs = 15000 } = {},
+  ) {
+    const socket = new WebSocketImpl(wsUrl);
+    const client = new CdpClient(socket, { requestTimeoutMs });
     await new Promise((resolve, reject) => {
-      socket.addEventListener("open", () => resolve(), { once: true });
-      socket.addEventListener("error", () => reject(new Error("CDP WebSocket connection failed")), {
-        once: true,
-      });
+      const finish = (error) => {
+        clearTimeout(timer);
+        socket.removeEventListener("open", opened);
+        socket.removeEventListener("error", failed);
+        socket.removeEventListener("close", closed);
+        if (error) {
+          client.close();
+          reject(error);
+        } else resolve();
+      };
+      const opened = () => finish();
+      const failed = () => finish(new Error("CDP WebSocket connection failed"));
+      const closed = () => finish(new Error("CDP WebSocket closed before connection"));
+      const timer = setTimeout(
+        () => finish(new Error(`CDP WebSocket connection timed out after ${timeoutMs}ms`)),
+        timeoutMs,
+      );
+      socket.addEventListener("open", opened, { once: true });
+      socket.addEventListener("error", failed, { once: true });
+      socket.addEventListener("close", closed, { once: true });
     });
-    return new CdpClient(socket);
+    return client;
+  }
+
+  failPending(error) {
+    this.closedError = error;
+    for (const entry of this.pending.values()) {
+      clearTimeout(entry.timer);
+      entry.reject(error);
+    }
+    this.pending.clear();
   }
 
   on(method, handler) {
@@ -273,15 +307,27 @@ class CdpClient {
   }
 
   send(method, params = {}, sessionId = undefined) {
+    if (this.closedError) return Promise.reject(this.closedError);
     const id = this.nextId++;
     return new Promise((resolve, reject) => {
-      this.pending.set(id, { resolve, reject });
+      const timer = setTimeout(() => {
+        this.pending.delete(id);
+        reject(new Error(`CDP ${method} timed out after ${this.requestTimeoutMs}ms`));
+      }, this.requestTimeoutMs);
+      this.pending.set(id, { resolve, reject, timer });
       const msg = sessionId ? { id, method, params, sessionId } : { id, method, params };
-      this.socket.send(JSON.stringify(msg));
+      try {
+        this.socket.send(JSON.stringify(msg));
+      } catch (error) {
+        clearTimeout(timer);
+        this.pending.delete(id);
+        reject(error);
+      }
     });
   }
 
   close() {
+    this.failPending(new Error("CDP client closed"));
     try {
       this.socket.close();
     } catch {
@@ -708,6 +754,7 @@ async function launchOfflineHeadlessChrome(browserPath, userDataDir) {
   const wsUrl = await new Promise((resolve, reject) => {
     let stderrBuf = "";
     const timer = setTimeout(() => {
+      child.kill();
       reject(new Error(`Timed out waiting for Chrome DevTools wsUrl. stderr=${stderrBuf}`));
     }, 12000);
 
@@ -726,6 +773,10 @@ async function launchOfflineHeadlessChrome(browserPath, userDataDir) {
     child.once("exit", (code) => {
       clearTimeout(timer);
       reject(new Error(`Browser exited prematurely with code ${code}. stderr=${stderrBuf}`));
+    });
+    child.once("error", (error) => {
+      clearTimeout(timer);
+      reject(error);
     });
   });
 
@@ -1470,7 +1521,17 @@ export async function verifyUiBrowserAcceptance(options = {}) {
         // Ignore
       }
     }
-    await new Promise((resolve) => server.close(() => resolve()));
+    await new Promise((resolve) => {
+      const timer = setTimeout(() => {
+        server.closeAllConnections();
+        resolve();
+      }, 1000);
+      server.close(() => {
+        clearTimeout(timer);
+        resolve();
+      });
+      server.closeAllConnections();
+    });
     await sleep(150);
     await rm(userDataDir, { recursive: true, force: true }).catch(() => {});
   }

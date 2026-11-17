@@ -1,0 +1,57 @@
+[
+  {
+    "rule": "vendor.typescript.react.security.react-insecure-request.react-insecure-request",
+    "path": "scripts/apps-harness/test-manual-clipboard-copy.ts",
+    "line": 82,
+    "sourceSha256": "aec6489408496c78b1cec921d86c76060dc50be1568b182144a38a2c11c12288",
+    "classification": "NOT_APPLICABLE_IN_THIS_FIXED_CONTEXT",
+    "reason": "Loopback-only local Chrome DevTools polling; no network host or user data is sent over public HTTP.",
+    "evidence": "fetch target is literal http://127.0.0.1:${DEBUG_PORT}/json/version in an offline manual browser harness.",
+    "reviewedAt": "2026-11-17",
+    "requiresReviewOnAnySourceChange": true
+  },
+  {
+    "rule": "vendor.typescript.react.security.react-insecure-request.react-insecure-request",
+    "path": "scripts/apps-harness/test-manual-export-browser.ts",
+    "line": 84,
+    "sourceSha256": "7955c28cef6a5d336a12a5d50daef126c7a21644f899d303e8257f71e79f19f2",
+    "classification": "NOT_APPLICABLE_IN_THIS_FIXED_CONTEXT",
+    "reason": "Loopback-only local Chrome DevTools polling; no network host or user data is sent over public HTTP.",
+    "evidence": "fetch target is literal http://127.0.0.1:${DEBUG_PORT}/json/version in an offline manual browser harness.",
+    "reviewedAt": "2026-11-17",
+    "requiresReviewOnAnySourceChange": true
+  },
+  {
+    "rule": "vendor.javascript.lang.security.html-in-template-string.html-in-template-string",
+    "path": "scripts/generate-evidence.mts",
+    "line": 62,
+    "sourceSha256": "8ff0dcafd77ee03efede633831606e3cc07ba33da96566022ef1d4ad2f28a388",
+    "classification": "NOT_APPLICABLE_IN_THIS_FIXED_CONTEXT",
+    "reason": "The template constructs XML synthetic test fixtures, not browser HTML or untrusted runtime content.",
+    "evidence": "mockBids is created only by makeSyntheticBid from a bounded numeric loop and fixed literal strings; content-type application/xml.",
+    "reviewedAt": "2026-11-17",
+    "requiresReviewOnAnySourceChange": true
+  },
+  {
+    "rule": "vendor.javascript.lang.security.detect-child-process.detect-child-process",
+    "path": "scripts/apps-harness/verify-ui-browser-acceptance.mjs",
+    "line": 727,
+    "sourceSha256": "0e4f0154ba424e359b0f8429a785cb5da220b04fab98423b4ad1d79eb6ba7793",
+    "classification": "NOT_APPLICABLE_IN_THIS_FIXED_CONTEXT",
+    "reason": "Offline test browser executable selected from trusted local configuration; argv is an array and shell is not enabled.",
+    "evidence": "findLocalBrowserExecutable checks configured/local browser paths; dedicated mkdtemp profile; no request-controlled argument or shell expansion.",
+    "reviewedAt": "2026-11-17",
+    "requiresReviewOnAnySourceChange": true
+  },
+  {
+    "rule": "vendor.javascript.ajv.security.audit.ajv-allerrors-true.ajv-allerrors-true",
+    "path": "scripts/build-openai-package.mjs",
+    "line": 179,
+    "sourceSha256": "606abe597e8cbf5f1c99654d94c18ea25b27154938b48feade8942fc6f8b3c75",
+    "classification": "NOT_APPLICABLE_IN_THIS_FIXED_CONTEXT",
+    "reason": "Local packaging validator for fixed repository schemas/manifests, outside the server request path.",
+    "evidence": "Used to preserve all OpenAI schema mismatch diagnostics; reads fixed schemas/plugin and schemas/mcp files from the repository.",
+    "reviewedAt": "2026-11-17",
+    "requiresReviewOnAnySourceChange": true
+  }
+]

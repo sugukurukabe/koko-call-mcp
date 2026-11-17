@@ -1,0 +1,14 @@
+{
+  "sourceCommit": "a5ad1714f00c9f7fde980cab0ea1d6dc6d414fd2",
+  "rules": 188,
+  "sourceFiles": 183,
+  "sha256": "60ab91f149f87795c1218679b41d11895c32a641e8c3526fe640fe56bdede82b",
+  "metrics": "off",
+  "ruleRegistryRequiredAtScan": false,
+  "localCorrections": [
+    {
+      "sourcePath": "typescript/mcp/security/mcp-ssrf-typescript.yaml",
+      "reason": "Bind HTTP sinks to fetch and imported Axios, avoiding arbitrary calls and Map.get."
+    }
+  ]
+}
