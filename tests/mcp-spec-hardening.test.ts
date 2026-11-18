@@ -8,6 +8,7 @@ import { JSONRPCErrorResponseSchema } from "@modelcontextprotocol/sdk/types.js";
 import request from "supertest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { KkjClient } from "../src/api/kkj-client.js";
+import { VERSION } from "../src/lib/version.js";
 import { createJpBidsServer } from "../src/mcp.js";
 import { signJwt, verifyJwt } from "../src/oauth/jwt.js";
 import { createHttpApp } from "../src/transports/http.js";
@@ -641,11 +642,11 @@ describe("MCP v0.10.1 specification, protocol adapter & security hardening", () 
     await server.close();
   });
 
-  it("nests custom interoperability metadata under _meta in server.json at version 0.10.1", async () => {
+  it("nests custom interoperability metadata under _meta in server.json at the product version", async () => {
     const serverJson = JSON.parse(
       await readFile(path.join(REPO_ROOT, "server.json"), "utf8"),
     ) as Record<string, unknown>;
-    expect(serverJson.version).toBe("0.10.1");
+    expect(serverJson.version).toBe(VERSION);
     expect("interoperability" in serverJson).toBe(false);
     const meta = serverJson._meta as Record<string, unknown> | undefined;
     const ns = meta?.["io.github.sugukurukabe/jp-bids"] as Record<string, unknown> | undefined;

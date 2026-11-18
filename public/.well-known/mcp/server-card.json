@@ -1,7 +1,7 @@
 {
   "serverInfo": {
     "name": "JP Bids",
-    "version": "0.10.1"
+    "version": "0.10.2"
   },
   "authentication": {
     "required": true,
@@ -19,22 +19,22 @@
     {
       "name": "search_bids",
       "title": "官公需入札検索",
-      "description": "日本全国の官公需入札情報を検索する。USE THIS WHEN: キーワード・件名・発注機関・都道府県・期間で入札候補を探したいとき。DO NOT USE WHEN: 既に Key があり1件の詳細が欲しいとき（get_bid_detail を使う）、追うべき順に並べたいとき（rank_bids を使う）。Search Japanese public procurement bids by keyword, project name, organization, prefecture, or date range. Cari tender pengadaan pemerintah Jepang berdasarkan kata kunci, nama proyek, instansi, prefektur, atau rentang tanggal.",
+      "description": "日本全国の官公需入札情報を検索する。query、project_name、organization_name、prefectureのいずれか1つ以上が必要です。categoryやcertificationのみでは検索できません。USE THIS WHEN: キーワード・件名・発注機関・都道府県・期間で入札候補を探したいとき。DO NOT USE WHEN: 既に Key があり1件の詳細が欲しいとき（get_bid_detail を使う）、追うべき順に並べたいとき（rank_bids を使う）、過去1〜30日の新着公告を一覧したいとき（list_recent_bids を使う）。Search Japanese public procurement bids by keyword, project name, organization, prefecture, or date range. Requires at least one of query, project_name, organization_name, or prefecture. Cari tender pengadaan pemerintah Jepang berdasarkan kata kunci, nama proyek, instansi, prefektur, atau rentang tanggal. Wajib mengisi minimal satu: query, project_name, organization_name, atau prefecture.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "query": {
-            "description": "自由記述キーワード。複数キーワードはAND結合で検索されます。",
+            "description": "自由記述キーワード。複数キーワードはAND結合で検索されます。query、project_name、organization_name、prefectureのいずれか1つ以上が必要です。categoryやcertificationのみでは検索できません。",
             "type": "string",
             "minLength": 1
           },
           "project_name": {
-            "description": "件名で絞り込む場合に指定します。",
+            "description": "件名で絞り込む場合に指定します。query、project_name、organization_name、prefectureのいずれか1つ以上が必要です。categoryやcertificationのみでは検索できません。",
             "type": "string",
             "minLength": 1
           },
           "prefecture": {
-            "description": "都道府県名で絞り込む。配列で複数指定可。例: 鹿児島県、東京都。",
+            "description": "都道府県名で絞り込む。配列で複数指定可。例: 鹿児島県、東京都。query、project_name、organization_name、prefectureのいずれか1つ以上が必要です。categoryやcertificationのみでは検索できません。",
             "anyOf": [
               {
                 "type": "string",
@@ -164,7 +164,7 @@
             }
           },
           "organization_name": {
-            "description": "発注機関名で絞り込む。例: 農林水産省、防衛省。",
+            "description": "発注機関名で絞り込む。例: 農林水産省、防衛省。query、project_name、organization_name、prefectureのいずれか1つ以上が必要です。categoryやcertificationのみでは検索できません。",
             "type": "string",
             "minLength": 1
           },
@@ -429,7 +429,7 @@
     {
       "name": "list_recent_bids",
       "title": "直近の官公需入札一覧",
-      "description": "過去1〜30日間に公告された新着官公需入札を一覧する。USE THIS WHEN: 毎朝の営業チェック、都道府県別の新着確認、直近公告の漏れ確認をしたいとき。DO NOT USE WHEN: 古い公告や細かい条件検索が必要なとき（search_bids を使う）。List recently published bid notices from the past 1–30 days for daily morning sales checks. Daftar pengumuman tender baru dalam 1–30 hari terakhir untuk cek pagi harian.",
+      "description": "過去1〜30日間に公告された新着官公需入札を一覧する。USE THIS WHEN: 今週・直近の新着公告を公告日で一覧したいとき、毎朝の営業チェックや都道府県別の新着確認をしたいとき。DO NOT USE WHEN: 古い公告やキーワード・発注機関・資格等級による条件検索が必要なとき（search_bids を使う）。List recently published bid notices from the past 1–30 days for daily morning sales checks. Daftar pengumuman tender baru dalam 1–30 hari terakhir untuk cek pagi harian.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -968,17 +968,17 @@
         "type": "object",
         "properties": {
           "query": {
-            "description": "自由記述キーワード。複数キーワードはAND結合で検索されます。",
+            "description": "自由記述キーワード。複数キーワードはAND結合で検索されます。query、project_name、organization_name、prefectureのいずれか1つ以上が必要です。categoryやcertificationのみでは検索できません。",
             "type": "string",
             "minLength": 1
           },
           "project_name": {
-            "description": "件名で絞り込む場合に指定します。",
+            "description": "件名で絞り込む場合に指定します。query、project_name、organization_name、prefectureのいずれか1つ以上が必要です。categoryやcertificationのみでは検索できません。",
             "type": "string",
             "minLength": 1
           },
           "prefecture": {
-            "description": "都道府県名で絞り込む。配列で複数指定可。例: 鹿児島県、東京都。",
+            "description": "都道府県名で絞り込む。配列で複数指定可。例: 鹿児島県、東京都。query、project_name、organization_name、prefectureのいずれか1つ以上が必要です。categoryやcertificationのみでは検索できません。",
             "anyOf": [
               {
                 "type": "string",
@@ -1108,7 +1108,7 @@
             }
           },
           "organization_name": {
-            "description": "発注機関名で絞り込む。例: 農林水産省、防衛省。",
+            "description": "発注機関名で絞り込む。例: 農林水産省、防衛省。query、project_name、organization_name、prefectureのいずれか1つ以上が必要です。categoryやcertificationのみでは検索できません。",
             "type": "string",
             "minLength": 1
           },
@@ -1472,7 +1472,7 @@
           },
           "fetch_documents": {
             "default": false,
-            "description": "trueの場合、公式公告ページまたは添付資料を一時取得して要件抽出を試みる。",
+            "description": "既定値はfalse。falseではメタデータから要件・期限・確認資料を整理し、資料本文は未確認として扱います。ユーザーが公式原本や添付資料の直接確認を明示的に求めた場合のみtrueを指定します。trueでも環境の文書取得設定により取得できない場合があります。",
             "type": "boolean"
           },
           "target_uris": {
@@ -1895,17 +1895,17 @@
         "type": "object",
         "properties": {
           "query": {
-            "description": "自由記述キーワード。複数キーワードはAND結合で検索されます。",
+            "description": "自由記述キーワード。複数キーワードはAND結合で検索されます。query、project_name、organization_name、prefectureのいずれか1つ以上が必要です。categoryやcertificationのみでは検索できません。",
             "type": "string",
             "minLength": 1
           },
           "project_name": {
-            "description": "件名で絞り込む場合に指定します。",
+            "description": "件名で絞り込む場合に指定します。query、project_name、organization_name、prefectureのいずれか1つ以上が必要です。categoryやcertificationのみでは検索できません。",
             "type": "string",
             "minLength": 1
           },
           "prefecture": {
-            "description": "都道府県名で絞り込む。配列で複数指定可。例: 鹿児島県、東京都。",
+            "description": "都道府県名で絞り込む。配列で複数指定可。例: 鹿児島県、東京都。query、project_name、organization_name、prefectureのいずれか1つ以上が必要です。categoryやcertificationのみでは検索できません。",
             "anyOf": [
               {
                 "type": "string",
@@ -2035,7 +2035,7 @@
             }
           },
           "organization_name": {
-            "description": "発注機関名で絞り込む。例: 農林水産省、防衛省。",
+            "description": "発注機関名で絞り込む。例: 農林水産省、防衛省。query、project_name、organization_name、prefectureのいずれか1つ以上が必要です。categoryやcertificationのみでは検索できません。",
             "type": "string",
             "minLength": 1
           },
@@ -2234,22 +2234,22 @@
     {
       "name": "search_bids_app",
       "title": "AI Bid Workspace",
-      "description": "日本全国の官公需入札情報を検索し、MCP Apps対応クライアントではAI Bid Workspaceとして検索結果を表示する。USE THIS WHEN: 対応クライアントで入札検索結果をカード/ワークスペースUIとして確認したいとき。DO NOT USE WHEN: テキストと structuredContent だけで十分なとき（search_bids を使う）。非対応クライアントでも通常のテキスト要約と structuredContent を返す。",
+      "description": "日本全国の官公需入札情報を検索し、MCP Apps対応クライアントではAI Bid Workspaceとして検索結果を表示する。query、project_name、organization_name、prefectureのいずれか1つ以上が必要です。categoryやcertificationのみでは検索できません。USE THIS WHEN: 対応クライアントで入札検索結果をカード/ワークスペースUIとして確認したいとき。DO NOT USE WHEN: テキストと structuredContent だけで十分なとき（search_bids を使う）。非対応クライアントでも通常のテキスト要約と structuredContent を返す。",
       "inputSchema": {
         "type": "object",
         "properties": {
           "query": {
-            "description": "自由記述キーワード。複数キーワードはAND結合で検索されます。",
+            "description": "自由記述キーワード。複数キーワードはAND結合で検索されます。query、project_name、organization_name、prefectureのいずれか1つ以上が必要です。categoryやcertificationのみでは検索できません。",
             "type": "string",
             "minLength": 1
           },
           "project_name": {
-            "description": "件名で絞り込む場合に指定します。",
+            "description": "件名で絞り込む場合に指定します。query、project_name、organization_name、prefectureのいずれか1つ以上が必要です。categoryやcertificationのみでは検索できません。",
             "type": "string",
             "minLength": 1
           },
           "prefecture": {
-            "description": "都道府県名で絞り込む。配列で複数指定可。例: 鹿児島県、東京都。",
+            "description": "都道府県名で絞り込む。配列で複数指定可。例: 鹿児島県、東京都。query、project_name、organization_name、prefectureのいずれか1つ以上が必要です。categoryやcertificationのみでは検索できません。",
             "anyOf": [
               {
                 "type": "string",
@@ -2379,7 +2379,7 @@
             }
           },
           "organization_name": {
-            "description": "発注機関名で絞り込む。例: 農林水産省、防衛省。",
+            "description": "発注機関名で絞り込む。例: 農林水産省、防衛省。query、project_name、organization_name、prefectureのいずれか1つ以上が必要です。categoryやcertificationのみでは検索できません。",
             "type": "string",
             "minLength": 1
           },
