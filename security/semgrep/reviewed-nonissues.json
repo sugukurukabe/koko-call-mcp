@@ -39,7 +39,7 @@
       "rule": "vendor.javascript.lang.security.detect-child-process.detect-child-process",
       "path": "scripts/apps-harness/verify-ui-browser-acceptance.mjs",
       "line": 727,
-      "sourceSha256": "0e4f0154ba424e359b0f8429a785cb5da220b04fab98423b4ad1d79eb6ba7793",
+      "sourceSha256": "2b0e0b13f1d639a6ec417077ca4c4e226b441203bde77e34c82dbd640c29c264",
       "classification": "NOT_APPLICABLE_IN_THIS_FIXED_CONTEXT",
       "reason": "Offline test browser executable selected from trusted local configuration; argv is an array and shell is not enabled.",
       "evidence": "findLocalBrowserExecutable checks configured/local browser paths; dedicated mkdtemp profile; no request-controlled argument or shell expansion.",

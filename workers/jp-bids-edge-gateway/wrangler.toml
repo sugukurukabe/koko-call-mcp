@@ -1,16 +1,18 @@
 name = "jp-bids-edge-gateway"
 main = "src/index.ts"
 compatibility_date = "2026-11-01"
-workers_dev = false
+workers_dev = true
 
-routes = [
-  { pattern = "mcp.bid-jp.com/*", zone_name = "bid-jp.com" }
-]
+# Production route intentionally omitted during staging (S6/S7).
+# Re-enable in the Cutover Plan after Cloud Run v0.10.2 (JP_BIDS_EDGE_AUTH_SECRET) is live:
+# routes = [
+#   { pattern = "mcp.bid-jp.com/*", zone_name = "bid-jp.com" }
+# ]
 
 [vars]
 ORIGIN_URL = "https://jp-bids-mcp-lchlj4owxq-an.a.run.app"
 PUBLIC_BASE_URL = "https://mcp.bid-jp.com"
-TURNSTILE_SITE_KEY = ""
+TURNSTILE_SITE_KEY = "0x4AAAAAAGIycdeICKrOIziz"
 CIRCUIT_BREAKER_THRESHOLD = "5"
 CIRCUIT_BREAKER_WINDOW_SEC = "60"
 CIRCUIT_BREAKER_OPEN_SEC = "30"
@@ -22,12 +24,12 @@ dataset = "jp_bids_mcp_telemetry"
 [[d1_databases]]
 binding = "FEEDBACK_DB"
 database_name = "jp-bids-feedback"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "1d6a3d6b-e34a-4b55-9b40-bc0c375e5b60"
 migrations_dir = "migrations"
 
 [[kv_namespaces]]
 binding = "STATE_KV"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+id = "f51ac1fafe0c4b6fafed5803cfc4963b"
 
 [triggers]
 # Every 5 minutes: zero-KKJ synthetic health probe & self-healing check

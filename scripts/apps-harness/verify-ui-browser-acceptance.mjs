@@ -728,6 +728,7 @@ async function launchOfflineHeadlessChrome(browserPath, userDataDir) {
     [
       "--headless=new",
       "--disable-gpu",
+      "--disable-dev-shm-usage",
       "--hide-scrollbars",
       "--no-first-run",
       "--no-default-browser-check",
@@ -756,7 +757,7 @@ async function launchOfflineHeadlessChrome(browserPath, userDataDir) {
     const timer = setTimeout(() => {
       child.kill();
       reject(new Error(`Timed out waiting for Chrome DevTools wsUrl. stderr=${stderrBuf}`));
-    }, 12000);
+    }, 30000);
 
     child.stderr.on("data", (chunk) => {
       stderrBuf += String(chunk);
