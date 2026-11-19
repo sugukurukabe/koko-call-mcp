@@ -33,5 +33,5 @@ id = "f51ac1fafe0c4b6fafed5803cfc4963b"
 
 [triggers]
 # Every 5 minutes: zero-KKJ synthetic health probe & self-healing check
-# Every Monday 00:00 UTC (09:00 JST): weekly Slack usage & feedback briefing
-crons = ["*/5 * * * *", "0 0 * * 1"]
+# Every Monday 00:00 UTC (09:00 JST; Cloudflare uses 1=SUN, 2=MON, or MON): weekly Slack briefing
+crons = ["*/5 * * * *", "0 0 * * MON"]
