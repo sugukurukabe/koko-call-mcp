@@ -3,6 +3,8 @@
 Cloudflare（`bid-jp.com` / `mcp.bid-jp.com`）上で稼働する自己修繕・利用データ分析・ユーザー反応収集ゲートウェイです。
 Self-healing edge gateway, zero-latency usage analytics (Workers Analytics Engine), and sanitized user feedback collection (D1 + Turnstile) for `https://mcp.bid-jp.com`.
 
+> 詳細な設計理由・本番カットオーバー記録・9つの落とし穴と解決策・他案件横展開ガイド・運用 SQL クエリ集は [docs/cloudflare-edge-mcp-playbook.md](../../docs/cloudflare-edge-mcp-playbook.md) を参照してください。
+
 ## Architecture Safeguards
 
 1. **OAuth Rate Limit Isolation**: Attaches verified `X-Jpbids-Edge-Auth` + daily-salted `X-Jpbids-Client-Ip-Hash` (`SHA-256(CF-Connecting-IP + salt + YYYY-MM-DD)`) so Cloud Run (`src/oauth/router.ts`) enforces per-client OAuth rate limits without ever storing raw IP addresses or sharing a single Cloudflare PoP bucket.
