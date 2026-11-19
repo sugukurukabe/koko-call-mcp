@@ -93,7 +93,7 @@ Agar Claude otomatis memahami nama 47 prefektur Jepang, kategori pengadaan (`物
 
 ```text
 Remote MCP:             https://mcp.bid-jp.com/mcp
-Versi kandidat:         0.10.1 (paket npm terbit saat ini: jp-bids-mcp@0.10.0)
+Versi terbit:           0.10.1 (npm: jp-bids-mcp@0.10.1 / MCP Registry: io.github.sugukurukabe/jp-bids@0.10.1)
 Nama MCP Registry:      io.github.sugukurukabe/jp-bids
 ```
 
@@ -154,7 +154,7 @@ Untuk mereproduksi panel UI di Claude Desktop atau menjalankan seluruh 35 sub-ko
 
 ```bash
 # Jalankan Gate 1 Acceptance Runner di bawah penjaga jaringan loopback (35/35 kondisi, 0 panggilan eksternal)
-node --import ./evidence/q02_batch2/net-guard.batch2.path-null-fix.mjs tests/acceptance/gate1-runner.mjs
+node --import ./tests/acceptance/net-guard.mjs tests/acceptance/gate1-runner.mjs
 ```
 
 ### 4. Spesifikasi Metadata & Registri (`v0.10.1`)

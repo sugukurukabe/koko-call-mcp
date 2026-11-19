@@ -110,7 +110,7 @@ Claudeが日本の都道府県名・調達区分（`物品` / `工事` / `役務
 
 ```text
 リモートMCP: https://mcp.bid-jp.com/mcp
-候補バージョン: 0.10.1（※ npmjs.org 既公開版は jp-bids-mcp@0.10.0）
+公開バージョン: 0.10.1（npm: jp-bids-mcp@0.10.1 / MCP Registry: io.github.sugukurukabe/jp-bids@0.10.1）
 MCP Registry名: io.github.sugukurukabe/jp-bids
 ```
 
@@ -173,7 +173,7 @@ npm run build
 
 ```bash
 # ネットワーク遮断ガード下での Gate 1 受入ランナー実行（全35条件・外部通信0件）
-node --import ./evidence/q02_batch2/net-guard.batch2.path-null-fix.mjs tests/acceptance/gate1-runner.mjs
+node --import ./tests/acceptance/net-guard.mjs tests/acceptance/gate1-runner.mjs
 ```
 
 ### 4. メタデータと仕様対応 (`v0.10.1`)

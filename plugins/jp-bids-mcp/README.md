@@ -1,6 +1,6 @@
 # JP Bids — local submission candidate
 
-Package identity: jp-bids 1.0.0. This is a packaging version, not a product release: the public MCP product remains 0.10.0.
+Package identity: jp-bids 1.0.0. This is a packaging version, not a product release: the live public MCP product is 0.10.1 (published on npm as `jp-bids-mcp@0.10.1` and Official MCP Registry as `io.github.sugukurukabe/jp-bids@0.10.1`).
 
 Remote endpoint: https://mcp.bid-jp.com/mcp (Streamable HTTP, OAuth/DCR, mcp:read).
 Publisher candidate: スグクル株式会社; console verification is not established by this manifest.
