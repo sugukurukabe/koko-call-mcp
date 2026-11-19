@@ -7,7 +7,7 @@
       "serverInfo": {
         "name": "JP Bids MCP",
         "title": "JP Bids MCP",
-        "version": "0.10.1",
+        "version": "0.10.2",
         "description": "Read-only MCP for Japan's KKJ public procurement notices (free, 7 tools, MCP Apps UI)."
       },
       "tools": [

@@ -19,12 +19,22 @@ export const searchBidsInputSchema = {
     .string()
     .min(1)
     .optional()
-    .describe("自由記述キーワード。複数キーワードはAND結合で検索されます。"),
-  project_name: z.string().min(1).optional().describe("件名で絞り込む場合に指定します。"),
+    .describe(
+      "自由記述キーワード。複数キーワードはAND結合で検索されます。query、project_name、organization_name、prefectureのいずれか1つ以上が必要です。categoryやcertificationのみでは検索できません。",
+    ),
+  project_name: z
+    .string()
+    .min(1)
+    .optional()
+    .describe(
+      "件名で絞り込む場合に指定します。query、project_name、organization_name、prefectureのいずれか1つ以上が必要です。categoryやcertificationのみでは検索できません。",
+    ),
   prefecture: z
     .union([PrefectureNameSchema, z.array(PrefectureNameSchema)])
     .optional()
-    .describe("都道府県名で絞り込む。配列で複数指定可。例: 鹿児島県、東京都。"),
+    .describe(
+      "都道府県名で絞り込む。配列で複数指定可。例: 鹿児島県、東京都。query、project_name、organization_name、prefectureのいずれか1つ以上が必要です。categoryやcertificationのみでは検索できません。",
+    ),
   category: CategorySchema.optional().describe("入札区分。物品、役務、工事、その他。"),
   procedure_type: ProcedureTypeSchema.optional().describe(
     "公示種別。一般競争入札、指名競争入札、随意契約など。",
@@ -37,7 +47,9 @@ export const searchBidsInputSchema = {
     .string()
     .min(1)
     .optional()
-    .describe("発注機関名で絞り込む。例: 農林水産省、防衛省。"),
+    .describe(
+      "発注機関名で絞り込む。例: 農林水産省、防衛省。query、project_name、organization_name、prefectureのいずれか1つ以上が必要です。categoryやcertificationのみでは検索できません。",
+    ),
   issued_after: z.string().optional().describe("公告日 YYYY-MM-DD 以降"),
   issued_before: z.string().optional().describe("公告日 YYYY-MM-DD 以前"),
   due_after: z.string().optional().describe("入札書提出期限 YYYY-MM-DD 以降"),
@@ -63,7 +75,7 @@ export function registerSearchBids(server: McpServer, client: KkjClient): void {
     {
       title: "官公需入札検索",
       description:
-        "日本全国の官公需入札情報を検索する。USE THIS WHEN: キーワード・件名・発注機関・都道府県・期間で入札候補を探したいとき。DO NOT USE WHEN: 既に Key があり1件の詳細が欲しいとき（get_bid_detail を使う）、追うべき順に並べたいとき（rank_bids を使う）。Search Japanese public procurement bids by keyword, project name, organization, prefecture, or date range. Cari tender pengadaan pemerintah Jepang berdasarkan kata kunci, nama proyek, instansi, prefektur, atau rentang tanggal.",
+        "日本全国の官公需入札情報を検索する。query、project_name、organization_name、prefectureのいずれか1つ以上が必要です。categoryやcertificationのみでは検索できません。USE THIS WHEN: キーワード・件名・発注機関・都道府県・期間で入札候補を探したいとき。DO NOT USE WHEN: 既に Key があり1件の詳細が欲しいとき（get_bid_detail を使う）、追うべき順に並べたいとき（rank_bids を使う）、過去1〜30日の新着公告を一覧したいとき（list_recent_bids を使う）。Search Japanese public procurement bids by keyword, project name, organization, prefecture, or date range. Requires at least one of query, project_name, organization_name, or prefecture. Cari tender pengadaan pemerintah Jepang berdasarkan kata kunci, nama proyek, instansi, prefektur, atau rentang tanggal. Wajib mengisi minimal satu: query, project_name, organization_name, atau prefecture.",
       inputSchema: searchBidsInputSchema,
       outputSchema: BidSearchResultSchema.shape,
       annotations: {

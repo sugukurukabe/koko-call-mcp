@@ -23,7 +23,9 @@ const inputSchema = {
   fetch_documents: z
     .boolean()
     .default(false)
-    .describe("trueの場合、公式公告ページまたは添付資料を一時取得して要件抽出を試みる。"),
+    .describe(
+      "既定値はfalse。falseではメタデータから要件・期限・確認資料を整理し、資料本文は未確認として扱います。ユーザーが公式原本や添付資料の直接確認を明示的に求めた場合のみtrueを指定します。trueでも環境の文書取得設定により取得できない場合があります。",
+    ),
   target_uris: z
     .array(z.string().url())
     .max(3)

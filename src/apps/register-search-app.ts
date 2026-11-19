@@ -25,7 +25,7 @@ export function registerSearchResultsApp(server: McpServer, client: KkjClient): 
     {
       title: "AI Bid Workspace",
       description:
-        "日本全国の官公需入札情報を検索し、MCP Apps対応クライアントではAI Bid Workspaceとして検索結果を表示する。USE THIS WHEN: 対応クライアントで入札検索結果をカード/ワークスペースUIとして確認したいとき。DO NOT USE WHEN: テキストと structuredContent だけで十分なとき（search_bids を使う）。非対応クライアントでも通常のテキスト要約と structuredContent を返す。",
+        "日本全国の官公需入札情報を検索し、MCP Apps対応クライアントではAI Bid Workspaceとして検索結果を表示する。query、project_name、organization_name、prefectureのいずれか1つ以上が必要です。categoryやcertificationのみでは検索できません。USE THIS WHEN: 対応クライアントで入札検索結果をカード/ワークスペースUIとして確認したいとき。DO NOT USE WHEN: テキストと structuredContent だけで十分なとき（search_bids を使う）。非対応クライアントでも通常のテキスト要約と structuredContent を返す。",
       inputSchema: searchBidsInputSchema,
       outputSchema: BidSearchResultSchema.shape,
       annotations: {

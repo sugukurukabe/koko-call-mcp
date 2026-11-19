@@ -24,7 +24,9 @@ const GIT_BASH_EXE =
 const NODE_BIN_DIR = path.dirname(process.execPath);
 
 const TARGET_SHA = "20bef7f9de3789b25ca1892b2984e6763ec41689";
-const EXPECTED_VERSION = "0.10.1";
+const EXPECTED_VERSION = JSON.parse(
+  fs.readFileSync(path.join(ROOT_DIR, "package.json"), "utf8"),
+).version;
 const SAMPLE_UI_HTML =
   '<!doctype html><html lang="ja"><head><title>JP Bids Workspace 0.10.1</title></head><body><div id="root">AI Bid Workspace</div></body></html>';
 const EXPECTED_UI_SHA256 = crypto.createHash("sha256").update(SAMPLE_UI_HTML, "utf8").digest("hex");
