@@ -5,12 +5,7 @@ import {
   sanitizeFeedbackText,
   stripInternalTelemetryHeaders,
 } from "./core.js";
-import type {
-  CloudflareRequest,
-  ExecutionContext,
-  GatewayEnv,
-  ScheduledEvent,
-} from "./types.js";
+import type { CloudflareRequest, ExecutionContext, GatewayEnv, ScheduledEvent } from "./types.js";
 
 const RETRY_DELAY_MS = 250;
 const STALE_CACHE_PREFIX = "stale_cache:";
@@ -411,10 +406,7 @@ export default {
       const openSec = parseIntEnv(env.CIRCUIT_BREAKER_OPEN_SEC, 30);
       ctx.waitUntil(
         (async () => {
-          const prev = Number.parseInt(
-            (await env.STATE_KV?.get(CIRCUIT_ERR_COUNT_KEY)) ?? "0",
-            10,
-          );
+          const prev = Number.parseInt((await env.STATE_KV?.get(CIRCUIT_ERR_COUNT_KEY)) ?? "0", 10);
           const next = (Number.isFinite(prev) ? prev : 0) + 1;
           await env.STATE_KV?.put(CIRCUIT_ERR_COUNT_KEY, String(next), {
             expirationTtl: windowSec,

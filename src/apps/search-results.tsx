@@ -892,7 +892,9 @@ export function WorkspaceContent({ onRetry }: WorkspaceContentProps) {
                       <button
                         type="button"
                         className="action-btn"
-                        onClick={() => void openFeedbackUrl(app, "search_bids_app", setActionMessage)}
+                        onClick={() =>
+                          void openFeedbackUrl(app, "search_bids_app", setActionMessage)
+                        }
                       >
                         ご意見・改善報告 / Feedback
                       </button>

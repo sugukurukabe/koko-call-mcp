@@ -840,9 +840,7 @@ export function createHttpApp(): express.Express {
       void server.close();
     });
     try {
-      if (
-        isVerifiedEdgeAuth(req.header(EDGE_AUTH_HEADER), process.env.JP_BIDS_EDGE_AUTH_SECRET)
-      ) {
+      if (isVerifiedEdgeAuth(req.header(EDGE_AUTH_HEADER), process.env.JP_BIDS_EDGE_AUTH_SECRET)) {
         installEdgeTelemetryResponseAdapter(res, extractMcpRequestTelemetry(req.body));
       }
       if (contract.effectiveVersion === "2026-07-28") {
