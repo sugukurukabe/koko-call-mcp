@@ -2,7 +2,6 @@ name = "jp-bids-edge-gateway"
 main = "src/index.ts"
 compatibility_date = "2026-11-01"
 workers_dev = true
-preview_urls = false
 
 # Production route intentionally omitted during staging (S6/S7).
 # Re-enable in the Cutover Plan after Cloud Run v0.10.2 (JP_BIDS_EDGE_AUTH_SECRET) is live:
