@@ -457,7 +457,7 @@ export default {
   },
 
   async scheduled(event: ScheduledEvent, env: GatewayEnv, ctx: ExecutionContext): Promise<void> {
-    if (event.cron === "0 0 * * 1") {
+    if (event.cron === "0 0 * * MON" || event.cron === "0 0 * * 2") {
       ctx.waitUntil(runWeeklyDigest(env));
       return;
     }
