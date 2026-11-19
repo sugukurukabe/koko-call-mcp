@@ -1,12 +1,14 @@
-# JP Bids MCP 機能仕様書
+# JP Bids MCP 機能仕様書 / Functional Specification
 
-更新日: 2026-11-16 JST
+更新日: 2026-11-19 JST
 
 [使用説明書](./USER_GUIDE.ja.md) · [検証状況](./VERIFICATION_STATUS.md)
 
+> **English Summary**: Functional specification for the public `JP_BIDS_PROFILE=public_mvp` profile (7 read-only tools + 16-column shortlist CSV/JSON export + `AI Bid Workspace` UI). Version `0.10.1` is deployed at `https://mcp.bid-jp.com/mcp` (`jp-bids-mcp-00087-kam`, commit `92e89aa`) and published on npm (`jp-bids-mcp@0.10.1`) and the Official MCP Registry (`io.github.sugukurukabe/jp-bids@0.10.1`). Source: Japan's SME Agency KKJ public procurement API (`fetch_documents` defaults to `false`; production `JP_BIDS_DOCUMENT_EXTRACTION=off`).
+
 ## 仕様の基準
 
-対象は `JP_BIDS_PROFILE=public_mvp`（公開7ツール）の公開候補 `0.10.1`（本候補ツリーの `package.json`・`server.json`・`plugin.json` 版数はすべて `0.10.1` に統一済み。なお `npmjs.org` 既公開版は `0.10.0`、過去の実機確認時点の公開リポジトリ `SUGUKURU-CO-LTD/jp-bids-mcp` コミットは `9afe0c6ffb1ec18930c1b358d43ecec784ff7da7`）です。ソースSHAと本番コンテナの配備リビジョン・イメージdigestとの対応は運用記録、[承認境界マトリクス](../JP_BIDS_CLIENT_ACCEPTANCE_APPROVAL_MATRIX_v1.0.md)、および[検証状況](./VERIFICATION_STATUS.md)で管理します。
+対象は `JP_BIDS_PROFILE=public_mvp`（公開7ツール）の公開版 `0.10.1`（本番 Cloud Run `jp-bids-mcp-00087-kam` / コミット `92e89aa6821411d9ec769f1ae8080b02c1ca0aec`、`npmjs.org` `jp-bids-mcp@0.10.1` および公式 MCP Registry `io.github.sugukurukabe/jp-bids@0.10.1` 公開済み。次期開発ブランチ `main` は `0.10.2` 準備中。過去の実機確認時点の旧リポジトリ `SUGUKURU-CO-LTD/jp-bids-mcp` コミットは `9afe0c6ffb1ec18930c1b358d43ecec784ff7da7`）です。ソースSHAと本番コンテナの配備リビジョン・イメージdigestとの対応は運用記録、[承認境界マトリクス](../JP_BIDS_CLIENT_ACCEPTANCE_APPROVAL_MATRIX_v1.0.md)、および[検証状況](./VERIFICATION_STATUS.md)で管理します。
 
 | ツール | 入力・機能 | 動作・制約 |
 | --- | --- | --- |

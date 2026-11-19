@@ -112,7 +112,7 @@ JP Bids MCP pairs seamlessly with [J-Grants MCP](https://github.com/digital-go-j
 
 ```text
 Remote MCP:             https://mcp.bid-jp.com/mcp
-Candidate version:      0.10.1 (currently published npm package: jp-bids-mcp@0.10.0)
+Published version:      0.10.1 (npm: jp-bids-mcp@0.10.1 / MCP Registry: io.github.sugukurukabe/jp-bids@0.10.1)
 Registry metadata name: io.github.sugukurukabe/jp-bids
 ```
 
@@ -179,7 +179,7 @@ To test UI rendering and all 35 Gate 1 acceptance sub-conditions locally with **
 
 ```bash
 # Run Gate 1 acceptance suite under the loopback-only network guard (35/35 conditions, 0 external calls)
-node --import ./evidence/q02_batch2/net-guard.batch2.path-null-fix.mjs tests/acceptance/gate1-runner.mjs
+node --import ./tests/acceptance/net-guard.mjs tests/acceptance/gate1-runner.mjs
 ```
 
 ### 4. Protocol & Registry Specifications (`v0.10.1`)

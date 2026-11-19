@@ -1,11 +1,13 @@
-# JP Bids MCP 検証状況と既知の問題
+# JP Bids MCP 検証状況と既知の問題 / Verification Status & Known Limitations
 
-更新日: 2026-11-17 JST / 対象: 公開候補 `0.10.1`（`public-candidate-20261117-v6` / ※ `npmjs.org` 既公開版は `0.10.0`）
+更新日: 2026-11-19 JST / 本番稼働・公開版: `0.10.1`（Cloud Run `jp-bids-mcp-00087-kam` @ `100%` / `npmjs.org` `jp-bids-mcp@0.10.1` / 公式 MCP Registry `io.github.sugukurukabe/jp-bids@0.10.1`）
 
-実装されている機能、固定データおよびローカル模擬ブラウザによる自動テスト、過去版での実クライアント確認、および本 `0.10.1` 候補における未実施事項を厳密に分けて記録します。説明書は[こちら](./USER_GUIDE.ja.md)、機能の入出力・制約は[機能仕様書](./FUNCTIONAL_SPEC.md)、承認境界と残課題は[承認境界マトリクス](../JP_BIDS_CLIENT_ACCEPTANCE_APPROVAL_MATRIX_v1.0.md)を参照してください。
+> **English Summary**: `v0.10.1` (commit `92e89aa6821411d9ec769f1ae8080b02c1ca0aec`, image `sha256:50955234...90002`) is live at 100% traffic on `https://mcp.bid-jp.com/mcp`, published on npm (`jp-bids-mcp@0.10.1` with Sigstore SLSA provenance) and the Official MCP Registry (`io.github.sugukurukabe/jp-bids@0.10.1`). Automated unit/safety/Gate 1 checks (35/35 offline conditions) and live authenticated OAuth PKCE S256 + MCP E2E probes (`initialize`, `tools/list` 7 tools, `resources/read` 754KB UI, 0 KKJ calls, `5xx = 0%`) have passed on `jp-bids-mcp-00087-kam`. Interactive Claude/ChatGPT UI walkthroughs on `0.10.1` remain tracked separately from the earlier `2026-10-21`/`2026-10-24` reference records below.
 
-> **`0.10.1` 候補における実機・本番状態の扱い**:
-> 本 `0.10.1` 候補（`dist/apps/search-results.html` `sha256: 92532dfb047ca3cac07968258d58dceba204f432bf11bdf3ae7d3c4c69e4d741`）については、ローカルの Node VM 起動検査および `127.0.0.1` ヘッドレスブラウザ模擬ホスト検証（13項目＋故障注入3種負例）まで完了していますが、**Cloud Run への配備・現在の本番状態照会（`UNCONFIRMED_NOT_QUERIED`）および実 Claude / 実 ChatGPT クライアント上での表示・操作確認（`NOT_EXECUTED_ON_0_10_1`）は未実施**です。以下の本番確認記録は過去版時点の参考実績であり、`0.10.1` の実ホスト受入完了証拠とは扱いません。
+実装されている機能、固定データおよびローカル模擬ブラウザによる自動テスト、過去版での実クライアント確認、および `0.10.1` 本番稼働後の検証済み範囲・未実施事項を厳密に分けて記録します。説明書は[こちら](./USER_GUIDE.ja.md)、機能の入出力・制約は[機能仕様書](./FUNCTIONAL_SPEC.md)、承認境界と残課題は[承認境界マトリクス](../JP_BIDS_CLIENT_ACCEPTANCE_APPROVAL_MATRIX_v1.0.md)を参照してください。
+
+> **`0.10.1` 本番稼働・検証状態の正確な区別（2026-11-19 JST 更新）**:
+> `0.10.1`（コミット `92e89aa6821411d9ec769f1ae8080b02c1ca0aec`、Cloud Build `f8653699-56bc-4d34-af97-f926a7ec8091`、イメージ `sha256:50955234931a3932c71be00ac77bc43ab84cc5dcb59f16deef7885e6a9e90002`）は Cloud Run リビジョン **`jp-bids-mcp-00087-kam`** として `https://mcp.bid-jp.com` へ **100% 配備完了** し、npm（`jp-bids-mcp@0.10.1`）・GitHub Release `v0.10.1`・公式 MCP Registry（`0.10.1`）への公開を完了しています。本番リビジョンに対し OAuth DCR + PKCE S256 認証付き MCP E2E（`initialize`・`tools/list` 公開7ツール・`resources/read` UI 754,754 bytes、実 KKJ 通信 0 回）および Cloud Logging 集計（`5xx = 0` 件、認証済み `POST /mcp` `p50 = 6.82 ms` / `p95 = 29.34 ms`）が通過済みです。一方、**実 Claude / 実 ChatGPT 画面上での `0.10.1` 対話操作録画（`NOT_EXECUTED_ON_0_10_1`）と外部ディレクトリ提出（OpenAI / Anthropic）は別工程で管理**しており、以下の過去版実機記録を `0.10.1` の実ホスト受入証拠として流用しません。
 
 ## 【過去版参考実績】本番Claudeで確認した範囲（2026-10-21 JST）
 

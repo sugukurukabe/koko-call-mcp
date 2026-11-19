@@ -200,16 +200,21 @@ export class FirestoreOAuthStore implements OAuthStore {
       if (familySnapshot.exists && familySnapshot.data()?.compromised === true) {
         return { status: "compromised" };
       }
+      const familyExpiresAtDate = Timestamp.fromMillis((now + 30 * 24 * 3600) * 1000);
       if (record.consumedAt !== null) {
         transaction.set(
           actualFamilyRef,
-          { compromised: true, compromisedAt: now },
+          { compromised: true, compromisedAt: now, expiresAtDate: familyExpiresAtDate },
           { merge: true },
         );
         return { status: "reused" };
       }
       transaction.update(tokenRef, { consumedAt: now });
-      transaction.set(actualFamilyRef, { compromised: false, lastUsedAt: now }, { merge: true });
+      transaction.set(
+        actualFamilyRef,
+        { compromised: false, lastUsedAt: now, expiresAtDate: familyExpiresAtDate },
+        { merge: true },
+      );
       return { status: "ok", record };
     });
   }

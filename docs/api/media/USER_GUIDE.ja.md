@@ -1,6 +1,6 @@
 # JP Bids MCP 使用説明書
 
-対象: 公開候補 `0.10.1`（`JP_BIDS_PROFILE=public_mvp` / 本番エンドポイント `https://mcp.bid-jp.com/mcp` ※既公開 npm 版は `0.10.0`） / 更新日: 2026-11-16 JST
+対象: 公開版 `0.10.1`（`JP_BIDS_PROFILE=public_mvp` / 本番エンドポイント `https://mcp.bid-jp.com/mcp` / npm `jp-bids-mcp@0.10.1`） / 更新日: 2026-11-19 JST
 
 [確認済み範囲・既知の問題](./VERIFICATION_STATUS.md) · [機能仕様書](./FUNCTIONAL_SPEC.md)
 
@@ -73,4 +73,4 @@ Team・Enterpriseでは組織の管理者による事前追加が必要な場合
 | 文字化け・1列にまとまる | CSVファイルをUTF-8・カンマ区切りとしてインポート。直接貼り付けだけで正しい列に分かれるとは限らない |
 | 公式URLで目的の案件が出ない | 入口ページかどうか確認し、件名・発注機関から公式サイト内で探す。URL到達だけで原本照合済みとはしない |
 
-問い合わせには、日時、クライアント名、操作、表示されたエラー、対象の公開案件名を添えます。通常の技術的な不具合は[GitHub Issues](https://github.com/SUGUKURU-CO-LTD/jp-bids-mcp/issues)へ。アクセストークン、認可コード、署名付きbid_ref、個人情報は公開投稿しません。秘密情報を含む相談は[会社の問い合わせ窓口](https://sugu-kuru.co.jp/contact)の受付方法を確認して連絡します。
+問い合わせには、日時、クライアント名、操作、表示されたエラー、対象の公開案件名を添えます。通常の技術的な不具合は[GitHub Issues](https://github.com/sugukurukabe/koko-call-mcp/issues)へ。アクセストークン、認可コード、署名付きbid_ref、個人情報は公開投稿しません。秘密情報を含む相談は[会社の問い合わせ窓口](https://sugu-kuru.co.jp/contact)の受付方法を確認して連絡します。
