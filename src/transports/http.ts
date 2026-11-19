@@ -6,6 +6,12 @@ import express, { type NextFunction, type Request, type Response } from "express
 import { KkjClient } from "../api/kkj-client.js";
 import { parseProApiKeys, parseTier } from "../lib/auth.js";
 import { authenticateMcpRequest } from "../lib/authn.js";
+import {
+  EDGE_AUTH_HEADER,
+  extractMcpRequestTelemetry,
+  installEdgeTelemetryResponseAdapter,
+  isVerifiedEdgeAuth,
+} from "../lib/edge-telemetry.js";
 import { parsePortEnv, parsePositiveNumberEnv } from "../lib/env.js";
 import { parseAllowedOrigins, validateOrigin } from "../lib/http.js";
 import {
@@ -834,6 +840,11 @@ export function createHttpApp(): express.Express {
       void server.close();
     });
     try {
+      if (
+        isVerifiedEdgeAuth(req.header(EDGE_AUTH_HEADER), process.env.JP_BIDS_EDGE_AUTH_SECRET)
+      ) {
+        installEdgeTelemetryResponseAdapter(res, extractMcpRequestTelemetry(req.body));
+      }
       if (contract.effectiveVersion === "2026-07-28") {
         // @modelcontextprotocol/sdk 1.32.2 implements MCP 2025-11-25 natively.
         // After enforcing the 2026-07-28 stateless request contract above, adapt the

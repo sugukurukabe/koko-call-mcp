@@ -888,6 +888,15 @@ export function WorkspaceContent({ onRetry }: WorkspaceContentProps) {
                       <dt>取得日時</dt>
                       <dd>{workspace.accessedAt}</dd>
                     </dl>
+                    <p style={{ marginTop: "8px" }}>
+                      <button
+                        type="button"
+                        className="action-btn"
+                        onClick={() => void openFeedbackUrl(app, "search_bids_app", setActionMessage)}
+                      >
+                        ご意見・改善報告 / Feedback
+                      </button>
+                    </p>
                   </div>
                 </details>
               </div>
@@ -1535,6 +1544,41 @@ async function handleOpenOfficialLink(
     await copyText(
       url,
       "公式リンクのリクエストに失敗したため、URLをコピーしました。",
+      setActionMessage,
+    );
+  }
+}
+
+const FEEDBACK_BASE_URL = "https://mcp.bid-jp.com/feedback";
+
+export async function openFeedbackUrl(
+  app: ReturnType<typeof useApp>["app"],
+  context: string,
+  setActionMessage: (message: string) => void,
+): Promise<void> {
+  const safeContext = /^[A-Za-z0-9_-]{1,64}$/.test(context) ? context : "workspace";
+  const url = `${FEEDBACK_BASE_URL}?tool=search_bids_app&ctx=${safeContext}`;
+  if (!app?.getHostCapabilities()?.openLinks) {
+    await copyText(
+      url,
+      "フィードバックURLをクリップボードにコピーしました。ブラウザで開いてください。",
+      setActionMessage,
+    );
+    return;
+  }
+  try {
+    const result = await app.openLink({ url });
+    if (result.isError) {
+      await copyText(
+        url,
+        "Hostが外部リンクを拒否したため、フィードバックURLをコピーしました。",
+        setActionMessage,
+      );
+    }
+  } catch {
+    await copyText(
+      url,
+      "外部リンクのリクエストに失敗したため、フィードバックURLをコピーしました。",
       setActionMessage,
     );
   }

@@ -1,0 +1,35 @@
+name = "jp-bids-edge-gateway"
+main = "src/index.ts"
+compatibility_date = "2026-11-01"
+workers_dev = false
+
+routes = [
+  { pattern = "mcp.bid-jp.com/*", zone_name = "bid-jp.com" }
+]
+
+[vars]
+ORIGIN_URL = "https://jp-bids-mcp-lchlj4owxq-an.a.run.app"
+PUBLIC_BASE_URL = "https://mcp.bid-jp.com"
+TURNSTILE_SITE_KEY = ""
+CIRCUIT_BREAKER_THRESHOLD = "5"
+CIRCUIT_BREAKER_WINDOW_SEC = "60"
+CIRCUIT_BREAKER_OPEN_SEC = "30"
+
+[[analytics_engine_datasets]]
+binding = "TELEMETRY"
+dataset = "jp_bids_mcp_telemetry"
+
+[[d1_databases]]
+binding = "FEEDBACK_DB"
+database_name = "jp-bids-feedback"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+migrations_dir = "migrations"
+
+[[kv_namespaces]]
+binding = "STATE_KV"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+[triggers]
+# Every 5 minutes: zero-KKJ synthetic health probe & self-healing check
+# Every Monday 00:00 UTC (09:00 JST): weekly Slack usage & feedback briefing
+crons = ["*/5 * * * *", "0 0 * * 1"]

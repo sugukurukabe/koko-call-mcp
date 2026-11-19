@@ -3,6 +3,7 @@
 // Endpoint OAuth 2.0 (RFC 8414 / RFC 9728 / RFC 7591 / PKCE)
 
 import express, { type NextFunction, type Request, type Response, Router } from "express";
+import { resolveOAuthRateLimitKey } from "../lib/edge-telemetry.js";
 import { generateId, signJwt, verifyJwt, verifyPkceS256 } from "./jwt.js";
 import { MemoryOAuthStore, type OAuthClientRecord, type OAuthStore } from "./store.js";
 
@@ -324,7 +325,8 @@ function oauthRateLimit(store: OAuthStore) {
   const windowMs = parsePositiveInteger(process.env.JP_BIDS_OAUTH_RATE_LIMIT_WINDOW_MS, 60_000);
   const maxRequests = parsePositiveInteger(process.env.JP_BIDS_OAUTH_RATE_LIMIT_MAX, 60);
   return async (req: Request, res: Response, next: NextFunction) => {
-    const allowed = await store.consumeRateLimit(`oauth:${req.ip}`, windowMs, maxRequests);
+    const rateKey = resolveOAuthRateLimitKey(req);
+    const allowed = await store.consumeRateLimit(rateKey, windowMs, maxRequests);
     if (!allowed) {
       res.status(429).json({ error: "rate_limited" });
       return;
