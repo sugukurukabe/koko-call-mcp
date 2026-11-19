@@ -3,11 +3,11 @@ main = "src/index.ts"
 compatibility_date = "2026-11-01"
 workers_dev = true
 
-# Production route intentionally omitted during staging (S6/S7).
-# Re-enable in the Cutover Plan after Cloud Run v0.10.2 (JP_BIDS_EDGE_AUTH_SECRET) is live:
-# routes = [
-#   { pattern = "mcp.bid-jp.com/*", zone_name = "bid-jp.com" }
-# ]
+# Production route attached for Cutover Step (c).
+# Remains inactive while mcp.bid-jp.com DNS is DNS-only (grey cloud) until Cutover Step (d).
+routes = [
+  { pattern = "mcp.bid-jp.com/*", zone_name = "bid-jp.com" }
+]
 
 [vars]
 ORIGIN_URL = "https://jp-bids-mcp-lchlj4owxq-an.a.run.app"
