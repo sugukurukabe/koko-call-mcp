@@ -1,14 +1,14 @@
-# JP Bids MCP — Panduan Bahasa Indonesia (v0.10.1)
+# JP Bids MCP — Panduan Bahasa Indonesia (v0.10.2)
 
 [![Smithery](https://smithery.ai/badge/a-kabe-1qio/jp-bids-mcp)](https://smithery.ai/servers/a-kabe-1qio/jp-bids-mcp)
 
 ## Gambaran Umum / Overview / 概要
 
-**JP Bids MCP (v0.10.1)** adalah server Model Context Protocol (MCP) yang memungkinkan siapa saja mencari, membandingkan, memeriksa URL pengumuman resmi, dan mengekspor daftar tender pengadaan pemerintah Jepang (KKJ) ke CSV/JSON 16 kolom langsung melalui obrolan AI (**Claude** atau **ChatGPT**). **Tanpa instalasi, tanpa pendaftaran akun, dan 100% gratis (7 alat publik + antarmuka AI Bid Workspace).**
+**JP Bids MCP (v0.10.2)** adalah server Model Context Protocol (MCP) yang memungkinkan siapa saja mencari, membandingkan, memeriksa URL pengumuman resmi, dan mengekspor daftar tender pengadaan pemerintah Jepang (KKJ) ke CSV/JSON 16 kolom langsung melalui obrolan AI (**Claude** atau **ChatGPT**). **Tanpa instalasi, tanpa pendaftaran akun, dan 100% gratis (7 alat publik + antarmuka AI Bid Workspace + Cloudflare Edge Gateway).**
 
-JP Bids MCP (`v0.10.1`) connects Claude, ChatGPT, and MCP clients to Japan's SME Agency procurement portal (KKJ) with **7 free, read-centric tools** and an interactive **AI Bid Workspace** UI.
+JP Bids MCP (`v0.10.2`) connects Claude, ChatGPT, and MCP clients to Japan's SME Agency procurement portal (KKJ) with **7 free, read-centric tools**, an interactive **AI Bid Workspace** UI, and a **Cloudflare Edge Gateway**.
 
-JP Bids MCP (`v0.10.1`) は、中小企業庁「官公需情報ポータルサイト」の入札公告をAIとの会話だけで検索・比較・CSV出力できる完全無料のMCPサーバーです。
+JP Bids MCP (`v0.10.2`) は、中小企業庁「官公需情報ポータルサイト」の入札公告をAIとの会話だけで検索・比較・CSV出力できる完全無料のMCPサーバーです。
 
 > **Sepenuhnya Gratis & Read-Only (`public_mvp`) / Free & Read-Centric**<br>
 > Semua 7 alat `public_mvp` dan panel **AI Bid Workspace** tersedia gratis tanpa kartu kredit, tanpa paket berbayar, dan tanpa pemanggilan Stripe saat runtime (`src/lib/billing.ts` serta paket `stripe` hanya dipertahankan untuk profil pengembangan lokal `full_local` dan tidak didaftarkan pada `public_mvp`). Server ini tidak pernah mengirim penawaran atau menulis ke sistem eksternal.
@@ -58,7 +58,7 @@ Agar Claude otomatis memahami nama 47 prefektur Jepang, kategori pengadaan (`物
 
 ---
 
-## Daftar 7 Alat Publik (Public MVP `v0.10.1`)
+## Daftar 7 Alat Publik (Public MVP `v0.10.2`)
 
 | Alat | Deskripsi | Profil |
 |---|---|---|
@@ -74,7 +74,7 @@ Agar Claude otomatis memahami nama 47 prefektur Jepang, kategori pengadaan (`物
 
 | Paket | Harga | Fitur |
 |---|---|---|
-| **Public MVP (`v0.10.1`)** | **Gratis (Free)** | Seluruh 7 alat publik + UI AI Bid Workspace (tanpa langganan berbayar atau pemanggilan Stripe saat runtime) |
+| **Public MVP (`v0.10.2`)** | **Gratis (Free)** | Seluruh 7 alat publik + UI AI Bid Workspace (tanpa langganan berbayar atau pemanggilan Stripe saat runtime) |
 
 *(※ Tidak termasuk biaya langganan klien AI pihak ketiga atau infrastruktur cloud self-hosted).*
 
@@ -93,7 +93,8 @@ Agar Claude otomatis memahami nama 47 prefektur Jepang, kategori pengadaan (`物
 
 ```text
 Remote MCP:             https://mcp.bid-jp.com/mcp
-Versi terbit:           0.10.1 (npm: jp-bids-mcp@0.10.1 / MCP Registry: io.github.sugukurukabe/jp-bids@0.10.1)
+Formulir Umpan Balik:   https://mcp.bid-jp.com/feedback
+Versi terbit:           0.10.2 (npm: jp-bids-mcp@0.10.2 / MCP Registry: io.github.sugukurukabe/jp-bids@0.10.2)
 Nama MCP Registry:      io.github.sugukurukabe/jp-bids
 ```
 
@@ -157,10 +158,11 @@ Untuk mereproduksi panel UI di Claude Desktop atau menjalankan seluruh 35 sub-ko
 node --import ./tests/acceptance/net-guard.mjs tests/acceptance/gate1-runner.mjs
 ```
 
-### 4. Spesifikasi Metadata & Registri (`v0.10.1`)
+### 4. Spesifikasi Metadata, Edge Gateway & Registri (`v0.10.2`)
 
-1. **Manifes MCP Registry Resmi (`server.json`)**: Mematuhi `$schema: "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json"` (`io.github.sugukurukabe/jp-bids`).
-2. **Endpoint Server Card (`public/.well-known/mcp/server-card.json`)**: Menyediakan introspeksi skema lengkap untuk 7 alat publik serta binding `_meta.ui` MCP Apps.
+1. **Cloudflare Edge Gateway (`mcp.bid-jp.com`)**: Berjalan di depan Cloud Run untuk self-healing 3 kelas (cache stale read-only & pemutus sirkuit KKJ), telemetri non-PII melalui Workers Analytics Engine, isolasi rate-limit OAuth berbasis hash IP harian, serta formulir umpan balik dwibahasa (`/feedback`) berbasis Turnstile & D1 ([`docs/cloudflare-edge-mcp-playbook.md`](docs/cloudflare-edge-mcp-playbook.md)).
+2. **Manifes MCP Registry Resmi (`server.json`)**: Mematuhi `$schema: "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json"` (`io.github.sugukurukabe/jp-bids`).
+3. **Endpoint Server Card (`public/.well-known/mcp/server-card.json`)**: Menyediakan introspeksi skema lengkap untuk 7 alat publik serta binding `_meta.ui` MCP Apps.
 
 ---
 
@@ -168,4 +170,4 @@ node --import ./tests/acceptance/net-guard.mjs tests/acceptance/gate1-runner.mjs
 
 - **Sumber Data**: API Pencarian Portal Informasi Pengadaan Pemerintah, Badan UKM Jepang (`中小企業庁 官公需情報ポータルサイト`).
 - **Penyedia**: Sugukuru Inc. (bukan produk resmi instansi pemerintah). Server ini tidak menyimpan dokumen lampiran asli; selalu verifikasi dengan dokumen resmi dari instansi terkait sebelum mengikuti tender.
-- [Kebijakan Privasi / Privacy Policy](https://mcp.bid-jp.com/privacy) · [Ketentuan Layanan / Terms of Service](https://mcp.bid-jp.com/terms)
+- [Cloudflare Edge Playbook](docs/cloudflare-edge-mcp-playbook.md) · [Kebijakan Privasi / Privacy Policy](https://mcp.bid-jp.com/privacy) · [Ketentuan Layanan / Terms of Service](https://mcp.bid-jp.com/terms) · [Umpan Balik / Feedback](https://mcp.bid-jp.com/feedback)

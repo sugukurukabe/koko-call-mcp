@@ -9,11 +9,14 @@
 
 ## 1. 定義 / Definition
 
-JP Bids MCP は、中小企業庁の官公需情報ポータルサイト（KKJ）が公開する入札公示データを Model Context Protocol (MCP) 2025-11-25 仕様で AI に提供する読み取り専用サーバーです。Claude Desktop / Cursor / ChatGPT などの MCP 対応クライアントから、自然言語で入札公告を検索・順位付け・要件チェックリスト抽出・CSV/JSON出力できます。完全無料・読み取り中心で動作し、Stripe等の課金呼出しは行いません。
+JP Bids MCP は、中小企業庁の官公需情報ポータルサイト（KKJ）が公開する入札公示データを Model Context Protocol（MCP `2025-11-25` ネイティブ＋ステートレス `2026-07-28` HTTP境界アダプタ、MCP Apps `2026-01-26`）で AI に提供する読み取り専用サーバーです。Claude Desktop / Cursor / ChatGPT などの MCP 対応クライアントから、自然言語で入札公告を検索・順位付け・要件チェックリスト抽出・CSV/JSON出力できます。完全無料・読み取り中心で動作し、Stripe等の課金呼出しは行いません。
 
 - 公式エンドポイント: `https://mcp.bid-jp.com/mcp`
-- トランスポート: Streamable HTTP（MCP 2025-11-25 仕様）
-- 認証: OAuth 2.0 Authorization Code + PKCE + Dynamic Client Registration
+- 公開バージョン: `0.10.2`
+- トランスポート: Streamable HTTP（MCP `2025-11-25` ＋ ステートレス `2026-07-28` HTTP境界アダプタ）
+- 認証: OAuth 2.0 Authorization Code + PKCE (S256) + Dynamic Client Registration（Firestore Native TTL 全5コレクション有効）
+- エッジ保護・窓口: Cloudflare Workers（自己修復・非PIIテレメトリ・`/feedback` Turnstile + D1）
+- フィードバック窓口: `https://mcp.bid-jp.com/feedback`
 - ライセンス: Apache-2.0
 - データ出典: 中小企業庁 官公需情報ポータルサイト（KKJ, https://kkj.go.jp ）
 - MCP Registry metadata name: `io.github.sugukurukabe/jp-bids`
@@ -37,7 +40,7 @@ JP Bids MCP は、中小企業庁の官公需情報ポータルサイト（KKJ�
 
 ## 3. MCP 仕様対応 / MCP Spec Support
 
-JP Bids MCP は MCP 2025-11-25 仕様に基づき、入札検索に必要な主要 primitive を実装します。Logging / Notifications は現行版では宣言していません。
+JP Bids MCP は MCP `2025-11-25`（`@modelcontextprotocol/sdk@1.32.2` ネイティブ）とステートレス `2026-07-28` HTTP境界アダプタ、および MCP Apps `2026-01-26` に基づき、入札検索に必要な主要 primitive を実装します。Logging / Notifications / Sampling は現行公開版では宣言していません。
 
 | プリミティブ | 実装 |
 |---|---|
@@ -137,6 +140,8 @@ npx jp-bids-mcp
   MCP Apps UI「AI Bid Workspace」の設計解説。`ui://jp-bids/search-results.html` を `text/html;profile=mcp-app` の単一HTMLバンドルとして配信する構成、CSP の `connectDomains: []` によるデータ経路分離、ホストアクション拒否時のフォールバック、view-model 分離によるテスト設計を扱う。
 - 「官公需の公告に、銘柄コードを付ける — Investor Radar」 https://github.com/sugukurukabe/koko-call-mcp/blob/main/articles/investor-radar.md
   ローカル開発用 `full_local` プロファイル向けの参考実装解説（公開MVP 7ツールには含まれない）。KKJ公告の組織名・件名から上場企業カタログへの名寄せとイベントウィンドウ検証の設計を扱う。
+- 「Cloudflare × Cloud Run 運用・再利用プレイブック」 https://github.com/sugukurukabe/koko-call-mcp/blob/main/docs/cloudflare-edge-mcp-playbook.md
+  Cloudflare Workers エッジゲートウェイによる自己修復・非PIIテレメトリ・OAuth IPハッシュ分離・Turnstile + D1 `/feedback` 窓口・無停止カットオーバーの実装・運用ガイド。
 
 ## 9. 著者 / Author
 

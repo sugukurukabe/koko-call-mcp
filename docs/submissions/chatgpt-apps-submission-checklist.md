@@ -7,10 +7,10 @@
 > 参照元: `https://developers.openai.com/apps-sdk/deploy/submission`、`https://developers.openai.com/apps-sdk/app-submission-guidelines`  
 > 最新のローカル準備状況・残課題正本: [`OPENAI_SUBMISSION_LOCAL_PREPARATION_20261021.md`](./OPENAI_SUBMISSION_LOCAL_PREPARATION_20261021.md)  
 > 申請日: 未提出 (`NOT_SUBMITTED`)  
-> 対象候補バージョン: `0.10.1` (`JP_BIDS_PROFILE=public_mvp` / ※ `npmjs.org` 既公開版は `0.10.0`)
+> 対象公開バージョン: `0.10.2` (`JP_BIDS_PROFILE=public_mvp` / Cloudflare エッジ `mcp.bid-jp.com` + Cloud Run `jp-bids-mcp-00091-jiq` 稼働済み・npm `jp-bids-mcp@0.10.2`・MCP Registry `0.10.2` 公開済み)
 
 > **ローカルパッケージ検査の状態に関する重要事項**:
-> `node scripts/build-openai-package.mjs`（6ファイル構成ZIP・65項目のローカル構造/画像/ZIP検査）の判定ステータスは **`LOCAL_PARTIAL_VALIDATION_WITH_SCHEMA_WARNING_NOT_SUBMITTED`** であり、コアプラグインスキーマと OpenAI 拡張フィールドの差異に関するスキーマ警告 **`CORE_MCP_OPENAI_EXTENSION_MISMATCH`** を含みます。これはローカル構造検査の通過であり、OpenAI 申請ポータルでの互換性確認・提出完了・審査合格を意味しません。また、本 `0.10.1` ビルドにおける実 ChatGPT クライアント上での描画・操作検証、KKJ二次利用条件根拠確認（`OAI-01/04`）、Organization/Business Verification、ドメインチャレンジ検証、提出 Case ID 取得は未完了の残課題です。
+> `node scripts/build-openai-package.mjs`（6ファイル構成ZIP・65項目のローカル構造/画像/ZIP検査）の判定ステータスは **`LOCAL_PARTIAL_VALIDATION_WITH_SCHEMA_WARNING_NOT_SUBMITTED`** であり、コアプラグインスキーマと OpenAI 拡張フィールドの差異に関するスキーマ警告 **`CORE_MCP_OPENAI_EXTENSION_MISMATCH`** を含みます。これはローカル構造検査の通過であり、OpenAI 申請ポータルでの互換性確認・提出完了・審査合格を意味しません。また、現行 `0.10.2` ビルドにおける実 ChatGPT クライアント上での描画・操作検証、KKJ二次利用条件根拠確認（`OAI-01/04`）、Organization/Business Verification、ドメインチャレンジ検証、提出 Case ID 取得は未完了の残課題です。
 
 > **公式ドキュメントに載っていない実務上の要点**（コミュニティ報告に基づく）は「⚠️ 未文書化」と明記する。ダッシュボードのUIは変わりうるため、実際の画面表示を優先すること。
 
@@ -33,7 +33,7 @@
 
 | 項目 | 状態 | 備考 |
 |---|---|---|
-| MCPサーバーが公開HTTPSドメインで稼働 | ⚠️ 候補 `0.10.1` 本番未配備 | ドメイン `https://mcp.bid-jp.com/mcp` は構築済みだが、本候補 `0.10.1` の Cloud Run 昇格および現時点の実状態照会は未実施（`UNCONFIRMED_NOT_QUERIED`） |
+| MCPサーバーが公開HTTPSドメインで稼働 | ✅ `0.10.2` 本番稼働済み | `https://mcp.bid-jp.com/mcp` は Cloudflare Workers エッジ (`Full (strict)`) + Cloud Run `jp-bids-mcp-00091-jiq` (`100%`) で稼働・検証済み |
 | localhost/テスト用エンドポイントでない | ✅ | 申請対象URLは `https://mcp.bid-jp.com/mcp` |
 | 公開7ツールに `readOnlyHint`/`destructiveHint`/`idempotentHint`/`openWorldHint` が明示されている | ✅ | 全てtrue/false明示、nullなし（`src/tools/*.ts`） |
 | 公開7ツール全てに `outputSchema` がある | ✅ | `BidSearchResultSchema` / `BidRankingResultSchema` / `BidShortlistExportSchema` 等 |
@@ -43,7 +43,7 @@
 | OpenAI Organization データレジデンシー = Global（EUではない） | ⚠️ 未確認（要確認: 壁さん） | 壁さんがDashboardで確認。EUだと提出不可 |
 | Organization/個人 verification 完了 | ⚠️ 未完了（要対応: 壁さん） | §2参照 |
 | ドメイン所有確認エンドポイント実装 & ポータルチャレンジ検証 | ⚠️ コード実装済み・ポータル検証未実施 | `GET /.well-known/openai-apps-challenge` 実装済み。申請時のトークン設定・Verify Domain 操作は未実施 |
-| `0.10.1` バンドルでの実 ChatGPT 接続・UI・動画・スクリーンショット確認 | ⚠️ 未実施 (`NOT_EXECUTED_ON_0_10_1`) | ローカル模擬ブラウザ（13項目）のみ完了。過去版（2026-10-24 `9afe0c6`）の実機記録で代用せず、`0.10.1` 本番昇格後に実 ChatGPT で再確認・撮影する |
+| `0.10.2` バンドルでの実 ChatGPT 接続・UI・動画・スクリーンショット確認 | ⚠️ 未実施 | ローカル模擬ブラウザ（13項目）およびエッジ経由 OAuth/MCP E2E のみ完了。過去版（2026-10-24 `9afe0c6`）の実機記録で代用せず、現行 `0.10.2` 本番で実 ChatGPT 再確認・撮影を行う |
 
 ---
 

@@ -1,14 +1,14 @@
-# JP Bids MCP — 日本語ガイド (v0.10.1)
+# JP Bids MCP — 日本語ガイド (v0.10.2)
 
 [![Smithery](https://smithery.ai/badge/a-kabe-1qio/jp-bids-mcp)](https://smithery.ai/servers/a-kabe-1qio/jp-bids-mcp)
 
 ## 概要 / Overview / Gambaran Umum
 
-**JP Bids MCP (v0.10.1)** は、中小企業庁「官公需情報ポータルサイト（KKJ）」の公開入札公告を、普段お使いのAI（Claude / ChatGPT など）との会話だけで**検索・比較・公式資料URL確認・検討用CSV出力**できるサービスです。**インストール不要・会員登録不要・完全無料（公開7ツール）**で利用できます。
+**JP Bids MCP (v0.10.2)** は、中小企業庁「官公需情報ポータルサイト（KKJ）」の公開入札公告を、普段お使いのAI（Claude / ChatGPT など）との会話だけで**検索・比較・公式資料URL確認・検討用CSV出力**できるサービスです。**インストール不要・会員登録不要・完全無料（公開7ツール・Cloudflareエッジ保護）**で利用できます。
 
-JP Bids MCP (`v0.10.1`) connects Claude, ChatGPT, and MCP clients to Japan's SME Agency public procurement portal (KKJ) with **7 free, read-centric tools** and an interactive **AI Bid Workspace** UI.
+JP Bids MCP (`v0.10.2`) connects Claude, ChatGPT, and MCP clients to Japan's SME Agency public procurement portal (KKJ) with **7 free, read-centric tools**, an interactive **AI Bid Workspace** UI, and a **Cloudflare Edge Gateway**.
 
-JP Bids MCP (`v0.10.1`) menghubungkan Claude, ChatGPT, dan klien MCP ke portal pengadaan pemerintah Jepang (KKJ) dengan **7 alat gratis & read-centric** serta antarmuka **AI Bid Workspace**.
+JP Bids MCP (`v0.10.2`) menghubungkan Claude, ChatGPT, dan klien MCP ke portal pengadaan pemerintah Jepang (KKJ) dengan **7 alat gratis & read-centric**, antarmuka **AI Bid Workspace**, dan **Cloudflare Edge Gateway**.
 
 > **完全無料・読み取り専用 (`public_mvp`) / Free & Read-Only**<br>
 > アカウント作成・クレジットカード登録・有料プランなしで、公開7ツールすべてを無料で利用できます。リポジトリ内にはローカル開発プロファイル（`full_local`）向けに `src/lib/billing.ts` と `stripe` 依存が残存していますが、`public_mvp` では課金ツール・Proキー判定・実行時 Stripe 通信は一切行わず、代理入札・外部書き込みも行いません（※AIクライアント自体の利用料は除きます）。
@@ -77,7 +77,7 @@ Claudeが日本の都道府県名・調達区分（`物品` / `工事` / `役務
 
 ---
 
-## 公開7ツール一覧（Public MVP `v0.10.1`）
+## 公開7ツール一覧（Public MVP `v0.10.2`）
 
 | ツール | できること | プロファイル |
 |---|---|---|
@@ -93,7 +93,7 @@ Claudeが日本の都道府県名・調達区分（`物品` / `工事` / `役務
 
 | プラン | 料金 | 内容 |
 |---|---|---|
-| **Public MVP (`v0.10.1`)** | **無料 (Free)** | 公開7ツールすべて＋AI Bid Workspace UI（会員登録・有料プラン・実行時Stripe通信なし） |
+| **Public MVP (`v0.10.2`)** | **無料 (Free)** | 公開7ツールすべて＋AI Bid Workspace UI（会員登録・有料プラン・実行時Stripe通信なし） |
 
 ---
 
@@ -110,7 +110,8 @@ Claudeが日本の都道府県名・調達区分（`物品` / `工事` / `役務
 
 ```text
 リモートMCP: https://mcp.bid-jp.com/mcp
-公開バージョン: 0.10.1（npm: jp-bids-mcp@0.10.1 / MCP Registry: io.github.sugukurukabe/jp-bids@0.10.1）
+フィードバックフォーム: https://mcp.bid-jp.com/feedback
+公開バージョン: 0.10.2（npm: jp-bids-mcp@0.10.2 / MCP Registry: io.github.sugukurukabe/jp-bids@0.10.2）
 MCP Registry名: io.github.sugukurukabe/jp-bids
 ```
 
@@ -176,11 +177,12 @@ npm run build
 node --import ./tests/acceptance/net-guard.mjs tests/acceptance/gate1-runner.mjs
 ```
 
-### 4. メタデータと仕様対応 (`v0.10.1`)
+### 4. メタデータ・エッジ保護・仕様対応 (`v0.10.2`)
 
 1. **MCPプロトコル対応**: `@modelcontextprotocol/sdk@1.32.2`（`2025-11-25` ネイティブ）および MCP Apps (`2026-01-26` / `@modelcontextprotocol/ext-apps@1.7.4`) を基盤とし、`src/transports/http.ts` のステートレスHTTP境界アダプターにより `2026-07-28` リクエスト契約（`_meta` 版数一致・`Mcp-Method`・メソッド別 `Mcp-Name` 検証）および RFC 9207 `iss` に対応（詳細: [`docs/spec-notes/mcp-2026-07-28.md`](docs/spec-notes/mcp-2026-07-28.md)）。
-2. **公式 MCP Registry 定義 (`server.json`)**: `$schema: "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json"` に準拠（`io.github.sugukurukabe/jp-bids`）。
-3. **Server Card ディスカバリ (`public/.well-known/mcp/server-card.json`)**: 公開7ツールのスキーマ・OAuth設定・`_meta.ui` バインディングを提供。
+2. **Cloudflare エッジゲートウェイ (`mcp.bid-jp.com`)**: Cloud Run の前段に Cloudflare Workers を配置し、3区分自己修復（読取専用ステイルキャッシュ配信＋KKJサーキットブレーカー）、非PIIの Workers Analytics Engine テレメトリ、日次ソルト付きクライアントIPハッシュによるOAuthレート制限分離、および Turnstile + D1 による日英フィードバック窓口（`/feedback`）を運用（詳細: [`docs/cloudflare-edge-mcp-playbook.md`](docs/cloudflare-edge-mcp-playbook.md)）。
+3. **公式 MCP Registry 定義 (`server.json`)**: `$schema: "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json"` に準拠（`io.github.sugukurukabe/jp-bids`）。
+4. **Server Card ディスカバリ (`public/.well-known/mcp/server-card.json`)**: 公開7ツールのスキーマ・OAuth設定・`_meta.ui` バインディングを提供。
 
 ---
 
@@ -188,4 +190,4 @@ node --import ./tests/acceptance/net-guard.mjs tests/acceptance/gate1-runner.mjs
 
 - **データ出典**: 中小企業庁 官公需情報ポータルサイト 検索API（`https://www.kkj.go.jp/s/help/notes/`）。
 - **サービス提供者**: スグクル株式会社（政府機関・中小企業庁の公式製品ではありません）。本サーバーは添付PDF原本を保存せず、代理応募・入札手続きも行いません。応札判断の前に必ず発注機関の公式調達書類原本をご確認ください。
-- [機能仕様書](docs/FUNCTIONAL_SPEC.md) · [検証状況](docs/VERIFICATION_STATUS.md) · [プライバシーポリシー](https://mcp.bid-jp.com/privacy) · [利用規約](https://mcp.bid-jp.com/terms)
+- [機能仕様書](docs/FUNCTIONAL_SPEC.md) · [検証状況](docs/VERIFICATION_STATUS.md) · [Cloudflare運用プレイブック](docs/cloudflare-edge-mcp-playbook.md) · [プライバシーポリシー](https://mcp.bid-jp.com/privacy) · [利用規約](https://mcp.bid-jp.com/terms) · [フィードバック](https://mcp.bid-jp.com/feedback)

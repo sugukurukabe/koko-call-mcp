@@ -3,7 +3,9 @@
 > 中小企業庁の官公需情報ポータルサイト（KKJ）が公開する入札公示データを、AI アシスタントから検索・分析・要件抽出・エクスポートできる、完全無料・読み取り専用の Model Context Protocol サーバーです。
 > A read-only Model Context Protocol server that exposes public procurement notice data from Japan's SME Agency KKJ portal as 7 AI tools for search, ranking, requirement extraction, and shortlist export (free, read-centric).
 
-公式エンドポイント: `https://mcp.bid-jp.com/mcp`（Streamable HTTP + OAuth 2.0）
+公式エンドポイント: `https://mcp.bid-jp.com/mcp`（Streamable HTTP + OAuth 2.0 + Cloudflare エッジ保護）
+公開バージョン: `0.10.2`
+フィードバック窓口: `https://mcp.bid-jp.com/feedback`
 ライセンス: Apache-2.0
 リポジトリ: https://github.com/sugukurukabe/koko-call-mcp
 MCP Registry metadata name: `io.github.sugukurukabe/jp-bids`
@@ -11,7 +13,7 @@ npm: https://www.npmjs.com/package/jp-bids-mcp
 
 ## このサーバーの定義 / What this server is
 
-JP Bids MCP は、日本の官公需入札情報（中小企業庁 官公需情報ポータルサイト KKJ が公開する公示データ）を、Model Context Protocol 2025-11-25 仕様で AI に提供するサーバーです。Claude Desktop / Cursor / ChatGPT などの MCP 対応クライアントから、自然言語で入札を検索し、要件チェックリストを抽出し、自社プロファイルに基づきランキングし、CSV または JSON に出力できます。完全無料・読み取り中心で動作し、Stripe等の課金呼出しは行いません。
+JP Bids MCP は、日本の官公需入札情報（中小企業庁 官公需情報ポータルサイト KKJ が公開する公示データ）を、Model Context Protocol（MCP `2025-11-25` ネイティブ＋ステートレス `2026-07-28` HTTP境界アダプタ、MCP Apps `2026-01-26`）で AI に提供するサーバーです。Claude Desktop / Cursor / ChatGPT などの MCP 対応クライアントから、自然言語で入札を検索し、要件チェックリストを抽出し、自社プロファイルに基づきランキングし、CSV または JSON に出力できます。完全無料・読み取り中心で動作し、Stripe等の課金呼出しは行いません。
 
 公示データは `https://kkj.go.jp` の公開 API を経由して取得します。本サーバーは入札を読み取るだけで、応札や提出は扱いません。
 
@@ -33,8 +35,10 @@ JP Bids MCP は、日本の官公需入札情報（中小企業庁 官公需情�
 - README (日本語): https://github.com/sugukurukabe/koko-call-mcp/blob/main/README.ja.md
 - README (Bahasa Indonesia): https://github.com/sugukurukabe/koko-call-mcp/blob/main/README.id.md
 - ユースケース集: https://github.com/sugukurukabe/koko-call-mcp/blob/main/docs/use-cases.md
+- Cloudflare エッジ運用プレイブック: https://github.com/sugukurukabe/koko-call-mcp/blob/main/docs/cloudflare-edge-mcp-playbook.md
 - API リファレンス: https://github.com/sugukurukabe/koko-call-mcp/tree/main/docs/api
 - Cursor / Claude セットアップ: https://mcp.bid-jp.com/#setup
+- フィードバック窓口: https://mcp.bid-jp.com/feedback
 
 ## 解説記事 / Articles
 

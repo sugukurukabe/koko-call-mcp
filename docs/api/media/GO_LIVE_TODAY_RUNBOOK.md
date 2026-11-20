@@ -1,5 +1,7 @@
 # JP Bids MCP `v0.10.1` — 段階的本番配備・公開運用ランブック (Stage 1 / Stage 2 Production & Release Runbook)
 
+> **稼働状況メモ（2026-11-20 JST）**: 本書は `v0.10.1` 公開時の 2段階 Cloud Run 昇格手順書です。その後 **`v0.10.2`**（Cloud Run `jp-bids-mcp-00091-jiq` @ 100%、Firestore Native TTL 全5コレクション `ACTIVE`、npm `jp-bids-mcp@0.10.2`、公式 MCP Registry `0.10.2`）および前段の **Cloudflare Workers エッジゲートウェイ (`mcp.bid-jp.com`)** のカットオーバーまで完了しています。エッジ運用・ロールバック手順は [`./cloudflare-edge-mcp-playbook.md`](./cloudflare-edge-mcp-playbook.md)、最新の検証状態は [`./VERIFICATION_STATUS.md`](./VERIFICATION_STATUS.md) を参照してください。
+
 > **重要（承認境界と前提条件）**:
 > 1. **本書は独立再監査完了および管理者の明示的承認後にのみ実行する正式手順書です。** 本書の整備自体は Cloud Shell / GCP 照会、Cloud Build、Cloud Run 配備・トラフィック切替、`git push`、タグ push、`npm publish`、外部ディレクトリ提出の承認を意味しません。
 > 2. 過去の `v11`（コミット `f8363c0` / `jp-bids-mcp-r8-f8363c0-a7ad36fb14c53c57`）に対する `0%` 配備1回承認は本候補（`0.10.1`）へ流用できません。また、既存の Stage 2 読取由来調査（v4 差戻し `F01`〜`F03` → v5 是正指示）を継続する場合はその完了が前提であり、本書を使って由来確認や固定切替条件を迂回してはなりません。

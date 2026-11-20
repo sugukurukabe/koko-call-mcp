@@ -56,7 +56,7 @@
         "description": "Completely free (read-centric, 7 tools)"
       },
       "publisher": { "@id": "https://sugu-kuru.co.jp/#organization" },
-      "softwareRequirements": "Any MCP 2025-11-25 compliant client (Claude Desktop, Cursor, ChatGPT, etc.)",
+      "softwareRequirements": "Any MCP 2025-11-25 or stateless 2026-07-28 compliant client (Claude Desktop, Cursor, ChatGPT, etc.)",
       "featureList": [
         "Search public procurement notices from Japan's SME Agency KKJ portal (search_bids, list_recent_bids, get_bid_detail)",
         "AI ranking by keywords and deadline urgency (rank_bids)",
@@ -64,7 +64,8 @@
         "Shortlist export to CSV/JSON (export_bid_shortlist)",
         "Interactive search workspace (search_bids_app)",
         "OAuth 2.0 with PKCE and Dynamic Client Registration",
-        "Streamable HTTP and stdio transports"
+        "Streamable HTTP and stdio transports",
+        "Cloudflare Edge Gateway with self-healing protection and zero-PII operational telemetry"
       ]
     },
     {
@@ -100,7 +101,7 @@
           "name": "JP Bids MCP は何のためのサーバーですか？",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "中小企業庁 官公需情報ポータルサイト KKJ の公開入札公示データを、Model Context Protocol 2025-11-25 仕様で AI に提供する読み取り専用のサーバーです。Claude Desktop / Cursor / ChatGPT などの MCP 対応クライアントから、自然言語で入札を検索・順位付け・要件抽出・CSV/JSON出力できます。"
+            "text": "中小企業庁 官公需情報ポータルサイト KKJ の公開入札公示データを、Model Context Protocol (MCP 2025-11-25 / ステートレス 2026-07-28 互換) で AI に提供する読み取り専用のサーバーです。Claude Desktop / Cursor / ChatGPT などの MCP 対応クライアントから、自然言語で入札を検索・順位付け・要件抽出・CSV/JSON出力できます。"
           }
         },
         {
@@ -449,13 +450,14 @@ footer a{color:var(--muted)}
   <h2>今日から入札業務をAIで</h2>
   <p>対応するMCPクライアントへ接続先を登録し、OAuth認可を経て入札検索を利用できます。</p>
   <div class="hero-actions">
-    <a href="#setup" class="btn btn-primary">セットアップへ</a>
-    <a href="#usecases" class="btn btn-outline">ユースケース</a>
+    <a href="#setup" class="btn btn-primary">セットアップへ / Setup</a>
+    <a href="#usecases" class="btn btn-outline">ユースケース / Use Cases</a>
+    <a href="/feedback" class="btn btn-outline">ご意見・フィードバック / Feedback</a>
   </div>
 </section>
 
 <footer>
-  <p>&copy; 2025-2026 <a href="https://sugu-kuru.co.jp">スグクル株式会社 (Sugukuru Inc.)</a> &nbsp;|&nbsp; <a href="/privacy">プライバシー / Privacy</a> &nbsp;|&nbsp; <a href="/terms">利用規約 / Terms</a> &nbsp;|&nbsp; <a href="https://github.com/sugukurukabe/koko-call-mcp">GitHub</a></p>
+  <p>&copy; 2025-2026 <a href="https://sugu-kuru.co.jp">スグクル株式会社 (Sugukuru Inc.)</a> &nbsp;|&nbsp; <a href="/privacy">プライバシー / Privacy</a> &nbsp;|&nbsp; <a href="/terms">利用規約 / Terms</a> &nbsp;|&nbsp; <a href="/feedback">フィードバック / Feedback</a> &nbsp;|&nbsp; <a href="https://github.com/sugukurukabe/koko-call-mcp">GitHub</a></p>
   <p style="margin-top:.5rem">データ出典 / Data Source: <a href="https://www.kkj.go.jp/">中小企業庁 官公需情報ポータルサイト (KKJ)</a>（<a href="https://www.kkj.go.jp/s/help/notes/">サイト利用上の注意</a>）</p>
 </footer>
 
