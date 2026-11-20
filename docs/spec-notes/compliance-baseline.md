@@ -2,7 +2,7 @@
 
 ## 日本語
 
-JP Bids MCP v0.10.1 の公開候補では、次の一次資料を「公式準拠」および「移行互換」の根拠とする。
+JP Bids MCP v0.10.2 では、次の一次資料を「公式準拠」および「移行互換」の根拠とする。
 
 | 領域 | 基準 | 扱い |
 |---|---|---|
@@ -16,7 +16,7 @@ JP Bids MCP v0.10.1 の公開候補では、次の一次資料を「公式準拠
 
 ## English
 
-JP Bids MCP v0.10.1 uses the following primary sources as the compliance and compatibility baseline for the release candidate.
+JP Bids MCP v0.10.2 uses the following primary sources as the compliance and compatibility baseline.
 
 | Area | Baseline | Treatment |
 |---|---|---|
@@ -30,7 +30,7 @@ Public writing must distinguish what the specification permits, what this implem
 
 ## Bahasa Indonesia
 
-JP Bids MCP v0.10.1 memakai sumber primer berikut sebagai garis dasar kepatuhan dan kompatibilitas untuk kandidat rilis.
+JP Bids MCP v0.10.2 memakai sumber primer berikut sebagai garis dasar kepatuhan dan kompatibilitas.
 
 | Area | Dasar | Perlakuan |
 |---|---|---|

@@ -1,6 +1,6 @@
-# Remote Release Checklist (`v0.10.1` — Public MVP Candidate)
+# Remote Release Checklist (`v0.10.2` — Live on Cloud Run + Cloudflare Edge)
 
-> 承認境界の正本は **[`../JP_BIDS_CLIENT_ACCEPTANCE_APPROVAL_MATRIX_v1.0.md`](../JP_BIDS_CLIENT_ACCEPTANCE_APPROVAL_MATRIX_v1.0.md)**、具体的な実行コマンドと安全制御は **[`./GO_LIVE_TODAY_RUNBOOK.md`](./GO_LIVE_TODAY_RUNBOOK.md)** を参照してください。本チェックリストの整備自体は本番照会・Cloud Run 配備・`git push`・`npm publish`・外部申請の承認を意味しません。
+> 承認境界の正本は **[`../JP_BIDS_CLIENT_ACCEPTANCE_APPROVAL_MATRIX_v1.0.md`](../JP_BIDS_CLIENT_ACCEPTANCE_APPROVAL_MATRIX_v1.0.md)**、段階的昇格の実行コマンドは **[`./GO_LIVE_TODAY_RUNBOOK.md`](./GO_LIVE_TODAY_RUNBOOK.md)**、Cloudflare エッジゲートウェイの運用・カットオーバー・ロールバック手順は **[`./cloudflare-edge-mcp-playbook.md`](./cloudflare-edge-mcp-playbook.md)** を参照してください。`v0.10.2` は 2026-11-20 JST 時点で Cloud Run (`jp-bids-mcp-00091-jiq`)・Cloudflare エッジ (`mcp.bid-jp.com`)・npm・公式 MCP Registry・GitHub Release まで公開完了済みです。以下は今後の版上げ時にもそのまま再利用する標準手順です。
 
 ## 日本語
 

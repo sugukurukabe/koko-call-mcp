@@ -4,6 +4,13 @@
 
 ### Unreleased
 
+### 0.10.2
+
+- **Cloudflare エッジゲートウェイ本番稼働 (`workers/jp-bids-edge-gateway` / `mcp.bid-jp.com`)**: Cloud Run の前段に Cloudflare Workers を配置し、3区分自己修復（読取専用ステイルキャッシュ配信・KKJ サーキットブレーカー・認証系バイパス）、非 PII の Workers Analytics Engine テレメトリ、日次ソルト付きクライアント IP ハッシュによる OAuth レート制限分離（`X-Jpbids-Edge-Auth` + `X-Jpbids-Client-Ip-Hash`）、および Turnstile + D1 による日英フィードバック窓口（`/feedback`）と毎週月曜 09:00 JST の週次集計 Cron を稼働。運用・再利用プレイブックを [`docs/cloudflare-edge-mcp-playbook.md`](docs/cloudflare-edge-mcp-playbook.md) に整備。
+- **Firestore ネイティブ TTL 全5コレクション有効化**: `jp_bids_oauth_refresh_families` に 30 日 TTL 用 `expiresAtDate` を追加し、OAuth 5 コレクションすべてのネイティブ TTL ポリシーを本番 `ACTIVE` 化。
+- **ツール案内・日英UI改善**: `search_bids` / `list_recent_bids` / `extract_bid_requirements` の案内を整理し、OAuth 認可画面およびランディングページの日英表記と CSP 安全なフィードバック導線を拡充。
+- **本番リリース**: Cloud Run（`jp-bids-mcp-00091-jiq` @ 100%）、npm（`jp-bids-mcp@0.10.2`・Sigstore Provenance 付与）、公式 MCP Registry（`io.github.sugukurukabe/jp-bids@0.10.2`）、GitHub Release `v0.10.2` を公開。
+
 ### 0.10.1
 
 - **未公開版 `0.10.1` への候補版数一本化 (`PUBLIC-V0100-F04`)**: npmjs.org に既公開の `jp-bids-mcp@0.10.0` との版数衝突を解消するため、`package.json`、`package-lock.json`、`src/lib/version.ts`、`server.json`、`.well-known`、プラグイン、スキルを含む全候補構成を未公開版 `0.10.1` へ統一し、公開ワークフローに既公開版チェックを追加。
@@ -192,6 +199,13 @@
 
 ### Unreleased
 
+### 0.10.2
+
+- **Cloudflare Edge Gateway live cutover (`workers/jp-bids-edge-gateway` / `mcp.bid-jp.com`)**: Deployed a Cloudflare Worker in front of Cloud Run with 3-class self-healing (read-only stale fallback, KKJ circuit breaker, zero-cache auth pass-through), non-PII Workers Analytics Engine telemetry, daily-salted client IP-hash OAuth rate-limit isolation (`X-Jpbids-Edge-Auth` + `X-Jpbids-Client-Ip-Hash`), a bilingual `/feedback` form backed by Turnstile and D1, and a weekly Monday 09:00 JST summary cron. Documented the architecture and reusable rollout checklist in [`docs/cloudflare-edge-mcp-playbook.md`](docs/cloudflare-edge-mcp-playbook.md).
+- **Firestore Native TTL active across all 5 OAuth collections**: Added 30-day `expiresAtDate` to `jp_bids_oauth_refresh_families` and enabled Native TTL across all 5 OAuth Firestore collections in production.
+- **Tool guidance & bilingual UX polish**: Refined guidance for `search_bids`, `list_recent_bids`, and `extract_bid_requirements`, added bilingual copy to OAuth consent and landing pages, and added a CSP-safe Feedback link in `AI Bid Workspace`.
+- **Production release**: Shipped Cloud Run (`jp-bids-mcp-00091-jiq` @ 100%), npm (`jp-bids-mcp@0.10.2` with Sigstore Provenance), Official MCP Registry (`io.github.sugukurukabe/jp-bids@0.10.2`), and GitHub Release `v0.10.2`.
+
 ### 0.10.1
 
 - **Unified unpublished `0.10.1` release candidate (`PUBLIC-V0100-F04`)**: Bumped all package, lockfile, registry, `.well-known`, plugin, and skill manifests to unpublished `0.10.1` to prevent collision with the already-published `jp-bids-mcp@0.10.0` on npmjs.org, and added a pre-publish npm registry guard to `release.yml`.
@@ -379,6 +393,13 @@
 ## Bahasa Indonesia
 
 ### Unreleased
+
+### 0.10.2
+
+- **Cloudflare Edge Gateway aktif di produksi (`workers/jp-bids-edge-gateway` / `mcp.bid-jp.com`)**: Menempatkan Cloudflare Worker di depan Cloud Run dengan self-healing 3 kelas (fallback cache stale read-only, pemutus sirkuit KKJ, pass-through auth tanpa cache), telemetri non-PII Workers Analytics Engine, isolasi rate-limit OAuth berbasis hash IP harian (`X-Jpbids-Edge-Auth` + `X-Jpbids-Client-Ip-Hash`), formulir umpan balik dwibahasa `/feedback` dengan Turnstile + D1, serta cron ringkasan mingguan Senin 09:00 JST. Panduan operasional dan daftar periksa reusable disimpan di [`docs/cloudflare-edge-mcp-playbook.md`](docs/cloudflare-edge-mcp-playbook.md).
+- **Firestore Native TTL aktif pada seluruh 5 koleksi OAuth**: Menambahkan `expiresAtDate` 30 hari pada `jp_bids_oauth_refresh_families` dan mengaktifkan Native TTL pada kelima koleksi OAuth produksi.
+- **Penyempurnaan panduan alat & UX dwibahasa**: Menyempurnakan panduan `search_bids`, `list_recent_bids`, dan `extract_bid_requirements`, menambah teks dwibahasa pada halaman persetujuan OAuth & landing page, serta tautan Feedback aman-CSP di `AI Bid Workspace`.
+- **Rilis produksi**: Merilis Cloud Run (`jp-bids-mcp-00091-jiq` @ 100%), npm (`jp-bids-mcp@0.10.2` dengan Sigstore Provenance), Official MCP Registry (`io.github.sugukurukabe/jp-bids@0.10.2`), dan GitHub Release `v0.10.2`.
 
 ### 0.10.1
 

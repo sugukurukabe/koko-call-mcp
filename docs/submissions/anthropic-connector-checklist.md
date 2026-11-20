@@ -1,23 +1,23 @@
-# Anthropic Connectors Directory 申請・更新チェックリスト (v0.10.1 候補)
-# Anthropic Connectors Directory Submission Checklist (v0.10.1 Candidate)
-# Daftar Periksa Pengajuan Anthropic Connectors Directory (Kandidat v0.10.1)
+# Anthropic Connectors Directory 申請・更新チェックリスト (v0.10.2 本番稼働済み)
+# Anthropic Connectors Directory Submission Checklist (v0.10.2 Live)
+# Daftar Periksa Pengajuan Anthropic Connectors Directory (v0.10.2 Aktif)
 
 > 申請・管理ポータル: Claude.ai Admin / Settings → Connectors → Submit / Manage  
 > 対象タイプ: Remote MCP server + MCP App (`AI Bid Workspace`)  
-> 対象候補バージョン: **`0.10.1`** (`JP_BIDS_PROFILE=public_mvp`・完全無料・公開7ツール / ※ `npmjs.org` 既公開版は `0.10.0`)
+> 対象公開バージョン: **`0.10.2`** (`JP_BIDS_PROFILE=public_mvp`・完全無料・公開7ツール / Cloudflare エッジ `mcp.bid-jp.com` + Cloud Run `jp-bids-mcp-00091-jiq`・npm `jp-bids-mcp@0.10.2`・MCP Registry `0.10.2` 公開済み)
 
 ---
 
-## Pre-submission ゲートチェック / Pre-submission Gate (`0.10.1` 候補)
+## Pre-submission ゲートチェック / Pre-submission Gate (`0.10.2`)
 
 | 項目 | 状態 | 備考 |
 |---|---|---|
-| `npm run check`（lint + typecheck:all + build + test）全通過 | ✅ ローカル完了 | `0.10.1` 候補スイート合格 |
-| Gate 1 ローカル受入ランナー（35条件・外部通信0件・VM＋模擬ブラウザUI 13項目） | ✅ ローカル完了 | `node --import ./evidence/q02_batch2/net-guard.batch2.path-null-fix.mjs tests/acceptance/gate1-runner.mjs` |
-| `npm run registry:validate` & `npm run release:parity` 通過 | ✅ ローカル完了 | `package.json`, `server.json`, `server-card.json`, `.smithery/shttp/manifest.json`, `plugin.json` すべて `0.10.1` で一致 |
-| Cloud Run `0.10.1` 本番昇格（Stage 1 `0%` → Stage 2 `100%`） | ⚠️ 本番未配備 | 再監査・管理者承認後に `docs/GO_LIVE_TODAY_RUNBOOK.md` に従い実施（現時点の本番状態は `UNCONFIRMED_NOT_QUERIED`） |
-| Documentation URL (GitHub repo) 公開・1クリック導入案内整備 | ✅ | `https://github.com/sugukurukabe/koko-call-mcp` (`README.md`, `README.ja.md`, `docs/USER_GUIDE.ja.md`) |
-| 実 Claude クライアントでの `0.10.1` バンドル実機確認 | ⚠️ 未実施 (`NOT_EXECUTED_ON_0_10_1`) | 過去版（2026-10-21 JST）の実績は `docs/VERIFICATION_STATUS.md` に参考保持。提出前に `0.10.1` 本番配備後の実 Claude 上で再確認する |
+| `npm run check`（lint + typecheck:all + build + test）全通過 | ✅ 完了 | `0.10.2` CI / gateway-check / semgrep-ce 合格 |
+| Gate 1 ローカル受入ランナー（35条件・外部通信0件・VM＋模擬ブラウザUI 13項目） | ✅ 完了 | `node --import ./tests/acceptance/net-guard.mjs tests/acceptance/gate1-runner.mjs` |
+| `npm run registry:validate` & `npm run release:parity` 通過 | ✅ 完了 | `package.json`, `server.json`, `server-card.json`, `.smithery/shttp/manifest.json`, `plugin.json` すべて `0.10.2` で一致 |
+| Cloud Run + Cloudflare エッジ `0.10.2` 本番稼働（`100%`） | ✅ 完了 | Cloud Run `jp-bids-mcp-00091-jiq` + Cloudflare Workers `jp-bids-edge-gateway` (`mcp.bid-jp.com`) 稼働中、Firestore TTL 全5コレクション `ACTIVE` |
+| Documentation URL (GitHub repo) 公開・1クリック導入案内整備 | ✅ 完了 | `https://github.com/sugukurukabe/koko-call-mcp` (`README.md`, `README.ja.md`, `docs/USER_GUIDE.ja.md`) |
+| 実 Claude クライアントでの `0.10.2` バンドル実機録画確認 | ⚠️ 未実施 | 過去版（2026-10-21 JST）の実績は `docs/VERIFICATION_STATUS.md` に参考保持。提出前に `0.10.2` 本番での実 Claude 画面確認・録画を行う |
 
 ---
 
@@ -85,7 +85,7 @@ Tasks capabilityは広告しません（すべての検索・比較・CSV出力�
 ### Description (2000文字以内)
 
 ```text
-JP Bids MCP (v0.10.1) は、中小企業庁 官公需情報ポータルサイト (KKJ) の公開入札公告を Claude との会話で検索・比較・確認・CSV出力できる読み取り専用MCPサーバーです。完全無料で提供され、KKJや外部システムへの書き込み・代理入札・課金処理は一切行いません。
+JP Bids MCP (v0.10.2) は、中小企業庁 官公需情報ポータルサイト (KKJ) の公開入札公告を Claude との会話で検索・比較・確認・CSV出力できる読み取り専用MCPサーバーです。完全無料で提供され、KKJや外部システムへの書き込み・代理入札・課金処理は一切行いません。
 
 主な機能 / Key features (全7ツール・無料):
 - 官公需入札検索 (`search_bids` / `list_recent_bids`) — 47都道府県・調達区分（物品/工事/役務）・キーワード・公告日/締切日で検索
@@ -219,7 +219,7 @@ https://mcp.bid-jp.com
 
 ## Final Submission / Update Steps
 
-1. 独立再監査・管理者承認後、`docs/GO_LIVE_TODAY_RUNBOOK.md` の Stage 1 / Stage 2 手順で Cloud Run 本番を `v0.10.1` に更新する。
-2. 実 Claude.ai カスタムコネクタで `0.10.1` の公開7ツールと `AI Bid Workspace` の動作を確認し、`docs/VERIFICATION_STATUS.md` に記録する。
-3. Claude Admin / Directory ポータルで上記 `v0.10.1`（無料7ツール・1クリックOAuth）の記載内容と最新スクリーンショットを提出・更新する。
+1. （完了済み）Cloud Run 本番 (`jp-bids-mcp-00091-jiq`) および Cloudflare エッジゲートウェイ (`mcp.bid-jp.com`) を `v0.10.2` で稼働済み。
+2. 実 Claude.ai カスタムコネクタで `0.10.2` の公開7ツールと `AI Bid Workspace` の動作を確認し、`docs/VERIFICATION_STATUS.md` に記録する。
+3. Claude Admin / Directory ポータルで上記 `v0.10.2`（無料7ツール・1クリックOAuth）の記載内容と最新スクリーンショットを提出・更新する。
 4. 提出日・ステータスを `docs/submissions/mcp-directories.md` に記録する。

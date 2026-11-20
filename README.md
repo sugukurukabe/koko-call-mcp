@@ -1,13 +1,13 @@
-# JP Bids MCP (v0.10.1)
+# JP Bids MCP (v0.10.2)
 
 [![npm version](https://img.shields.io/npm/v/jp-bids-mcp)](https://www.npmjs.com/package/jp-bids-mcp)
 [![CI](https://github.com/sugukurukabe/koko-call-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/sugukurukabe/koko-call-mcp/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Smithery](https://smithery.ai/badge/a-kabe-1qio/jp-bids-mcp)](https://smithery.ai/servers/a-kabe-1qio/jp-bids-mcp)
 
-日本の官公需入札情報を普段お使いのAI（Claude / ChatGPT）から検索・比較・公式URL確認・16列CSV出力できるMCPサーバー（**v0.10.1・完全無料・インストール不要・公開7ツール**）。<br>
-Search, compare, verify official notice URLs, and export 16-column CSV/JSON shortlists of Japanese government procurement notices via MCP (**v0.10.1, 100% free, read-centric, 7 public tools + interactive AI Bid Workspace UI**).<br>
-Cari, bandingkan, periksa URL resmi, dan ekspor CSV/JSON 16 kolom pengumuman pengadaan pemerintah Jepang melalui MCP (**v0.10.1, sepenuhnya gratis, read-centric, 7 alat publik**).
+日本の官公需入札情報を普段お使いのAI（Claude / ChatGPT）から検索・比較・公式URL確認・16列CSV出力できるMCPサーバー（**v0.10.2・完全無料・インストール不要・公開7ツール・Cloudflareエッジ保護**）。<br>
+Search, compare, verify official notice URLs, and export 16-column CSV/JSON shortlists of Japanese government procurement notices via MCP (**v0.10.2, 100% free, read-centric, 7 public tools + interactive AI Bid Workspace UI + Cloudflare Edge Gateway**).<br>
+Cari, bandingkan, periksa URL resmi, dan ekspor CSV/JSON 16 kolom pengumuman pengadaan pemerintah Jepang melalui MCP (**v0.10.2, sepenuhnya gratis, read-centric, 7 alat publik + Cloudflare Edge Gateway**).
 
 [日本語ガイド (README.ja.md)](README.ja.md) · [使用説明書 (USER_GUIDE.ja.md)](docs/USER_GUIDE.ja.md) · [Panduan Bahasa Indonesia (README.id.md)](README.id.md)
 
@@ -79,7 +79,7 @@ To give Claude built-in mastery of Japanese prefecture codes, procurement catego
 
 | Plan | Price | Included |
 |---|---|---|
-| **Public MVP (`v0.10.1`)** | **Free / 無料 / Gratis** | All 7 public tools + single-file MCP Apps UI (`AI Bid Workspace`). Zero subscriptions or runtime billing calls. |
+| **Public MVP (`v0.10.2`)** | **Free / 無料 / Gratis** | All 7 public tools + single-file MCP Apps UI (`AI Bid Workspace`). Zero subscriptions or runtime billing calls. |
 
 *(Excludes third-party AI client subscriptions or self-hosted cloud costs / 外部AIクライアント利用料や自己ホスト時のクラウド費用は除きます).*
 
@@ -112,7 +112,8 @@ JP Bids MCP pairs seamlessly with [J-Grants MCP](https://github.com/digital-go-j
 
 ```text
 Remote MCP:             https://mcp.bid-jp.com/mcp
-Published version:      0.10.1 (npm: jp-bids-mcp@0.10.1 / MCP Registry: io.github.sugukurukabe/jp-bids@0.10.1)
+Feedback Form:          https://mcp.bid-jp.com/feedback
+Published version:      0.10.2 (npm: jp-bids-mcp@0.10.2 / MCP Registry: io.github.sugukurukabe/jp-bids@0.10.2)
 Registry metadata name: io.github.sugukurukabe/jp-bids
 ```
 
@@ -182,17 +183,18 @@ To test UI rendering and all 35 Gate 1 acceptance sub-conditions locally with **
 node --import ./tests/acceptance/net-guard.mjs tests/acceptance/gate1-runner.mjs
 ```
 
-### 4. Protocol & Registry Specifications (`v0.10.1`)
+### 4. Protocol, Edge Gateway & Registry Specifications (`v0.10.2`)
 
 - **MCP `2025-11-25` & Stateless `2026-07-28` HTTP Adapter**: Runs `@modelcontextprotocol/sdk@1.32.2` (`2025-11-25` native) with a stateless `2026-07-28` HTTP boundary adapter in `src/transports/http.ts` enforcing `_meta["io.modelcontextprotocol/protocolVersion"]`, `Mcp-Method`, method-aware `Mcp-Name` (`params.name` for `tools/call`/`prompts/get`, `params.uri` for `resources/read`), `Cache-Control: no-store`, and RFC 9207 `iss` ([docs/spec-notes/mcp-2026-07-28.md](docs/spec-notes/mcp-2026-07-28.md)).
+- **Cloudflare Edge Gateway (`mcp.bid-jp.com`)**: Proxies `https://mcp.bid-jp.com/*` in front of Cloud Run with 3-class self-healing (read-only stale fallback + KKJ circuit breaker), non-PII Workers Analytics Engine telemetry, daily-salted client IP-hash OAuth rate-limit isolation, and the bilingual `/feedback` form backed by Turnstile and D1 ([docs/cloudflare-edge-mcp-playbook.md](docs/cloudflare-edge-mcp-playbook.md)).
 - **Official MCP Registry (`server.json`)**: Conforms to `2025-12-11/server.schema.json` (`io.github.sugukurukabe/jp-bids`).
 - **Server Card Discovery (`public/.well-known/mcp/server-card.json`)**: Exposes full JSON schemas and `_meta.ui` bindings for the 7 `public_mvp` tools.
 
 ## Documentation
 
 - [User Guide (Japanese)](docs/USER_GUIDE.ja.md) · [Functional Spec](docs/FUNCTIONAL_SPEC.md) · [Verification Status](docs/VERIFICATION_STATUS.md)
-- [Go-Live Runbook](docs/GO_LIVE_TODAY_RUNBOOK.md) · [Remote Release Checklist](docs/remote-release-checklist.md) · [Directory Submissions](docs/submissions/mcp-directories.md)
-- [Architecture](docs/architecture.md) · [MCP Apps UI](docs/mcp-apps.md) · [AI Bid Radar](docs/ai-bid-radar.md) · [Cloud Run Deployment](docs/deployment-cloud-run.md) · [ADRs](docs/adr/)
+- [Cloudflare Edge Playbook](docs/cloudflare-edge-mcp-playbook.md) · [Go-Live Runbook](docs/GO_LIVE_TODAY_RUNBOOK.md) · [Remote Release Checklist](docs/remote-release-checklist.md) · [Directory Submissions](docs/submissions/mcp-directories.md)
+- [Architecture](docs/architecture.md) · [MCP Apps UI](docs/mcp-apps.md) · [AI Bid Radar](docs/ai-bid-radar.md) · [Cloud Run Deployment](docs/deployment-cloud-run.md) · [OAuth Operations](docs/oauth.md) · [ADRs](docs/adr/)
 
 ## Notes & Policies / 注意事項
 
@@ -200,3 +202,4 @@ Data source: Small and Medium Enterprise Agency KKJ Portal Search API (`中小�
 
 - [Privacy Policy / プライバシーポリシー](https://mcp.bid-jp.com/privacy)
 - [Terms of Service / 利用規約](https://mcp.bid-jp.com/terms)
+- [Feedback / ご意見・フィードバック](https://mcp.bid-jp.com/feedback)
